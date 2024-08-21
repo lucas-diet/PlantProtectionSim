@@ -1,6 +1,8 @@
 
 import tkinter as tk
 
+from tooltip import Tooltip
+
 class GUI:
 
     def __init__(self):
@@ -44,15 +46,19 @@ class GUI:
 
         tip_lab1 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab1.place(x=240, y=15)
+        Tooltip(tip_lab1, 'Enter the number of plants as a number of 1 to 16.')
 
         tip_lab2 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab2.place(x=240, y=55)
+        Tooltip(tip_lab2, 'Enter the number of herbivores as a number of 0 to 15.')
 
         tip_lab3 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab3.place(x=240, y=105)
+        Tooltip(tip_lab3, 'Enter the grid width as a number <= 80')
 
         tip_lab4 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab4.place(x=240, y=145)
+        Tooltip(tip_lab4, 'Enter the grid heightas a number <= 80.')
 
     def mainloop(self):
         self.window.mainloop()
