@@ -60,6 +60,9 @@ class GUI:
         tip_lab4.place(x=240, y=145)
         Tooltip(tip_lab4, 'Enter the grid heightas a number <= 80.')
 
+        start_btn = tk.Button(text='start')
+        start_btn.place(x=220, y=250)
+
     def mainloop(self):
         self.window.mainloop()
 
