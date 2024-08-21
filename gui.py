@@ -7,7 +7,7 @@ class GUI:
 
     def __init__(self):
         self.window = tk.Tk()
-        self.window.title('Configuration')
+        self.window.title('Initital Configuration')
         
         screen_width = self.window.winfo_screenwidth()
         screen_height = self.window.winfo_screenheight()
@@ -66,9 +66,7 @@ class GUI:
     def mainloop(self):
         self.window.mainloop()
 
-
-
-  
+ 
 if __name__ == "__main__":
     gui = GUI()
     gui.mainloop()
