@@ -45,12 +45,12 @@ class GUI:
         # Validierungsfunktionen Grid
         valiGrid_in = (self.window.register(self.inputValidation), '%P', '%W', 1, 80)
 
-        girdWidth_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
-        gridHeight_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
-        girdWidth_in.config(bg='white', fg='black')
-        gridHeight_in.config(bg='white', fg='black')
-        girdWidth_in.place(x=130, y=100)
-        gridHeight_in.place(x=130, y=140)
+        self.girdWidth_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
+        self.gridHeight_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
+        self.girdWidth_in.config(bg='white', fg='black')
+        self.gridHeight_in.config(bg='white', fg='black')
+        self.girdWidth_in.place(x=130, y=100)
+        self.gridHeight_in.place(x=130, y=140)
 
         tip_lab1 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab1.place(x=240, y=15)
@@ -75,13 +75,27 @@ class GUI:
         self.window.mainloop()
 
     def openSimualtor(self):
-        self.simWindow = tk.Tk()
-        self.simWindow.title('Simulator')
-        self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
+        
+        if self.numPlant_in.index("end") == 0:
+            messagebox.showwarning('Missing Input', 'Please enter a number')
+        
+        elif self.numHerbi_in.index("end") == 0:
+            messagebox.showwarning('Missing Input', 'Please enter a number')
+        
+        elif self.girdWidth_in.index("end") == 0:
+            messagebox.showwarning('Missing Input', 'Please enter a number')
+        
+        elif self.gridHeight_in.index("end") == 0:
+            messagebox.showwarning('Missing Input', 'Please enter a number')
+        
+        else:
+            self.simWindow = tk.Tk()
+            self.simWindow.title('Simulator')
+            self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
+
+
 
     def inputValidation(self, inp, widgetName, minVal, maxVal):
-        if inp == '':
-            return True
         
         if inp.isdigit():
             num = int(inp)
@@ -93,7 +107,7 @@ class GUI:
         
         widget = self.window.nametowidget(widgetName)
         widget.bell()
-        messagebox.showwarning("Invalid Input", f"Please enter a number between {minVal} and {maxVal}.")
+        messagebox.showwarning('Invalid Input', f'Please enter a number between {minVal} and {maxVal}.')
         widget = self.window.nametowidget(widgetName)
         self.window.after(0, lambda: widget.delete(0, tk.END))
         return False
