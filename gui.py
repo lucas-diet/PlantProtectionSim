@@ -74,6 +74,7 @@ class GUI:
     def mainloop(self):
         self.window.mainloop()
 
+
     def openSimualtor(self):
         
         if self.numPlant_in.index("end") == 0:
@@ -92,19 +93,36 @@ class GUI:
             self.simWindow = tk.Tk()
             self.simWindow.title('Simulator')
             self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
+            leftFrame = tk.Frame(self.simWindow, bg='green')
+            centerFrame = tk.Frame(self.simWindow)
+            rightFrame  =tk.Frame(self.simWindow, bg='red')
+
+            leftFrame.grid(row=0, column=0, sticky='nswe')
+            centerFrame.grid(row=0, column=1, sticky='nswe')
+            rightFrame.grid(row=0, column=2, sticky='nswe')
+
+            # Spaltengewichte einstellen, um die Größe der Bereiche zu steuern
+            self.simWindow.grid_columnconfigure(0, weight=1)  # Linker Bereich
+            self.simWindow.grid_columnconfigure(1, weight=3)  # Mittlerer Bereich (größer)
+            self.simWindow.grid_columnconfigure(2, weight=1)  # Rechter Bereich
+
+            # Zeilengewicht einstellen, um die vertikale Dehnung zu ermöglichen
+            self.simWindow.grid_rowconfigure(0, weight=1)
 
 
 
     def inputValidation(self, inp, widgetName, minVal, maxVal):
+        if inp == '':
+            return True
         
-        if inp.isdigit():
+        if inp.isdigit() and len(inp) <= 2:
             num = int(inp)
             minVal = int(minVal)
             maxVal = int(maxVal)
 
             if minVal <= num <= maxVal:
                 return True
-        
+            
         widget = self.window.nametowidget(widgetName)
         widget.bell()
         messagebox.showwarning('Invalid Input', f'Please enter a number between {minVal} and {maxVal}.')
