@@ -21,6 +21,10 @@ class GUI:
         
         self.window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
+        self.createInitWindow()
+        
+
+    def createInitWindow(self):
         numPlant_lab = tk.Label(text='number plants')
         numherbi_lab = tk.Label(text='number herbivores')
         numPlant_lab.place(x=10, y=10)
@@ -70,9 +74,6 @@ class GUI:
 
         start_btn = tk.Button(text='start', command=self.openSimualtor)
         start_btn.place(x=220, y=250)
-
-    def mainloop(self):
-        self.window.mainloop()
 
 
     def openSimualtor(self):
@@ -136,8 +137,8 @@ class GUI:
 
         # Spaltengewichte einstellen, um die Größe der Bereiche zu steuern
         self.simWindow.grid_columnconfigure(0, weight=1)  # Linker Bereich
-        self.simWindow.grid_columnconfigure(1, weight=3)  # Mittlerer Bereich (größer)
-        self.simWindow.grid_columnconfigure(2, weight=1)  # Rechter Bereich
+        self.simWindow.grid_columnconfigure(1, weight=5)  # Mittlerer Bereich (größer)
+        self.simWindow.grid_columnconfigure(2, weight=0)  # Rechter Bereich
 
         # Zeilengewicht einstellen, um die vertikale Dehnung zu ermöglichen
         self.simWindow.grid_rowconfigure(0, weight=0)  # Toolbar, kein Dehnen
@@ -146,33 +147,35 @@ class GUI:
         self.createPlantsFrame()
         self.createHerbivorFrame()
         self.createBattlefield()
+
             
     def createTeams_labs(self, team):
-        labelList = []
+        checkBtnList = []
 
         if team == 'plants':
             plants = int(self.numPlant_in.get())
 
-            for plantLabel in labelList:
+            for plantLabel in checkBtnList:
                 plantLabel.destroy()
-            labelList.clear()
+            checkBtnList.clear()
 
             for i in range(plants):
-                newLabel = tk.Label(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18))
-                newLabel.grid(row=i+3, column=0, padx=10, pady=10, sticky='w')
-                labelList.append(newLabel)
+                newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18))
+                newPlant.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
+                checkBtnList.append(newPlant)
         
         elif team == 'herbivors':
             herbivors = int(self.numHerbi_in.get())
 
-            for herbivorLabel in labelList:
+            for herbivorLabel in checkBtnList:
                 herbivorLabel.destroy()
-            labelList.clear()
+            checkBtnList.clear()
 
             for i in range(herbivors):
-                newLabel = tk.Label(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18))
-                newLabel.grid(row=i+3, column=0, padx=10, pady=10, sticky='w')
-                labelList.append(newLabel)
+                newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18))
+                newHerbivor.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
+                checkBtnList.append(newHerbivor)
+
 
     def createPlantsFrame(self):
         plantHeader = tk.Frame(self.leftFrame)
@@ -187,6 +190,7 @@ class GUI:
 
         plantHeader.grid_rowconfigure(0, weight=1)
         plantHeader.grid_columnconfigure(0, weight=1)
+
 
     def createHerbivorFrame(self):
         # Header im rechten Bereich erstellen
@@ -205,13 +209,43 @@ class GUI:
         herbivoreHeader.grid_rowconfigure(0, weight=1)
         herbivoreHeader.grid_columnconfigure(0, weight=1)
 
-    def createBattlefield(self):
-        width = int(self.girdWidth_in.get())
-        heigth = int(self.gridHeight_in.get())
 
+    def createBattlefield(self):
+
+        # Canvas für das Grid
+        self.canvas = tk.Canvas(self.centerFrame, bg='white')
+        self.canvas.pack(fill='both', expand=True)
+
+        width = int(self.girdWidth_in.get())
+        height = int(self.gridHeight_in.get())
+
+        # Bereinige die Canvas vor dem Zeichnen
+        self.canvas.delete('all')
+
+        # Größe des Canvas berechnen
+        self.canvas.update()  # Aktualisiere die Canvas-Größe
+        canvas_width = self.canvas.winfo_width()
+        canvas_height = self.canvas.winfo_height()
+
+        # Bestimme die Größe jedes Quadrats
+        if width > 0 and height > 0:
+            square_width = canvas_width / width
+            square_height = canvas_height / height
+
+            # Zeichne die Quadrate
+            for i in range(width):
+                for j in range(height):
+                    x1 = i * square_width
+                    y1 = j * square_height
+                    x2 = x1 + square_width
+                    y2 = y1 + square_height
+                    self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=4)
         
 
 
-if __name__ == "__main__":
+    def mainloop(self):
+        self.window.mainloop()
+
+if __name__ == '__main__':
     gui = GUI()
     gui.mainloop()
