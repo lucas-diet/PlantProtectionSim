@@ -145,6 +145,7 @@ class GUI:
 
         self.createPlantsFrame()
         self.createHerbivorFrame()
+        self.createBattlefield()
             
     def createTeams_labs(self, team):
         labelList = []
@@ -203,6 +204,13 @@ class GUI:
         # Konfiguration der Zeilen und Spalten im herbivoreHeader
         herbivoreHeader.grid_rowconfigure(0, weight=1)
         herbivoreHeader.grid_columnconfigure(0, weight=1)
+
+    def createBattlefield(self):
+        width = int(self.girdWidth_in.get())
+        heigth = int(self.gridHeight_in.get())
+
+        
+
 
 if __name__ == "__main__":
     gui = GUI()
