@@ -77,29 +77,36 @@ class GUI:
 
     def openSimualtor(self):
         
-        if self.numPlant_in.index("end") == 0:
+        if self.numPlant_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
-        elif self.numHerbi_in.index("end") == 0:
+        elif self.numHerbi_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
-        elif self.girdWidth_in.index("end") == 0:
+        elif self.girdWidth_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
-        elif self.gridHeight_in.index("end") == 0:
+        elif self.gridHeight_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
         else:
             self.simWindow = tk.Tk()
             self.simWindow.title('Simulator')
             self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
+
+            # Toolbar-Frame erstellen
+            toolbar = tk.Frame(self.simWindow, bg='white', height=25)
+            toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
+
+            # Erstelle drei Rahmen (links, mitte, rechts)
             leftFrame = tk.Frame(self.simWindow, bg='green')
             centerFrame = tk.Frame(self.simWindow)
-            rightFrame  =tk.Frame(self.simWindow, bg='red')
+            rightFrame = tk.Frame(self.simWindow, bg='red')
 
-            leftFrame.grid(row=0, column=0, sticky='nswe')
-            centerFrame.grid(row=0, column=1, sticky='nswe')
-            rightFrame.grid(row=0, column=2, sticky='nswe')
+            # Rahmen im Gitter anordnen (Zeile 1, da Zeile 0 für Toolbar reserviert ist)
+            leftFrame.grid(row=1, column=0, sticky='nswe')
+            centerFrame.grid(row=1, column=1, sticky='nswe')
+            rightFrame.grid(row=1, column=2, sticky='nswe')
 
             # Spaltengewichte einstellen, um die Größe der Bereiche zu steuern
             self.simWindow.grid_columnconfigure(0, weight=1)  # Linker Bereich
@@ -107,9 +114,9 @@ class GUI:
             self.simWindow.grid_columnconfigure(2, weight=1)  # Rechter Bereich
 
             # Zeilengewicht einstellen, um die vertikale Dehnung zu ermöglichen
-            self.simWindow.grid_rowconfigure(0, weight=1)
-
-
+            self.simWindow.grid_rowconfigure(0, weight=0)  # Toolbar, kein Dehnen
+            self.simWindow.grid_rowconfigure(1, weight=1)  # Hauptinhalt, dehnbar
+                
 
     def inputValidation(self, inp, widgetName, minVal, maxVal):
         if inp == '':
