@@ -174,7 +174,7 @@ class GUI:
                 labelList.append(newLabel)
 
     def createPlantsFrame(self):
-        plantHeader = tk.Frame(self.leftFrame, bg='blue')
+        plantHeader = tk.Frame(self.leftFrame)
         plantHeader.grid(row=0, column=0, sticky='nswe')
 
         self.leftFrame.grid_rowconfigure(0, weight=0)  # plantHeader nicht dehnbar in der Höhe
@@ -189,7 +189,7 @@ class GUI:
 
     def createHerbivorFrame(self):
         # Header im rechten Bereich erstellen
-        herbivoreHeader = tk.Frame(self.rightFrame, bg='purple')
+        herbivoreHeader = tk.Frame(self.rightFrame)
         herbivoreHeader.grid(row=0, column=0, sticky='nswe')
 
         self.rightFrame.grid_rowconfigure(0, weight=0)  
@@ -197,7 +197,7 @@ class GUI:
         self.rightFrame.grid_columnconfigure(0, weight=1)
 
         # Text im Header zentrieren
-        herbivorePara_lab = tk.Label(herbivoreHeader, text="Herbivore Header", bg='purple', font=('Arial', 25))
+        herbivorePara_lab = tk.Label(herbivoreHeader, text='herbivore parameter', bg='purple', font=('Arial', 25))
         herbivorePara_lab.grid(row=0, column=0, sticky='nsew')
 
         # Konfiguration der Zeilen und Spalten im herbivoreHeader
