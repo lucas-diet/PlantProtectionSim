@@ -43,20 +43,20 @@ class GUI:
         self.numPlant_in.place(x=130, y=10)
         self.numHerbi_in.place(x=130, y=50)
 
-        girdWidth_lab = tk.Label(text='grid width')
-        gridHeight_lab = tk.Label(text='grid height')
+        girdWidth_lab = tk.Label(text='grid size')
+        #gridHeight_lab = tk.Label(text='grid height')
         girdWidth_lab.place(x=10, y=100)
-        gridHeight_lab.place(x=10, y=140)
+        #gridHeight_lab.place(x=10, y=140)
 
         # Validierungsfunktionen Grid
         valiGrid_in = (self.window.register(self.inputValidation), '%P', '%W', 1, 80)
 
-        self.girdWidth_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
-        self.gridHeight_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
-        self.girdWidth_in.config(bg='white', fg='black')
-        self.gridHeight_in.config(bg='white', fg='black')
-        self.girdWidth_in.place(x=130, y=100)
-        self.gridHeight_in.place(x=130, y=140)
+        self.girdSize_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
+        #self.gridHeight_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
+        self.girdSize_in.config(bg='white', fg='black')
+        #self.gridHeight_in.config(bg='white', fg='black')
+        self.girdSize_in.place(x=130, y=100)
+        #self.gridHeight_in.place(x=130, y=140)
 
         tip_lab1 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab1.place(x=240, y=15)
@@ -70,9 +70,9 @@ class GUI:
         tip_lab3.place(x=240, y=105)
         Tooltip(tip_lab3, 'Enter the grid width as a number <= 80')
 
-        tip_lab4 = tk.Label(text='?', borderwidth=1, relief='solid')
-        tip_lab4.place(x=240, y=145)
-        Tooltip(tip_lab4, 'Enter the grid heightas a number <= 80.')
+        #tip_lab4 = tk.Label(text='?', borderwidth=1, relief='solid')
+        #tip_lab4.place(x=240, y=145)
+        #Tooltip(tip_lab4, 'Enter the grid heightas a number <= 80.')
 
         start_btn = tk.Button(text='start', command=self.openSimualtor)
         start_btn.place(x=220, y=250)
@@ -86,11 +86,11 @@ class GUI:
         elif self.numHerbi_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
-        elif self.girdWidth_in.index('end') == 0:
+        elif self.girdSize_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
-        elif self.gridHeight_in.index('end') == 0:
-            messagebox.showwarning('Missing Input', 'Please enter a number')
+        #elif self.gridHeight_in.index('end') == 0:
+            #messagebox.showwarning('Missing Input', 'Please enter a number')
         
         else:
             self.createSimWindow()
@@ -214,14 +214,12 @@ class GUI:
 
     def createBattlefield(self):
 
-        
-
         # Canvas für das Grid
         self.canvas = tk.Canvas(self.centerFrame, bg='white')
         self.canvas.pack(fill='both', expand=True)
 
-        width = int(self.girdWidth_in.get())
-        height = int(self.gridHeight_in.get())
+        width = int(self.girdSize_in.get())
+        height = int(self.girdSize_in.get())
 
         # Bereinige die Canvas vor dem Zeichnen
         self.canvas.delete('all')
@@ -244,10 +242,11 @@ class GUI:
                     y1 = j * square_height
                     x2 = x1 + square_width
                     y2 = y1 + square_height
-                    squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=4)
+                    squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=3)
                     self.squares[squareID] = (x1, y1, x2, y2)
 
             self.canvas.bind('<Button-1>', self.onCanvasClick)
+            
 
     def onCanvasClick(self, event):
         itm = self.canvas.find_closest(event.x, event.y)[0]
@@ -257,7 +256,7 @@ class GUI:
                 self.canvas.itemconfig(itm, fill='white')
                 self.selected_squares.remove(itm)
             else:
-                self.canvas.itemconfig(itm, fill='lightblue')
+                self.canvas.itemconfig(itm, fill='blue')
                 self.selected_squares.append(itm)
 
     def mainloop(self):
