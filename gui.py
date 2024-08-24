@@ -22,8 +22,10 @@ class GUI:
         self.window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
         self.createInitWindow()
-        
 
+        # Hold the ID of selected squares
+        self.selected_squares = []
+       
     def createInitWindow(self):
         numPlant_lab = tk.Label(text='number plants')
         numherbi_lab = tk.Label(text='number herbivores')
@@ -202,7 +204,7 @@ class GUI:
         self.rightFrame.grid_columnconfigure(0, weight=1)
 
         # Text im Header zentrieren
-        herbivorePara_lab = tk.Label(herbivoreHeader, text='herbivore parameter', bg='purple', font=('Arial', 25))
+        herbivorePara_lab = tk.Label(herbivoreHeader, text='herbivores parameter', bg='purple', font=('Arial', 25))
         herbivorePara_lab.grid(row=0, column=0, sticky='nsew')
 
         # Konfiguration der Zeilen und Spalten im herbivoreHeader
@@ -211,6 +213,8 @@ class GUI:
 
 
     def createBattlefield(self):
+
+        
 
         # Canvas für das Grid
         self.canvas = tk.Canvas(self.centerFrame, bg='white')
@@ -233,15 +237,28 @@ class GUI:
             square_height = canvas_height / height
 
             # Zeichne die Quadrate
+            self.squares = {}
             for i in range(width):
                 for j in range(height):
                     x1 = i * square_width
                     y1 = j * square_height
                     x2 = x1 + square_width
                     y2 = y1 + square_height
-                    self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=4)
-        
+                    squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=4)
+                    self.squares[squareID] = (x1, y1, x2, y2)
 
+            self.canvas.bind('<Button-1>', self.onCanvasClick)
+
+    def onCanvasClick(self, event):
+        itm = self.canvas.find_closest(event.x, event.y)[0]
+
+        if itm in self.squares:
+            if itm in self.selected_squares:
+                self.canvas.itemconfig(itm, fill='white')
+                self.selected_squares.remove(itm)
+            else:
+                self.canvas.itemconfig(itm, fill='lightblue')
+                self.selected_squares.append(itm)
 
     def mainloop(self):
         self.window.mainloop()
