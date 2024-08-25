@@ -23,6 +23,8 @@ class GUI:
 
         self.createInitWindow()
 
+        
+
         # Hold the ID of selected squares
         self.selected_squares = []
        
@@ -128,9 +130,9 @@ class GUI:
         toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
 
         # Erstelle drei Rahmen (links, mitte, rechts)
-        self.leftFrame = tk.Frame(self.simWindow, bg='green')
+        self.leftFrame = tk.Frame(self.simWindow, bg='lightblue')
         self.centerFrame = tk.Frame(self.simWindow)
-        self.rightFrame = tk.Frame(self.simWindow, bg='red')
+        self.rightFrame = tk.Frame(self.simWindow, bg='lightblue')
 
         # Rahmen im Gitter anordnen (Zeile 1, da Zeile 0 für Toolbar reserviert ist)
         self.leftFrame.grid(row=1, column=0, sticky='nswe')
@@ -152,40 +154,52 @@ class GUI:
 
             
     def createTeams_labs(self, team):
-        checkBtnList = []
+
+        self.checkBtnList_p = []
+        self.checkBtnList_h = []
+        self.colorList_p = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
+        self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00', '#D2691E']
 
         if team == 'plants':
             plants = int(self.numPlant_in.get())
 
-            for plantLabel in checkBtnList:
-                plantLabel.destroy()
-            checkBtnList.clear()
+            for plantBtn in self.checkBtnList_p:
+                plantBtn.destroy()
+            self.checkBtnList_p.clear()
 
             for i in range(plants):
                 newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18))
                 newPlant.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                checkBtnList.append(newPlant)
+                self.checkBtnList_p.append(newPlant)
+
+                newColor = tk.Label(self.leftFrame, text='   ', font=('Arial', 18), bg=self.colorList_p[i])
+                newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
+                self.colorList_p.append(newColor)
         
         elif team == 'herbivors':
             herbivors = int(self.numHerbi_in.get())
 
-            for herbivorLabel in checkBtnList:
-                herbivorLabel.destroy()
-            checkBtnList.clear()
+            for herbivorBtn in self.checkBtnList_h:
+                herbivorBtn.destroy()
+            self.checkBtnList_h.clear()
 
             for i in range(herbivors):
                 newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18))
                 newHerbivor.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                checkBtnList.append(newHerbivor)
+                self.checkBtnList_h.append(newHerbivor)
+
+                newColor = tk.Label(self.rightFrame, text='   ', font=('Arial', 18), bg=self.colorList_h[i])
+                newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
+                self.colorList_h.append(newColor)
 
 
     def createPlantsFrame(self):
         plantHeader = tk.Frame(self.leftFrame)
-        plantHeader.grid(row=0, column=0, sticky='nswe')
+        plantHeader.grid(row=0, column=0, columnspan=2, sticky='nswe')
 
         self.leftFrame.grid_rowconfigure(0, weight=0)  # plantHeader nicht dehnbar in der Höhe
         self.leftFrame.grid_rowconfigure(1, weight=0)  # darunterliegende Zeile dehnbar
-        self.leftFrame.grid_columnconfigure(0, weight=1)  # gesamte Breite nutzen
+        self.leftFrame.grid_columnconfigure(1, weight=1)  # gesamte Breite nutzen
 
         plantsPara_lab = tk.Label(plantHeader, text='plants parameter', bg='blue', font=('Arial', 25))
         plantsPara_lab.grid(row=2, column=0, sticky='nswe')
@@ -197,11 +211,11 @@ class GUI:
     def createHerbivorFrame(self):
         # Header im rechten Bereich erstellen
         herbivoreHeader = tk.Frame(self.rightFrame)
-        herbivoreHeader.grid(row=0, column=0, sticky='nswe')
+        herbivoreHeader.grid(row=0, column=0, columnspan=2, sticky='nswe')
 
         self.rightFrame.grid_rowconfigure(0, weight=0)  
         self.rightFrame.grid_rowconfigure(1, weight=0)  
-        self.rightFrame.grid_columnconfigure(0, weight=1)
+        self.rightFrame.grid_columnconfigure(1, weight=1)
 
         # Text im Header zentrieren
         herbivorePara_lab = tk.Label(herbivoreHeader, text='herbivores parameter', bg='purple', font=('Arial', 25))
@@ -242,7 +256,7 @@ class GUI:
                     y1 = j * square_height
                     x2 = x1 + square_width
                     y2 = y1 + square_height
-                    squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=3)
+                    squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=2)
                     self.squares[squareID] = (x1, y1, x2, y2)
 
             self.canvas.bind('<Button-1>', self.onCanvasClick)
