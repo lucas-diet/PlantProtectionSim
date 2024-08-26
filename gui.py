@@ -23,7 +23,9 @@ class GUI:
 
         self.createInitWindow()
 
-        
+        self.checkBtnList = []
+        self.colorList_p = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
+        self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00', '#D2691E']
 
         # Hold the ID of selected squares
         self.selected_squares = []
@@ -45,20 +47,15 @@ class GUI:
         self.numPlant_in.place(x=130, y=10)
         self.numHerbi_in.place(x=130, y=50)
 
-        girdWidth_lab = tk.Label(text='grid size')
-        #gridHeight_lab = tk.Label(text='grid height')
-        girdWidth_lab.place(x=10, y=100)
-        #gridHeight_lab.place(x=10, y=140)
+        girdSize_lab = tk.Label(text='grid size')
+        girdSize_lab.place(x=10, y=100)
 
         # Validierungsfunktionen Grid
         valiGrid_in = (self.window.register(self.inputValidation), '%P', '%W', 1, 80)
 
         self.girdSize_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
-        #self.gridHeight_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
         self.girdSize_in.config(bg='white', fg='black')
-        #self.gridHeight_in.config(bg='white', fg='black')
         self.girdSize_in.place(x=130, y=100)
-        #self.gridHeight_in.place(x=130, y=140)
 
         tip_lab1 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab1.place(x=240, y=15)
@@ -71,10 +68,6 @@ class GUI:
         tip_lab3 = tk.Label(text='?', borderwidth=1, relief='solid')
         tip_lab3.place(x=240, y=105)
         Tooltip(tip_lab3, 'Enter the grid width as a number <= 80')
-
-        #tip_lab4 = tk.Label(text='?', borderwidth=1, relief='solid')
-        #tip_lab4.place(x=240, y=145)
-        #Tooltip(tip_lab4, 'Enter the grid heightas a number <= 80.')
 
         start_btn = tk.Button(text='start', command=self.openSimualtor)
         start_btn.place(x=220, y=250)
@@ -90,9 +83,6 @@ class GUI:
         
         elif self.girdSize_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
-        
-        #elif self.gridHeight_in.index('end') == 0:
-            #messagebox.showwarning('Missing Input', 'Please enter a number')
         
         else:
             self.createSimWindow()
@@ -155,22 +145,23 @@ class GUI:
             
     def createTeams_labs(self, team):
 
-        self.checkBtnList_p = []
-        self.checkBtnList_h = []
-        self.colorList_p = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
-        self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00', '#D2691E']
+        
+        #checkBtnList = []
 
+        if not hasattr(self, 'selectedBtn'):
+            self.selectedBtn = tk.IntVar(self.simWindow)
+        
         if team == 'plants':
             plants = int(self.numPlant_in.get())
 
-            for plantBtn in self.checkBtnList_p:
-                plantBtn.destroy()
-            self.checkBtnList_p.clear()
+            #for plantBtn in checkBtnList:
+            #    plantBtn.destroy()
+            #checkBtnList.clear()
 
             for i in range(plants):
-                newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18))
+                newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i+1, offvalue=0)
                 newPlant.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                self.checkBtnList_p.append(newPlant)
+                self.checkBtnList.append(newPlant)
 
                 newColor = tk.Label(self.leftFrame, text='   ', font=('Arial', 18), bg=self.colorList_p[i])
                 newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
@@ -179,14 +170,14 @@ class GUI:
         elif team == 'herbivors':
             herbivors = int(self.numHerbi_in.get())
 
-            for herbivorBtn in self.checkBtnList_h:
-                herbivorBtn.destroy()
-            self.checkBtnList_h.clear()
+            #for herbivorBtn in checkBtnList:
+             #   herbivorBtn.destroy()
+            #checkBtnList.clear()
 
             for i in range(herbivors):
-                newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18))
+                newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i+1+len(self.checkBtnList), offvalue=0)
                 newHerbivor.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                self.checkBtnList_h.append(newHerbivor)
+                self.checkBtnList.append(newHerbivor)
 
                 newColor = tk.Label(self.rightFrame, text='   ', font=('Arial', 18), bg=self.colorList_h[i])
                 newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
