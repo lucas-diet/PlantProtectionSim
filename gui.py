@@ -11,7 +11,7 @@ class GUI:
         self.window.title('Initital Configuration')
         
         self.screen_width = self.window.winfo_screenwidth()
-        self.screen_height = self.window.winfo_screenheight()
+        self.screen_height = self.window.winfo_screenheight()-200
 
         window_width = 300
         window_height = 300
@@ -115,10 +115,10 @@ class GUI:
         self.simWindow = tk.Tk()
         self.selectedBtn = tk.IntVar(self.simWindow) # zum Zurücksetzen
         self.simWindow.title('Simulator')
-        self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
+        self.simWindow.geometry(f'{self.screen_width}x{self.screen_height}')
 
         # Toolbar-Frame erstellen
-        self.toolbar = tk.Frame(self.simWindow)
+        self.toolbar = tk.Frame(self.simWindow, height=32)
         self.toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
 
         # Erstelle drei Rahmen (links, mitte, rechts)
@@ -139,6 +139,9 @@ class GUI:
         # Zeilengewicht einstellen, um die vertikale Dehnung zu ermöglichen
         self.simWindow.grid_rowconfigure(0, weight=0)  # Toolbar, kein Dehnen
         self.simWindow.grid_rowconfigure(1, weight=1)  # Hauptinhalt, dehnbar
+
+        self.bottonbar = tk.Frame(self.simWindow, height=32)
+        self.bottonbar.grid(row=2, column=0, columnspan=3, sticky='we')
 
         self.createPlantsFrame()
         self.createHerbivorFrame()
@@ -277,13 +280,13 @@ class GUI:
 
     def toolbarElements(self):
         fileBtn = tk.Button(self.toolbar, text='save file', width=10)
-        fileBtn.grid(row=0, column=1, sticky='nswe')
+        fileBtn.grid(row=0, column=0, sticky='nswe')
 
-        plotBtn = tk.Button(self.toolbar, text='Plots', width=10)
-        plotBtn.grid(row=0, column=2, sticky='nswe')
+        plotBtn = tk.Button(self.toolbar, text='plots', width=10)
+        plotBtn.grid(row=0, column=1, sticky='nswe')
 
         simBtn = tk.Button(self.toolbar, text='simulation', width=10)
-        simBtn.grid(row=0, column=3, sticky='nswe')
+        simBtn.grid(row=0, column=2, sticky='nswe')
 
     def mainloop(self):
         self.window.mainloop()
