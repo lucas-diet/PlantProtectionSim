@@ -23,9 +23,10 @@ class GUI:
 
         self.createInitWindow()
 
-        self.checkBtnList = []
+        
         self.colorList_p = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
-        self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00', '#D2691E']
+        self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00']
+        self.colors = []
 
         # Hold the ID of selected squares
         self.selected_squares = []
@@ -74,6 +75,8 @@ class GUI:
 
 
     def openSimualtor(self):
+
+        self.resetWindowWidgets()
         
         if self.numPlant_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
@@ -111,7 +114,10 @@ class GUI:
     
 
     def createSimWindow(self):
+
         self.simWindow = tk.Tk()
+
+        self.selectedBtn = tk.IntVar(self.simWindow) 
         self.simWindow.title('Simulator')
         self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
 
@@ -141,48 +147,45 @@ class GUI:
         self.createPlantsFrame()
         self.createHerbivorFrame()
         self.createBattlefield()
-
-            
+        
     def createTeams_labs(self, team):
 
+        checkBtnList = []
+        plants = int(self.numPlant_in.get())
+        herbivors = int(self.numHerbi_in.get())
         
-        #checkBtnList = []
-
         if not hasattr(self, 'selectedBtn'):
-            self.selectedBtn = tk.IntVar(self.simWindow)
+            self.selectedBtn = tk.IntVar(self.simWindow)   
         
         if team == 'plants':
-            plants = int(self.numPlant_in.get())
+            
+            for plantBtn in checkBtnList:
+                plantBtn.destroy()
 
-            #for plantBtn in checkBtnList:
-            #    plantBtn.destroy()
-            #checkBtnList.clear()
+            checkBtnList.clear()
 
             for i in range(plants):
-                newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i+1, offvalue=0)
+                newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i, offvalue=0)
                 newPlant.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                self.checkBtnList.append(newPlant)
-
+                checkBtnList.append(newPlant)
+                
                 newColor = tk.Label(self.leftFrame, text='   ', font=('Arial', 18), bg=self.colorList_p[i])
-                newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
-                self.colorList_p.append(newColor)
+                newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w') 
         
         elif team == 'herbivors':
-            herbivors = int(self.numHerbi_in.get())
+           
+            for herbivorBtn in checkBtnList:
+                herbivorBtn.destroy()
 
-            #for herbivorBtn in checkBtnList:
-             #   herbivorBtn.destroy()
-            #checkBtnList.clear()
+            checkBtnList.clear()
 
             for i in range(herbivors):
-                newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i+1+len(self.checkBtnList), offvalue=0)
+                newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i+plants, offvalue=0)
                 newHerbivor.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                self.checkBtnList.append(newHerbivor)
+                checkBtnList.append(newHerbivor)
 
                 newColor = tk.Label(self.rightFrame, text='   ', font=('Arial', 18), bg=self.colorList_h[i])
                 newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
-                self.colorList_h.append(newColor)
-
 
     def createPlantsFrame(self):
         plantHeader = tk.Frame(self.leftFrame)
@@ -255,14 +258,36 @@ class GUI:
 
     def onCanvasClick(self, event):
         itm = self.canvas.find_closest(event.x, event.y)[0]
+        plants = int(self.numPlant_in.get())
+        herbivor = int(self.numHerbi_in.get())
+
+        self.colors = []
+        self.colors = self.colorList_p[:plants] + self.colorList_h[:herbivor]
+        
+        # Debug-Ausgaben zur Überprüfung
+        print(f"Colors list: {self.colors}")
+        print(f"Colors list length: {len(self.colors)}")
+        print(f"Selected value: {self.selectedBtn.get()}")
 
         if itm in self.squares:
             if itm in self.selected_squares:
                 self.canvas.itemconfig(itm, fill='white')
                 self.selected_squares.remove(itm)
             else:
-                self.canvas.itemconfig(itm, fill='blue')
-                self.selected_squares.append(itm)
+                selectedValue = self.selectedBtn.get()
+                if 0 <= selectedValue < len(self.colors):
+                    self.canvas.itemconfig(itm, fill=self.colors[selectedValue])
+                    self.selected_squares.append(itm)
+                else:
+                    print(f"Index out of range: {selectedValue}")
+
+
+    def resetWindowWidgets(self):
+        self.colors.clear()
+        self.selected_squares.clear()
+        
+        
+        
 
     def mainloop(self):
         self.window.mainloop()
