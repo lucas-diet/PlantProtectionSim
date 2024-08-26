@@ -75,9 +75,6 @@ class GUI:
 
 
     def openSimualtor(self):
-
-        self.resetWindowWidgets()
-        
         if self.numPlant_in.index('end') == 0:
             messagebox.showwarning('Missing Input', 'Please enter a number')
         
@@ -89,6 +86,7 @@ class GUI:
         
         else:
             self.createSimWindow()
+            self.toolbarElements()
             self.createTeams_labs('plants')
             self.createTeams_labs('herbivors')
 
@@ -114,16 +112,14 @@ class GUI:
     
 
     def createSimWindow(self):
-
         self.simWindow = tk.Tk()
-
-        self.selectedBtn = tk.IntVar(self.simWindow) 
+        self.selectedBtn = tk.IntVar(self.simWindow) # zum Zurücksetzen
         self.simWindow.title('Simulator')
         self.simWindow.geometry(f'{self.screen_width-100}x{self.screen_height-100}')
 
         # Toolbar-Frame erstellen
-        toolbar = tk.Frame(self.simWindow, bg='white', height=25)
-        toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
+        self.toolbar = tk.Frame(self.simWindow)
+        self.toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
 
         # Erstelle drei Rahmen (links, mitte, rechts)
         self.leftFrame = tk.Frame(self.simWindow, bg='lightblue')
@@ -149,7 +145,6 @@ class GUI:
         self.createBattlefield()
         
     def createTeams_labs(self, team):
-
         checkBtnList = []
         plants = int(self.numPlant_in.get())
         herbivors = int(self.numHerbi_in.get())
@@ -187,6 +182,7 @@ class GUI:
                 newColor = tk.Label(self.rightFrame, text='   ', font=('Arial', 18), bg=self.colorList_h[i])
                 newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
 
+
     def createPlantsFrame(self):
         plantHeader = tk.Frame(self.leftFrame)
         plantHeader.grid(row=0, column=0, columnspan=2, sticky='nswe')
@@ -221,7 +217,6 @@ class GUI:
 
 
     def createBattlefield(self):
-
         # Canvas für das Grid
         self.canvas = tk.Canvas(self.centerFrame, bg='white')
         self.canvas.pack(fill='both', expand=True)
@@ -265,7 +260,6 @@ class GUI:
         self.colors = self.colorList_p[:plants] + self.colorList_h[:herbivor]
         
         # Debug-Ausgaben zur Überprüfung
-        print(f"Colors list: {self.colors}")
         print(f"Colors list length: {len(self.colors)}")
         print(f"Selected value: {self.selectedBtn.get()}")
 
@@ -281,13 +275,15 @@ class GUI:
                 else:
                     print(f"Index out of range: {selectedValue}")
 
+    def toolbarElements(self):
+        fileBtn = tk.Button(self.toolbar, text='save file', width=10)
+        fileBtn.grid(row=0, column=1, sticky='nswe')
 
-    def resetWindowWidgets(self):
-        self.colors.clear()
-        self.selected_squares.clear()
-        
-        
-        
+        plotBtn = tk.Button(self.toolbar, text='Plots', width=10)
+        plotBtn.grid(row=0, column=2, sticky='nswe')
+
+        simBtn = tk.Button(self.toolbar, text='simulation', width=10)
+        simBtn.grid(row=0, column=3, sticky='nswe')
 
     def mainloop(self):
         self.window.mainloop()
