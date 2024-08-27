@@ -256,10 +256,11 @@ class GUI:
                     squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=2)
                     self.squares[squareID] = (x1, y1, x2, y2)
 
-            self.canvas.bind('<Button-1>', self.onCanvasClick)
+            self.canvas.bind('<Button-1>', self.canvasColor)
+            self.canvas.bind('<Button-2>', self.canvasOption)
             
 
-    def onCanvasClick(self, event):
+    def canvasColor(self, event):
         itm = self.canvas.find_closest(event.x, event.y)[0]
         plants = int(self.numPlant_in.get())
         herbivor = int(self.numHerbi_in.get())
@@ -282,6 +283,27 @@ class GUI:
                     self.selected_squares.append(itm)
                 else:
                     print(f"Index out of range: {selectedValue}")
+    
+
+    def canvasOption(self, event):
+        clickedID = self.canvas.find_closest(event.x, event.y)[0]
+        if clickedID in self.squares:
+            self.showContextMenu(event, clickedID)
+
+
+    def showContextMenu(self, event, squareID):
+        menu = tk.Menu(self.canvas, tearoff=0)
+        menu.add_command(label="Option 1", command=lambda: self.option_selected(squareID, "Option 1"))
+        menu.add_command(label="Option 2", command=lambda: self.option_selected(squareID, "Option 2"))
+        menu.add_command(label="Option 3", command=lambda: self.option_selected(squareID, "Option 3"))
+
+        menu.post(event.x_root, event.y_root)
+
+    def option_selected(self, square_id, option):
+		# Hier kannst du die Aktion für jede Option definieren
+		# Verwende square_id, um herauszufinden, welches Quadrat ausgewählt wurde
+        x1, y1, x2, y2 = self.squares[square_id]
+        print(f'Option {option} ausgewählt für Quadrat ID {square_id} mit Koordinaten ({x1}, {y1}, {x2}, {y2})')
 
     def toolbarElements(self):
         fileBtn = tk.Button(self.toolbar, text='save file', width=10, command=self.saveFile)
