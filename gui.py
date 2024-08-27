@@ -226,7 +226,7 @@ class GUI:
         self.canvasContainer.pack(fill='both', expand=True)
 
         # Canvas für das Grid
-        self.canvas = tk.Canvas(self.canvasContainer, bg='white', bd=1, relief='solid')
+        self.canvas = tk.Canvas(self.canvasContainer, bg='white', bd=0, relief='solid')
         self.canvas.pack(fill='both', expand=True)
 
         width = int(self.girdSize_in.get())
@@ -286,20 +286,21 @@ class GUI:
     
 
     def canvasOption(self, event):
-        clickedID = self.canvas.find_closest(event.x, event.y)[0]
-        if clickedID in self.squares:
-            self.showContextMenu(event, clickedID)
+        if event.x >= 0 and event.x <= self.canvas.winfo_width() and event.y >= 0 and event.y <= self.canvas.winfo_height():
+            clickedID = self.canvas.find_closest(event.x, event.y)[0]
+            if clickedID in self.squares:
+                self.showContextMenu(event, clickedID)
 
 
     def showContextMenu(self, event, squareID):
         menu = tk.Menu(self.canvas, tearoff=0)
-        menu.add_command(label="Option 1", command=lambda: self.option_selected(squareID, "Option 1"))
-        menu.add_command(label="Option 2", command=lambda: self.option_selected(squareID, "Option 2"))
-        menu.add_command(label="Option 3", command=lambda: self.option_selected(squareID, "Option 3"))
+        menu.add_command(label="Option 1", command=lambda: self.optionSelected(squareID, "Option 1"))
+        menu.add_command(label="Option 2", command=lambda: self.optionSelected(squareID, "Option 2"))
+        menu.add_command(label="Option 3", command=lambda: self.optionSelected(squareID, "Option 3"))
 
         menu.post(event.x_root, event.y_root)
 
-    def option_selected(self, square_id, option):
+    def optionSelected(self, square_id, option):
 		# Hier kannst du die Aktion für jede Option definieren
 		# Verwende square_id, um herauszufinden, welches Quadrat ausgewählt wurde
         x1, y1, x2, y2 = self.squares[square_id]
