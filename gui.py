@@ -1,6 +1,7 @@
 
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import filedialog
 
 from tooltip import Tooltip
 
@@ -17,12 +18,11 @@ class GUI:
         window_height = 300
 
         center_x = int(self.screen_width / 2 - window_width / 2)
-        center_y = int(self.screen_height / 2 - window_height / 2) - 200
+        center_y = int(self.screen_height / 2 - window_height / 2)
         
         self.window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
 
         self.createInitWindow()
-
         
         self.colorList_p = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
         self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00']
@@ -118,8 +118,9 @@ class GUI:
         self.simWindow.geometry(f'{self.screen_width}x{self.screen_height}')
 
         # Toolbar-Frame erstellen
-        self.toolbar = tk.Frame(self.simWindow, height=32)
+        self.toolbar = tk.Frame(self.simWindow)
         self.toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
+        self.simWindow.grid_rowconfigure(0, weight=0)
 
         # Erstelle drei Rahmen (links, mitte, rechts)
         self.leftFrame = tk.Frame(self.simWindow, bg='lightblue')
@@ -139,8 +140,9 @@ class GUI:
         # Zeilengewicht einstellen, um die vertikale Dehnung zu ermöglichen
         self.simWindow.grid_rowconfigure(0, weight=0)  # Toolbar, kein Dehnen
         self.simWindow.grid_rowconfigure(1, weight=1)  # Hauptinhalt, dehnbar
+        self.simWindow.grid_rowconfigure(2, weight=0)  # Untere Leiste, kein Dehnen
 
-        self.bottonbar = tk.Frame(self.simWindow, height=32)
+        self.bottonbar = tk.Frame(self.simWindow, height=15)
         self.bottonbar.grid(row=2, column=0, columnspan=3, sticky='we')
 
         self.createPlantsFrame()
@@ -220,8 +222,11 @@ class GUI:
 
 
     def createBattlefield(self):
+        self.canvasContainer = tk.Frame(self.centerFrame)
+        self.canvasContainer.pack(fill='both', expand=True)
+
         # Canvas für das Grid
-        self.canvas = tk.Canvas(self.centerFrame, bg='white')
+        self.canvas = tk.Canvas(self.canvasContainer, bg='white', bd=1, relief='solid')
         self.canvas.pack(fill='both', expand=True)
 
         width = int(self.girdSize_in.get())
@@ -233,7 +238,7 @@ class GUI:
         # Größe des Canvas berechnen
         self.canvas.update()  # Aktualisiere die Canvas-Größe
         canvas_width = self.canvas.winfo_width()
-        canvas_height = self.canvas.winfo_height()
+        canvas_height = self.canvas.winfo_height()-30
 
         # Bestimme die Größe jedes Quadrats
         if width > 0 and height > 0:
@@ -279,7 +284,7 @@ class GUI:
                     print(f"Index out of range: {selectedValue}")
 
     def toolbarElements(self):
-        fileBtn = tk.Button(self.toolbar, text='save file', width=10)
+        fileBtn = tk.Button(self.toolbar, text='save file', width=10, command=self.saveFile)
         fileBtn.grid(row=0, column=0, sticky='nswe')
 
         plotBtn = tk.Button(self.toolbar, text='plots', width=10)
@@ -287,6 +292,12 @@ class GUI:
 
         simBtn = tk.Button(self.toolbar, text='simulation', width=10)
         simBtn.grid(row=0, column=2, sticky='nswe')
+
+    def saveFile(self):
+        filePath = filedialog.asksaveasfilename(title='select a location to save the file', defaultextension='.txt')
+
+        print(filePath)
+
 
     def mainloop(self):
         self.window.mainloop()
