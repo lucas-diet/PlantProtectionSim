@@ -313,8 +313,11 @@ class GUI:
         plotBtn = tk.Button(self.toolbar, text='plots', width=10)
         plotBtn.grid(row=0, column=1, sticky='nswe')
 
+        timeBtn = tk.Button(self.toolbar, text='time settings', width=10)
+        timeBtn.grid(row=0, column=2, sticky='nswe')
+
         simBtn = tk.Button(self.toolbar, text='simulation', width=10)
-        simBtn.grid(row=0, column=2, sticky='nswe')
+        simBtn.grid(row=0, column=3, sticky='nswe')
 
     def saveFile(self):
         filePath = filedialog.asksaveasfilename(title='select a location to save the file', defaultextension='.txt')
