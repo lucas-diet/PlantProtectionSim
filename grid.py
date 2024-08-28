@@ -1,8 +1,6 @@
 
 import numpy as np
 
-from plant import Plant as plant
-
 class Grid():
 
     def __init__(self, width, height):
@@ -30,7 +28,7 @@ class Grid():
         return 0 <= x < self.width and 0 <= y < self.heigth
     
 
-    def connectPLants(self, pos1, pos2):
+    def connectPlants(self, pos1, pos2):
         plant1 = self.grid[pos1]
         plant2 = self.grid[pos2]
 

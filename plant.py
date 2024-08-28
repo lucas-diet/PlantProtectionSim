@@ -23,7 +23,7 @@ class Plant():
 
     def survive(self):
         if self.currEnergy < self.minEnergy:
-            self.grid.removePLant(self)
+            self.grid.removePlant(self)
 
     def reproduce(self):
         if self.age % self.reproductionSteps == 0:
@@ -42,6 +42,7 @@ class Plant():
                                       grid=self.grid
                     )
                     self.grid.addPlant(offspring)
+                    self.currEnergy -= 10 # Enegrie aufwenden, um Nachkommen zu produzieren!
 
 
     def findOffspringPos(self):
