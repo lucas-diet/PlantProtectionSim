@@ -1,21 +1,24 @@
 
 import numpy as np
 
+from plant import Plant
+from enemie import Enemie
+
 class Grid():
 
     def __init__(self, width, height):
         self.width = width
         self.heigth = height
         self.plants = []
+        self.enemies = []
         self.grid = np.full((width, height), None)
-
     
     def addPlant(self, plant):
         self.plants.append(plant)
         self.grid[plant.position] = plant
 
     
-    def removePLant(self, plant):
+    def removePlant(self, plant):
         self.plants.remove(plant)
         self.grid[plant.position] = None
 
@@ -32,12 +35,25 @@ class Grid():
         plant1 = self.grid[pos1]
         plant2 = self.grid[pos2]
 
-        if plant1 and plant2:
-            # Implementiere die Symbiose-Logik und zeichne die Verbindung
-            pass
+        # Symbiose von zwei Pflanzen
 
     def display(self):
+
         for row in self.grid:
-            print(' '.join(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%' if plant else '----' for plant in row))
+            for cell in row:
+                if isinstance(cell, Plant):
+                    print(f'{(cell.currEnergy / cell.initEnergy) * 100:.1f}%', end =' ')
+                elif isinstance(cell, Enemie):
+                    print(f'{cell.species}', end=' ')
+                else:
+                    print('----', end=' ')
+            print()
+
+            #print(f'{(enemie.species)}' if enemie else '----' for enemie in row)
 
         print('\n')
+
+
+    def addEnemie(self, enemie):
+        self.enemies.append(enemie)
+        self.grid[enemie.position] = enemie

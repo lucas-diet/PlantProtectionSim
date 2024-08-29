@@ -2,13 +2,15 @@
 
 class Enemie():
     
-    def __init__(self, num, speed):
+    def __init__(self, species, num, speed, position, grid):
+        self.species = species
         self.num = num
         self.speed = speed
+        self.position = position
+        self.gird = grid
 
-    
     def findPlant(self):
-        pass
+        print(self.plant.position)
 
 
     def movement(self):
