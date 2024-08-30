@@ -99,7 +99,7 @@ class Enemie():
     def movement(self, speed, grid, start):
 
         path = self.findPlant(grid, start)
-        
+
         for i in range(0, len(path), speed):
             if i + speed < len(path):
                 nextPos = i + speed
@@ -108,28 +108,6 @@ class Enemie():
             else:
                 nextPos = len(path) - 1
                 print(f'{path[nextPos]}')
-            
-
-            
-        
-        
-        
-        
-        '''
-        dx, dy = direction
-
-        print(dx, dy)
-
-        newX = self.position[0] + dx * speed
-        newY = self.position[1] + dy * speed
-
-        print(newX, newY)
-        
-        if self.grid.isWithinBounds(newX, newY) or self.grid[(newX, newY)] == ' ---- ' or self.grid[plantPos]:
-            self.grid[enemiePos] = ' ---- '
-            self.position = (newX, newY)
-            self.grid[self.position] = self.species
-        '''
 
     
 
