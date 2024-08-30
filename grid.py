@@ -6,12 +6,13 @@ from enemie import Enemie
 
 class Grid():
 
-    def __init__(self, width, height):
+    def __init__(self, width, heigth):
         self.width = width
-        self.heigth = height
+        self.heigth = heigth
         self.plants = []
         self.enemies = []
-        self.grid = np.full((width, height), None)
+        self.grid = np.full((width, heigth), None)
+       
     
     def addPlant(self, plant):
         self.plants.append(plant)
@@ -38,18 +39,15 @@ class Grid():
         # Symbiose von zwei Pflanzen
 
     def display(self):
-
         for row in self.grid:
             for cell in row:
                 if isinstance(cell, Plant):
-                    print(f'{(cell.currEnergy / cell.initEnergy) * 100:.1f}%', end =' ')
+                    print(f'{(cell.currEnergy / cell.initEnergy) * 100:.1f}% ', end='')
                 elif isinstance(cell, Enemie):
-                    print(f'{cell.species}', end=' ')
+                    print(f'{cell.species}-#{cell.num} ', end='')
                 else:
-                    print('----', end=' ')
+                    print(' ---- ', end='')
             print()
-
-            #print(f'{(enemie.species)}' if enemie else '----' for enemie in row)
 
         print('\n')
 
@@ -57,3 +55,29 @@ class Grid():
     def addEnemie(self, enemie):
         self.enemies.append(enemie)
         self.grid[enemie.position] = enemie
+
+    
+    def removeEnemie(self, enemie):
+        self.enemies.remove(enemie)
+        self.grid[enemie.position] = None
+
+
+    def createTempGrid(self):
+        grid = self.grid
+
+        tmpGrid = []
+
+        for i in range(0, len(grid)):
+            row = []
+            for j in range(0, len(grid[0])):
+                if grid[i][j] is not None:
+                    if isinstance(grid[i][j], Plant):
+                        row.append('P')
+                    elif isinstance(grid[i][j], Enemie):
+                        row.append('E')
+                else:
+                    row.append('*')
+            tmpGrid.append(row)
+
+        return tmpGrid
+            
