@@ -66,8 +66,9 @@ class Enemie():
         return None
     
     
-    def findPlant(self, grid, start):
-        pPos = self. detectPlant(grid)
+    def findPlant(self, tmpGrid, start):
+        
+        pPos = self. detectPlant(tmpGrid)
         #ePos = self.grid.detectEnemies()
 
         #print('EP: ', ePos)
@@ -79,7 +80,7 @@ class Enemie():
             
         shortWay = None
         for plantPos in pPos:
-            path = self.findShortPath(grid, start, plantPos)
+            path = self.findShortPath(tmpGrid, start, plantPos)
             if path:
                 if shortWay is None or len(path) < len(shortWay):
                     shortWay = path
@@ -95,7 +96,26 @@ class Enemie():
             return None
         
 
-    def movement(self, direction, speed, enemiePos, plantPos):
+    def movement(self, speed, grid, start):
+
+        path = self.findPlant(grid, start)
+        
+        for i in range(0, len(path), speed):
+            if i + speed < len(path):
+                nextPos = i + speed
+                print(f'{path[nextPos]}')
+            
+            else:
+                nextPos = len(path) - 1
+                print(f'{path[nextPos]}')
+            
+
+            
+        
+        
+        
+        
+        '''
         dx, dy = direction
 
         print(dx, dy)
@@ -109,7 +129,7 @@ class Enemie():
             self.grid[enemiePos] = ' ---- '
             self.position = (newX, newY)
             self.grid[self.position] = self.species
-
+        '''
 
     
 

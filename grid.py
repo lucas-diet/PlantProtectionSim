@@ -80,4 +80,19 @@ class Grid():
             tmpGrid.append(row)
 
         return tmpGrid
+
+
+    def detectEnemies(self):
+        grid = self.grid
+
+        enemiesPos = []
+        for i in range(0, len(grid)):
+           
+            for j in range(0, len(grid[0])):
+                if isinstance(grid[i][j], Enemie):
+                    enemiesPos.append((i,j))
+        
+        return enemiesPos
+
+
             
