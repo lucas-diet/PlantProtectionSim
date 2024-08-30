@@ -31,7 +31,7 @@ if __name__ == '__main__':
                position=(2, 4), 
                grid=grid)
     # species, num, speed, position, grid
-    e1 = Enemie(species='E1', num=4, speed=3, position=(0,0), grid=grid)
+    e1 = Enemie(species='E1', num=4, speed=1, position=(0,0), grid=grid)
     e2 = Enemie(species='E2', num=1, speed=1, position=(4,4), grid=grid)
     e3 = Enemie(species='E3', num=1, speed=1, position=(3,3), grid=grid)
 
@@ -47,10 +47,11 @@ if __name__ == '__main__':
     e2.findPlant(tmpGrid, e2.position)
     e3.findPlant(tmpGrid, e3.position)
 
-    e1.movement(e1.speed, tmpGrid, e1.position)
+    steps = e1.movement(e1.speed, tmpGrid, e1.position)
+    print(steps)
 
     #e1.movement((1,1), e1.speed, e1.position, p1.position)
     #grid.addEnemie(e1)
 
     sim = Simulation(grid)
-    sim.run(steps=10)
+    sim.run(5)

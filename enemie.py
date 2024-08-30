@@ -99,16 +99,26 @@ class Enemie():
     def movement(self, speed, grid, start):
 
         path = self.findPlant(grid, start)
+        steps = []
 
-        for i in range(0, len(path), speed):
-            if i + speed < len(path):
+        for i in range(0, len(path), speed): 
+            if i + speed < len(path) - 1:
                 nextPos = i + speed
-                print(f'{path[nextPos]}')
-            
+                #print(f'{path[nextPos]}')
+                #steps.append(path[nextPos])
             else:
                 nextPos = len(path) - 1
-                print(f'{path[nextPos]}')
+                #print(f'{path[nextPos]}')
+                
+            if nextPos in steps:
+                pass
+            else:
+                steps.append(path[nextPos])
 
+            if nextPos == len(path) - 1:
+                break
+      
+        return steps
     
 
         
