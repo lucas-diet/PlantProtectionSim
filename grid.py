@@ -6,12 +6,12 @@ from enemie import Enemie
 
 class Grid():
 
-    def __init__(self, width, heigth):
-        self.width = width
+    def __init__(self, heigth, width):
         self.heigth = heigth
+        self.width = width
         self.plants = []
         self.enemies = []
-        self.grid = np.full((width, heigth), None)
+        self.grid = np.full((heigth, width), None)
        
     
     def addPlant(self, plant):
