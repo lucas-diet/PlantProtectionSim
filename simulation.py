@@ -14,6 +14,7 @@ class Simulation:
     
     
     def run(self, steps):
+        self.grid.display()
         for _ in range(steps):
-            self.runStep()
-            self.grid.display()
+            self.runStep()  
+            self.grid.updateEnemiePos()

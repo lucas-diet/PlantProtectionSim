@@ -44,7 +44,6 @@ class Enemie():
 
         while len(queue) != 0:
             currPos = queue.popleft()
-
             if currPos == goal:
                 path = []
                 while currPos:
@@ -63,11 +62,12 @@ class Enemie():
                     queue.append(nextPos)
                     distances[nextPos] = distances[currPos] + 1
                     previous[nextPos] = currPos
+        
         return None
     
     
-    def findPlant(self, tmpGrid, start):
-        
+    def findPlant(self, start):
+        tmpGrid = self.grid.createTempGrid()
         pPos = self. detectPlant(tmpGrid)
         #ePos = self.grid.detectEnemies()
 
@@ -86,38 +86,45 @@ class Enemie():
                     shortWay = path
             
         if len(shortWay) > 0:
-            print('\nKürzester Weg gefunden:')
-            for step in shortWay:
-                print(step, end='')
-            print()
+            #print('\nKürzester Weg gefunden:')
+            #for step in shortWay:
+            #    print(step, end='')
+            #print()
             return shortWay
         else:
             print('\nKein Pfad gefunden.')
             return None
         
 
-    def movement(self, speed, grid, start):
+    def movement(self):
 
-        path = self.findPlant(grid, start)
+        start = self.position
+        path = self.findPlant(start)
         steps = []
 
-        for i in range(0, len(path), speed): 
-            if i + speed < len(path) - 1:
-                nextPos = i + speed
+        if path is None:
+            #print('Keine Pflanze gefunden!')
+            return []
+
+        for i in range(0, len(path), self.speed): 
+            if i + self.speed < len(path) - 1:
+                nextPos = i + self.speed
                 #print(f'{path[nextPos]}')
-                #steps.append(path[nextPos])
+                steps.append(path[nextPos])
             else:
                 nextPos = len(path) - 1
                 #print(f'{path[nextPos]}')
-                
+            
+            if path[nextPos] not in steps:
+                steps.append(path[nextPos])
+
             if nextPos in steps:
                 pass
-            else:
-                steps.append(path[nextPos])
 
             if nextPos == len(path) - 1:
                 break
-      
+        
+        #print('steps: ', steps)
         return steps
     
 

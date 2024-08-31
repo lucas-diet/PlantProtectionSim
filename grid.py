@@ -38,19 +38,6 @@ class Grid():
 
         # Symbiose von zwei Pflanzen
 
-    def display(self):
-        for row in self.grid:
-            for cell in row:
-                if isinstance(cell, Plant):
-                    print(f'{(cell.currEnergy / cell.initEnergy) * 100:.1f}% ', end='')
-                elif isinstance(cell, Enemie):
-                    print(f'{cell.species}-#{cell.num} ', end='')
-                else:
-                    print(' ---- ', end='')
-            print()
-
-        print('\n')
-
 
     def addEnemie(self, enemie):
         self.enemies.append(enemie)
@@ -93,6 +80,58 @@ class Grid():
                     enemiesPos.append((i,j))
         
         return enemiesPos
+    
+
+    def display(self):
+
+        for row in self.grid:
+            for cell in row:
+                if isinstance(cell, Plant):
+                    print(f' {(cell.currEnergy / cell.initEnergy) * 100:.1f}% ', end='')
+                elif isinstance(cell, Enemie):
+                    print(f' {cell.species}-#{cell.num}  ', end='')
+                else:
+                    print(' ------ ', end='')
+            print()
+        print('\n')
+
+    def hasPlants(self):
+        for row in self.grid:
+            for cell in row:
+                if isinstance(cell, Plant):
+                    return True  # Eine Pflanze gefunden, also gibt es noch Pflanzen
+        return False
+
+    def updateEnemiePos(self):
+        #self.display()
+        for i, row in enumerate(self.grid):
+            for j, cell in enumerate(row):
+                if isinstance(cell, Enemie):
+                    oldPos = (i, j)
+                    steps = cell.movement()
+                    newPos = oldPos
+                    for step in steps:
+                        #print(step)
+                        tmpPos = (step[0], step[1])
+                        #print(newPos)
+                        if 0 <= tmpPos[0] < len(self.grid) and 0 <= tmpPos[1] < len(self.grid[0]):
+                            newPos = tmpPos
+                            break
+                        else:
+                            newPos = oldPos
+                    # Setze die neue Position
+                    if oldPos != newPos:
+                        self.grid[oldPos[0]][oldPos[1]] = None  # Entferne den Feind von der alten Position
+                        self.grid[newPos[0]][newPos[1]] = cell  # Setze den Feind auf die neue Position
+                        cell.position = newPos  # Aktualisiere die Position des Feinds im Objekt
+                        print(f'Enemy {cell.species} moved from {oldPos} to {newPos}\n')
+                        
+                    else:
+                        #print(f'Enemy at {oldPos} did not move.')
+                        if not isinstance(cell, Plant):
+                            break
+                    self.display()
+                    break
 
 
             
