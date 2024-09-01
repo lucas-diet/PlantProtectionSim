@@ -29,7 +29,7 @@ class Grid():
     
 
     def isWithinBounds(self, x, y):
-        return 0 <= x < self.width and 0 <= y < self.heigth
+        return 0 <= x < self.heigth and 0 <= y < self.width
     
 
     def connectPlants(self, pos1, pos2):
@@ -67,23 +67,9 @@ class Grid():
             tmpGrid.append(row)
 
         return tmpGrid
-
-
-    def detectEnemies(self):
-        grid = self.grid
-
-        enemiesPos = []
-        for i in range(0, len(grid)):
-           
-            for j in range(0, len(grid[0])):
-                if isinstance(grid[i][j], Enemie):
-                    enemiesPos.append((i,j))
-        
-        return enemiesPos
     
 
     def display(self):
-
         for row in self.grid:
             for cell in row:
                 if isinstance(cell, Plant):
@@ -97,10 +83,40 @@ class Grid():
 
     def hasPlants(self):
         for row in self.grid:
-            for cell in row:
-                if isinstance(cell, Plant):
+            for plant in row:
+                if isinstance(plant, Plant):
                     return True  # Eine Pflanze gefunden, also gibt es noch Pflanzen
         return False
+    
+
+    def updateEnemiePos(self):     
+        for i, row in enumerate(self.grid):
+            for j, enemie in enumerate(row):
+                if isinstance(enemie, Enemie):
+                    oldPos = (i,j)
+                    steps = enemie.movement()
+                    newPos = oldPos
+                    for step in steps:
+                        tmpPos = (step[0], step[1])
+                        if 0 <= tmpPos[0] < len(self.grid) and 0 <= tmpPos[1] < len(self.grid[0]):
+                            #print(tmpPos)
+                            newPos = tmpPos
+                            break
+                        
+                    if oldPos != newPos:
+                        self.grid[oldPos[0]][oldPos[1]] = None
+                        self.grid[newPos[0]][newPos[1]] = enemie
+                        enemie.position = newPos
+                        return enemie.position
+                
+                    if self.hasPlants() == False:
+                        break
+            
+        
+
+
+
+    '''
 
     def updateEnemiePos(self):
         #self.display()
@@ -132,6 +148,6 @@ class Grid():
                             break
                     self.display()
                     break
-
+'''
 
             

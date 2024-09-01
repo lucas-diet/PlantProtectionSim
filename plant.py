@@ -30,8 +30,8 @@ class Plant():
             pass
 
         elif self.age % self.reproductionSteps == 0:
-            for _ in range(random.randint(1, 5)):       ## Zufall zwischen 1 und 5
-                offspringPosition = self.findOffspringPos()
+            for _ in range(random.randint(1, 4)):       ## Zufall zwischen 1 und 5
+                offspringPosition = self.setOffspringPos()
                 
                 if offspringPosition:
                     offspring = Plant(species=self.species, 
@@ -49,7 +49,7 @@ class Plant():
                     self.currEnergy -= 10 # Enegrie aufwenden, um Nachkommen zu produzieren!
 
 
-    def findOffspringPos(self):
+    def setOffspringPos(self):
         """_summary_
             Erstellt eine Liste, die alle möglichen Richtungen innerhalb einer Distanz um einen 
             Punkt herum darstellt und mischt diese dann zufällig und prüft dann nacheinander, 
@@ -69,7 +69,11 @@ class Plant():
             newX, newY = self.position[0] + dx, self.position[1] + dy
 
             if self.grid.isWithinBounds(newX, newY) and not self.grid.isOccupied((newX, newY)):
+                print('Wurf')
                 return (newX, newY)
+
+            #else:
+            #    print('kein Platz!')
             
         return None   
     

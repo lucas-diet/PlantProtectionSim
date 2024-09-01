@@ -69,13 +69,12 @@ class Enemie():
     def findPlant(self, start):
         tmpGrid = self.grid.createTempGrid()
         pPos = self. detectPlant(tmpGrid)
-        #ePos = self.grid.detectEnemies()
 
         #print('EP: ', ePos)
         #print('PP: ', pPos)
 
         if len(pPos) == 0:
-            print('Keine Pflanze gefunden!')
+            #print('Keine Pflanze gefunden!')
             return None
             
         shortWay = None

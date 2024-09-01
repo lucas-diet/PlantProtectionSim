@@ -15,6 +15,13 @@ class Simulation:
     
     def run(self, steps):
         self.grid.display()
+        print(' -------------------- \n\n')
         for _ in range(steps):
-            self.runStep()  
-            self.grid.updateEnemiePos()
+            
+            if self.grid.hasPlants() == False:
+                break
+            else:
+                print(_)
+                self.runStep()
+                self.grid.updateEnemiePos()
+                self.grid.display()
