@@ -27,6 +27,8 @@ class Grid():
     def isOccupied(self, position):
         return self.grid[position] is not None
     
+    def isOccupiedEnemie(self, x, y):
+        return isinstance(self.grid[x][y], Enemie)
 
     def isWithinBounds(self, x, y):
         return 0 <= x < self.heigth and 0 <= y < self.width
@@ -49,11 +51,10 @@ class Grid():
         self.grid[enemie.position] = None
 
 
-    def createTempGrid(self):
+    def helperGrid(self):
         grid = self.grid
-
         tmpGrid = []
-
+        
         for i in range(0, len(grid)):
             row = []
             for j in range(0, len(grid[0])):
@@ -79,7 +80,8 @@ class Grid():
                 else:
                     print(' ------ ', end='')
             print()
-        print('\n')
+        print()
+
 
     def hasPlants(self):
         for row in self.grid:
@@ -89,65 +91,42 @@ class Grid():
         return False
     
 
-    def updateEnemiePos(self):     
+    def updateEnemiePos(self):
+        #idxs = []
+        new_positions = {}
         for i, row in enumerate(self.grid):
             for j, enemie in enumerate(row):
                 if isinstance(enemie, Enemie):
                     oldPos = (i,j)
-                    steps = enemie.movement()
+                    steps = enemie.move()
                     newPos = oldPos
-                    for step in steps:
+                    #print(steps)
+
+                    if steps is None:
+                        continue
+
+                    count = []
+                    
+                    for idx, step in enumerate(steps):
                         tmpPos = (step[0], step[1])
                         if 0 <= tmpPos[0] < len(self.grid) and 0 <= tmpPos[1] < len(self.grid[0]):
-                            #print(tmpPos)
                             newPos = tmpPos
+                            #idxs.append(idx)
                             break
-                        
+
+                    if newPos not in new_positions:
+                        new_positions[newPos] = enemie
+                    
                     if oldPos != newPos:
                         self.grid[oldPos[0]][oldPos[1]] = None
                         self.grid[newPos[0]][newPos[1]] = enemie
                         enemie.position = newPos
-                        return enemie.position
-                
-                    if self.hasPlants() == False:
+
+                        print(f'{enemie.species} moved from {oldPos} to {newPos} \n')
+                        self.display()
                         break
-            
-        
+                        #print(len(idxs)+1, ' #################### \n') 
+                                         
 
-
-
-    '''
-
-    def updateEnemiePos(self):
-        #self.display()
-        for i, row in enumerate(self.grid):
-            for j, cell in enumerate(row):
-                if isinstance(cell, Enemie):
-                    oldPos = (i, j)
-                    steps = cell.movement()
-                    newPos = oldPos
-                    for step in steps:
-                        #print(step)
-                        tmpPos = (step[0], step[1])
-                        #print(newPos)
-                        if 0 <= tmpPos[0] < len(self.grid) and 0 <= tmpPos[1] < len(self.grid[0]):
-                            newPos = tmpPos
-                            break
-                        else:
-                            newPos = oldPos
-                    # Setze die neue Position
-                    if oldPos != newPos:
-                        self.grid[oldPos[0]][oldPos[1]] = None  # Entferne den Feind von der alten Position
-                        self.grid[newPos[0]][newPos[1]] = cell  # Setze den Feind auf die neue Position
-                        cell.position = newPos  # Aktualisiere die Position des Feinds im Objekt
-                        print(f'Enemy {cell.species} moved from {oldPos} to {newPos}\n')
-                        
-                    else:
-                        #print(f'Enemy at {oldPos} did not move.')
-                        if not isinstance(cell, Plant):
-                            break
-                    self.display()
-                    break
-'''
-
-            
+                    
+                    

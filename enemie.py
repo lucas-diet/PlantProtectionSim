@@ -13,6 +13,7 @@ class Enemie():
     def detectPlant(self, grid):
         pos = (0,0)
         posistions = []
+
         for i in range(0, len(grid)):
             for j in range(0,len(grid[0])):
                 if grid[i][j] == 'P':
@@ -44,6 +45,7 @@ class Enemie():
 
         while len(queue) != 0:
             currPos = queue.popleft()
+
             if currPos == goal:
                 path = []
                 while currPos:
@@ -67,68 +69,43 @@ class Enemie():
     
     
     def findPlant(self, start):
-        tmpGrid = self.grid.createTempGrid()
-        pPos = self. detectPlant(tmpGrid)
-
-        #print('EP: ', ePos)
-        #print('PP: ', pPos)
+        helperGrid = self.grid.helperGrid()
+        pPos = self.detectPlant(helperGrid)
+        shortestPath = None
 
         if len(pPos) == 0:
-            #print('Keine Pflanze gefunden!')
-            return None
-            
-        shortWay = None
-        for plantPos in pPos:
-            path = self.findShortPath(tmpGrid, start, plantPos)
-            if path:
-                if shortWay is None or len(path) < len(shortWay):
-                    shortWay = path
-            
-        if len(shortWay) > 0:
-            #print('\nKürzester Weg gefunden:')
-            #for step in shortWay:
-            #    print(step, end='')
-            #print()
-            return shortWay
+            print('no plant. stop simulation')
+            return []
+        
+        for plant in pPos:
+            path = self.findShortPath(helperGrid, start, plant)
+            if path is not None:
+                if shortestPath is None or len(path) < len(shortestPath):
+                    shortestPath = path
+        
+        if len(shortestPath) > 0:
+            return shortestPath
         else:
-            print('\nKein Pfad gefunden.')
             return None
         
-
-    def movement(self):
-
+    
+    def move(self):
         start = self.position
         path = self.findPlant(start)
         steps = []
+        #print(start, path[1:])
 
-        if path is None:
-            #print('Keine Pflanze gefunden!')
-            return []
+        if path  == []:
+            print('no path. stop simulation\n')
+            return None
 
-        for i in range(0, len(path), self.speed): 
+        for i in range(0, len(path)-1, self.speed):
             if i + self.speed < len(path) - 1:
-                nextPos = i + self.speed
-                #print(f'{path[nextPos]}')
+                nextPos = i + self.speed 
                 steps.append(path[nextPos])
             else:
                 nextPos = len(path) - 1
-                #print(f'{path[nextPos]}')
-            
-            if path[nextPos] not in steps:
                 steps.append(path[nextPos])
 
-            if nextPos in steps:
-                pass
-
-            if nextPos == len(path) - 1:
-                break
-        
-        #print('steps: ', steps)
-        return steps
-    
-
-        
-        
-
-        
-        
+        #print(steps)
+        return steps        
