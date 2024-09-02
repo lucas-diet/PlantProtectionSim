@@ -6,7 +6,7 @@ from grid import Grid
 from simulation import Simulation
 
 if __name__ == '__main__':
-    grid = Grid(heigth=5, width=6)
+    grid = Grid(heigth=10, width=10)
 
     #species, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
     p1 = Plant(species='P1', 
@@ -31,9 +31,8 @@ if __name__ == '__main__':
                position=(4, 5), 
                grid=grid)
     
-    # species, num, speed, position, grid
-    e1 = Enemie(species='E1', num=2, speed=1, position=(0,0), grid=grid)
-    e2 = Enemie(species='E2', num=2, speed=1, position=(4,0), grid=grid)
+    e1 = Enemie(species='E1', num=2, speed=3, position=(0,0), grid=grid)
+    e2 = Enemie(species='E2', num=2, speed=1, position=(3,3), grid=grid)
     e3 = Enemie(species='E3', num=1, speed=1, position=(3,3), grid=grid)
     #e4 = Enemie(species='E4', num=1, speed=5, position=(4,1), grid=grid)
     #e5 = Enemie(species='E5', num=1, speed=5, position=(2,1), grid=grid)

@@ -14,11 +14,11 @@ class Simulation:
     
     
     def run(self, steps):
-        print('\n##########################')
-        print('###### initial grid ######')
-        print('##########################\n')
+        print('\n ##########################')
+        print(' ###### initial grid ######')
+        print(' ##########################\n')
         self.grid.display()
-        print('1  #################### \n')
+        print(' #################### \n')
 
         for _ in range(steps):
             if not self.grid.hasPlants():

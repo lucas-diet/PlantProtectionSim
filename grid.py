@@ -26,9 +26,7 @@ class Grid():
 
     def isOccupied(self, position):
         return self.grid[position] is not None
-    
-    def isOccupiedEnemie(self, x, y):
-        return isinstance(self.grid[x][y], Enemie)
+
 
     def isWithinBounds(self, x, y):
         return 0 <= x < self.heigth and 0 <= y < self.width
@@ -53,7 +51,7 @@ class Grid():
 
     def helperGrid(self):
         grid = self.grid
-        tmpGrid = []
+        hGrid = []
         
         for i in range(0, len(grid)):
             row = []
@@ -65,9 +63,9 @@ class Grid():
                         row.append('E')
                 else:
                     row.append('*')
-            tmpGrid.append(row)
+            hGrid.append(row)
 
-        return tmpGrid
+        return hGrid
     
 
     def display(self):
@@ -92,40 +90,34 @@ class Grid():
     
 
     def updateEnemiePos(self):
-        #idxs = []
-        new_positions = {}
         for i, row in enumerate(self.grid):
             for j, enemie in enumerate(row):
                 if isinstance(enemie, Enemie):
                     oldPos = (i,j)
                     steps = enemie.move()
                     newPos = oldPos
-                    #print(steps)
 
                     if steps is None:
                         continue
-
-                    count = []
                     
                     for idx, step in enumerate(steps):
                         tmpPos = (step[0], step[1])
                         if 0 <= tmpPos[0] < len(self.grid) and 0 <= tmpPos[1] < len(self.grid[0]):
                             newPos = tmpPos
-                            #idxs.append(idx)
                             break
-
-                    if newPos not in new_positions:
-                        new_positions[newPos] = enemie
                     
                     if oldPos != newPos:
+                        if isinstance(self.grid[newPos[0]][newPos[1]], Enemie):
+                            # TODO: Logik dafür, dass Freinde auf dem gleichen Feld gleichzeitig sitzen können, ohne sich zu fressen
+                            pass
                         self.grid[oldPos[0]][oldPos[1]] = None
                         self.grid[newPos[0]][newPos[1]] = enemie
                         enemie.position = newPos
 
-                        print(f'{enemie.species} moved from {oldPos} to {newPos} \n')
+                        print(f' {enemie.species} moved from {oldPos} to {newPos} \n')
                         self.display()
+                        print(' #################### \n')
                         break
-                        #print(len(idxs)+1, ' #################### \n') 
                                          
 
                     

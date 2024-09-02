@@ -60,11 +60,9 @@ class Enemie():
 
                 if 0 <= nextRow < rows and 0 <= nextCol < cols and nextPos not in distances:
                     #print(currPos, f'::{currPos}+{direction} =' , nextPos)
-                    
                     queue.append(nextPos)
                     distances[nextPos] = distances[currPos] + 1
                     previous[nextPos] = currPos
-        
         return None
     
     
@@ -98,14 +96,15 @@ class Enemie():
         if path  == []:
             print('no path. stop simulation\n')
             return None
-
+        
         for i in range(0, len(path)-1, self.speed):
             if i + self.speed < len(path) - 1:
-                nextPos = i + self.speed 
-                steps.append(path[nextPos])
+                nextPos = i + self.speed
+                idx1 = path[nextPos][0]
+                idx2 = path[nextPos][1]
+                steps.append(path[nextPos])  
             else:
                 nextPos = len(path) - 1
                 steps.append(path[nextPos])
-
         #print(steps)
         return steps        
