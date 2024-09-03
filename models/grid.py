@@ -1,8 +1,8 @@
 
 import numpy as np
 
-from plant import Plant
-from enemy import Enemy
+from models.plant import Plant
+from models.enemy import Enemy
 
 class Grid():
 
@@ -105,13 +105,6 @@ class Grid():
                     return True  # Eine Pflanze gefunden, also gibt es noch Pflanzen
         return False
     
-    def isEnemy(self):
-        for row in self.grid:
-            for enemy in row:
-                if isinstance(enemy, Enemy):
-                    return True
-        return False
-    
 
     def updateEnemyPos(self):
         # Erstelle eine Liste von Feinden mit ihren Positionen
@@ -157,7 +150,7 @@ class Grid():
                 # Aktualisiere die Position des Feindes
                 enemy.position = newPos
 
-                print(f'{enemy.species} moved from {oldPos} to {newPos}\n')
+                print(f' {enemy.species} moved from {oldPos} to {newPos}\n')
                 self.display()
                 print(' #################### \n')
                                         

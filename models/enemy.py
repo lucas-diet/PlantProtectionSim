@@ -1,3 +1,4 @@
+
 from collections import deque
 
 class Enemy():
@@ -99,8 +100,6 @@ class Enemy():
         for i in range(0, len(path)-1, self.speed):
             if i + self.speed < len(path) - 1:
                 nextPos = i + self.speed
-                idx1 = path[nextPos][0]
-                idx2 = path[nextPos][1]
                 steps.append(path[nextPos])  
             else:
                 nextPos = len(path) - 1

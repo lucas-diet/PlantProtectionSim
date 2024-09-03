@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 from tkinter import filedialog
 
-from tooltip import Tooltip
+from views.tooltip import Tooltip
 
 class GUI:
 
