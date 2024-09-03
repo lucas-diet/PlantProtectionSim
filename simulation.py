@@ -26,5 +26,5 @@ class Simulation:
                 break
 
             self.runStep()
-            self.grid.updateEnemiePos()
+            self.grid.updateEnemyPos()
             #self.grid.display()

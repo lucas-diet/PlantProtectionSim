@@ -1,7 +1,6 @@
-
 from collections import deque
 
-class Enemie():
+class Enemy():
     
     def __init__(self, species, num, speed, position, grid):
         self.species = species
@@ -107,4 +106,4 @@ class Enemie():
                 nextPos = len(path) - 1
                 steps.append(path[nextPos])
         #print(steps)
-        return steps        
+        return steps

@@ -2,7 +2,7 @@
 import numpy as np
 
 from plant import Plant
-from enemie import Enemie
+from enemy import Enemy
 
 class Grid():
 
@@ -10,7 +10,7 @@ class Grid():
         self.heigth = heigth
         self.width = width
         self.plants = []
-        self.enemies = []
+        self.enemys = []
         self.grid = np.full((heigth, width), None)
        
     
@@ -36,17 +36,17 @@ class Grid():
         plant1 = self.grid[pos1]
         plant2 = self.grid[pos2]
 
-        # Symbiose von zwei Pflanzen
+        # TODO: Symbiose von zwei Pflanzen
 
 
-    def addEnemie(self, enemie):
-        self.enemies.append(enemie)
-        self.grid[enemie.position] = enemie
+    def addEnemy(self, enemy):
+        self.enemys.append(enemy)
+        self.grid[enemy.position] = enemy
 
     
-    def removeEnemie(self, enemie):
-        self.enemies.remove(enemie)
-        self.grid[enemie.position] = None
+    def removeEnemy(self, enemy):
+        self.enemys.remove(enemy)
+        self.grid[enemy.position] = None
 
 
     def helperGrid(self):
@@ -59,7 +59,7 @@ class Grid():
                 if grid[i][j] is not None:
                     if isinstance(grid[i][j], Plant):
                         row.append('P')
-                    elif isinstance(grid[i][j], Enemie):
+                    elif isinstance(grid[i][j], Enemy):
                         row.append('E')
                 else:
                     row.append('*')
@@ -73,7 +73,7 @@ class Grid():
             for cell in row:
                 if isinstance(cell, Plant):
                     print(f' {(cell.currEnergy / cell.initEnergy) * 100:.1f}% ', end='')
-                elif isinstance(cell, Enemie):
+                elif isinstance(cell, Enemy):
                     print(f' {cell.species}-#{cell.num}  ', end='')
                 else:
                     print(' ------ ', end='')
@@ -89,32 +89,32 @@ class Grid():
         return False
     
 
-    def updateEnemiePos(self):
+    def updateEnemyPos(self):
         for i, row in enumerate(self.grid):
-            for j, enemie in enumerate(row):
-                if isinstance(enemie, Enemie):
+            for j, enemy in enumerate(row):
+                if isinstance(enemy, Enemy):
                     oldPos = (i,j)
-                    steps = enemie.move()
+                    steps = enemy.move()
                     newPos = oldPos
 
                     if steps is None:
                         continue
                     
-                    for idx, step in enumerate(steps):
+                    for step in steps:
                         tmpPos = (step[0], step[1])
                         if 0 <= tmpPos[0] < len(self.grid) and 0 <= tmpPos[1] < len(self.grid[0]):
                             newPos = tmpPos
                             break
                     
                     if oldPos != newPos:
-                        if isinstance(self.grid[newPos[0]][newPos[1]], Enemie):
+                        if isinstance(self.grid[newPos[0]][newPos[1]], Enemy):
                             # TODO: Logik dafür, dass Freinde auf dem gleichen Feld gleichzeitig sitzen können, ohne sich zu fressen
                             pass
                         self.grid[oldPos[0]][oldPos[1]] = None
-                        self.grid[newPos[0]][newPos[1]] = enemie
-                        enemie.position = newPos
+                        self.grid[newPos[0]][newPos[1]] = enemy
+                        enemy.position = newPos
 
-                        print(f' {enemie.species} moved from {oldPos} to {newPos} \n')
+                        print(f' {enemy.species} moved from {oldPos} to {newPos} \n')
                         self.display()
                         print(' #################### \n')
                         break

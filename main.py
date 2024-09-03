@@ -1,7 +1,7 @@
 
 
 from plant import Plant
-from enemie import Enemie
+from enemy import Enemy
 from grid import Grid
 from simulation import Simulation
 
@@ -31,9 +31,9 @@ if __name__ == '__main__':
                position=(4, 5), 
                grid=grid)
     
-    e1 = Enemie(species='E1', num=2, speed=3, position=(0,0), grid=grid)
-    e2 = Enemie(species='E2', num=2, speed=1, position=(3,3), grid=grid)
-    e3 = Enemie(species='E3', num=1, speed=1, position=(3,3), grid=grid)
+    e1 = Enemy(species='E1', num=2, speed=3, position=(0,0), grid=grid)
+    e2 = Enemy(species='E2', num=2, speed=1, position=(3,3), grid=grid)
+    e3 = Enemy(species='E3', num=1, speed=1, position=(3,3), grid=grid)
     #e4 = Enemie(species='E4', num=1, speed=5, position=(4,1), grid=grid)
     #e5 = Enemie(species='E5', num=1, speed=5, position=(2,1), grid=grid)
     #e6 = Enemie(species='E6', num=1, speed=5, position=(4,1), grid=grid)
@@ -41,12 +41,12 @@ if __name__ == '__main__':
     grid.addPlant(p1)
     grid.addPlant(p2)
     
-    grid.addEnemie(e1)
-    grid.addEnemie(e2)
-    #grid.addEnemie(e3)
-    #grid.addEnemie(e4)
-    #grid.addEnemie(e5)
-    #grid.addEnemie(e6)
+    grid.addEnemy(e1)
+    grid.addEnemy(e2)
+    #grid.addEnemy(e3)
+    #grid.addEnemy(e4)
+    #grid.addEnemy(e5)
+    #grid.addEnemy(e6)
 
     #hGrid = grid.helperGrid()
 
@@ -60,7 +60,7 @@ if __name__ == '__main__':
     #e1.move()
     #e2.move()
     #e3.move()
-    #grid.updateEnemiePos()
+    #grid.updateEnemyPos()
 
     sim = Simulation(grid)
     sim.run(20)
