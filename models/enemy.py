@@ -1,5 +1,6 @@
 
 from collections import deque
+import random
 
 class Enemy():
     
@@ -69,7 +70,8 @@ class Enemy():
     def findPlant(self, start):
         helperGrid = self.grid.helperGrid()
         pPos = self.detectPlant(helperGrid)
-        shortestPath = None
+        shortestPaths = [] # Liste mit allen kürzesten Pfaden mit der gleichen Länge
+        shortestPathLength = None
 
         if len(pPos) == 0:
             print('no plant. stop simulation')
@@ -78,11 +80,15 @@ class Enemy():
         for plant in pPos:
             path = self.findShortPath(helperGrid, start, plant)
             if path is not None:
-                if shortestPath is None or len(path) < len(shortestPath):
-                    shortestPath = path
+                pathLength = len(path)
+                if shortestPathLength is None or pathLength < shortestPathLength: # Falls neuer kürzester Pfad gefunden wird, reset der Liste
+                    shortestPathLength = pathLength
+                    shortestPaths = [path]
+                elif pathLength == shortestPathLength: # Kürzester Pfad mit gleicher Länge wird hinzugefügt
+                    shortestPaths.append(path)
         
-        if len(shortestPath) > 0:
-            return shortestPath
+        if len(shortestPaths) > 0:
+            return random.choice(shortestPaths) # Wähle einen zufälligen kürzesten Pfad aus der Liste
         else:
             return None
         
@@ -90,6 +96,7 @@ class Enemy():
     def move(self):
         start = self.position
         path = self.findPlant(start)
+        print(path)
         steps = []
         #print(start, path[1:])
 

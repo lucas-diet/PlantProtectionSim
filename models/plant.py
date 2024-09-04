@@ -17,13 +17,16 @@ class Plant():
         self.grid = grid
         self.age = 0
 
+
     def grow(self):
         self.currEnergy += self.currEnergy * (self.growthRateEnegry / 100)
         self.age += 1
 
+
     def survive(self):
         if self.currEnergy < self.minEnergy:
             self.grid.removePlant(self)
+        
 
     def reproduce(self):
         if self.reproductionSteps == 0:
