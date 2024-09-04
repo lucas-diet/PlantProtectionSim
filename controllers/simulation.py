@@ -13,18 +13,17 @@ class Simulation:
             plant.reproduce()
     
     
-    def run(self, steps):
+    def run(self):
         print('\n ##########################')
         print(' ###### initial grid ######')
         print(' ##########################\n')
         self.grid.display()
         print(' #################### \n')
 
-        for _ in range(steps):
+        while True:#for _ in range(steps):
             if not self.grid.hasPlants():
                 print('no more plants. simulation ending.')
                 break
-
+                 
             self.runStep()
             self.grid.updateEnemyPos()
-            #self.grid.display()

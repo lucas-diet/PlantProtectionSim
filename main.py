@@ -48,8 +48,6 @@ if __name__ == '__main__':
     #grid.addEnemy(e5)
     #grid.addEnemy(e6)
 
-    #hGrid = grid.helperGrid()
-
     #e1.findPlant(e1.position)
     #e2.findPlant(e2.position)
     #e3.findPlant(e3.position)
@@ -60,7 +58,6 @@ if __name__ == '__main__':
     #e1.move()
     #e2.move()
     #e3.move()
-    #grid.updateEnemyPos()
 
     sim = Simulation(grid)
-    sim.run(20)
+    sim.run()

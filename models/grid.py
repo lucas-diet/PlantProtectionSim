@@ -11,7 +11,7 @@ class Grid():
         self.width = width
         self.plants = []
         self.enemys = []
-        self.grid = np.full((heigth, width), None)
+        self.grid = np.full((heigth, width), None) 
        
     
     def addPlant(self, plant):
@@ -76,8 +76,8 @@ class Grid():
 
     def display(self):
         # Bestimme die maximale Anzahl an Feinden in einem Feld für das Layout
-        max_enemies_in_cell = max(len(cell) if isinstance(cell, list) else 1 for row in self.grid for cell in row)
-
+        max_enemies_in_cell = max(len(cell) if isinstance(cell, list) else 1 for row in self.grid for cell in row)     
+        
         for row in self.grid:
             for level in range(max_enemies_in_cell):
                 for cell in row:
