@@ -115,6 +115,8 @@ class Grid():
                     return True  # Eine Pflanze gefunden, also gibt es noch Pflanzen
         return False
     
+    def displayMove(self, enemy, oldPos, newPos):
+        print(f'{enemy.species} moved from {oldPos} to {newPos}\n')
 
     def updateEnemyPos(self):
         # Erstelle eine Liste von Feinden mit ihren Positionen
@@ -160,9 +162,9 @@ class Grid():
                 # Aktualisiere die Position des Feindes
                 enemy.position = newPos
 
-                print(f'{enemy.species} moved from {oldPos} to {newPos}\n')
+                self.displayMove(enemy, oldPos, newPos)
                 self.display()
-                print('#################### \n')
+                
                                         
 
                     

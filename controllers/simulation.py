@@ -30,3 +30,4 @@ class Simulation:
             self.runStep()
             self.grid.displayGridEnergy()
             self.grid.updateEnemyPos()
+            print('#################### \n')
