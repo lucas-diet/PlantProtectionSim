@@ -96,7 +96,6 @@ class Enemy():
     def move(self):
         start = self.position
         path = self.findPlant(start)
-        print(path)
         steps = []
         #print(start, path[1:])
 

@@ -32,6 +32,17 @@ class Grid():
         return 0 <= x < self.heigth and 0 <= y < self.width
     
 
+    def getGridEnergy(self):
+        energy = 0
+        for plant in self.plants:
+            energy += plant.currEnergy
+        return energy
+    
+
+    def displayGridEnergy(self):
+        print(f'Grid-Enery: {self.getGridEnergy()}')
+
+
     def connectPlants(self, pos1, pos2):
         plant1 = self.grid[pos1]
         plant2 = self.grid[pos2]
@@ -70,7 +81,6 @@ class Grid():
                 else:
                     row.append('*')
             hGrid.append(row)
-
         return hGrid
     
 
@@ -84,14 +94,14 @@ class Grid():
                     if isinstance(cell, list):
                         if level < len(cell):
                             enemy = cell[level]
-                            print(f' {enemy.species}-#{enemy.num} ', end='  ')
+                            print(f'{enemy.species}-#{enemy.num} ', end='  ')
                         else:
                             print(' ' * 8, end=' ')  # Leeren Platz lassen, wenn kein Feind auf dieser Ebene
                     elif isinstance(cell, Plant) and level == 0:
                         # Pflanzen nur auf der ersten Ebene darstellen
-                        print(f' {(cell.currEnergy / cell.initEnergy) * 100:.1f}%', end='  ')
+                        print(f'{(cell.currEnergy / cell.initEnergy) * 100:.1f}%', end='  ')
                     elif cell is None and level == 0:
-                        print(' ------ ', end=' ')
+                        print('------ ', end=' ')
                     else:
                         print(' ' * 8, end=' ')  # Leeren Platz lassen
                 print()  # Neue Zeile nach jeder Ebene
@@ -150,9 +160,9 @@ class Grid():
                 # Aktualisiere die Position des Feindes
                 enemy.position = newPos
 
-                print(f' {enemy.species} moved from {oldPos} to {newPos}\n')
+                print(f'{enemy.species} moved from {oldPos} to {newPos}\n')
                 self.display()
-                print(' #################### \n')
+                print('#################### \n')
                                         
 
                     

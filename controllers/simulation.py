@@ -14,16 +14,19 @@ class Simulation:
     
     
     def run(self):
-        print('\n ##########################')
-        print(' ###### initial grid ######')
-        print(' ##########################\n')
+        print('\n##########################')
+        print('###### initial grid ######')
+        print('##########################\n')
+        self.grid.displayGridEnergy()
+        print()
         self.grid.display()
-        print(' #################### \n')
+        print('#################### \n')
 
         while True:
             if not self.grid.hasPlants():
                 print('no more plants. simulation ending.')
                 break
-                 
+               
             self.runStep()
+            self.grid.displayGridEnergy()
             self.grid.updateEnemyPos()
