@@ -20,7 +20,7 @@ class Simulation:
         self.grid.display()
         print(' #################### \n')
 
-        while True:#for _ in range(steps):
+        while True:
             if not self.grid.hasPlants():
                 print('no more plants. simulation ending.')
                 break
