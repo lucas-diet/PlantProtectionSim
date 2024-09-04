@@ -84,7 +84,7 @@ class Grid():
         return hGrid
     
 
-    def display(self):
+    def displayGrid(self):
         # Bestimme die maximale Anzahl an Feinden in einem Feld für das Layout
         max_enemies_in_cell = max(len(cell) if isinstance(cell, list) else 1 for row in self.grid for cell in row)     
         
@@ -115,10 +115,57 @@ class Grid():
                     return True  # Eine Pflanze gefunden, also gibt es noch Pflanzen
         return False
     
+    
     def displayMove(self, enemy, oldPos, newPos):
         print(f'{enemy.species} moved from {oldPos} to {newPos}\n')
 
-    def updateEnemyPos(self):
+    
+    def getNewPosition(self, steps):
+        for step in steps:
+            tmpPos = (step[0], step[1])
+            if self.isWithinBounds(tmpPos[0], tmpPos[1]):
+                return tmpPos
+        return None
+
+
+    def updateEnemyPosition(self, enemy, oldPos, newPos):
+        # Entferne den Feind von der alten Position
+            if isinstance(self.grid[oldPos[0]][oldPos[1]], list):
+                self.grid[oldPos[0]][oldPos[1]].remove(enemy)
+                if len(self.grid[oldPos[0]][oldPos[1]]) == 0:
+                    self.grid[oldPos[0]][oldPos[1]] = None
+            else:
+                self.grid[oldPos[0]][oldPos[1]] = None
+
+            # Füge den Feind zur neuen Position hinzu
+            if isinstance(self.grid[newPos[0]][newPos[1]], list):
+                self.grid[newPos[0]][newPos[1]].append(enemy)
+            else:
+                self.grid[newPos[0]][newPos[1]] = [enemy]
+
+            # Aktualisiere die Position des Feindes
+            enemy.position = newPos
+
+
+    def moveEachEnemy(self, moveArr):
+        # Bewege jeden Feind
+        for enemy, oldPos in moveArr:
+            steps = enemy.move()
+            newPos = oldPos
+
+            if steps is None:
+                continue
+
+            newPos = self.getNewPosition(steps) or newPos
+
+            if oldPos != newPos:
+                self.updateEnemyPosition(enemy, oldPos, newPos)
+
+                self.displayMove(enemy, oldPos, newPos)
+                self.displayGrid()
+
+
+    def collectAndMoveEnemies(self):
         # Erstelle eine Liste von Feinden mit ihren Positionen
         enemies_to_move = []
 
@@ -130,40 +177,7 @@ class Grid():
                 elif isinstance(cell, Enemy):
                     enemies_to_move.append((cell, (i, j)))
 
-        # Bewege jeden Feind
-        for enemy, oldPos in enemies_to_move:
-            steps = enemy.move()
-            newPos = oldPos
-
-            if steps is None:
-                continue
-
-            for step in steps:
-                tmpPos = (step[0], step[1])
-                if self.isWithinBounds(tmpPos[0], tmpPos[1]):
-                    newPos = tmpPos
-                    break
-
-            if oldPos != newPos:
-                # Entferne den Feind von der alten Position
-                if isinstance(self.grid[oldPos[0]][oldPos[1]], list):
-                    self.grid[oldPos[0]][oldPos[1]].remove(enemy)
-                    if len(self.grid[oldPos[0]][oldPos[1]]) == 0:
-                        self.grid[oldPos[0]][oldPos[1]] = None
-                else:
-                    self.grid[oldPos[0]][oldPos[1]] = None
-
-                # Füge den Feind zur neuen Position hinzu
-                if isinstance(self.grid[newPos[0]][newPos[1]], list):
-                    self.grid[newPos[0]][newPos[1]].append(enemy)
-                else:
-                    self.grid[newPos[0]][newPos[1]] = [enemy]
-
-                # Aktualisiere die Position des Feindes
-                enemy.position = newPos
-
-                self.displayMove(enemy, oldPos, newPos)
-                self.display()
+        self.moveEachEnemy(enemies_to_move)
                 
                                         
 

@@ -19,7 +19,7 @@ class Simulation:
         print('##########################\n')
         self.grid.displayGridEnergy()
         print()
-        self.grid.display()
+        self.grid.displayGrid()
         print('#################### \n')
 
         while True:
@@ -29,5 +29,5 @@ class Simulation:
                
             self.runStep()
             self.grid.displayGridEnergy()
-            self.grid.updateEnemyPos()
+            self.grid.collectAndMoveEnemies()
             print('#################### \n')
