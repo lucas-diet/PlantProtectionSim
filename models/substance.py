@@ -13,7 +13,7 @@ class Substance:
     
 
     def setType(self, type):
-        if type == 'signal':
+        if type == 'messenger':
             self.type = type
-        elif type == 'poison':
+        elif type == 'toxin':
             self.type = type

@@ -11,23 +11,54 @@ class Simulation:
             plant.grow()
             plant.survive()
             plant.reproduce()
-    
-    
-    def run(self):
+
+
+    def initDisplay(self):
         print('\n##########################')
         print('###### initial grid ######')
         print('##########################\n')
         self.grid.displayGridEnergy()
+        self.grid.displayEnemyNum()
         print()
         self.grid.displayGrid()
         print('#################### \n')
 
+
+    def noPlantsBreak(self):
+        if not self.grid.hasPlants():
+            print('no more plants. simulation ending.')
+            return True
+        return False
+    
+
+    def upperGridEnergyBreak(self):
+        if self.grid.getGridEnergy() > 1000:                #TODO: später umschreiben als Parameter
+            print('Upper Border -- Grid-Energy')
+            return True
+        return False
+    
+
+    def upperEnemyNumBreak(self):
+        if self.grid.getGridEnemyNum() > 3:                #TODO: später umschreiben als Parameter
+            print('Upper Border -- Enemies')
+            return True
+        return False
+
+    def run(self):
+        self.initDisplay()
+
         while True:
-            if not self.grid.hasPlants():
-                print('no more plants. simulation ending.')
+            if self.noPlantsBreak():
                 break
-               
+            
+            if self.upperGridEnergyBreak():
+                break
+
+            if self.upperEnemyNumBreak():
+                break
+
             self.runStep()
             self.grid.displayGridEnergy()
+            self.grid.displayEnemyNum()
             self.grid.collectAndMoveEnemies()
             print('#################### \n')

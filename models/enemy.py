@@ -103,7 +103,7 @@ class Enemy():
             print('no path. stop simulation\n')
             return None
         
-        for i in range(0, len(path)-1, self.speed):
+        for i in range(0, len(path)-1):
             if i + self.speed < len(path) - 1:
                 nextPos = i + self.speed
                 steps.append(path[nextPos])  

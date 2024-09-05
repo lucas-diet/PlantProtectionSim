@@ -74,7 +74,7 @@ class Plant():
             newX, newY = self.position[0] + dx, self.position[1] + dy
 
             if self.grid.isWithinBounds(newX, newY) and not self.grid.isOccupied((newX, newY)):
-                print('Wurf')
+                print(f'{self.species} auf {self.position} erzeugt Nachkommen ')
                 return (newX, newY)
 
             #else:

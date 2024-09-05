@@ -10,7 +10,7 @@ class Grid():
         self.heigth = heigth
         self.width = width
         self.plants = []
-        self.enemys = []
+        self.enemies = []
         self.grid = np.full((heigth, width), None) 
        
     
@@ -42,6 +42,17 @@ class Grid():
     def displayGridEnergy(self):
         print(f'Grid-Enery: {self.getGridEnergy()}')
 
+    
+    def getGridEnemyNum(self):
+        enemyNum = 0
+        for enemy in self.enemies:
+            enemyNum += enemy.num
+        return enemyNum
+    
+
+    def displayEnemyNum(self):
+        print(f'Enemy-Number: {self.getGridEnemyNum()}')
+
 
     def connectPlants(self, pos1, pos2):
         plant1 = self.grid[pos1]
@@ -51,7 +62,7 @@ class Grid():
 
 
     def addEnemy(self, enemy):
-        self.enemys.append(enemy)
+        self.enemies.append(enemy)
         if isinstance(self.grid[enemy.position], list):
             self.grid[enemy.position].append(enemy)
         else:
@@ -59,7 +70,7 @@ class Grid():
 
     
     def removeEnemy(self, enemy):
-        self.enemys.remove(enemy)
+        self.enemies.remove(enemy)
         if isinstance(self.grid[enemy.position], list):
             self.grid[enemy.position].remove(enemy)
             if len(self.grid[enemy.position]) == 0:
@@ -106,7 +117,7 @@ class Grid():
                         print(' ' * 8, end=' ')  # Leeren Platz lassen
                 print()  # Neue Zeile nach jeder Ebene
             print()  # Zusätzliche neue Zeile nach jeder Zeile im Grid
-
+        
 
     def hasPlants(self):
         for row in self.grid:
