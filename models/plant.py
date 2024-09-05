@@ -3,7 +3,7 @@ import random
 
 class Plant():
 
-    def __init__(self, species, initEnergy, growthRateEnegry, minEnegrgy, reproductionSteps, offspingEnergy, minDist, maxDist, position, grid):
+    def __init__(self, species, initEnergy, growthRateEnegry, minEnegrgy, reproductionSteps, offspingEnergy, minDist, maxDist, position, grid, color):
         self.species = species
         self.initEnergy = initEnergy
         self.currEnergy = initEnergy
@@ -16,6 +16,7 @@ class Plant():
         self.position = position
         self.grid = grid
         self.age = 0
+        self.color = color
 
 
     def grow(self):
@@ -46,7 +47,8 @@ class Plant():
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 
-                                      grid=self.grid
+                                      grid=self.grid,
+                                      color = self.color
                     )
                     self.grid.addPlant(offspring)
                     self.currEnergy -= 10 # Enegrie aufwenden, um Nachkommen zu produzieren!
@@ -78,6 +80,9 @@ class Plant():
             #else:
             #    print('kein Platz!')
             
-        return None   
-    
+        return None 
+
+
+    def getColor(self):
+        print(self.color)
     
