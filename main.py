@@ -3,7 +3,10 @@
 from models.plant import Plant
 from models.enemy import Enemy
 from models.grid import Grid
+
 from controllers.simulation import Simulation
+
+from views.gui import Gui
 
 if __name__ == '__main__':
     grid = Grid(heigth=10, width=10)
@@ -66,3 +69,6 @@ if __name__ == '__main__':
 
     sim = Simulation(grid)
     sim.run()
+
+    #gui = Gui()
+    #gui.mainloop()

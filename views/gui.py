@@ -328,6 +328,6 @@ class Gui:
     def mainloop(self):
         self.window.mainloop()
 
-if __name__ == '__main__':
-    gui = Gui()
-    gui.mainloop()
+#if __name__ == '__main__':
+#    gui = Gui()
+#    gui.mainloop()
