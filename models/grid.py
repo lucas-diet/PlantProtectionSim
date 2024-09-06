@@ -133,9 +133,9 @@ class Grid():
     
     def getNewPosition(self, steps):
         for step in steps:
-            tmpPos = (step[0], step[1])
-            if self.isWithinBounds(tmpPos[0], tmpPos[1]):
-                return tmpPos
+            newPos = (step[0], step[1])
+            if self.isWithinBounds(newPos[0], newPos[1]):
+                return newPos
         return None
 
 
@@ -143,6 +143,7 @@ class Grid():
         # Entferne den Feind von der alten Position
             if isinstance(self.grid[oldPos[0]][oldPos[1]], list):
                 self.grid[oldPos[0]][oldPos[1]].remove(enemy)
+
                 if len(self.grid[oldPos[0]][oldPos[1]]) == 0:
                     self.grid[oldPos[0]][oldPos[1]] = None
             else:
@@ -161,20 +162,28 @@ class Grid():
     def moveEachEnemy(self, moveArr):
         # Bewege jeden Feind
         for enemy, oldPos in moveArr:
-            steps = enemy.move()
-            newPos = oldPos
+            if enemy.stepCounter < enemy.speed - 1:
+                enemy.stepCounter += 1
+                newPos = oldPos
+            else:
+                enemy.stepCounter = 0
+                steps = enemy.move()
+                tmpPos = oldPos
 
-            if steps is None:
-                continue
+                if steps is None:
+                    continue
+                
+                if self.getNewPosition(steps) is not None:
+                    newPos = self.getNewPosition(steps) 
+                else:
+                    newPos = tmpPos
 
-            newPos = self.getNewPosition(steps) or newPos
-
-            if oldPos != newPos:
-                self.updateEnemyPosition(enemy, oldPos, newPos)
-
-                self.displayMove(enemy, oldPos, newPos)
-                self.displayGrid()
-
+                if oldPos != newPos:
+                    self.updateEnemyPosition(enemy, oldPos, newPos)
+                  
+            self.displayMove(enemy, oldPos, newPos)
+            self.displayGrid()
+                
 
     def collectAndMoveEnemies(self):
         # Erstelle eine Liste von Feinden mit ihren Positionen

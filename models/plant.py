@@ -78,7 +78,8 @@ class Plant():
                 return (newX, newY)
 
             #else:
-            #    print('kein Platz!')
+            #    print('kein Platz im Radius!')
+            #    pass
             
         return None 
 

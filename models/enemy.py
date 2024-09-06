@@ -4,12 +4,13 @@ import random
 
 class Enemy():
     
-    def __init__(self, species, num, speed, position, grid):
+    def __init__(self, species, num, speed, position, grid, stepCounter=0):
         self.species = species
         self.num = num
         self.speed = speed
         self.position = position
         self.grid = grid
+        self.stepCounter = stepCounter
 
     def detectPlant(self, grid):
         pos = (0,0)
@@ -27,7 +28,7 @@ class Enemy():
 
     def findShortPath(self, grid, start, goal):
         """_summary_
-            Breadth First Search
+            Breadth First Search / Breitensuche
         Args:
             grid (_type_): _description_
             start (_type_): _description_
@@ -97,14 +98,14 @@ class Enemy():
         path = self.findPlant(start)
         steps = []
         #print(start, path[1:])
-
+        
         if path  == []:
             print('no path. stop simulation\n')
             return None
         
         for i in range(0, len(path)-1):
-            if i + self.speed < len(path) - 1:
-                nextPos = i + self.speed
+            if i + 1 < len(path) - 1:
+                nextPos = i + 1#self.speed
                 steps.append(path[nextPos])  
             else:
                 nextPos = len(path) - 1

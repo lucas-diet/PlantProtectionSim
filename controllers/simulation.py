@@ -46,7 +46,7 @@ class Simulation:
 
     def run(self):
         self.initDisplay()
-
+        count = 1
         while True:
             if self.noPlantsBreak():
                 break
@@ -58,7 +58,9 @@ class Simulation:
                 break
 
             self.runStep()
+            print(count)
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
             self.grid.collectAndMoveEnemies()
             print('#################### \n')
+            count += 1

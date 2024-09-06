@@ -39,12 +39,12 @@ if __name__ == '__main__':
                color = plantColor[1])
     
 
-    e1 = Enemy(species='e1', num=2, speed=2, position=(2,0), grid=grid)
+    e1 = Enemy(species='e1', num=2, speed=7, position=(2,0), grid=grid)
     e2 = Enemy(species='e2', num=2, speed=1, position=(2,0), grid=grid)
     e3 = Enemy(species='e3', num=1, speed=1, position=(0,5), grid=grid)
-    #e4 = Enemie(species='E4', num=1, speed=5, position=(4,1), grid=grid)
-    #e5 = Enemie(species='E5', num=1, speed=5, position=(2,1), grid=grid)
-    #e6 = Enemie(species='E6', num=1, speed=5, position=(4,1), grid=grid)
+    #e4 = Enemie(species='e4', num=1, speed=5, position=(4,1), grid=grid)
+    #e5 = Enemie(species='e5', num=1, speed=5, position=(2,1), grid=grid)
+    #e6 = Enemie(species='e6', num=1, speed=5, position=(4,1), grid=grid)
 
     grid.addPlant(p1)
     grid.addPlant(p2)
