@@ -13,17 +13,16 @@ class Enemy():
 
     def detectPlant(self, grid):
         pos = (0,0)
-        posistions = []
+        positions = []
 
         for i in range(0, len(grid)):
             for j in range(0,len(grid[0])):
                 if grid[i][j] == 'P':
                     pos = (i,j)
-                    posistions.append(pos)
+                    positions.append(pos)
                 else:
                     pass
-        
-        return posistions
+        return positions
     
 
     def findShortPath(self, grid, start, goal):

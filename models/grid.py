@@ -40,7 +40,7 @@ class Grid():
     
 
     def displayGridEnergy(self):
-        print(f'Grid-Enery: {self.getGridEnergy()}')
+        print(f'Grid-Energy: {self.getGridEnergy()}')
 
     
     def getGridEnemyNum(self):

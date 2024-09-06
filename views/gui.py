@@ -5,7 +5,7 @@ from tkinter import filedialog
 
 from views.tooltip import Tooltip
 
-class GUI:
+class Gui:
 
     def __init__(self):
         self.window = tk.Tk()
@@ -329,5 +329,5 @@ class GUI:
         self.window.mainloop()
 
 if __name__ == '__main__':
-    gui = GUI()
+    gui = Gui()
     gui.mainloop()

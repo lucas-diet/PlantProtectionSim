@@ -15,7 +15,7 @@ if __name__ == '__main__':
                initEnergy=200, 
                growthRateEnegry=10, 
                minEnegrgy=50, 
-               reproductionSteps=1, 
+               reproductionSteps=0, 
                offspingEnergy=60, 
                minDist=1, 
                maxDist=2,

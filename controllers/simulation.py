@@ -39,7 +39,7 @@ class Simulation:
     
 
     def upperEnemyNumBreak(self):
-        if self.grid.getGridEnemyNum() > 3:                #TODO: später umschreiben als Parameter
+        if self.grid.getGridEnemyNum() > 10:                #TODO: später umschreiben als Parameter
             print('Upper Border -- Enemies')
             return True
         return False
