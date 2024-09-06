@@ -141,22 +141,22 @@ class Grid():
 
     def updateEnemyPosition(self, enemy, oldPos, newPos):
         # Entferne den Feind von der alten Position
-            if isinstance(self.grid[oldPos[0]][oldPos[1]], list):
-                self.grid[oldPos[0]][oldPos[1]].remove(enemy)
+        if isinstance(self.grid[oldPos[0]][oldPos[1]], list):
+            self.grid[oldPos[0]][oldPos[1]].remove(enemy)
 
-                if len(self.grid[oldPos[0]][oldPos[1]]) == 0:
-                    self.grid[oldPos[0]][oldPos[1]] = None
-            else:
+            if len(self.grid[oldPos[0]][oldPos[1]]) == 0:
                 self.grid[oldPos[0]][oldPos[1]] = None
+        else:
+            self.grid[oldPos[0]][oldPos[1]] = None
 
-            # Füge den Feind zur neuen Position hinzu
-            if isinstance(self.grid[newPos[0]][newPos[1]], list):
-                self.grid[newPos[0]][newPos[1]].append(enemy)
-            else:
-                self.grid[newPos[0]][newPos[1]] = [enemy]
+        # Füge den Feind zur neuen Position hinzu
+        if isinstance(self.grid[newPos[0]][newPos[1]], list):
+            self.grid[newPos[0]][newPos[1]].append(enemy)
+        else:
+            self.grid[newPos[0]][newPos[1]] = [enemy]
 
-            # Aktualisiere die Position des Feindes
-            enemy.position = newPos
+        # Aktualisiere die Position des Feindes
+        enemy.position = newPos
 
 
     def moveEachEnemy(self, moveArr):
@@ -180,7 +180,7 @@ class Grid():
 
                 if oldPos != newPos:
                     self.updateEnemyPosition(enemy, oldPos, newPos)
-                  
+                    
             self.displayMove(enemy, oldPos, newPos)
             self.displayGrid()
                 

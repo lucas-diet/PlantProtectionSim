@@ -58,7 +58,7 @@ class Simulation:
                 break
 
             self.runStep()
-            print(count)
+            print('Simulation-Step:', count)
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
             self.grid.collectAndMoveEnemies()

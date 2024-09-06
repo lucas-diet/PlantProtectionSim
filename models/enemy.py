@@ -26,7 +26,7 @@ class Enemy():
         return positions
     
 
-    def findShortPath(self, grid, start, goal):
+    def findShortestPath(self, grid, start, goal):
         """_summary_
             Breadth First Search / Breitensuche
         Args:
@@ -78,7 +78,7 @@ class Enemy():
             return []
         
         for plant in pPos:
-            path = self.findShortPath(helperGrid, start, plant)
+            path = self.findShortestPath(helperGrid, start, plant)
             if path is not None:
                 pathLength = len(path)
                 if shortestPathLength is None or pathLength < shortestPathLength: # Falls neuer kürzester Pfad gefunden wird, reset der Liste
@@ -104,11 +104,7 @@ class Enemy():
             return None
         
         for i in range(0, len(path)-1):
-            if i + 1 < len(path) - 1:
-                nextPos = i + 1#self.speed
-                steps.append(path[nextPos])  
-            else:
-                nextPos = len(path) - 1
-                steps.append(path[nextPos])
+            nextPos = i + 1 
+            steps.append(path[nextPos])  
         #print(steps)
         return steps

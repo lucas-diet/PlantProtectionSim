@@ -39,7 +39,7 @@ if __name__ == '__main__':
                color = plantColor[1])
     
 
-    e1 = Enemy(species='e1', num=2, speed=7, position=(2,0), grid=grid)
+    e1 = Enemy(species='e1', num=2, speed=3, position=(2,0), grid=grid)
     e2 = Enemy(species='e2', num=2, speed=1, position=(2,0), grid=grid)
     e3 = Enemy(species='e3', num=1, speed=1, position=(0,5), grid=grid)
     #e4 = Enemie(species='e4', num=1, speed=5, position=(4,1), grid=grid)
