@@ -20,16 +20,36 @@ class Plant():
 
 
     def grow(self):
+        """_summary_
+            Lässt die Pflanze wachsen, indem sie ihre Energie erhöht und ihr Alter steigert.
+            Die Methode erhöht die aktuelle Energie ('currEnergy') der Pflanze basierend auf der Wachstumsrate ('growthRateEnegry'),
+            die als Prozentsatz angegeben ist. Außerdem wird das Alter der Pflanze ('age') um 1 Jahr erhöht.
+
+        """
         self.currEnergy += self.currEnergy * (self.growthRateEnegry / 100)
         self.age += 1
 
 
     def survive(self):
+        """_summary_
+            Überprüft, ob die Pflanze überleben kann und entfernt sie andernfalls.
+            Die Methode vergleicht die aktuelle Energie ('currEnergy') der Pflanze mit einem Minimalwert ('minEnergy').
+            Wenn die aktuelle Energie unter dem Minimalwert liegt, wird die Pflanze aus dem Gitter entfernt, indem 'removePlant' aufgerufen wird.
+
+        """
         if self.currEnergy < self.minEnergy:
             self.grid.removePlant(self)
         
 
     def reproduce(self):
+        """_summary_
+            Ermöglicht der Pflanze die Fortpflanzung, wenn die Bedingungen erfüllt sind.
+            Die Methode überprüft, ob die Pflanze gemäß ihrer Fortpflanzungszyklen ('reproductionSteps') zur Fortpflanzung bereit ist.
+            Falls die Pflanze das Fortpflanzungsalter erreicht hat, erzeugt sie eine zufällige Anzahl von Nachkommen (zwischen 1 und 4).
+            Jeder Nachkomme wird an einer neu bestimmten Position ('offspringPosition') im Gitter erstellt und zur Gitterstruktur hinzugefügt.
+            Die Energie der Pflanze wird um 10 reduziert, um die Fortpflanzung zu unterstützen.
+
+        """
         if self.reproductionSteps == 0:
             pass
 
@@ -56,13 +76,14 @@ class Plant():
 
     def setOffspringPos(self):
         """_summary_
-            Erstellt eine Liste, die alle möglichen Richtungen innerhalb einer Distanz um einen 
-            Punkt herum darstellt und mischt diese dann zufällig und prüft dann nacheinander, 
-            ob eine gültige Position innerhalb der vorgegebenen Distanz auf einem Gitter 
-            gefunden werden kann. Wenn eine gültige Position gefunden wird, wird diese zurückgegeben. 
-            Ansonsten gibt die Funktion None zurück.
+            Bestimmt eine gültige Position für einen Nachkommen innerhalb eines definierten Radius.
+            Die Methode erstellt eine Liste aller möglichen Richtungen innerhalb eines Kreises um die aktuelle Position
+            mit einer maximalen Distanz ('maxDist') und mischt diese zufällig. Anschließend wird jede Richtung geprüft, um
+            eine neue Position zu finden, die innerhalb der Gittergrenzen liegt und nicht bereits besetzt ist.
+            Falls eine gültige Position gefunden wird, wird diese zurückgegeben. Andernfalls wird 'None' zurückgegeben.
+
         Returns:
-            - None
+            tuple[int, int] | None: Die neue Position für den Nachkommen als Koordinatenpaar oder 'None', wenn keine gültige Position gefunden wurde.
         """
         directions = [(dx, dy) for dx in range(-self.maxDist, self.maxDist+1)
                       for dy in range(-self.maxDist, self.maxDist+1)

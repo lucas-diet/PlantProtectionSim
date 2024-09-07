@@ -2,6 +2,8 @@
 from collections import deque
 import random
 
+from models.plant import Plant
+
 class Enemy():
     
     def __init__(self, species, num, speed, position, grid, stepCounter=0):
@@ -13,6 +15,18 @@ class Enemy():
         self.stepCounter = stepCounter
 
     def detectPlant(self, grid):
+        """_summary_
+            Ermittelt die Positionen von Pflanzen im Grid.
+            Die Methode durchsucht das übergebene Gitter `grid` nach Zellen, die durch 'P' 
+            repräsentiert werden, und sammelt deren Positionen in einer Liste 'positions'.
+            Diese Liste wird anschließend zurückgegeben.
+
+        Args:
+            grid (_type_): _description_
+
+        Returns:
+            Liste: Liste von Positionen, woe Pflanzen stehen
+        """
         pos = (0,0)
         positions = []
 
@@ -28,14 +42,20 @@ class Enemy():
 
     def findShortestPath(self, grid, start, goal):
         """_summary_
-            Breadth First Search / Breitensuche
+            Finde den kürzesten Pfad zwischen zwei Punkten im Gitter mittels Breitensuche (BFS).
+            Die Methode verwendet die Breitensuche, um den kürzesten Weg von 'start' nach 'goal' im übergebenen 'grid' zu ermitteln.
+            Sie durchläuft die Nachbarzellen in den vier Hauptrichtungen (oben, unten, links, rechts) und verfolgt die bisher gefundenen Wege,
+            um den kürzesten Pfad zu bestimmen. Der Pfad wird als Liste von Koordinaten zurückgegeben. 
+            Wenn kein Pfad gefunden wird, wird 'None' zurückgegeben.
+
         Args:
-            grid (_type_): _description_
-            start (_type_): _description_
-            goal (_type_): _description_
+             grid (list[list]): Das Gitter, in dem der Pfad gefunden werden soll.
+                start (tuple[int, int]): Die Startposition im Gitter.
+                goal (tuple[int, int]): Die Zielposition im Gitter.
+
 
         Returns:
-            _type_: _description_
+            list[tuple[int, int]] | None: Eine Liste von Koordinaten, die den kürzesten Pfad darstellen, oder 'None', wenn kein Pfad gefunden wurde.
         """
         rows, cols = len(grid), len(grid[0])
         directions = [(-1,0), (1,0), (0,-1), (0,1)] # Bewegungsmöglichkeiten: Oben, Unten, Links, Rechts
@@ -68,6 +88,19 @@ class Enemy():
     
     
     def findPlant(self, start):
+        """_summary_
+            Findet den kürzesten Pfad zu einer Pflanze im Grid, beginnend von einer Startposition.
+            Die Methode durchsucht das Gitter nach Pflanzen, berechnet den kürzesten Pfad von 'start' zu jeder Pflanze
+            mithilfe der Funktion 'findShortestPath' und sammelt alle Pfade mit der minimalen Länge. 
+            Falls mehrere Pfade der gleichen kürzesten Länge existieren, wird zufällig einer ausgewählt und zurückgegeben.
+            Wenn keine Pflanzen im Gitter gefunden werden, wird eine leere Liste zurückgegeben.
+
+        Args:
+            start (tuple[int, int]): Die Startposition im Grid.
+
+        Returns:
+            list[tuple[int, int]] | None: Der kürzeste Pfad zu einer Pflanze als Liste von Koordinaten oder 'None'
+        """
         helperGrid = self.grid.helperGrid()
         pPos = self.detectPlant(helperGrid)
         shortestPaths = [] # Liste mit allen kürzesten Pfaden mit der gleichen Länge
@@ -91,9 +124,18 @@ class Enemy():
             return random.choice(shortestPaths) # Wähle einen zufälligen kürzesten Pfad aus der Liste
         else:
             return None
-        
     
+
     def move(self):
+        """_summary_
+            Bestimmt die Schritte, um von der aktuellen Position zur nächsten Pflanze zu gelangen.
+            Die Methode berechnet den kürzesten Pfad von der aktuellen Position ('self.position') zu einer Pflanze
+            mithilfe der Methode 'findPlant'. Anschließend erstellt sie eine Liste von Schritten, die zur Pflanze führen,
+            indem sie die aufeinanderfolgenden Positionen im Pfad durchläuft. Wenn kein Pfad gefunden wird, wird `None` zurückgegeben.
+
+        Returns:
+           list[tuple[int, int]] | None: Eine Liste von Positionen, die die Schritte zur Pflanze darstellen, oder 'None', wenn kein Pfad gefunden wurde.
+        """
         start = self.position
         path = self.findPlant(start)
         steps = []
