@@ -283,7 +283,6 @@ class Grid():
         auf Grundlage der gesammelten Daten zu bewegen.
         """
         enemies_to_move = []
-        plant_to_eat = []
 
         # Durchlaufe jede Zelle im Gitter
         for i, row in enumerate(self.grid):
@@ -292,8 +291,6 @@ class Grid():
                     for obj in cell:
                         if isinstance(obj, Enemy):
                             enemies_to_move.append((obj, (i, j)))
-                        elif isinstance(obj, Plant):
-                            plant_to_eat.append((obj, (i, j)))
                 elif isinstance(cell, Enemy):  # Einzelnes Enemy-Objekt in der Zelle
                     enemies_to_move.append((cell, (i, j)))
 
