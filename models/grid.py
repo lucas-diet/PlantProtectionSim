@@ -186,7 +186,7 @@ class Grid():
             oldPos: Tupel (x,y) -> alte Position
             newPos: Tupel (x,y) -> neue Position
         """
-        print(f'{enemy.species} moved from {oldPos} to {newPos}\n')
+        print(f'{enemy.species} moved from {oldPos} to {newPos}')
 
     
     def getNewPosition(self, steps):
@@ -262,13 +262,16 @@ class Grid():
             # Aktualisiere die Position des Feindes im Grid
             if oldPos != newPos:
                 self.updateEnemyPosition(enemy, oldPos, newPos)
-
-            if oldPos == newPos:
-                enemy.eatPlant(enemy, oldPos, newPos)
                 
             # Zeige die Bewegung des Feindes an und aktualisiere das Grid
             self.displayMove(enemy, oldPos, newPos)
+
+            if oldPos == newPos:                                #TODO: Gesamt-Engerieeinheiten werden noch nicht angepasst, bei entfernen einer Pflanze 
+                enemy.eatPlant(enemy, oldPos, newPos)
+
             self.displayGrid()
+
+            
 
     
     def collectAndMoveEnemies(self):

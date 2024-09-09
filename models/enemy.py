@@ -159,5 +159,5 @@ class Enemy():
         if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
             grid[pPos[0]][pPos[1]].pop(0)
             
-        print(f'{enemy.species} at {ePos} eat plant at {enemy.position}')
+        print(f'{enemy.species} at {ePos} eat plant at {enemy.position}\n')
         
