@@ -32,15 +32,16 @@ class Enemy():
 
         for i in range(0, len(grid)):
             for j in range(0,len(grid[0])):
-                if grid[i][j] == 'P':
+                if 'P' in grid[i][j]:
                     pos = (i,j)
                     positions.append(pos)
                 else:
                     pass
+        #print(positions)
         return positions
     
 
-    def findShortestPath(self, grid, start, goal):
+    def findShortestPath(self, start, goal):
         """_summary_
             Finde den kürzesten Pfad zwischen zwei Punkten im Gitter mittels Breitensuche (BFS).
             Die Methode verwendet die Breitensuche, um den kürzesten Weg von 'start' nach 'goal' im übergebenen 'grid' zu ermitteln.
@@ -57,6 +58,7 @@ class Enemy():
         Returns:
             list[tuple[int, int]] | None: Eine Liste von Koordinaten, die den kürzesten Pfad darstellen, oder 'None', wenn kein Pfad gefunden wurde.
         """
+        grid = self.grid.getGrid()
         rows, cols = len(grid), len(grid[0])
         directions = [(-1,0), (1,0), (0,-1), (0,1)] # Bewegungsmöglichkeiten: Oben, Unten, Links, Rechts
 
@@ -87,7 +89,7 @@ class Enemy():
         return None
     
     
-    def findPlant(self, start):
+    def choosePlant(self, start):
         """_summary_
             Findet den kürzesten Pfad zu einer Pflanze im Grid, beginnend von einer Startposition.
             Die Methode durchsucht das Gitter nach Pflanzen, berechnet den kürzesten Pfad von 'start' zu jeder Pflanze
@@ -105,13 +107,13 @@ class Enemy():
         pPos = self.detectPlant(helperGrid)
         shortestPaths = [] # Liste mit allen kürzesten Pfaden mit der gleichen Länge
         shortestPathLength = None
-
+        
         if len(pPos) == 0:
             print('no plant. stop simulation')
             return []
         
         for plant in pPos:
-            path = self.findShortestPath(helperGrid, start, plant)
+            path = self.findShortestPath(start, plant)
             if path is not None:
                 pathLength = len(path)
                 if shortestPathLength is None or pathLength < shortestPathLength: # Falls neuer kürzester Pfad gefunden wird, reset der Liste
@@ -137,7 +139,7 @@ class Enemy():
            list[tuple[int, int]] | None: Eine Liste von Positionen, die die Schritte zur Pflanze darstellen, oder 'None', wenn kein Pfad gefunden wurde.
         """
         start = self.position
-        path = self.findPlant(start)
+        path = self.choosePlant(start)
         steps = []
         #print(start, path[1:])
         
@@ -147,6 +149,15 @@ class Enemy():
         
         for i in range(0, len(path)-1):
             nextPos = i + 1 
-            steps.append(path[nextPos])  
+            steps.append(path[nextPos])
+
         #print(steps)
         return steps
+    
+    def eatPlant(self, enemy, ePos, pPos):
+        grid = self.grid.getGrid()
+        if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
+            grid[pPos[0]][pPos[1]].pop(0)
+            
+        print(f'{enemy.species} at {ePos} eat plant at {enemy.position}')
+        

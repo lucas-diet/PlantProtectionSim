@@ -4,70 +4,43 @@ import numpy as np
 from models.plant import Plant
 from models.enemy import Enemy
 
+
 class Grid():
 
-    def __init__(self, heigth, width):
-        self.heigth = heigth
+    def __init__(self, height, width):
+        self.height = height
         self.width = width
         self.plants = []
         self.enemies = []
-        self.grid = np.full((heigth, width), None) 
-       
+        self.grid = [[[] for _ in range(width)] for _ in range(height)]
+
+
+    def getGrid(self):
+        return self.grid 
     
+
     def addPlant(self, plant):
-        """_summary_
-            Fügt eine Pflanze zur Pflanzenliste und Grid hinzu.
-            Die Methode speichert die Pflanze in der Liste 'plants' und platziert sie
-            an der durch 'plant.position' bestimmten Position im Gitter 'grid'.
-        Args:
-            plant: Objekt der Klasse Plant 
-        """
+        pos = plant.position
+
         self.plants.append(plant)
-        self.grid[plant.position] = plant
+        self.grid[pos[0]][pos[1]].append(plant)
 
     
     def removePlant(self, plant):
-        """_summary_
-            Entfernt eine Pflanze aus der Pflanzenliste und dem Grid.
-            Die Methode löscht die Pflanze aus der Liste 'plants' und setzt die 
-            Position im Gitter 'grid', die durch 'plant.position' bestimmt ist, auf 'None'.
+        pos = plant.position
 
-        Args:
-            plant: Objekt der Klasse Plant 
-        """
         self.plants.remove(plant)
-        self.grid[plant.position] = None
+        self.grid[pos[0]][pos[1]].remove(plant)
 
-
+    
     def isOccupied(self, position):
-        """_summary_
-            Überprüft, ob eine bestimmte Position im Grid belegt ist.
-            Die Methode gibt 'True' zurück, wenn die angegebene 'position' im Grid belegt ist,
-            d. h. wenn dort ein Objekt (z. B. eine Pflanze) vorhanden ist; ansonsten 'False'.
-
-        Args:
-            position (Tuple): Ein Tupple (x,y), das aus zwei Zahlen besthet
-
-        Returns:
-            _type_: _description_
-        """
-        return self.grid[position] is not None
-
+        if len(self.grid[position[0]][position[1]]) == 0:
+            return False
+        return True
+    
 
     def isWithinBounds(self, x, y):
-        """_summary_
-            Überprüft, ob die gegebenen Koordinaten (x, y) innerhalb der Gittergrenzen liegen.
-            Die Methode gibt 'True' zurück, wenn die x- und y-Koordinaten innerhalb der Höhe ('heigth') 
-            und Breite ('width') des Gitters liegen; ansonsten 'False'.
-
-        Args:
-            x (int): x-Koordiante
-            y (int): y-Koordiante
-
-        Returns:
-            _type_: _description_
-        """
-        return 0 <= x < self.heigth and 0 <= y < self.width
+        return 0 <= x < self.height and 0 <= y < self.width
     
 
     def getGridEnergy(self):
@@ -119,7 +92,7 @@ class Grid():
         """
         print(f'Enemy-Number: {self.getGridEnemyNum()}')
 
-
+    
     def connectPlants(self, pos1, pos2):
         plant1 = self.grid[pos1]
         plant2 = self.grid[pos2]
@@ -128,125 +101,79 @@ class Grid():
 
 
     def addEnemy(self, enemy):
-        """_summary_
-            Fügt einen Feind zur Feindesliste und zum Grid hinzu.
-            Die Methode speichert den Feind in der Liste 'enemies' und platziert ihn
-            an der durch 'enemy.position' bestimmten Position im Grid. Falls an
-            dieser Position bereits eine Liste von Feinden vorhanden ist, wird der neue Feind
-            zur Liste hinzugefügt; andernfalls wird eine neue Liste erstellt und der Feind wird
-            darin gespeichert.
+        pos = enemy.position
 
-        Args:
-            enemy: Objekt vom Typ Enemy
-        """
         self.enemies.append(enemy)
-        if isinstance(self.grid[enemy.position], list):
-            self.grid[enemy.position].append(enemy)
-        else:
-            self.grid[enemy.position] = [enemy]
-
+        self.grid[pos[0]][pos[1]].append(enemy)
 
     
     def removeEnemy(self, enemy):
-        """_summary_
-            Entfernt einen Feind aus der Feindesliste und dem Grid.
-            Die Methode löscht den Feind aus der Liste 'enemies' und entfernt ihn von der
-            Position Grid, die durch 'enemy.position' bestimmt ist. Falls an dieser
-            Position eine Liste von Feinden vorhanden ist, wird der Feind daraus entfernt. Wenn
-            nach dem Entfernen keine weiteren Feinde an dieser Position verbleiben, wird die
-            Position im Gitter auf 'None' gesetzt.
-        Args:
-            enemy: Objekt vom Typ Enemy
-        """
+        pos = enemy.position
+
         self.enemies.remove(enemy)
-        if isinstance(self.grid[enemy.position], list):
-            self.grid[enemy.position].remove(enemy)
-            if len(self.grid[enemy.position]) == 0:
-                self.grid[enemy.position] = None
+        self.grid[pos[0]][pos[1]].remove(enemy)
 
-
-
+    
     def helperGrid(self):
-        """_summary_
-            Erzeugt eine textuelle Darstellung des Gitters.
-            Die Methode erstellt eine 2D-Liste ('hGrid'), die das Grid in eine leicht verständliche Form umwandelt.
-            Jede Position im `hGrid` wird wie folgt dargestellt:
-            - 'E', wenn an der Position eine Liste von Feinden vorhanden ist,
-            - 'P', wenn eine Pflanze vorhanden ist,
-            - '*', wenn die Position leer ist.
-            Die Methode gibt die erzeugte 2D-Liste zurück.
-
-        Returns:
-            hGrid (Liste): 
-        """
         grid = self.grid
         hGrid = []
-        
+
         for i in range(0, len(grid)):
             row = []
             for j in range(0, len(grid[0])):
-                if grid[i][j] is not None:
-                    if isinstance(grid[i][j], list) and any(isinstance(e, Enemy) for e in grid[i][j]):
+                if len(grid[i][j]) > 0:
+                    plantObj = any(isinstance(item, Plant) for item in grid[i][j])
+                    enemyObj = any(isinstance(item, Enemy) for item in grid[i][j])
+                    if plantObj and enemyObj:
+                        row.append('PE')
+                    elif plantObj:
+                        row.append('P')
+                    elif enemyObj:
                         row.append('E')
-                    elif isinstance(grid[i][j], Plant):
-                        row.append('P')                
                 else:
-                    row.append('*')
+                    row.append('#')
             hGrid.append(row)
+        
         return hGrid
-
     
 
     def displayGrid(self):
-        """_summary_
-            Gibt das Grid in einem strukturierten Layout aus.
-            Die Methode bestimmt zunächst die maximale Anzahl an Feinden, die in einem Feld platziert
-            sein können, um das Layout zu gestalten. Dann wird das Gitter zeilenweise durchlaufen und
-            auf verschiedenen Ebenen angezeigt. Für jede Zelle im Grid wird Folgendes angezeigt:
-            - Feinde werden als 'species-#num' dargestellt, wobei 'species' und 'num' Eigenschaften des Feindes sind.
-            - Pflanzen werden auf der ersten Ebene durch den Prozentsatz ihrer aktuellen Energie ('currEnergy' im Vergleich zur Initialenergie 'initEnergy') dargestellt.
-            - Leere Zellen werden durch '------' oder Leerzeichen repräsentiert.
-            Die Methode sorgt für eine klare und strukturierte Ausgabe, wobei jede Ebene und Zeile korrekt formatiert wird.
+        # Hilfsfunktion, um den Inhalt einer Zelle als mehrzeilige Darstellung zu generieren
+        def format_cell(cell):
+            lines = []
+            for obj in cell:
+                if isinstance(obj, Plant):
+                    lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
+                elif isinstance(obj, Enemy):
+                    lines.append(f'{obj.species}-#{obj.num}')
+            return lines if lines else ['------']  # Leeres Feld
 
-        """
-        # Bestimme die maximale Anzahl an Feinden in einem Feld für das Layout
-        max_enemies_in_cell = max(len(cell) if isinstance(cell, list) else 1 for row in self.grid for cell in row)     
-        
-        for row in self.grid:
-            for level in range(max_enemies_in_cell):
+        # Alle Zellen vorbereiten, jede Zelle wird zu einer Liste von Zeilen
+        formatted_grid = [list(map(format_cell, row)) for row in self.grid]
+
+        # Bestimme die maximale Anzahl der Zeilen in jeder Spalte, um Zeilen korrekt auszurichten
+        max_lines_per_row = [max(len(cell) for cell in row) for row in formatted_grid]
+
+        # Drucke jede Zeile des Gitters
+        for row_idx, row in enumerate(formatted_grid):
+            for line_idx in range(max_lines_per_row[row_idx]):
                 for cell in row:
-                    if isinstance(cell, list):
-                        if level < len(cell):
-                            enemy = cell[level]
-                            print(f'{enemy.species}-#{enemy.num} ', end='  ')
-                        else:
-                            print(' ' * 8, end=' ')  # Leeren Platz lassen, wenn kein Feind auf dieser Ebene
-                    elif isinstance(cell, Plant) and level == 0:
-                        # Pflanzen nur auf der ersten Ebene darstellen
-                        print(f'{(cell.currEnergy / cell.initEnergy) * 100:.1f}%', end='  ')
-                    elif cell is None and level == 0:
-                        print('------ ', end=' ')
+                    # Wenn die Zelle nicht genügend Zeilen hat, füllen wir mit Leerzeichen auf
+                    if line_idx < len(cell):
+                        print(f'{cell[line_idx]:<10}', end='  ')  # Links ausgerichtet mit fester Breite
                     else:
-                        print(' ' * 8, end=' ')  # Leeren Platz lassen
-                print()  # Neue Zeile nach jeder Ebene
-            print()  # Zusätzliche neue Zeile nach jeder Zeile im Grid
-
-
-    def hasPlants(self):
-        """_summary_
-            Überprüft, ob sich mindestens eine Pflanze im Grid befindet.
-            Die Methode durchsucht das gesamte Grid und gibt 'True' zurück, wenn mindestens eine
-            Zelle eine Pflanze ('Plant') enthält. Andernfalls wird 'False' zurückgegeben.
-
-        Returns:
-            _type_: _description_
-        """
-        for row in self.grid:
-            for plant in row:
-                if isinstance(plant, Plant):
-                    return True  # Eine Pflanze gefunden, also gibt es noch Pflanzen
-        return False
+                        print(f'{'':<10}', end='  ')  # Leerzeilen auffüllen
+                print()  # Neue Zeile nach jeder Zeile im Grid
+            print()
+        print('#################### \n')
     
+    def hasPlants(self):
+        for row in self.grid:
+            for cell in row:
+                if any(isinstance(item, Plant) for item in cell):
+                    return True
+        return False
+                    
     
     def displayMove(self, enemy, oldPos, newPos):
         """_summary_
@@ -283,102 +210,89 @@ class Grid():
 
 
     def updateEnemyPosition(self, enemy, oldPos, newPos):
-        """_summary_
-            Aktualisiert die Position eines Feindes im Grid.
-            Die Methode entfernt den Feind von seiner alten Position im Grid und fügt ihn
-            an der neuen Position hinzu. Falls an der alten Position mehrere Feinde vorhanden sind,
-            wird der Feind aus der Liste entfernt; ist die Liste nach der Entfernung leer, wird die
-            Position auf 'None' gesetzt. An der neuen Position wird der Feind zur Liste hinzugefügt,
-            oder es wird eine neue Liste erstellt, falls dort noch keine Feinde vorhanden sind.
-            Abschließend wird die Position des Feindes auf die neue Position aktualisiert.
-
-        Args:
-            enemy: Objekt der Klasse Enemy
-            oldPos: Tupel (x,y) -> alte Position
-            newPos: Tupel (x,y) -> neue Position
+        """Aktualisiert die Position eines Feindes im Grid.
+        
+        Entfernt den Feind von seiner alten Position und fügt ihn an die neue Position hinzu.
         """
-        # Entferne den Feind von der alten Position
-        if isinstance(self.grid[oldPos[0]][oldPos[1]], list):
+        # Entferne den Feind von der alten Position, falls er dort ist
+        if enemy in self.grid[oldPos[0]][oldPos[1]]:
             self.grid[oldPos[0]][oldPos[1]].remove(enemy)
 
-            if len(self.grid[oldPos[0]][oldPos[1]]) == 0:
-                self.grid[oldPos[0]][oldPos[1]] = None
-        else:
-            self.grid[oldPos[0]][oldPos[1]] = None
-
-        # Füge den Feind zur neuen Position hinzu
-        if isinstance(self.grid[newPos[0]][newPos[1]], list):
-            self.grid[newPos[0]][newPos[1]].append(enemy)
-        else:
-            self.grid[newPos[0]][newPos[1]] = [enemy]
+        # Füge den Feind an der neuen Position hinzu
+        self.grid[newPos[0]][newPos[1]].append(enemy)
 
         # Aktualisiere die Position des Feindes
         enemy.position = newPos
 
 
     def moveEachEnemy(self, moveArr):
-        """_summary_
-            Bewegt jeden Feind entsprechend den angegebenen Bewegungsanweisungen.
-            Die Methode durchläuft das Array 'moveArr', das Paare aus Feind und alter Position enthält.
-            Für jeden Feind wird überprüft, ob seine 'stepCounter'-Variable den Wert 'speed - 1' erreicht hat.
-            Wenn dies nicht der Fall ist, wird der 'stepCounter' erhöht und die Position bleibt unverändert.
-            Andernfalls wird 'stepCounter' zurückgesetzt, und der Feind bewegt sich entsprechend den Schritten, die von 'enemy.move()' zurückgegeben werden.
-            Die neue Position wird durch 'getNewPosition' ermittelt. Falls die neue Position gültig ist, wird die Funktion 'updateEnemyPosition' aufgerufen, um den Feind an die neue Position zu verschieben.
-            Die Methode gibt die Bewegung des Feindes durch 'displayMove' aus und zeigt das aktualisierte Gitter mit `displayGrid` an.
+        """Bewegt jeden Feind entsprechend den angegebenen Bewegungsanweisungen.
+        
+        Die Methode durchläuft das Array 'moveArr', das Paare aus Feind und alter Position enthält.
+        Für jeden Feind wird überprüft, ob seine 'stepCounter'-Variable den Wert 'speed - 1' erreicht hat.
+        Wenn dies nicht der Fall ist, wird der 'stepCounter' erhöht und die Position bleibt unverändert.
+        Andernfalls wird der 'stepCounter' zurückgesetzt, und der Feind bewegt sich entsprechend den Schritten, die von 'enemy.move()' zurückgegeben werden.
+        Die neue Position wird durch 'getNewPosition' ermittelt. Falls die neue Position gültig ist, wird die Funktion 'updateEnemyPosition' aufgerufen, um den Feind an die neue Position zu verschieben.
+        Die Methode gibt die Bewegung des Feindes durch 'displayMove' aus und zeigt das aktualisierte Gitter mit `displayGrid` an.
 
         Args:
-            moveArr (Liste): Array mit Tupel (x,y), die diBwewegungsroute repräsentiert
+            moveArr (Liste): Array mit Tupel (x,y), die die Bewegungsroute repräsentieren.
         """
-        # Bewege jeden Feind
         for enemy, oldPos in moveArr:
-            if not isinstance(enemy,Enemy):
+            if not isinstance(enemy, Enemy):
                 continue
+            
+            # Überprüfen, ob der Schrittzähler die Geschwindigkeit erreicht hat
             if enemy.stepCounter < enemy.speed - 1:
                 enemy.stepCounter += 1
-                newPos = oldPos
-            else:
-                enemy.stepCounter = 0
-                steps = enemy.move()
-                tmpPos = oldPos
+                continue  # Bewege den Feind nicht, da der Schrittzähler noch nicht die Geschwindigkeit erreicht hat
+            
+            # Reset Schrittzähler und erhalte die nächsten Schritte des Feindes
+            enemy.stepCounter = 0
+            steps = enemy.move()
+            
+            if steps is None:
+                continue
+            
+            # Bestimme die neue Position
+            newPos = self.getNewPosition(steps)
+            if newPos is None:
+                newPos = oldPos  # Wenn keine gültige Position gefunden wird, bleibe an der alten Position
 
-                if steps is None:
-                    continue
+            # Aktualisiere die Position des Feindes im Grid
+            if oldPos != newPos:
+                self.updateEnemyPosition(enemy, oldPos, newPos)
+
+            if oldPos == newPos:
+                enemy.eatPlant(enemy, oldPos, newPos)
                 
-                if self.getNewPosition(steps) is not None:
-                    newPos = self.getNewPosition(steps) 
-                else:
-                    newPos = tmpPos
-
-                if oldPos != newPos:
-                    self.updateEnemyPosition(enemy, oldPos, newPos)
-
+            # Zeige die Bewegung des Feindes an und aktualisiere das Grid
             self.displayMove(enemy, oldPos, newPos)
             self.displayGrid()
-                
 
+    
     def collectAndMoveEnemies(self):
-        """_summary_
-            Sammelt alle Feinde im Gitter und bewegt sie.
-            Die Methode erstellt eine Liste 'enemies_to_move', die Paare aus Feinden und deren Positionen enthält.
-            Dabei werden alle Feinde aus Zellen, die Listen von Feinden enthalten, sowie einzelne Feinde
-            in Zellen durchlaufen. Anschließend wird die Methode 'moveEachEnemy' aufgerufen, um die Feinde
-            auf Grundlage der gesammelten Daten zu bewegen.
+        """Sammelt alle Feinde im Gitter und bewegt sie.
 
+        Die Methode erstellt eine Liste 'enemies_to_move', die Paare aus Feinden und deren Positionen enthält.
+        Dabei werden alle Feinde aus Zellen, die Listen von Feinden enthalten, sowie einzelne Feinde
+        in Zellen durchlaufen. Anschließend wird die Methode 'moveEachEnemy' aufgerufen, um die Feinde
+        auf Grundlage der gesammelten Daten zu bewegen.
         """
-        # Erstelle eine Liste von Feinden mit ihren Positionen
         enemies_to_move = []
+        plant_to_eat = []
 
+        # Durchlaufe jede Zelle im Gitter
         for i, row in enumerate(self.grid):
             for j, cell in enumerate(row):
-                if isinstance(cell, list):
-                    for enemy in cell:
-                        enemies_to_move.append((enemy, (i, j)))
-                elif isinstance(cell, Enemy):
+                if isinstance(cell, list):  # Zelle enthält eine Liste von Objekten
+                    for obj in cell:
+                        if isinstance(obj, Enemy):
+                            enemies_to_move.append((obj, (i, j)))
+                        elif isinstance(obj, Plant):
+                            plant_to_eat.append((obj, (i, j)))
+                elif isinstance(cell, Enemy):  # Einzelnes Enemy-Objekt in der Zelle
                     enemies_to_move.append((cell, (i, j)))
 
+        # Bewege alle gesammelten Feinde
         self.moveEachEnemy(enemies_to_move)
-                
-                                        
-
-                    
-                    

@@ -54,7 +54,7 @@ class Plant():
             pass
 
         elif self.age % self.reproductionSteps == 0:
-            for _ in range(random.randint(1, 4)):       ## Zufall zwischen 1 und 5
+            for _ in range(random.randint(1, 4)):       ## Zufall zwischen 1 und 4              # Wie viele Kinder soll es max geben?
                 offspringPosition = self.setOffspringPos()
                 
                 if offspringPosition:
@@ -63,7 +63,7 @@ class Plant():
                                       growthRateEnegry=self.growthRateEnegry, 
                                       minEnegrgy=self.minEnergy, 
                                       reproductionSteps=self.reproductionSteps, 
-                                      offspingEnergy=self.offspringEnergy, 
+                                      offspingEnergy=self.offspringEnergy,                  #TODO: Via Input, damit jeweils individuell ist
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 
@@ -107,4 +107,5 @@ class Plant():
 
     def getColor(self):
         print(self.color)
+        return self.color
     

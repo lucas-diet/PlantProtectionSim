@@ -35,7 +35,6 @@ class Simulation:
         self.grid.displayEnemyNum()
         print()
         self.grid.displayGrid()
-        print('#################### \n')
 
 
     def noPlantsBreak(self):
@@ -99,5 +98,5 @@ class Simulation:
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
             self.grid.collectAndMoveEnemies()
-            print('#################### \n')
+            
             count += 1
