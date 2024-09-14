@@ -3,8 +3,8 @@ import random
 
 class Plant():
 
-    def __init__(self, species, initEnergy, growthRateEnegry, minEnegrgy, reproductionSteps, offspingEnergy, minDist, maxDist, position, grid, color):
-        self.species = species
+    def __init__(self, name, initEnergy, growthRateEnegry, minEnegrgy, reproductionSteps, offspingEnergy, minDist, maxDist, position, grid, color):
+        self.name = name
         self.initEnergy = initEnergy
         self.currEnergy = initEnergy
         self.growthRateEnegry = growthRateEnegry
@@ -58,7 +58,7 @@ class Plant():
                 offspringPosition = self.setOffspringPos()
                 
                 if offspringPosition:
-                    offspring = Plant(species=self.species, 
+                    offspring = Plant(name=self.name, 
                                       initEnergy=self.offspringEnergy, 
                                       growthRateEnegry=self.growthRateEnegry, 
                                       minEnegrgy=self.minEnergy, 
@@ -95,7 +95,7 @@ class Plant():
             newX, newY = self.position[0] + dx, self.position[1] + dy
 
             if self.grid.isWithinBounds(newX, newY) and not self.grid.isOccupied((newX, newY)):
-                print(f'{self.species} auf {self.position} erzeugt Nachkommen ')
+                print(f'{self.name} auf {self.position} erzeugt Nachkommen ')
                 return (newX, newY)
 
             #else:

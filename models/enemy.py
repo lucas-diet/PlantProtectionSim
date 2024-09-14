@@ -6,8 +6,8 @@ from models.plant import Plant
 
 class Enemy():
     
-    def __init__(self, species, num, speed, position, grid, stepCounter=0):
-        self.species = species
+    def __init__(self, name, num, speed, position, grid, stepCounter=0):
+        self.name = name
         self.num = num
         self.speed = speed
         self.position = position
@@ -159,5 +159,5 @@ class Enemy():
         if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
             grid[pPos[0]][pPos[1]].pop(0)
             
-        print(f'{enemy.species} at {ePos} eat plant at {enemy.position}\n')
+        print(f'{enemy.name} at {ePos} eat plant at {enemy.position}\n')
         

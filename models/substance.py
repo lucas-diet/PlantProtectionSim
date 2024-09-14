@@ -2,10 +2,10 @@
 
 class Substance:
 
-    def __init__(self, name, type, plantSpecies):
+    def __init__(self, name, type, plantName):
         self.name = name
         self.type = type
-        self.plantSpecies = plantSpecies
+        self.plantName = plantName
 
     
     def setName(self, name):
