@@ -1,6 +1,6 @@
 
 from models.plant import Plant
-from models.enemy import Enemy
+from models.enemyCluster import EnemyCluster
 from models.grid import Grid
 
 from controllers.simulation import Simulation
@@ -17,7 +17,7 @@ if __name__ == '__main__':
                initEnergy=200, 
                growthRateEnegry=10, 
                minEnegrgy=50, 
-               reproductionSteps=0, 
+               reproductionIntervall=0, 
                offspingEnergy=60, 
                minDist=1, 
                maxDist=2,
@@ -26,10 +26,10 @@ if __name__ == '__main__':
                color=plantColor[0])
     
     p2 = Plant(name='p2', 
-               initEnergy=100, 
+               initEnergy=100,
                growthRateEnegry=5,
                minEnegrgy=50, 
-               reproductionSteps=0, 
+               reproductionIntervall=0, 
                offspingEnergy=60, 
                minDist=1, 
                maxDist=2, 
@@ -38,9 +38,9 @@ if __name__ == '__main__':
                color = plantColor[1])
     
 
-    e1 = Enemy(name='e1', num=2, speed=3, position=(2,0), grid=grid)
-    e2 = Enemy(name='e2', num=2, speed=1, position=(0,3), grid=grid)
-    e3 = Enemy(name='e3', num=1, speed=1, position=(2,0), grid=grid)
+    e1 = EnemyCluster(name='e1', num=2, speed=3, position=(2,0), grid=grid)
+    e2 = EnemyCluster(name='e2', num=2, speed=1, position=(0,3), grid=grid)
+    e3 = EnemyCluster(name='e3', num=1, speed=1, position=(2,0), grid=grid)
     #e4 = Enemie(name='e4', num=1, speed=5, position=(4,1), grid=grid)
     #e5 = Enemie(name='e5', num=1, speed=5, position=(2,1), grid=grid)
     #e6 = Enemie(name='e6', num=1, speed=5, position=(4,1), grid=grid)
@@ -48,9 +48,9 @@ if __name__ == '__main__':
     grid.addPlant(p1)
     grid.addPlant(p2)
 
-    grid.addEnemy(e1)
-    grid.addEnemy(e2)
-    grid.addEnemy(e3)
+    grid.addEnemyCluster(e1)
+    grid.addEnemyCluster(e2)
+    grid.addEnemyCluster(e3)
 
     sim = Simulation(grid)
     sim.run()

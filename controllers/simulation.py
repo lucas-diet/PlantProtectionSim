@@ -20,7 +20,7 @@ class Simulation:
             plant.reproduce()
 
 
-    def initDisplay(self):
+    def displayInit(self):
         """_summary_
             Zeigt den initialen Zustand des Gitters an.
             Die Methode gibt eine Übersicht über das Grid zu Beginn der Simulation aus. Sie zeigt zunächst
@@ -80,7 +80,7 @@ class Simulation:
             Die Schleife wiederholt sich, bis eine der Beendigungsbedingungen erfüllt ist. Jeder Schritt wird mit einer Schrittzahl ('count') angezeigt.
 
         """
-        self.initDisplay()
+        self.displayInit()
         count = 1
 
         while True:

@@ -4,15 +4,15 @@ import random
 
 from models.plant import Plant
 
-class Enemy():
+class EnemyCluster():
     
-    def __init__(self, name, num, speed, position, grid, stepCounter=0):
+    def __init__(self, name, num, speed, position, grid):
         self.name = name
         self.num = num
         self.speed = speed
         self.position = position
         self.grid = grid
-        self.stepCounter = stepCounter
+
 
     def detectPlant(self, grid):
         """_summary_
@@ -115,11 +115,10 @@ class Enemy():
         for plant in pPos:
             path = self.findShortestPath(start, plant)
             if path is not None:
-                pathLength = len(path)
-                if shortestPathLength is None or pathLength < shortestPathLength: # Falls neuer kürzester Pfad gefunden wird, reset der Liste
-                    shortestPathLength = pathLength
+                if shortestPathLength is None or len(path) < shortestPathLength: # Falls neuer kürzester Pfad gefunden wird, reset der Liste
+                    shortestPathLength = len(path)
                     shortestPaths = [path]
-                elif pathLength == shortestPathLength: # Kürzester Pfad mit gleicher Länge wird hinzugefügt
+                elif len(path) == shortestPathLength: # Kürzester Pfad mit gleicher Länge wird hinzugefügt
                     shortestPaths.append(path)
         
         if len(shortestPaths) > 0:
@@ -154,10 +153,11 @@ class Enemy():
         #print(steps)
         return steps
     
-    def eatPlant(self, enemy, ePos, pPos):
+    
+    def eatPlant(self, enemyCluster, ePos, pPos):
         grid = self.grid.getGrid()
         if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
             grid[pPos[0]][pPos[1]].pop(0)
             
-        print(f'{enemy.name} at {ePos} eat plant at {enemy.position}\n')
+        print(f'{enemyCluster.name} at {ePos} eat plant at {enemyCluster.position}\n')
         

@@ -1,8 +1,6 @@
 
-import numpy as np
-
 from models.plant import Plant
-from models.enemy import Enemy
+from models.enemyCluster import EnemyCluster
 
 
 class Grid():
@@ -28,7 +26,7 @@ class Grid():
     
     def removePlant(self, plant):
         pos = plant.position
-
+        
         self.plants.remove(plant)
         self.grid[pos[0]][pos[1]].remove(plant)
 
@@ -100,18 +98,18 @@ class Grid():
         # TODO: Symbiose von zwei Pflanzen
 
 
-    def addEnemy(self, enemy):
-        pos = enemy.position
+    def addEnemyCluster(self, ec):
+        pos = ec.position
 
-        self.enemies.append(enemy)
-        self.grid[pos[0]][pos[1]].append(enemy)
+        self.enemies.append(ec)
+        self.grid[pos[0]][pos[1]].append(ec)
 
     
-    def removeEnemy(self, enemy):
-        pos = enemy.position
+    def removeEnemyCluster(self, ec):
+        pos = ec.position
 
-        self.enemies.remove(enemy)
-        self.grid[pos[0]][pos[1]].remove(enemy)
+        self.enemies.remove(ec)
+        self.grid[pos[0]][pos[1]].remove(ec)
 
     
     def helperGrid(self):
@@ -123,12 +121,12 @@ class Grid():
             for j in range(0, len(grid[0])):
                 if len(grid[i][j]) > 0:
                     plantObj = any(isinstance(item, Plant) for item in grid[i][j])
-                    enemyObj = any(isinstance(item, Enemy) for item in grid[i][j])
-                    if plantObj and enemyObj:
+                    ecObj = any(isinstance(item, EnemyCluster) for item in grid[i][j])
+                    if plantObj and ecObj:
                         row.append('PE')
                     elif plantObj:
                         row.append('P')
-                    elif enemyObj:
+                    elif ecObj:
                         row.append('E')
                 else:
                     row.append('#')
@@ -144,7 +142,7 @@ class Grid():
             for obj in cell:
                 if isinstance(obj, Plant):
                     lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
-                elif isinstance(obj, Enemy):
+                elif isinstance(obj, EnemyCluster):
                     lines.append(f'{obj.name}-#{obj.num}')
             return lines if lines else ['------']  # Leeres Feld
 
@@ -175,7 +173,7 @@ class Grid():
         return False
                     
     
-    def displayMove(self, enemy, oldPos, newPos):
+    def displayMove(self, ec, oldPos, newPos):
         """_summary_
             Zeigt die Bewegung eines Feindes im Gitter an.
             Die Methode gibt eine Nachricht auf der Konsole aus, die den Namen des Feindes ('species'),
@@ -186,7 +184,7 @@ class Grid():
             oldPos: Tupel (x,y) -> alte Position
             newPos: Tupel (x,y) -> neue Position
         """
-        print(f'{enemy.name} moved from {oldPos} to {newPos}')
+        print(f'{ec.name} moved from {oldPos} to {newPos}')
 
     
     def getNewPosition(self, steps):
@@ -209,23 +207,23 @@ class Grid():
         return None
 
 
-    def updateEnemyPosition(self, enemy, oldPos, newPos):
+    def updateEnemyClusterPos(self, ec, oldPos, newPos):
         """Aktualisiert die Position eines Feindes im Grid.
         
         Entfernt den Feind von seiner alten Position und fügt ihn an die neue Position hinzu.
         """
         # Entferne den Feind von der alten Position, falls er dort ist
-        if enemy in self.grid[oldPos[0]][oldPos[1]]:
-            self.grid[oldPos[0]][oldPos[1]].remove(enemy)
+        if ec in self.grid[oldPos[0]][oldPos[1]]:
+            self.grid[oldPos[0]][oldPos[1]].remove(ec)
 
         # Füge den Feind an der neuen Position hinzu
-        self.grid[newPos[0]][newPos[1]].append(enemy)
+        self.grid[newPos[0]][newPos[1]].append(ec)
 
         # Aktualisiere die Position des Feindes
-        enemy.position = newPos
+        ec.position = newPos
 
 
-    def moveEachEnemy(self, moveArr):
+    def moveEachEnemyCluster(self, moveArr):
         """Bewegt jeden Feind entsprechend den angegebenen Bewegungsanweisungen.
         
         Die Methode durchläuft das Array 'moveArr', das Paare aus Feind und alter Position enthält.
@@ -238,18 +236,20 @@ class Grid():
         Args:
             moveArr (Liste): Array mit Tupel (x,y), die die Bewegungsroute repräsentieren.
         """
-        for enemy, oldPos in moveArr:
-            if not isinstance(enemy, Enemy):
+        
+        stepCounter = 0
+        for ec, oldPos in moveArr:
+            if not isinstance(ec, EnemyCluster):
                 continue
             
             # Überprüfen, ob der Schrittzähler die Geschwindigkeit erreicht hat
-            if enemy.stepCounter < enemy.speed - 1:
-                enemy.stepCounter += 1
+            if stepCounter < ec.speed - 1:
+                stepCounter += 1
                 continue  # Bewege den Feind nicht, da der Schrittzähler noch nicht die Geschwindigkeit erreicht hat
             
             # Reset Schrittzähler und erhalte die nächsten Schritte des Feindes
-            enemy.stepCounter = 0
-            steps = enemy.move()
+            stepCounter = 0
+            steps = ec.move()
             
             if steps is None:
                 continue
@@ -261,13 +261,13 @@ class Grid():
 
             # Aktualisiere die Position des Feindes im Grid
             if oldPos != newPos:
-                self.updateEnemyPosition(enemy, oldPos, newPos)
+                self.updateEnemyClusterPos(ec, oldPos, newPos)
                 
             # Zeige die Bewegung des Feindes an und aktualisiere das Grid
-            self.displayMove(enemy, oldPos, newPos)
+            self.displayMove(ec, oldPos, newPos)
 
             if oldPos == newPos:                                #TODO: Gesamt-Engerieeinheiten werden noch nicht angepasst, bei entfernen einer Pflanze 
-                enemy.eatPlant(enemy, oldPos, newPos)
+                ec.eatPlant(ec, oldPos, newPos)
 
             self.displayGrid()
 
@@ -289,10 +289,10 @@ class Grid():
             for j, cell in enumerate(row):
                 if isinstance(cell, list):  # Zelle enthält eine Liste von Objekten
                     for obj in cell:
-                        if isinstance(obj, Enemy):
+                        if isinstance(obj, EnemyCluster):
                             enemies_to_move.append((obj, (i, j)))
-                elif isinstance(cell, Enemy):  # Einzelnes Enemy-Objekt in der Zelle
+                elif isinstance(cell, EnemyCluster):  # Einzelnes Enemy-Objekt in der Zelle
                     enemies_to_move.append((cell, (i, j)))
 
         # Bewege alle gesammelten Feinde
-        self.moveEachEnemy(enemies_to_move)
+        self.moveEachEnemyCluster(enemies_to_move)

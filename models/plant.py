@@ -3,13 +3,13 @@ import random
 
 class Plant():
 
-    def __init__(self, name, initEnergy, growthRateEnegry, minEnegrgy, reproductionSteps, offspingEnergy, minDist, maxDist, position, grid, color):
+    def __init__(self, name, initEnergy, growthRateEnegry, minEnegrgy, reproductionIntervall, offspingEnergy, minDist, maxDist, position, grid, color):
         self.name = name
         self.initEnergy = initEnergy
         self.currEnergy = initEnergy
         self.growthRateEnegry = growthRateEnegry
         self.minEnergy = minEnegrgy
-        self.reproductionSteps = reproductionSteps
+        self.reproductionIntervall = reproductionIntervall
         self.offspringEnergy = offspingEnergy
         self.minDist = minDist
         self.maxDist = maxDist
@@ -39,6 +39,7 @@ class Plant():
         """
         if self.currEnergy < self.minEnergy:
             self.grid.removePlant(self)
+            
         
 
     def reproduce(self):
@@ -50,10 +51,10 @@ class Plant():
             Die Energie der Pflanze wird um 10 reduziert, um die Fortpflanzung zu unterstützen.
 
         """
-        if self.reproductionSteps == 0:
+        if self.reproductionIntervall == 0:
             pass
 
-        elif self.age % self.reproductionSteps == 0:
+        elif self.age % self.reproductionIntervall == 0:
             for _ in range(random.randint(1, 4)):       ## Zufall zwischen 1 und 4              # Wie viele Kinder soll es max geben?
                 offspringPosition = self.setOffspringPos()
                 
@@ -62,7 +63,7 @@ class Plant():
                                       initEnergy=self.offspringEnergy, 
                                       growthRateEnegry=self.growthRateEnegry, 
                                       minEnegrgy=self.minEnergy, 
-                                      reproductionSteps=self.reproductionSteps, 
+                                      reproductionIntervall=self.reproductionIntervall, 
                                       offspingEnergy=self.offspringEnergy,                  #TODO: Via Input, damit jeweils individuell ist
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
