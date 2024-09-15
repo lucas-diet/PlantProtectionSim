@@ -38,19 +38,19 @@ if __name__ == '__main__':
                color = plantColor[1])
     
 
-    e1 = EnemyCluster(name='e1', num=2, speed=3, position=(2,0), grid=grid)
-    e2 = EnemyCluster(name='e2', num=2, speed=1, position=(0,3), grid=grid)
-    e3 = EnemyCluster(name='e3', num=1, speed=1, position=(2,0), grid=grid)
-    #e4 = Enemie(name='e4', num=1, speed=5, position=(4,1), grid=grid)
-    #e5 = Enemie(name='e5', num=1, speed=5, position=(2,1), grid=grid)
-    #e6 = Enemie(name='e6', num=1, speed=5, position=(4,1), grid=grid)
+    ec1 = EnemyCluster(name='ec1', num=2, speed=3, position=(2,0), grid=grid)
+    ec2 = EnemyCluster(name='ec2', num=2, speed=1, position=(0,3), grid=grid)
+    ec3 = EnemyCluster(name='ec3', num=1, speed=1, position=(2,0), grid=grid)
+    #ec4 = Enemie(name='ec4', num=1, speed=5, position=(4,1), grid=grid)
+    #ec5 = Enemie(name='ec5', num=1, speed=5, position=(2,1), grid=grid)
+    #ec6 = Enemie(name='ec6', num=1, speed=5, position=(4,1), grid=grid)
 
     grid.addPlant(p1)
     grid.addPlant(p2)
 
-    grid.addEnemyCluster(e1)
-    grid.addEnemyCluster(e2)
-    grid.addEnemyCluster(e3)
+    grid.addEnemyCluster(ec1)
+    grid.addEnemyCluster(ec2)
+    grid.addEnemyCluster(ec3)
 
     sim = Simulation(grid)
     sim.run()

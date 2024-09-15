@@ -165,6 +165,7 @@ class Grid():
             print()
         print('#################### \n')
     
+
     def hasPlants(self):
         for row in self.grid:
             for cell in row:
@@ -237,18 +238,17 @@ class Grid():
             moveArr (Liste): Array mit Tupel (x,y), die die Bewegungsroute repräsentieren.
         """
         
-        stepCounter = 0
         for ec, oldPos in moveArr:
             if not isinstance(ec, EnemyCluster):
                 continue
             
             # Überprüfen, ob der Schrittzähler die Geschwindigkeit erreicht hat
-            if stepCounter < ec.speed - 1:
-                stepCounter += 1
+            if ec.stepCounter < ec.speed - 1:
+                ec.stepCounter += 1
                 continue  # Bewege den Feind nicht, da der Schrittzähler noch nicht die Geschwindigkeit erreicht hat
             
             # Reset Schrittzähler und erhalte die nächsten Schritte des Feindes
-            stepCounter = 0
+            ec.stepCounter = 0
             steps = ec.move()
             
             if steps is None:
@@ -269,11 +269,9 @@ class Grid():
             if oldPos == newPos:                                #TODO: Gesamt-Engerieeinheiten werden noch nicht angepasst, bei entfernen einer Pflanze 
                 ec.eatPlant(ec, oldPos, newPos)
 
-            self.displayGrid()
+        self.displayGrid()
 
             
-
-    
     def collectAndMoveEnemies(self):
         """Sammelt alle Feinde im Gitter und bewegt sie.
 

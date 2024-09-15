@@ -12,6 +12,7 @@ class EnemyCluster():
         self.speed = speed
         self.position = position
         self.grid = grid
+        self.stepCounter = 0
 
 
     def detectPlant(self, grid):
@@ -154,10 +155,10 @@ class EnemyCluster():
         return steps
     
     
-    def eatPlant(self, enemyCluster, ePos, pPos):
+    def eatPlant(self, ec, ePos, pPos):
         grid = self.grid.getGrid()
         if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
             grid[pPos[0]][pPos[1]].pop(0)
             
-        print(f'{enemyCluster.name} at {ePos} eat plant at {enemyCluster.position}\n')
+        print(f'{ec.name} at {ePos} eat plant at {ec.position}')
         
