@@ -2,18 +2,19 @@
 from collections import deque
 import random
 
+from models.enemy import Enemy
 from models.plant import Plant
 
 class EnemyCluster():
     
-    def __init__(self, name, num, speed, position, grid):
-        self.name = name
+    def __init__(self, enemy, num, speed, position, grid):
+        self.enemy = enemy
         self.num = num
         self.speed = speed
         self.position = position
         self.grid = grid
         self.stepCounter = 0
-
+        
 
     def detectPlant(self, grid):
         """_summary_
@@ -160,5 +161,5 @@ class EnemyCluster():
         if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
             grid[pPos[0]][pPos[1]].pop(0)
             
-        print(f'{ec.name} at {ePos} eat plant at {ec.position}')
+        print(f'{ec.enemy.name} at {ePos} eat plant at {ec.position}')
         

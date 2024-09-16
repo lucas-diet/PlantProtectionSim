@@ -1,5 +1,6 @@
 
 from models.plant import Plant
+from models.enemy import Enemy
 from models.enemyCluster import EnemyCluster
 
 
@@ -98,14 +99,14 @@ class Grid():
         # TODO: Symbiose von zwei Pflanzen
 
 
-    def addEnemyCluster(self, ec):
+    def addEnemies(self, ec):
         pos = ec.position
 
         self.enemies.append(ec)
         self.grid[pos[0]][pos[1]].append(ec)
 
     
-    def removeEnemyCluster(self, ec):
+    def removeEnemies(self, ec):
         pos = ec.position
 
         self.enemies.remove(ec)
@@ -143,7 +144,7 @@ class Grid():
                 if isinstance(obj, Plant):
                     lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
                 elif isinstance(obj, EnemyCluster):
-                    lines.append(f'{obj.name}-#{obj.num}')
+                    lines.append(f'{obj.enemy.name}-#{obj.num}')
             return lines if lines else ['------']  # Leeres Feld
 
         # Alle Zellen vorbereiten, jede Zelle wird zu einer Liste von Zeilen
@@ -185,7 +186,7 @@ class Grid():
             oldPos: Tupel (x,y) -> alte Position
             newPos: Tupel (x,y) -> neue Position
         """
-        print(f'{ec.name} moved from {oldPos} to {newPos}')
+        print(f'{ec.enemy.name} moved from {oldPos} to {newPos}')
 
     
     def getNewPosition(self, steps):

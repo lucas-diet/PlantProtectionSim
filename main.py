@@ -1,4 +1,5 @@
 
+from models.enemy import Enemy
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
 from models.grid import Grid
@@ -38,9 +39,13 @@ if __name__ == '__main__':
                color = plantColor[1])
     
 
-    ec1 = EnemyCluster(name='ec1', num=2, speed=3, position=(2,0), grid=grid)
-    ec2 = EnemyCluster(name='ec2', num=2, speed=1, position=(0,3), grid=grid)
-    ec3 = EnemyCluster(name='ec3', num=1, speed=1, position=(2,0), grid=grid)
+    e1 = Enemy(name='e1', symbol='E1')
+    e2 = Enemy(name='e2', symbol='E2')
+    e3 = Enemy(name='e3', symbol='E3')
+
+    ec1 = EnemyCluster(enemy=e1, num=2, speed=3, position=(2,0), grid=grid)
+    ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,3), grid=grid)
+    ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(2,0), grid=grid)
     #ec4 = Enemie(name='ec4', num=1, speed=5, position=(4,1), grid=grid)
     #ec5 = Enemie(name='ec5', num=1, speed=5, position=(2,1), grid=grid)
     #ec6 = Enemie(name='ec6', num=1, speed=5, position=(4,1), grid=grid)
@@ -48,9 +53,9 @@ if __name__ == '__main__':
     grid.addPlant(p1)
     grid.addPlant(p2)
 
-    grid.addEnemyCluster(ec1)
-    grid.addEnemyCluster(ec2)
-    grid.addEnemyCluster(ec3)
+    grid.addEnemies(ec1)
+    grid.addEnemies(ec2)
+    grid.addEnemies(ec3)
 
     sim = Simulation(grid)
     sim.run()
