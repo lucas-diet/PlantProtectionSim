@@ -15,8 +15,8 @@ if __name__ == '__main__':
 
     #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
     p1 = Plant(name='p1', 
-               initEnergy=200, 
-               growthRateEnegry=10, 
+               initEnergy=100, 
+               growthRateEnegry=1, 
                minEnegrgy=50, 
                reproductionIntervall=0, 
                offspingEnergy=60, 
@@ -28,7 +28,7 @@ if __name__ == '__main__':
     
     p2 = Plant(name='p2', 
                initEnergy=100,
-               growthRateEnegry=5,
+               growthRateEnegry=0,
                minEnegrgy=50, 
                reproductionIntervall=0, 
                offspingEnergy=60, 
@@ -43,19 +43,16 @@ if __name__ == '__main__':
     e2 = Enemy(name='e2', symbol='E2')
     e3 = Enemy(name='e3', symbol='E3')
 
-    ec1 = EnemyCluster(enemy=e1, num=2, speed=3, position=(2,0), grid=grid)
+    ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid)
     ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,3), grid=grid)
     ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(2,0), grid=grid)
-    #ec4 = Enemie(name='ec4', num=1, speed=5, position=(4,1), grid=grid)
-    #ec5 = Enemie(name='ec5', num=1, speed=5, position=(2,1), grid=grid)
-    #ec6 = Enemie(name='ec6', num=1, speed=5, position=(4,1), grid=grid)
 
     grid.addPlant(p1)
     grid.addPlant(p2)
 
     grid.addEnemies(ec1)
-    grid.addEnemies(ec2)
-    grid.addEnemies(ec3)
+    #grid.addEnemies(ec2)
+    #grid.addEnemies(ec3)
 
     sim = Simulation(grid)
     sim.run()

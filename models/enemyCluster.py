@@ -2,9 +2,6 @@
 from collections import deque
 import random
 
-from models.enemy import Enemy
-from models.plant import Plant
-
 class EnemyCluster():
     
     def __init__(self, enemy, num, speed, position, grid):
@@ -111,7 +108,7 @@ class EnemyCluster():
         shortestPathLength = None
         
         if len(pPos) == 0:
-            print('no plant. stop simulation')
+            print('\nno plant. stop simulation')
             return []
         
         for plant in pPos:
@@ -156,10 +153,13 @@ class EnemyCluster():
         return steps
     
     
-    def eatPlant(self, ec, ePos, pPos):
-        grid = self.grid.getGrid()
-        if grid[ePos[0]][ePos[1]] == grid[pPos[0]][pPos[1]]:
-            grid[pPos[0]][pPos[1]].pop(0)
+    def eatPlant(self, ec, ePos, plant, pPos):
+        # Prüfen, ob die Positionen übereinstimmen
+        if ePos == pPos:
+            grid = self.grid.getGrid()
+            # Durchlaufe alle Objekte an der Position und entferne die Pflanze
+            for plant in grid[pPos[0]][pPos[1]]:
+                print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}.')
+                #grid[pPos[0]][pPos[1]].remove(obj)  # Entferne die spezifische Pflanze
+                self.grid.removePlant(plant)  # Aktualisiere auch die Pflanzenliste im Grid
             
-        print(f'{ec.enemy.name} at {ePos} eat plant at {ec.position}')
-        

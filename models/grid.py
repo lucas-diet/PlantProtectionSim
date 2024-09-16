@@ -1,6 +1,5 @@
 
 from models.plant import Plant
-from models.enemy import Enemy
 from models.enemyCluster import EnemyCluster
 
 
@@ -12,6 +11,7 @@ class Grid():
         self.plants = []
         self.enemies = []
         self.grid = [[[] for _ in range(width)] for _ in range(height)]
+        self.totalEnergy = 0
 
 
     def getGrid(self):
@@ -51,10 +51,10 @@ class Grid():
         Returns:
             energy (int): Summe der vorhanden Energieeinheiten im Netzwerk
         """
-        energy = 0
+        self.totalEnergy = 0
         for plant in self.plants:
-            energy += plant.currEnergy
-        return energy
+            self.totalEnergy += plant.currEnergy
+        return self.totalEnergy
     
 
     def displayGridEnergy(self):
@@ -65,8 +65,8 @@ class Grid():
 
         """
         print(f'Grid-Energy: {self.getGridEnergy()}')
+        
 
-    
     def getGridEnemyNum(self):
         """_summary_
             Berechnet die Gesamtzahl aller Feinde im Gitter.
@@ -90,13 +90,6 @@ class Grid():
 
         """
         print(f'Enemy-Number: {self.getGridEnemyNum()}')
-
-    
-    def connectPlants(self, pos1, pos2):
-        plant1 = self.grid[pos1]
-        plant2 = self.grid[pos2]
-
-        # TODO: Symbiose von zwei Pflanzen
 
 
     def addEnemies(self, ec):
@@ -267,10 +260,11 @@ class Grid():
             # Zeige die Bewegung des Feindes an und aktualisiere das Grid
             self.displayMove(ec, oldPos, newPos)
 
-            if oldPos == newPos:                                #TODO: Gesamt-Engerieeinheiten werden noch nicht angepasst, bei entfernen einer Pflanze 
-                ec.eatPlant(ec, oldPos, newPos)
-
-        self.displayGrid()
+            for plant in self.plants:
+                if isinstance(plant, Plant) and plant.position == oldPos:
+                    self.totalEnergy = self.getGridEnergy()
+                    self.totalEnergy -= plant.currEnergy
+                    ec.eatPlant(ec, oldPos, plant, newPos)
 
             
     def collectAndMoveEnemies(self):
@@ -295,3 +289,4 @@ class Grid():
 
         # Bewege alle gesammelten Feinde
         self.moveEachEnemyCluster(enemies_to_move)
+        

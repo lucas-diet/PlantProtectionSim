@@ -64,7 +64,7 @@ class Plant():
                                       growthRateEnegry=self.growthRateEnegry, 
                                       minEnegrgy=self.minEnergy, 
                                       reproductionIntervall=self.reproductionIntervall, 
-                                      offspingEnergy=self.offspringEnergy,                  #TODO: Via Input, damit jeweils individuell ist
+                                      offspingEnergy=self.offspringEnergy,                  #TODO: Via input(), damit jeweils individuell ist
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 

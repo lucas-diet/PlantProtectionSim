@@ -92,11 +92,12 @@ class Simulation:
 
             if self.upperEnemyNumBreak() == True:
                 break
-
+            
+ 
             self.runStep()
             print('Simulation-Step:', count)
+            self.grid.collectAndMoveEnemies()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
-            self.grid.collectAndMoveEnemies()
-            
+            self.grid.displayGrid()
             count += 1
