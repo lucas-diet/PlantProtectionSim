@@ -265,6 +265,7 @@ class Grid():
                     self.totalEnergy = self.getGridEnergy()
                     self.totalEnergy -= plant.currEnergy
                     ec.eatPlant(ec, oldPos, plant, newPos)
+                    ec.reproduce(ec)
 
             
     def collectAndMoveEnemies(self):

@@ -43,9 +43,9 @@ if __name__ == '__main__':
     e2 = Enemy(name='e2', symbol='E2')
     e3 = Enemy(name='e3', symbol='E3')
 
-    ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid)
-    ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,3), grid=grid)
-    ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(2,0), grid=grid)
+    ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatVictory=10)
+    ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,3), grid=grid, eatVictory=20)
+    ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(2,0), grid=grid, eatVictory=20)
 
     grid.addPlant(p1)
     grid.addPlant(p2)

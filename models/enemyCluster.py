@@ -4,14 +4,15 @@ import random
 
 class EnemyCluster():
     
-    def __init__(self, enemy, num, speed, position, grid):
+    def __init__(self, enemy, num, speed, position, grid, eatVictory):
         self.enemy = enemy
         self.num = num
         self.speed = speed
         self.position = position
         self.grid = grid
         self.stepCounter = 0
-        
+        self.eatedEnergy = 0
+        self.eatVictory = eatVictory
 
     def detectPlant(self, grid):
         """_summary_
@@ -159,7 +160,16 @@ class EnemyCluster():
             grid = self.grid.getGrid()
             # Durchlaufe alle Objekte an der Position und entferne die Pflanze
             for plant in grid[pPos[0]][pPos[1]]:
-                print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}.')
-                #grid[pPos[0]][pPos[1]].remove(obj)  # Entferne die spezifische Pflanze
-                self.grid.removePlant(plant)  # Aktualisiere auch die Pflanzenliste im Grid
-            
+                print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
+                self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
+                self.eatedEnergy += plant.currEnergy
+
+    def reproduce(self, ec):
+        newEnemy = 0
+        if self.eatedEnergy >= self.eatVictory:
+            for _ in range(self.eatVictory, round(self.eatedEnergy)+1, self.eatVictory):
+                newEnemy += 1
+                #print(self.eatedEnergy, _, self.eatedEnergy - _)     
+        ec.num += newEnemy
+        self.eatedEnergy -= newEnemy * self.eatVictory
+        print('leftover eated energy:', self.eatedEnergy)
