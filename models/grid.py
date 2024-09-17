@@ -290,4 +290,5 @@ class Grid():
 
         # Bewege alle gesammelten Feinde
         self.moveEachEnemyCluster(enemies_to_move)
+
         

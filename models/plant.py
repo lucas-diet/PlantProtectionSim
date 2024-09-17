@@ -59,12 +59,14 @@ class Plant():
                 offspringPosition = self.setOffspringPos()
                 
                 if offspringPosition:
+                    energyInput = input('Init-Energy of offspring:')
+                    offspringEnergy = float(energyInput) if energyInput else 100
                     offspring = Plant(name=self.name, 
                                       initEnergy=self.offspringEnergy, 
                                       growthRateEnegry=self.growthRateEnegry, 
                                       minEnegrgy=self.minEnergy, 
                                       reproductionIntervall=self.reproductionIntervall, 
-                                      offspingEnergy=self.offspringEnergy,                  #TODO: Via input(), damit jeweils individuell ist
+                                      offspingEnergy=offspringEnergy,                  #TODO: Via input(), damit jeweils individuell ist
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 
@@ -96,7 +98,7 @@ class Plant():
             newX, newY = self.position[0] + dx, self.position[1] + dy
 
             if self.grid.isWithinBounds(newX, newY) and not self.grid.isOccupied((newX, newY)):
-                print(f'{self.name} auf {self.position} erzeugt Nachkommen ')
+                print(f'{self.name} auf {self.position} erzeugt Nachkommen')
                 return (newX, newY)
 
             #else:
@@ -109,4 +111,4 @@ class Plant():
     def getColor(self):
         print(self.color)
         return self.color
-    
+       

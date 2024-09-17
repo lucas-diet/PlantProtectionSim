@@ -2,6 +2,8 @@
 from collections import deque
 import random
 
+from models.plant import Plant
+
 class EnemyCluster():
     
     def __init__(self, enemy, num, speed, position, grid, eatVictory):
@@ -11,9 +13,10 @@ class EnemyCluster():
         self.position = position
         self.grid = grid
         self.stepCounter = 0
-        self.eatedEnergy = 0
         self.eatVictory = eatVictory
+        self.eatedEnergy = 0
 
+        
     def detectPlant(self, grid):
         """_summary_
             Ermittelt die Positionen von Pflanzen im Grid.
@@ -126,6 +129,10 @@ class EnemyCluster():
         else:
             return None
     
+    
+    def getPath(self, start):
+        return self.choosePlant(start)
+
 
     def move(self):
         """_summary_
@@ -163,6 +170,8 @@ class EnemyCluster():
                 print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
                 self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
                 self.eatedEnergy += plant.currEnergy
+                break #abbruch nach einer Schleife, da potentiell nur noch feinde auf dem Feld sind 
+
 
     def reproduce(self, ec):
         newEnemy = 0
@@ -172,4 +181,4 @@ class EnemyCluster():
                 #print(self.eatedEnergy, _, self.eatedEnergy - _)     
         ec.num += newEnemy
         self.eatedEnergy -= newEnemy * self.eatVictory
-        print('leftover eated energy:', self.eatedEnergy)
+        print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)

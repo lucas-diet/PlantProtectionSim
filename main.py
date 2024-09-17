@@ -1,8 +1,12 @@
 
-from models.enemy import Enemy
+
 from models.plant import Plant
+from models.enemy import Enemy
 from models.enemyCluster import EnemyCluster
 from models.grid import Grid
+
+from models.substance import Substance
+from models.toxin import Toxin
 
 from controllers.simulation import Simulation
 
@@ -16,7 +20,7 @@ if __name__ == '__main__':
     #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
     p1 = Plant(name='p1', 
                initEnergy=100, 
-               growthRateEnegry=1, 
+               growthRateEnegry=10, 
                minEnegrgy=50, 
                reproductionIntervall=0, 
                offspingEnergy=60, 
@@ -44,18 +48,31 @@ if __name__ == '__main__':
     e3 = Enemy(name='e3', symbol='E3')
 
     ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatVictory=10)
-    ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,3), grid=grid, eatVictory=20)
-    ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(2,0), grid=grid, eatVictory=20)
+    ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(2,0), grid=grid, eatVictory=20)
+    ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatVictory=20)
 
     grid.addPlant(p1)
     grid.addPlant(p2)
 
     grid.addEnemies(ec1)
-    #grid.addEnemies(ec2)
+    grid.addEnemies(ec2)
     #grid.addEnemies(ec3)
 
+    s1 = Substance(name='s1', type='signal')
+    s2 = Substance(name='s2', type='toxin')
+
+    tox1 = Toxin(substance=s2, 
+                plantTransmitter=[p1], 
+                energyCosts=2, 
+                triggerCombination=[e3.name, ec3.num],
+                prodTime = 2,
+                deadly='n', 
+                eliminationStrength=[2, 1])
+
+    tox1.displaceEnemies(ec2, p1, 10)
+
     sim = Simulation(grid)
-    sim.run()
+    sim.run(maxGridEnergy=2000, maxEnemyNum=2000)
 
     #gui = Gui()
     #gui.mainloop()

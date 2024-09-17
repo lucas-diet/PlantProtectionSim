@@ -53,21 +53,21 @@ class Simulation:
         return False
     
 
-    def upperGridEnergyBreak(self):
-        if self.grid.getGridEnergy() > 1000:                #TODO: später umschreiben als Parameter
+    def upperGridEnergyBreak(self, maxGridEnergy):
+        if self.grid.getGridEnergy() > maxGridEnergy:
             print('Upper Border -- Grid-Energy')
             return True
         return False
     
 
-    def upperEnemyNumBreak(self):
-        if self.grid.getGridEnemyNum() > 100:                #TODO: später umschreiben als Parameter
+    def upperEnemyNumBreak(self, maxEnemyNum):
+        if self.grid.getGridEnemyNum() > maxEnemyNum:
             print('Upper Border -- Enemies')
             return True
         return False
 
     
-    def run(self):
+    def run(self, maxGridEnergy, maxEnemyNum):
         """_summary_
             Führt die Hauptsimulationsschleife aus und aktualisiert den Zustand des Grids in jedem Schritt.
             Die Methode beginnt mit der Anzeige des initialen Zustands des Grids ('initDisplay'). 
@@ -87,15 +87,15 @@ class Simulation:
             if self.noPlantsBreak() == True:
                 break
             
-            if self.upperGridEnergyBreak() == True:
+            if self.upperGridEnergyBreak(maxGridEnergy) == True:
                 break
 
-            if self.upperEnemyNumBreak() == True:
+            if self.upperEnemyNumBreak(maxEnemyNum) == True:
                 break
             
  
             self.runStep()
-            print('Simulation-Step:', count)
+            print('\nSimulation-Step:', count)
             self.grid.collectAndMoveEnemies()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
