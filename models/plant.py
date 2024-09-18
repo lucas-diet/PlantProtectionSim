@@ -132,5 +132,6 @@ class Plant():
     
     
     def makeToxin(self):
+        self.alarmed = False
         self.isPoisonous = True
     

@@ -137,7 +137,12 @@ class Grid():
             lines = []
             for obj in cell:
                 if isinstance(obj, Plant):
-                    lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
+                    if obj.alarmed == True:
+                        lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%+')
+                    elif obj.isPoisonous == True:
+                        lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%*')
+                    else:
+                        lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
                 elif isinstance(obj, EnemyCluster):
                     lines.append(f'{obj.enemy.name}-#{obj.num}')
             return lines if lines else ['------']  # Leeres Feld
@@ -293,6 +298,7 @@ class Grid():
                         toxin.prodCounter = 0
                     elif toxin.prodCounter == toxin.prodTime:
                         plant.makeToxin()
+                        print(plant.isPoisonous)
                         print(f'[DEBUG]: {plant.name} ist giftig')
                     else:
                         toxin.prodCounter += 1
