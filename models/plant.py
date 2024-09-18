@@ -17,6 +17,7 @@ class Plant():
         self.grid = grid
         self.age = 0
         self.color = color
+        self.alarmed = False
         self.isPoisonous = False
 
 
@@ -113,19 +114,23 @@ class Plant():
         return self.color
     
     
-    def makeToxin(self, toxin, dist, alarmDist):
+    def enemyAlarm(self, toxin, dist, alarmDist):
         if self in toxin.plantTransmitter:
             if dist <= alarmDist:
-                self.isPoisonous = True
+                self.alarmed = True
                 #print(f'[DEBUG]: Len-path {dist} < alarmDist {alarmDist}')
-                print(self.isPoisonous)
+                print(self.alarmed)
                 return toxin
             else:
                 #print(f'[DEBUG]: Len-path  {dist} > alarmDist {alarmDist}')
-                print(self.isPoisonous)
+                print(self.alarmed)
                 return None
         else:
             #print(f'[DEBUG]: {self.name} produziert {toxin.name} nicht')
-            print(self.isPoisonous)
+            print(self.alarmed)
             return None
-        
+    
+    
+    def makeToxin(self):
+        self.isPoisonous = True
+    

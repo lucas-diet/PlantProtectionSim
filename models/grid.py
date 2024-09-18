@@ -271,18 +271,36 @@ class Grid():
                         ec.reproduce(ec)
 
                     dist = self.getDistance(ec.position, plant.position)
-                    print(f'[DEBUG]: Distance {dist} from {ec.enemy.name} at {ec.position} to {plant.name} at {plant.position}')
-                    for toxin in self.toxins:
-                        if plant in toxin.plantTransmitter and [ec.enemy.name, ec.num] in toxin.triggerCombination:
-                            mt = plant.makeToxin(toxin, dist, toxin.alarmDist)
-                            if mt is not None:
-                                print(f'[DEBUG]: {plant.name} produziert Toxin: {toxin.name}')
-                            else:
-                                pass
-                        else:
-                            pass
+                    self.plantAlarmAndPoisonProd(ec, dist, plant)
 
+                      
     
+    def plantAlarmAndPoisonProd(self, ec, dist, plant):
+        for toxin in self.toxins:
+            if plant in toxin.plantTransmitter and [ec.enemy.name, ec.num] in toxin.triggerCombination:
+                if dist <= toxin.alarmDist and not plant.alarmed:
+                    plant.alarmed = True
+                    print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
+
+                if plant.alarmed:
+                    if toxin.prodCounter > toxin.prodTime:
+                        enAl = plant.enemyAlarm(toxin, dist, toxin.alarmDist)
+                        if enAl is not None:
+                            print(f'[DEBUG]: {plant.name} ist alamiert')
+                        else:
+                            #print(f'[DEBUG]: {plant.name} wurde nicht alamiert')
+                            pass
+                        toxin.prodCounter = 0
+                    elif toxin.prodCounter == toxin.prodTime:
+                        plant.makeToxin()
+                        print(f'[DEBUG]: {plant.name} ist giftig')
+                    else:
+                        toxin.prodCounter += 1
+                         #print(f'[DEBUG]: {toxin.prodCounter}, {toxin.prodTime}')
+            else:
+                pass
+                #print(f'[DEBUG]: {toxin.name} hat keine Wirkung auf {plant.name}, da die Pflanze nicht alamiert ist')
+
     def addToxin(self, toxin):
         self.toxins.append(toxin)
     

@@ -62,13 +62,13 @@ if __name__ == '__main__':
     s2 = Substance(name='s2', type='toxin')
 
     tox1 = Toxin(substance=s2, 
-                plantTransmitter=[p1], 
+                plantTransmitter=[p1],
                 energyCosts=2, 
                 triggerCombination=[['e1', 2]],
                 prodTime = 2,
                 deadly='n', 
                 eliminationStrength=[2, 1],
-                alarmDist = 2)
+                alarmDist = 3)
     
     grid.addToxin(tox1)
 
