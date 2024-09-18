@@ -177,8 +177,7 @@ class EnemyCluster():
         newEnemy = 0
         if self.eatedEnergy >= self.eatVictory:
             for _ in range(self.eatVictory, round(self.eatedEnergy)+1, self.eatVictory):
-                newEnemy += 1
-                #print(self.eatedEnergy, _, self.eatedEnergy - _)     
+                newEnemy += 1    
         ec.num += newEnemy
         self.eatedEnergy -= newEnemy * self.eatVictory
         print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)

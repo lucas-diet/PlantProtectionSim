@@ -36,7 +36,7 @@ if __name__ == '__main__':
                minEnegrgy=50, 
                reproductionIntervall=0, 
                offspingEnergy=60, 
-               minDist=1, 
+               minDist=1,
                maxDist=2, 
                position=(4, 3), 
                grid=grid,
@@ -64,12 +64,15 @@ if __name__ == '__main__':
     tox1 = Toxin(substance=s2, 
                 plantTransmitter=[p1], 
                 energyCosts=2, 
-                triggerCombination=[e3.name, ec3.num],
+                triggerCombination=[['e1', 2]],
                 prodTime = 2,
                 deadly='n', 
-                eliminationStrength=[2, 1])
+                eliminationStrength=[2, 1],
+                alarmDist = 2)
+    
+    grid.addToxin(tox1)
 
-    tox1.displaceEnemies(ec2, p1, 10)
+    #p1.makeToxin(tox1, ec1, tox1.alarmDist)
 
     sim = Simulation(grid)
     sim.run(maxGridEnergy=2000, maxEnemyNum=2000)

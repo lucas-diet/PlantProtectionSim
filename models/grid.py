@@ -1,6 +1,7 @@
 
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
+from models.toxin import Toxin
 
 
 class Grid():
@@ -10,6 +11,7 @@ class Grid():
         self.width = width
         self.plants = []
         self.enemies = []
+        self.toxins = []
         self.grid = [[[] for _ in range(width)] for _ in range(height)]
         self.totalEnergy = 0
 
@@ -261,13 +263,38 @@ class Grid():
             self.displayMove(ec, oldPos, newPos)
 
             for plant in self.plants:
-                if isinstance(plant, Plant) and plant.position == oldPos:
-                    self.totalEnergy = self.getGridEnergy()
-                    self.totalEnergy -= plant.currEnergy
-                    ec.eatPlant(ec, oldPos, plant, newPos)
-                    ec.reproduce(ec)
+                if isinstance(plant, Plant):
+                    if plant.position == oldPos:
+                        self.totalEnergy = self.getGridEnergy()
+                        self.totalEnergy -= plant.currEnergy
+                        ec.eatPlant(ec, oldPos, plant, newPos)
+                        ec.reproduce(ec)
 
-            
+                    dist = self.getDistance(ec.position, plant.position)
+                    print(f'[DEBUG]: Distance {dist} from {ec.enemy.name} at {ec.position} to {plant.name} at {plant.position}')
+                    for toxin in self.toxins:
+                        if plant in toxin.plantTransmitter and [ec.enemy.name, ec.num] in toxin.triggerCombination:
+                            mt = plant.makeToxin(toxin, dist, toxin.alarmDist)
+                            if mt is not None:
+                                print(f'[DEBUG]: {plant.name} produziert Toxin: {toxin.name}')
+                            else:
+                                pass
+                        else:
+                            pass
+
+    
+    def addToxin(self, toxin):
+        self.toxins.append(toxin)
+    
+    
+    def removeToxin(self, toxin):
+        self.toxins.remove(toxin)
+
+
+    def getDistance(self, pos1, pos2):
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+    
+
     def collectAndMoveEnemies(self):
         """Sammelt alle Feinde im Gitter und bewegt sie.
 

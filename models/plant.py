@@ -17,6 +17,7 @@ class Plant():
         self.grid = grid
         self.age = 0
         self.color = color
+        self.isPoisonous = False
 
 
     def grow(self):
@@ -41,7 +42,6 @@ class Plant():
             self.grid.removePlant(self)
             
         
-
     def reproduce(self):
         """_summary_
             Ermöglicht der Pflanze die Fortpflanzung, wenn die Bedingungen erfüllt sind.
@@ -111,4 +111,21 @@ class Plant():
     def getColor(self):
         print(self.color)
         return self.color
-       
+    
+    
+    def makeToxin(self, toxin, dist, alarmDist):
+        if self in toxin.plantTransmitter:
+            if dist <= alarmDist:
+                self.isPoisonous = True
+                #print(f'[DEBUG]: Len-path {dist} < alarmDist {alarmDist}')
+                print(self.isPoisonous)
+                return toxin
+            else:
+                #print(f'[DEBUG]: Len-path  {dist} > alarmDist {alarmDist}')
+                print(self.isPoisonous)
+                return None
+        else:
+            #print(f'[DEBUG]: {self.name} produziert {toxin.name} nicht')
+            print(self.isPoisonous)
+            return None
+        
