@@ -1,4 +1,8 @@
 
+###  bequemlichkeit  ###
+import os            ###
+os.system('clear')   ###
+########################
 
 from models.plant import Plant
 from models.enemy import Enemy
@@ -63,8 +67,8 @@ if __name__ == '__main__':
 
     tox1 = Toxin(substance=s2, 
                 plantTransmitter=[p1],
-                energyCosts=2, 
-                triggerCombination=[['e1', 2]],
+                energyCosts=10,
+                triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
                 prodTime = 2,
                 deadly='n', 
                 eliminationStrength=[2, 1],

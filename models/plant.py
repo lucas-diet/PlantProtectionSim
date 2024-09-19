@@ -60,14 +60,14 @@ class Plant():
                 offspringPosition = self.setOffspringPos()
                 
                 if offspringPosition:
-                    energyInput = input('Init-Energy of offspring:')
-                    offspringEnergy = float(energyInput) if energyInput else 100
+                    energyInput = input('Init-Energy of offspring:')                        # Input() famit Energie für jedes Nachkommen individuell ist
+                    offspringEnergy = float(energyInput) if energyInput else 100            # default ist 100 Einheiten
                     offspring = Plant(name=self.name, 
                                       initEnergy=self.offspringEnergy, 
                                       growthRateEnegry=self.growthRateEnegry, 
                                       minEnegrgy=self.minEnergy, 
                                       reproductionIntervall=self.reproductionIntervall, 
-                                      offspingEnergy=offspringEnergy,                  #TODO: Via input(), damit jeweils individuell ist
+                                      offspingEnergy=offspringEnergy,
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 
@@ -114,24 +114,10 @@ class Plant():
         return self.color
     
     
-    def enemyAlarm(self, toxin, dist, alarmDist):
-        if self in toxin.plantTransmitter:
-            if dist <= alarmDist:
-                self.alarmed = True
-                #print(f'[DEBUG]: Len-path {dist} < alarmDist {alarmDist}')
-                print(self.alarmed)
-                return toxin
-            else:
-                #print(f'[DEBUG]: Len-path  {dist} > alarmDist {alarmDist}')
-                print(self.alarmed)
-                return None
-        else:
-            #print(f'[DEBUG]: {self.name} produziert {toxin.name} nicht')
-            print(self.alarmed)
-            return None
+    def enemyAlarm(self):
+        self.alarmed = True
     
-    
+
     def makeToxin(self):
         self.alarmed = False
         self.isPoisonous = True
-    

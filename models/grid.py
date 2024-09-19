@@ -1,7 +1,6 @@
 
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
-from models.toxin import Toxin
 
 
 class Grid():
@@ -283,26 +282,21 @@ class Grid():
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
             if plant in toxin.plantTransmitter and [ec.enemy.name, ec.num] in toxin.triggerCombination:
-                if dist <= toxin.alarmDist and not plant.alarmed:
-                    plant.alarmed = True
+                if dist <= toxin.alarmDist and plant.alarmed == False and plant.isPoisonous == False:
+                    plant.enemyAlarm()
                     print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                    
 
-                if plant.alarmed:
+                if plant.alarmed == True or plant.isPoisonous == True:
+                    toxin.toxinCosts(plant)
                     if toxin.prodCounter > toxin.prodTime:
-                        enAl = plant.enemyAlarm(toxin, dist, toxin.alarmDist)
-                        if enAl is not None:
-                            print(f'[DEBUG]: {plant.name} ist alamiert')
-                        else:
-                            #print(f'[DEBUG]: {plant.name} wurde nicht alamiert')
-                            pass
                         toxin.prodCounter = 0
                     elif toxin.prodCounter == toxin.prodTime:
                         plant.makeToxin()
-                        print(plant.isPoisonous)
                         print(f'[DEBUG]: {plant.name} ist giftig')
                     else:
                         toxin.prodCounter += 1
-                         #print(f'[DEBUG]: {toxin.prodCounter}, {toxin.prodTime}')
+                        #print(f'[DEBUG]: {toxin.prodCounter}, {toxin.prodTime}')
             else:
                 pass
                 #print(f'[DEBUG]: {toxin.name} hat keine Wirkung auf {plant.name}, da die Pflanze nicht alamiert ist')
@@ -336,7 +330,7 @@ class Grid():
                     for obj in cell:
                         if isinstance(obj, EnemyCluster):
                             enemies_to_move.append((obj, (i, j)))
-                elif isinstance(cell, EnemyCluster):  # Einzelnes Enemy-Objekt in der Zelle
+                elif isinstance(cell, EnemyCluster):  # Einzelnes EnemyCluster-Objekt in der Zelle
                     enemies_to_move.append((cell, (i, j)))
 
         # Bewege alle gesammelten Feinde

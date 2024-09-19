@@ -115,8 +115,8 @@ class EnemyCluster():
             print('\nno plant. stop simulation')
             return []
         
-        for plant in pPos:
-            path = self.findShortestPath(start, plant)
+        for pos in pPos:
+            path = self.findShortestPath(start, pos)
             if path is not None:
                 if shortestPathLength is None or len(path) < shortestPathLength: # Falls neuer kürzester Pfad gefunden wird, reset der Liste
                     shortestPathLength = len(path)
@@ -181,3 +181,9 @@ class EnemyCluster():
         ec.num += newEnemy
         self.eatedEnergy -= newEnemy * self.eatVictory
         print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)
+
+
+    def newPath(self, toxin, ec, plant):
+        # TODO: Wähle eine neue Pflanze, falls die erste wahl giftig ist und Feind auf dieses Grift reagiert.
+        
+        pass
