@@ -268,7 +268,7 @@ class Grid():
 
             for plant in self.plants:
                 if isinstance(plant, Plant):
-                    if plant.position == oldPos:
+                    if plant.position == newPos:
                         self.totalEnergy = self.getGridEnergy()
                         self.totalEnergy -= plant.currEnergy
                         ec.eatPlant(ec, oldPos, plant, newPos)
@@ -293,7 +293,10 @@ class Grid():
                         toxin.prodCounter = 0
                     elif toxin.prodCounter == toxin.prodTime:
                         plant.makeToxin()
-                        print(f'[DEBUG]: {plant.name} ist giftig')
+                        if toxin.deadly == 'y':
+                            print(f'[DEBUG]: {plant.name} ist tötlich giftig')
+                        elif toxin.deadly == 'n':
+                            print(f'[DEBUG]: {plant.name} ist NICHT tötlich giftig')
                     else:
                         toxin.prodCounter += 1
                         #print(f'[DEBUG]: {toxin.prodCounter}, {toxin.prodTime}')

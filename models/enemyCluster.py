@@ -1,4 +1,5 @@
 
+
 from collections import deque
 import random
 
@@ -162,15 +163,34 @@ class EnemyCluster():
     
     
     def eatPlant(self, ec, ePos, plant, pPos):
+        #TODO: fixen, wenn letzte Pflanze nicht tötlich ist, dann soll sie nicht entfernt werden
+        # -> bis jetzt wird die letzte Pflanze auch entfernt, auch wenn sie den Feind nur weglenken kann
+
         # Prüfen, ob die Positionen übereinstimmen
         if ePos == pPos:
             grid = self.grid.getGrid()
-            # Durchlaufe alle Objekte an der Position und entferne die Pflanze
+            
             for plant in grid[pPos[0]][pPos[1]]:
-                print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
-                self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
-                self.eatedEnergy += plant.currEnergy
-                break #abbruch nach einer Schleife, da potentiell nur noch feinde auf dem Feld sind 
+                for toxin in self.grid.toxins:
+                    # entferne die Pflanze wenn sie tötlich ist ode rdas toxin nicht von ihr produziert wird
+                    if toxin.deadly == 'y' or plant not in toxin.plantTransmitter:
+                        print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
+                        self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
+                        self.eatedEnergy += plant.currEnergy
+                        
+                    elif toxin.deadly == 'n':
+                        newPath = self.newPath(plant, self.grid.plants)
+                        if newPath is not None and len(newPath) > 1:
+                            self.grid.removeEnemies(ec)
+                            ec.position = newPath[1]
+                            self.grid.addEnemies(ec)
+                        else:
+                            print(f'[DEBUG] Kein gültiger neuer Pfad für {ec.enemy.name} gefunden.')
+                        break
+                break # Abbruch nach einer Schleife, da potentiell nur noch feinde auf dem Feld sind
+                    
+                    
+                
 
 
     def reproduce(self, ec):
@@ -183,7 +203,32 @@ class EnemyCluster():
         print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)
 
 
-    def newPath(self, toxin, ec, plant):
-        # TODO: Wähle eine neue Pflanze, falls die erste wahl giftig ist und Feind auf dieses Grift reagiert.
+    
+    def newPath(self, plant, allPlants):
+        """Wähle eine neue Pflanze, falls die erste Wahl giftig ist und Feind auf dieses Gift reagiert."""
         
-        pass
+        if plant.isPoisonous:
+            print(f'[DEBUG]: {plant.name} ist NICHT tötlich giftig. Suche neue Pflanze...')
+
+            alternativePlant = None
+            shortestDistance = float('inf')  # Setze eine hohe Standarddistanz
+
+            # Suche nach der nächsten Pflanze, die nicht giftig ist
+            for p in allPlants:
+                if not p.isPoisonous:
+                    distance = self.grid.getDistance(self.position, p.position)
+                    
+                    if distance < shortestDistance:
+                        shortestDistance = distance
+                        alternativePlant = p
+
+            # Wenn eine alternative Pflanze gefunden wird, berechne den neuen Pfad
+            if alternativePlant:
+                newPath = self.findShortestPath(self.position, alternativePlant.position)
+                print(f'[DEBUG]: Neuer Pfad zu {alternativePlant.name} gefunden: {newPath}')
+                return newPath
+            else:
+                print('[DEBUG]: Keine alternative Pflanze gefunden!')
+                return None
+        else:
+            return None
