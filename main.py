@@ -23,7 +23,7 @@ plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', 
     #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
 p1 = Plant(name='p1', 
            initEnergy=100, 
-           growthRateEnegry=5, 
+           growthRateEnegry=1, 
            minEnegrgy=50, 
            reproductionIntervall=0, 
            offspingEnergy=60, 
@@ -35,7 +35,7 @@ p1 = Plant(name='p1',
     
 p2 = Plant(name='p2', 
            initEnergy=100,
-           growthRateEnegry=5,
+           growthRateEnegry=1,
            minEnegrgy=50, 
            reproductionIntervall=0, 
            offspingEnergy=60, 
@@ -66,7 +66,7 @@ s2 = Substance(name='s2', type='toxin')
 
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1, p2],
-             energyCosts=2,
+             energyCosts=1,
              triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime = 2,
              deadly='y',
