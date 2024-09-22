@@ -20,7 +20,11 @@ class Toxin(Substance):
         plant.currEnergy -= self.energyCosts               # Produktion kostet energie 
         #print(f'[DEBUG]: post Energy {plant.currEnergy}')
         
-    def displaceEnemies(self, ec, plant, toxin):
-        if plant.isPoisonous == True and self.deadly == 'n':
-            # TODO Feind weglenken von sich
-            pass
+    def displaceEnemies(self, ec, plant, grid):
+
+        #TODO: Wenn deadly == n, dann geht Feind auf dem nuen Pfad weiter, geht dann aber wieder zurück -> eine art endlosschleife
+
+        if self.deadly == 'n' and plant.isPoisonous == True:
+            newPath = ec.newPath(plant, grid.plants)
+            print(newPath)
+            #TODO: Logik dafür, dass der Feind von der Pflanze weggelenkt wird.

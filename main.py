@@ -18,7 +18,6 @@ from views.gui import Gui
 
 
 grid = Grid(height=6, width=6)
-
 plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
     #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
@@ -67,10 +66,10 @@ s2 = Substance(name='s2', type='toxin')
 
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1, p2],
-             energyCosts=20,
+             energyCosts=2,
              triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime = 2,
-             deadly='y', 
+             deadly='y',
              eliminationStrength=['e1', 1],
              alarmDist = 3,
             )

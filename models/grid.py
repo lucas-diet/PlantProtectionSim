@@ -28,6 +28,9 @@ class Grid():
     
     def removePlant(self, plant):
         pos = plant.position
+
+        self.alarmed = False
+        self.isPoisonous = False
         
         self.plants.remove(plant)
         self.grid[pos[0]][pos[1]].remove(plant)
@@ -271,39 +274,57 @@ class Grid():
                     if plant.position == newPos:
                         self.totalEnergy = self.getGridEnergy()
                         self.totalEnergy -= plant.currEnergy
-                        ec.eatPlant(ec, oldPos, plant, newPos)
-                        ec.reproduce(ec)
+                        for toxin in self.toxins:
+                            if toxin.deadly == 'y':
+                                ec.eatPlant(ec, oldPos, plant, newPos)
+                                ec.reproduce(ec)
+                            elif toxin.deadly == 'n':
+                                pass
+                                #toxin.displaceEnemies(ec, plant, plant.grid)
 
                     dist = self.getDistance(ec.position, plant.position)
                     self.plantAlarmAndPoisonProd(ec, dist, plant)
+        
 
-                      
-    
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
+        print(f'[DEBUG]: {plant.name}')
         for toxin in self.toxins:
-            if plant in toxin.plantTransmitter and [ec.enemy.name, ec.num] in toxin.triggerCombination:
-                if dist <= toxin.alarmDist and plant.alarmed == False and plant.isPoisonous == False:
+            # Suche nach der passenden Triggerkombination für den Feind
+            for trigger in toxin.triggerCombination:
+                ecName, minEcSize = trigger  # Extrahiere den Feindnamen und die Mindestanzahl
+
+                # Prüfen, ob der Feindname und die Mindestanzahl in der Trigger-Kombination passen
+                if plant in toxin.plantTransmitter and ec.enemy.name == ecName:
+                    
+                    # Prüfen, ob die Mindestanzahl an 'ec.num' erreicht wurde
+                    if ec.num < minEcSize:
+                        print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
+                        continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
+                    
+                if dist > toxin.alarmDist:
+                    plant.alarmed = False
+                    plant.isPoisonous = False
+                elif dist <= toxin.alarmDist and plant.alarmed == False:
                     plant.enemyAlarm()
                     print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                    
-
-                if plant.alarmed == True or plant.isPoisonous == True:
-                    toxin.toxinCosts(plant)
-                    if toxin.prodCounter > toxin.prodTime:
-                        toxin.prodCounter = 0
-                    elif toxin.prodCounter == toxin.prodTime:
+                
+                if plant.alarmed == True:
+                    if toxin.prodCounter >= toxin.prodTime:
                         plant.makeToxin()
-                        if toxin.deadly == 'y':
+                        plant.isPoisonous = True
+                        #print(f'[DEBUG]: {plant.name} produziert jetzt Toxin und ist giftig.')
+                        if toxin.deadly == 'y' or plant not in toxin.plantTransmitter:
                             print(f'[DEBUG]: {plant.name} ist tötlich giftig')
                         elif toxin.deadly == 'n':
                             print(f'[DEBUG]: {plant.name} ist NICHT tötlich giftig')
-                    else:
+                        toxin.toxinCosts(plant)
+                    elif toxin.prodCounter < toxin.prodTime:
                         toxin.prodCounter += 1
-                        #print(f'[DEBUG]: {toxin.prodCounter}, {toxin.prodTime}')
-            else:
-                pass
-                #print(f'[DEBUG]: {toxin.name} hat keine Wirkung auf {plant.name}, da die Pflanze nicht alamiert ist')
+                
+                if ec.position == plant.position:
+                    toxin.prodCounter = 0
 
+    
     def addToxin(self, toxin):
         self.toxins.append(toxin)
     

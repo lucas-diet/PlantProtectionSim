@@ -16,6 +16,7 @@ class EnemyCluster():
         self.stepCounter = 0
         self.eatVictory = eatVictory
         self.eatedEnergy = 0
+        self.visitedPlants = set()
 
         
     def detectPlant(self, grid):
@@ -163,35 +164,15 @@ class EnemyCluster():
     
     
     def eatPlant(self, ec, ePos, plant, pPos):
-        #TODO: fixen, wenn letzte Pflanze nicht tötlich ist, dann soll sie nicht entfernt werden
-        # -> bis jetzt wird die letzte Pflanze auch entfernt, auch wenn sie den Feind nur weglenken kann
-
         # Prüfen, ob die Positionen übereinstimmen
         if ePos == pPos:
             grid = self.grid.getGrid()
-            
             for plant in grid[pPos[0]][pPos[1]]:
-                for toxin in self.grid.toxins:
-                    # entferne die Pflanze wenn sie tötlich ist ode rdas toxin nicht von ihr produziert wird
-                    if toxin.deadly == 'y' or plant not in toxin.plantTransmitter:
-                        print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
-                        self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
-                        self.eatedEnergy += plant.currEnergy
-                        
-                    elif toxin.deadly == 'n':
-                        newPath = self.newPath(plant, self.grid.plants)
-                        if newPath is not None and len(newPath) > 1:
-                            self.grid.removeEnemies(ec)
-                            ec.position = newPath[1]
-                            self.grid.addEnemies(ec)
-                        else:
-                            print(f'[DEBUG] Kein gültiger neuer Pfad für {ec.enemy.name} gefunden.')
-                        break
+                print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
+                self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
+                self.eatedEnergy += plant.currEnergy
                 break # Abbruch nach einer Schleife, da potentiell nur noch feinde auf dem Feld sind
                     
-                    
-                
-
 
     def reproduce(self, ec):
         newEnemy = 0
@@ -201,7 +182,6 @@ class EnemyCluster():
         ec.num += newEnemy
         self.eatedEnergy -= newEnemy * self.eatVictory
         print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)
-
 
     
     def newPath(self, plant, allPlants):
@@ -215,7 +195,7 @@ class EnemyCluster():
 
             # Suche nach der nächsten Pflanze, die nicht giftig ist
             for p in allPlants:
-                if not p.isPoisonous:
+                if p.isPoisonous == False and p.alarmed == False:
                     distance = self.grid.getDistance(self.position, p.position)
                     
                     if distance < shortestDistance:
