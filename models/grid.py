@@ -238,7 +238,6 @@ class Grid():
 
     
     def processEnemyMovement(self, ec, oldPos, path):
-        
         steps = ec.move(path)
         
         if steps is None:
@@ -263,9 +262,7 @@ class Grid():
             if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False):
                 self.eatAndReproduce(ec, plant.position, plant, ec.position)
             elif toxin.deadly == False and plant.isPoisonous == True:
-                # Pfad wird neu berechnet, wenn leer
-                ec.currentPath = toxin.displaceEnemies(ec, plant, self.plants)
-                ec.targetPlant = ec.currentPath[-1]               
+                ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
 
 
     def checkNearbyPlants(self, ec):
@@ -302,6 +299,7 @@ class Grid():
             else:
                 print('\nNICHT BEWEGT\n')
 
+
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
             # Suche nach der passenden Triggerkombination für den Feind
@@ -331,7 +329,6 @@ class Grid():
                             plant.isPoisonous = True
                             toxin.toxinCosts(plant)
                         
-                    
                     if ec.position == plant.position:
                         toxin.prodCounter = 0
 

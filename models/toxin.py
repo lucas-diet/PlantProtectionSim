@@ -26,10 +26,10 @@ class Toxin(Substance):
         np = []
         if len(ec.currentPath) == 0:
             np = ec.newPath(plant, allPlants)
-                
+            tp = np[-1]
         # Fallback: Falls keine passende Pflanze gefunden wurde, definiere np
         if np is None:
             print('[DEBUG]: Kein neuer Pfad gefunden')
             return []
 
-        return np
+        return np, tp

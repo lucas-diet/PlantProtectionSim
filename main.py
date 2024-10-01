@@ -68,7 +68,7 @@ ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatVicto
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-grid.addPlant(p3)
+#grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
@@ -90,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxGridEnergy=350, maxEnemyNum=2000)
+sim.run(maxGridEnergy=250, maxEnemyNum=2000)
 
     
 
