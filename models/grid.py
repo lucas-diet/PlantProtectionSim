@@ -264,10 +264,8 @@ class Grid():
                 self.eatAndReproduce(ec, plant.position, plant, ec.position)
             elif toxin.deadly == False and plant.isPoisonous == True:
                 # Pfad wird neu berechnet, wenn leer
-                if len(ec.currentPath) == 0:
-                    ec.currentPath = ec.newPath(plant, self.plants)
-                    ec.targetPlant = ec.currentPath[-1]
-                    print('Pfad wurde neu gesetzt:', ec.currentPath)                
+                ec.currentPath = toxin.displaceEnemies(ec, plant, self.plants)
+                ec.targetPlant = ec.currentPath[-1]               
 
 
     def checkNearbyPlants(self, ec):

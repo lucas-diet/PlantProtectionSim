@@ -22,14 +22,11 @@ class Toxin(Substance):
         #print(f'[DEBUG]: post Energy {plant.currEnergy}')
 
 
-    def displaceEnemies(self, ec, plant, grid):
+    def displaceEnemies(self, ec, plant, allPlants):
         np = []
-
-        for p in grid.plants:
-            if p.position == ec.position and p.isPoisonous == True:
-                ec.visitedPlants.add(p.position)
-                np = ec.newPath(plant, grid)
-        
+        if len(ec.currentPath) == 0:
+            np = ec.newPath(plant, allPlants)
+                
         # Fallback: Falls keine passende Pflanze gefunden wurde, definiere np
         if np is None:
             print('[DEBUG]: Kein neuer Pfad gefunden')
