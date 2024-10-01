@@ -20,7 +20,7 @@ from views.gui import Gui
 grid = Grid(height=6, width=6)
 plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
-    #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
+#name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
 p1 = Plant(name='p1', 
            initEnergy=100, 
            growthRateEnegry=1, 
@@ -44,6 +44,18 @@ p2 = Plant(name='p2',
            position=(4, 3), 
            grid=grid,
            color = plantColor[1])
+
+p3 = Plant(name='p3', 
+           initEnergy=100,
+           growthRateEnegry=1,
+           minEnegrgy=50, 
+           reproductionIntervall=0, 
+           offspingEnergy=60, 
+           minDist=1,
+           maxDist=2, 
+           position=(2, 5), 
+           grid=grid,
+           color = plantColor[1])
     
 
 e1 = Enemy(name='e1', symbol='E1')
@@ -56,6 +68,7 @@ ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatVicto
 
 grid.addPlant(p1)
 grid.addPlant(p2)
+#grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
@@ -68,8 +81,8 @@ tox1 = Toxin(substance=s2,
              plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
-             prodTime = 2,
-             deadly='y',
+             prodTime=2,
+             deadly=False,
              eliminationStrength=['e1', 1],
              alarmDist = 3,
             )
@@ -77,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxGridEnergy=400, maxEnemyNum=2000)
+sim.run(maxGridEnergy=250, maxEnemyNum=2000)
 
     
 

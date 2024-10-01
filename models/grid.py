@@ -129,7 +129,6 @@ class Grid():
                 else:
                     row.append('#')
             hGrid.append(row)
-        
         return hGrid
     
 
@@ -208,6 +207,7 @@ class Grid():
             newPos = (step[0], step[1])
             if self.isWithinBounds(newPos[0], newPos[1]):
                 return newPos
+            
         return None
 
 
@@ -216,79 +216,93 @@ class Grid():
         
         Entfernt den Feind von seiner alten Position und fügt ihn an die neue Position hinzu.
         """
+
         # Entferne den Feind von der alten Position, falls er dort ist
         if ec in self.grid[oldPos[0]][oldPos[1]]:
             self.grid[oldPos[0]][oldPos[1]].remove(ec)
 
-        # Füge den Feind an der neuen Position hinzu
-        self.grid[newPos[0]][newPos[1]].append(ec)
+        # Füge den Feind an der neuen Position hinzu, falls er dort noch nicht existiert
+        if ec not in self.grid[newPos[0]][newPos[1]]:
+            self.grid[newPos[0]][newPos[1]].append(ec)
 
         # Aktualisiere die Position des Feindes
         ec.position = newPos
+    
 
+    def canMove(self, ec):
+        if ec.stepCounter < ec.speed - 1:
+            ec.stepCounter += 1
+            return False
+        ec.stepCounter = 0
+        return True
 
-    def moveEachEnemyCluster(self, moveArr):
-        """Bewegt jeden Feind entsprechend den angegebenen Bewegungsanweisungen.
+    
+    def processEnemyMovement(self, ec, oldPos, path):
         
-        Die Methode durchläuft das Array 'moveArr', das Paare aus Feind und alter Position enthält.
-        Für jeden Feind wird überprüft, ob seine 'stepCounter'-Variable den Wert 'speed - 1' erreicht hat.
-        Wenn dies nicht der Fall ist, wird der 'stepCounter' erhöht und die Position bleibt unverändert.
-        Andernfalls wird der 'stepCounter' zurückgesetzt, und der Feind bewegt sich entsprechend den Schritten, die von 'enemy.move()' zurückgegeben werden.
-        Die neue Position wird durch 'getNewPosition' ermittelt. Falls die neue Position gültig ist, wird die Funktion 'updateEnemyPosition' aufgerufen, um den Feind an die neue Position zu verschieben.
-        Die Methode gibt die Bewegung des Feindes durch 'displayMove' aus und zeigt das aktualisierte Gitter mit `displayGrid` an.
-
-        Args:
-            moveArr (Liste): Array mit Tupel (x,y), die die Bewegungsroute repräsentieren.
-        """
+        steps = ec.move(path)
         
-        for ec, oldPos in moveArr:
-            if not isinstance(ec, EnemyCluster):
-                continue
-            
-            # Überprüfen, ob der Schrittzähler die Geschwindigkeit erreicht hat
-            if ec.stepCounter < ec.speed - 1:
-                ec.stepCounter += 1
-                continue  # Bewege den Feind nicht, da der Schrittzähler noch nicht die Geschwindigkeit erreicht hat
-            
-            # Reset Schrittzähler und erhalte die nächsten Schritte des Feindes
-            ec.stepCounter = 0
-            steps = ec.move()
-            
-            if steps is None:
-                continue
-            
-            # Bestimme die neue Position
-            newPos = self.getNewPosition(steps)
-            if newPos is None:
-                newPos = oldPos  # Wenn keine gültige Position gefunden wird, bleibe an der alten Position
-
-            # Aktualisiere die Position des Feindes im Grid
-            if oldPos != newPos:
-                self.updateEnemyClusterPos(ec, oldPos, newPos)
-                
-            # Zeige die Bewegung des Feindes an und aktualisiere das Grid
-            self.displayMove(ec, oldPos, newPos)
-
-            for plant in self.plants:
-                if isinstance(plant, Plant):
-                    if plant.position == newPos:
-                        for toxin in self.toxins:
-                            if toxin.deadly == 'y':
-                                self.eatAndReproduce(ec, oldPos, plant, newPos)
-                            elif toxin.deadly == 'n':
-                               pass
-                                #toxin.displaceEnemies(ec, plant, plant.grid)
-
-                    dist = self.getDistance(ec.position, plant.position)
-                    self.plantAlarmAndPoisonProd(ec, dist, plant)
-
-
+        if steps is None:
+            return oldPos
+        
+        newPos = self.getNewPosition(steps)
+        if newPos is not None:
+            return newPos
+        else:
+            return oldPos
+        
+    
     def eatAndReproduce(self, ec, oldPos, plant, newPos):
         self.totalEnergy = self.getGridEnergy()
         ec.eatPlant(ec, oldPos, plant, newPos)
         self.totalEnergy -= plant.currEnergy
         ec.reproduce(ec)
+        
+    
+    def handlePlantEnemyInteraction(self, ec, plant):
+        for toxin in self.toxins:
+            if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False):
+                self.eatAndReproduce(ec, plant.position, plant, ec.position)
+            elif toxin.deadly == False and plant.isPoisonous == True:
+                # Pfad wird neu berechnet, wenn leer
+                if len(ec.currentPath) == 0:
+                    ec.currentPath = ec.newPath(plant, self.plants)
+                    ec.targetPlant = ec.currentPath[-1]
+                    print('Pfad wurde neu gesetzt:', ec.currentPath)                
 
+
+    def checkNearbyPlants(self, ec):
+        for plant in self.plants:
+            if not isinstance(plant, Plant):
+                continue
+
+            dist = self.getDistance(ec.position, plant.position)
+            self.plantAlarmAndPoisonProd(ec, dist, plant)
+
+            if plant.position == ec.position:
+                #ec.visitedPlants.add(plant.position)
+                self.handlePlantEnemyInteraction(ec, plant)
+                ec.currentPath = []
+
+    
+    def moveEachEnemyCluster(self, moveArr):
+        for ec, oldPos in moveArr:
+            if not isinstance(ec, EnemyCluster):
+                continue
+
+            if not self.canMove(ec):
+                continue
+            
+            path = ec.chooseRandomPlant(ec.position)
+            newPos = self.processEnemyMovement(ec, oldPos, path)
+
+            # Überprüfen, ob der Feind sich tatsächlich bewegt hat
+            if newPos != oldPos:
+            # Aktualisiere die Feindposition, falls er sich bewegt hat
+            
+                self.updateEnemyClusterPos(ec, oldPos, newPos)
+                self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
+            else:
+                print('\nNICHT BEWEGT\n')
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
@@ -296,7 +310,7 @@ class Grid():
             for trigger in toxin.triggerCombination:
                 ecName, minEcSize = trigger  # Extrahiere den Feindnamen und die Mindestanzahl
 
-                # Prüfen, ob der Feindname und die Mindestanzahl in der Trigger-Kombination passen
+                # Prüfen, Pflanze das Gift produziert und o der Feindname in der Trigger-Kombination passt
                 if plant in toxin.plantTransmitter and ec.enemy.name == ecName:
                     
                     # Prüfen, ob die Mindestanzahl an 'ec.num' erreicht wurde
@@ -307,22 +321,18 @@ class Grid():
                     if dist > toxin.alarmDist:
                         plant.alarmed = False
                         plant.isPoisonous = False
-                    elif dist <= toxin.alarmDist and plant.alarmed == False:
+                    elif dist <= toxin.alarmDist and plant.alarmed == False and plant.position not in ec.visitedPlants and plant.isPoisonous == False:
                         plant.enemyAlarm()
                         print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
                     
                     if plant.alarmed == True:
-                        if toxin.prodCounter >= toxin.prodTime:
+                        if toxin.prodCounter < toxin.prodTime:
+                            toxin.prodCounter += 1
+                        elif toxin.prodCounter >= toxin.prodTime:
                             plant.makeToxin()
                             plant.isPoisonous = True
-                            #print(f'[DEBUG]: {plant.name} produziert jetzt Toxin und ist giftig.')
-                            if toxin.deadly == 'y' or plant not in toxin.plantTransmitter:
-                                print(f'[DEBUG]: {plant.name} ist tötlich giftig')
-                            elif toxin.deadly == 'n':
-                                print(f'[DEBUG]: {plant.name} ist NICHT tötlich giftig')
                             toxin.toxinCosts(plant)
-                        elif toxin.prodCounter < toxin.prodTime:
-                            toxin.prodCounter += 1
+                        
                     
                     if ec.position == plant.position:
                         toxin.prodCounter = 0

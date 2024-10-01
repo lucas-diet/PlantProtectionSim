@@ -89,6 +89,7 @@ class Plant():
         Returns:
             tuple[int, int] | None: Die neue Position für den Nachkommen als Koordinatenpaar oder 'None', wenn keine gültige Position gefunden wurde.
         """
+        
         directions = [(dx, dy) for dx in range(-self.maxDist, self.maxDist+1)
                       for dy in range(-self.maxDist, self.maxDist+1)
                       if self.minDist <= abs(dx) + abs(dy) <= self.maxDist]

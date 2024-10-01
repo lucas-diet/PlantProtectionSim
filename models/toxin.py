@@ -15,16 +15,24 @@ class Toxin(Substance):
         self.eliminationStrength = eliminationStrength
         self.alarmDist = alarmDist
 
+
     def toxinCosts(self, plant):
         #print(f'[DEBUG]: pre Energy {plant.currEnergy}')
         plant.currEnergy -= self.energyCosts               # Produktion kostet energie 
         #print(f'[DEBUG]: post Energy {plant.currEnergy}')
-        
+
+
     def displaceEnemies(self, ec, plant, grid):
+        np = []
 
-        #TODO: Wenn deadly == n, dann geht Feind auf dem nuen Pfad weiter, geht dann aber wieder zurück -> eine art endlosschleife
+        for p in grid.plants:
+            if p.position == ec.position and p.isPoisonous == True:
+                ec.visitedPlants.add(p.position)
+                np = ec.newPath(plant, grid)
+        
+        # Fallback: Falls keine passende Pflanze gefunden wurde, definiere np
+        if np is None:
+            print('[DEBUG]: Kein neuer Pfad gefunden')
+            return []
 
-        if self.deadly == 'n' and plant.isPoisonous == True:
-            newPath = ec.newPath(plant, grid.plants)
-            print(newPath)
-            #TODO: Logik dafür, dass der Feind von der Pflanze weggelenkt wird.
+        return np

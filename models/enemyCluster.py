@@ -17,6 +17,8 @@ class EnemyCluster():
         self.eatVictory = eatVictory
         self.eatedEnergy = 0
         self.visitedPlants = set()
+        self.targetPlant = None
+        self.currentPath = []
 
         
     def detectPlant(self, grid):
@@ -42,7 +44,6 @@ class EnemyCluster():
                     positions.append(pos)
                 else:
                     pass
-        #print(positions)
         return positions
     
 
@@ -94,7 +95,7 @@ class EnemyCluster():
         return None
     
     
-    def choosePlant(self, start):
+    def chooseRandomPlant(self, start):
         """_summary_
             Findet den kürzesten Pfad zu einer Pflanze im Grid, beginnend von einer Startposition.
             Die Methode durchsucht das Gitter nach Pflanzen, berechnet den kürzesten Pfad von 'start' zu jeder Pflanze
@@ -108,6 +109,11 @@ class EnemyCluster():
         Returns:
             list[tuple[int, int]] | None: Der kürzeste Pfad zu einer Pflanze als Liste von Koordinaten oder 'None'
         """
+        
+        # Wenn bereits eine Zielpflanze gesetzt ist, muss keine neue ausgewählt werden
+        if self.targetPlant is not None and self.targetPlant not in self.visitedPlants:
+            return self.findShortestPath(start, self.targetPlant)
+        
         helperGrid = self.grid.helperGrid()
         pPos = self.detectPlant(helperGrid)
         shortestPaths = [] # Liste mit allen kürzesten Pfaden mit der gleichen Länge
@@ -127,16 +133,20 @@ class EnemyCluster():
                     shortestPaths.append(path)
         
         if len(shortestPaths) > 0:
-            return random.choice(shortestPaths) # Wähle einen zufälligen kürzesten Pfad aus der Liste
+            # Wähle eine zufällige Pflanze aus und speichere diese als Ziel
+            chosenPath = random.choice(shortestPaths)
+            self.targetPlant = chosenPath[-1]  # Letztes Element des Pfads ist das Ziel
+            
+            return chosenPath
         else:
             return None
     
     
     def getPath(self, start):
-        return self.choosePlant(start)
+        return self.chooseRandomPlant(start)
 
 
-    def move(self):
+    def move(self, path):
         """_summary_
             Bestimmt die Schritte, um von der aktuellen Position zur nächsten Pflanze zu gelangen.
             Die Methode berechnet den kürzesten Pfad von der aktuellen Position ('self.position') zu einer Pflanze
@@ -147,31 +157,52 @@ class EnemyCluster():
            list[tuple[int, int]] | None: Eine Liste von Positionen, die die Schritte zur Pflanze darstellen, oder 'None', wenn kein Pfad gefunden wurde.
         """
         start = self.position
-        path = self.choosePlant(start)
+        #path = self.chooseRandomPlant(start)
+
         steps = []
-        #print(start, path[1:])
-        
-        if path  == []:
+
+        if path is None:
             print('no path. stop simulation\n')
             return None
-        
-        for i in range(0, len(path)-1):
-            nextPos = i + 1 
-            steps.append(path[nextPos])
+        else:
+            for i in range(1, len(path)):
+                nextStep = path[i]
+                if nextStep not in self.visitedPlants:
+                    steps.append(path[i])
 
-        #print(steps)
         return steps
-    
+        
     
     def eatPlant(self, ec, ePos, plant, pPos):
         # Prüfen, ob die Positionen übereinstimmen
-        if ePos == pPos:
-            grid = self.grid.getGrid()
-            for plant in grid[pPos[0]][pPos[1]]:
+        grid = self.grid.getGrid()
+        hGrid = self.grid.helperGrid()
+        
+        if ePos == pPos and 'P' in hGrid[ePos[0]][ePos[1]]:
+            plant = None
+            for p in grid[pPos[0]][pPos[1]]:
+                if isinstance(p, Plant):
+                    plant = p
+                    break
+
+            if plant is not None:
                 print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
                 self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
                 self.eatedEnergy += plant.currEnergy
-                break # Abbruch nach einer Schleife, da potentiell nur noch feinde auf dem Feld sind
+                self.targetPlant = None
+                #self.visitedPlants.add(plant.position)
+
+            # Signalisiere allen Feinden, dass eine Pflanze gegessen wurde
+            for enemyCluster in self.grid.enemies:
+                if enemyCluster.targetPlant == pPos:
+                    enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
+                    print(f'{enemyCluster.enemy.name} has lost its target and will look for a new plant')
+
+            # Jetzt ein neues Ziel suchen
+            return self.chooseRandomPlant(ePos)
+        
+        else:
+            print(f'No plant found at position {pPos}.')
                     
 
     def reproduce(self, ec):
@@ -183,30 +214,30 @@ class EnemyCluster():
         self.eatedEnergy -= newEnemy * self.eatVictory
         print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)
 
-    
+
     def newPath(self, plant, allPlants):
-        """Wähle eine neue Pflanze, falls die erste Wahl giftig ist und Feind auf dieses Gift reagiert."""
-        
         if plant.isPoisonous:
-            print(f'[DEBUG]: {plant.name} ist NICHT tötlich giftig. Suche neue Pflanze...')
+            alternativePlants = []
+            shortestDistance = float('inf')
 
-            alternativePlant = None
-            shortestDistance = float('inf')  # Setze eine hohe Standarddistanz
-
-            # Suche nach der nächsten Pflanze, die nicht giftig ist
+            # Suche nach Pflanzen mit der kürzesten Entfernung
             for p in allPlants:
-                if p.isPoisonous == False and p.alarmed == False:
-                    distance = self.grid.getDistance(self.position, p.position)
-                    
-                    if distance < shortestDistance:
-                        shortestDistance = distance
-                        alternativePlant = p
+                distance = self.grid.getDistance(self.position, p.position)
 
-            # Wenn eine alternative Pflanze gefunden wird, berechne den neuen Pfad
-            if alternativePlant:
-                newPath = self.findShortestPath(self.position, alternativePlant.position)
-                print(f'[DEBUG]: Neuer Pfad zu {alternativePlant.name} gefunden: {newPath}')
-                return newPath
+                if distance < shortestDistance and self.position != p.position:
+                    # Neue kürzeste Distanz gefunden, leere Liste und füge diese Pflanze hinzu
+                    shortestDistance = distance
+                    alternativePlants = [p]
+                elif distance == shortestDistance and self.position != p.position:
+                    # Pflanze hat die gleiche kürzeste Distanz, also füge sie zur Liste hinzu
+                    alternativePlants.append(p)
+
+            if alternativePlants:
+                # Wähle zufällig eine der Pflanzen mit der kürzesten Distanz
+                alternativePlant = random.choice(alternativePlants)
+                # Berechne den kürzesten Pfad zur gewählten Pflanze
+                np = self.findShortestPath(self.position, alternativePlant.position)
+                return np
             else:
                 print('[DEBUG]: Keine alternative Pflanze gefunden!')
                 return None
