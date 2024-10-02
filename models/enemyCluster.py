@@ -240,6 +240,6 @@ class EnemyCluster():
                 return np
             else:
                 print('[DEBUG]: Keine alternative Pflanze gefunden!')
-                return None
+                return []
         else:
             return None

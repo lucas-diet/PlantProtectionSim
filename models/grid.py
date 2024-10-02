@@ -258,12 +258,14 @@ class Grid():
         
     
     def handlePlantEnemyInteraction(self, ec, plant):
-        for toxin in self.toxins:
-            if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False):
-                self.eatAndReproduce(ec, plant.position, plant, ec.position)
-            elif toxin.deadly == False and plant.isPoisonous == True:
-                ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
-
+        if len(self.toxins) > 0:
+            for toxin in self.toxins:
+                if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False):
+                    self.eatAndReproduce(ec, plant.position, plant, ec.position)
+                elif toxin.deadly == False and plant.isPoisonous == True:
+                    ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
+        else:
+            self.eatAndReproduce(ec, plant.position, plant, ec.position)
 
     def checkNearbyPlants(self, ec):
         for plant in self.plants:
@@ -292,8 +294,7 @@ class Grid():
 
             # Überprüfen, ob der Feind sich tatsächlich bewegt hat
             if newPos != oldPos:
-            # Aktualisiere die Feindposition, falls er sich bewegt hat
-            
+                # Aktualisiere die Feindposition, falls er sich bewegt hat
                 self.updateEnemyClusterPos(ec, oldPos, newPos)
                 self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
             else:
@@ -310,7 +311,7 @@ class Grid():
                 if plant in toxin.plantTransmitter and ec.enemy.name == ecName:
                     
                     # Prüfen, ob die Mindestanzahl an 'ec.num' erreicht wurde
-                    if ec.num < minEcSize:
+                    if ec.num < minEcSize and dist <= toxin.alarmDist:
                         print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                     

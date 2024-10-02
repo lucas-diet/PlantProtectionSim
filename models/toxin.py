@@ -24,11 +24,15 @@ class Toxin(Substance):
 
     def displaceEnemies(self, ec, plant, allPlants):
         np = []
+        tp = 0
         if len(ec.currentPath) == 0:
             np = ec.newPath(plant, allPlants)
-            tp = np[-1]
+            if len(np) > 0:
+                tp = np[-1]
+            else:
+                tp = 0
         # Fallback: Falls keine passende Pflanze gefunden wurde, definiere np
-        if np is None:
+        if np == 0:
             print('[DEBUG]: Kein neuer Pfad gefunden')
             return []
 
