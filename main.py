@@ -23,7 +23,7 @@ plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', 
 #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
 p1 = Plant(name='p1', 
            initEnergy=100, 
-           growthRateEnegry=1, 
+           growthRateEnegry=5, 
            minEnegrgy=50, 
            reproductionIntervall=0, 
            offspingEnergy=60, 
@@ -90,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxGridEnergy=205, maxEnemyNum=2000)
+sim.run(maxGridEnergy=250, maxEnemyNum=2000)
 
     
 

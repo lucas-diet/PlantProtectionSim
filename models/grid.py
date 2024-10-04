@@ -304,12 +304,10 @@ class Grid():
                 # Aktualisiere die Feindposition, falls er sich bewegt hat
                 self.updateEnemyClusterPos(ec, oldPos, newPos)
                 self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
-
             else:
                 print(f'[DEBUG]: {ec.enemy.name} bewegt sich nicht ::: Zielpflanze: {ec.targetPlant}')
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
-        #TODO: Warum verschieb sich manchmal der intervall von alamiert/ gifig, so dass feind nicht vertrieben wird.
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 ecName, minEcSize = trigger

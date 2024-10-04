@@ -10,7 +10,6 @@ class Toxin(Substance):
         self.energyCosts = energyCosts
         self.triggerCombination = triggerCombination
         self.prodTime = prodTime
-        self.prodCounter = 0
         self.deadly = deadly
         self.eliminationStrength = eliminationStrength
         self.alarmDist = alarmDist
