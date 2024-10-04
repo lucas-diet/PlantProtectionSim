@@ -136,7 +136,6 @@ class EnemyCluster():
             # Wähle eine zufällige Pflanze aus und speichere diese als Ziel
             chosenPath = random.choice(shortestPaths)
             self.targetPlant = chosenPath[-1]  # Letztes Element des Pfads ist das Ziel
-            
             return chosenPath
         else:
             return None
@@ -166,9 +165,9 @@ class EnemyCluster():
             return None
         else:
             for i in range(1, len(path)):
-                nextStep = path[i]
-                if nextStep not in self.visitedPlants:
-                    steps.append(path[i])
+                #nextStep = path[i]
+                #if nextStep not in self.visitedPlants:
+                steps.append(path[i])
 
         return steps
         

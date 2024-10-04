@@ -261,24 +261,31 @@ class Grid():
         if len(self.toxins) > 0:
             for toxin in self.toxins:
                 if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False):
+                    #print(f'[DEBUG]: {ec.enemy.name} is eating {plant.name} at position {plant.position}')
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                 elif toxin.deadly == False and plant.isPoisonous == True:
+                    #print(f'[DEBUG]: {ec.enemy.name} is being displaced by {plant.name} (poisonous)')
                     ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
         else:
             self.eatAndReproduce(ec, plant.position, plant, ec.position)
+            
+
 
     def checkNearbyPlants(self, ec):
         for plant in self.plants:
             if not isinstance(plant, Plant):
                 continue
-
+            
+            #for ec in self.enemies:
             dist = self.getDistance(ec.position, plant.position)
             self.plantAlarmAndPoisonProd(ec, dist, plant)
-
+                
             if plant.position == ec.position:
                 #ec.visitedPlants.add(plant.position)
                 self.handlePlantEnemyInteraction(ec, plant)
+                print(ec.currentPath)
                 ec.currentPath = []
+                #print(ec.targetPlant)
 
     
     def moveEachEnemyCluster(self, moveArr):
@@ -297,42 +304,48 @@ class Grid():
                 # Aktualisiere die Feindposition, falls er sich bewegt hat
                 self.updateEnemyClusterPos(ec, oldPos, newPos)
                 self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
-            else:
-                print('\nNICHT BEWEGT\n')
 
+            else:
+                print(f'[DEBUG]: {ec.enemy.name} bewegt sich nicht ::: Zielpflanze: {ec.targetPlant}')
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
+        #TODO: Warum verschieb sich manchmal der intervall von alamiert/ gifig, so dass feind nicht vertrieben wird.
         for toxin in self.toxins:
-            # Suche nach der passenden Triggerkombination für den Feind
             for trigger in toxin.triggerCombination:
-                ecName, minEcSize = trigger  # Extrahiere den Feindnamen und die Mindestanzahl
+                ecName, minEcSize = trigger
 
-                # Prüfen, Pflanze das Gift produziert und o der Feindname in der Trigger-Kombination passt
-                if plant in toxin.plantTransmitter and ec.enemy.name == ecName:
-                    
-                    # Prüfen, ob die Mindestanzahl an 'ec.num' erreicht wurde
-                    if ec.num < minEcSize and dist <= toxin.alarmDist:
+                if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
+                    if ec.num < minEcSize:
                         print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                     
-                    if dist > toxin.alarmDist:
+                    if dist <= toxin.alarmDist and plant.alarmed == False:
+                        # Pflanze wird alamiert und fängt an den Giftstoff zu produzieren, der Energie kostet
+                        #print('\n', dist, toxin.alarmDist, plant.alarmed, plant.isPoisonous)
+                        plant.enemyAlarm()
+                        toxin.toxinCosts(plant)
+                        print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                        #print(dist, toxin.alarmDist, plant.alarmed, plant.isPoisonous)
+                    elif dist > toxin.alarmDist and plant.isPoisonous == True:
+                        #print(dist, dist > toxin.alarmDist, toxin.alarmDist)
                         plant.alarmed = False
                         plant.isPoisonous = False
-                    elif dist <= toxin.alarmDist and plant.alarmed == False and plant.position not in ec.visitedPlants and plant.isPoisonous == False:
-                        plant.enemyAlarm()
-                        print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                    
-                    if plant.alarmed == True:
-                        if toxin.prodCounter < toxin.prodTime:
-                            toxin.prodCounter += 1
-                        elif toxin.prodCounter >= toxin.prodTime:
-                            plant.makeToxin()
-                            plant.isPoisonous = True
-                            toxin.toxinCosts(plant)
-                        
-                    if ec.position == plant.position:
-                        toxin.prodCounter = 0
 
+                    if plant.alarmed == True:
+                        # Prüfen ob der Produktions-Counter < produktionszeit für ein Giftstoff ist -> Falls ja erhöhe den Counter.
+                        if plant.getProdCounter(ec, toxin) < toxin.prodTime:
+                            plant.incrementProdCounter(ec, toxin)
+                            print(f'[DEBUG]: Produktionszähler für {plant.name}: {plant.toxinCounters[ec, toxin]}')
+                        else:
+                            # Falls Counter >= Produktionszeit ist, soll Pflanze auf giftig gesetzt werden und die 
+                            plant.makeToxin()
+                            toxin.toxinCosts(plant)
+                            print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+
+                        if ec.position == plant.position:
+                            # prodCounter wird zurückgesetzt auf 0
+                            plant.resetProdCounter(ec, toxin)
+                
     
     def addToxin(self, toxin):
         self.toxins.append(toxin)

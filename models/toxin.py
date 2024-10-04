@@ -14,7 +14,7 @@ class Toxin(Substance):
         self.deadly = deadly
         self.eliminationStrength = eliminationStrength
         self.alarmDist = alarmDist
-
+   
 
     def toxinCosts(self, plant):
         #print(f'[DEBUG]: pre Energy {plant.currEnergy}')

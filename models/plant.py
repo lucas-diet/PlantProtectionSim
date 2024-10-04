@@ -19,6 +19,7 @@ class Plant():
         self.color = color
         self.alarmed = False
         self.isPoisonous = False
+        self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
 
 
     def grow(self):
@@ -122,3 +123,20 @@ class Plant():
     def makeToxin(self):
         self.alarmed = False
         self.isPoisonous = True
+
+    
+    def resetProdCounter(self, ec, toxin):
+        self.toxinCounters[ec, toxin] = 0
+
+
+    def incrementProdCounter(self, ec, toxin):
+        key= (ec, toxin)
+        if key in self.toxinCounters:
+            self.toxinCounters[ec, toxin] += 1
+        else:
+            self.toxinCounters[ec, toxin] = 1
+
+
+    def getProdCounter(self, ec, toxin):
+        key = (ec, toxin)
+        return self.toxinCounters.get(key, 0)
