@@ -268,44 +268,7 @@ class Grid():
                     ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
         else:
             self.eatAndReproduce(ec, plant.position, plant, ec.position)
-            
 
-
-    def checkNearbyPlants(self, ec):
-        for plant in self.plants:
-            if not isinstance(plant, Plant):
-                continue
-            
-            #for ec in self.enemies:
-            dist = self.getDistance(ec.position, plant.position)
-            self.plantAlarmAndPoisonProd(ec, dist, plant)
-                
-            if plant.position == ec.position:
-                #ec.visitedPlants.add(plant.position)
-                self.handlePlantEnemyInteraction(ec, plant)
-                print(ec.currentPath)
-                ec.currentPath = []
-                #print(ec.targetPlant)
-
-    
-    def moveEachEnemyCluster(self, moveArr):
-        for ec, oldPos in moveArr:
-            if not isinstance(ec, EnemyCluster):
-                continue
-
-            if not self.canMove(ec):
-                continue
-            
-            path = ec.chooseRandomPlant(ec.position)
-            newPos = self.processEnemyMovement(ec, oldPos, path)
-
-            # Überprüfen, ob der Feind sich tatsächlich bewegt hat
-            if newPos != oldPos:
-                # Aktualisiere die Feindposition, falls er sich bewegt hat
-                self.updateEnemyClusterPos(ec, oldPos, newPos)
-                self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
-            else:
-                print(f'[DEBUG]: {ec.enemy.name} bewegt sich nicht ::: Zielpflanze: {ec.targetPlant}')
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
@@ -340,6 +303,42 @@ class Grid():
                         if ec.position == plant.position:
                             # prodCounter wird zurückgesetzt auf 0
                             plant.resetProdCounter(ec, toxin)
+
+
+    def checkNearbyPlants(self, ec):
+        for plant in self.plants:
+            if not isinstance(plant, Plant):
+                continue
+            
+            dist = self.getDistance(ec.position, plant.position)
+            self.plantAlarmAndPoisonProd(ec, dist, plant)
+                
+            if plant.position == ec.position:
+                #ec.visitedPlants.add(plant.position)
+                self.handlePlantEnemyInteraction(ec, plant)
+                print(ec.currentPath)
+                ec.currentPath = []
+                #print(ec.targetPlant)
+
+    
+    def moveEachEnemyCluster(self, moveArr):
+        for ec, oldPos in moveArr:
+            if not isinstance(ec, EnemyCluster):
+                continue
+
+            if not self.canMove(ec):
+                continue
+            
+            path = ec.chooseRandomPlant(ec.position)
+            newPos = self.processEnemyMovement(ec, oldPos, path)
+
+            # Überprüfen, ob der Feind sich tatsächlich bewegt hat
+            if newPos != oldPos:
+                # Aktualisiere die Feindposition, falls er sich bewegt hat
+                self.updateEnemyClusterPos(ec, oldPos, newPos)
+                self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
+            else:
+                print(f'[DEBUG]: {ec.enemy.name} bewegt sich nicht ::: Zielpflanze: {ec.targetPlant}')
                 
     
     def addToxin(self, toxin):

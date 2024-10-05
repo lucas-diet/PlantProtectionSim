@@ -90,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxGridEnergy=230, maxEnemyNum=2000, plant=None)
+sim.run(maxGridEnergy=205, maxEnemyNum=2000, plant=None)
 
     
 
