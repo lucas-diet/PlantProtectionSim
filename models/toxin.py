@@ -30,9 +30,5 @@ class Toxin(Substance):
                 tp = np[-1]
             else:
                 tp = 0
-        # Fallback: Falls keine passende Pflanze gefunden wurde, definiere np
-        if np == 0:
-            print('[DEBUG]: Kein neuer Pfad gefunden')
-            return []
 
         return np, tp
