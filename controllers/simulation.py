@@ -37,6 +37,16 @@ class Simulation:
         self.grid.displayGrid()
 
 
+    def noSpecificPlant(self, plant=None):
+        if plant is not None:
+            if plant not in self.grid.plants:
+                print(f'no more plants of {plant.name}')
+                return True
+        else:
+            return False
+        return False
+    
+
     def noPlantsBreak(self):
         """_summary_
             Überprüft, ob keine Pflanzen mehr im Grid vorhanden sind, und beendet die Simulation falls erforderlich.
@@ -48,7 +58,7 @@ class Simulation:
             True | False: Wenn keine Pflanzen auf dem Grid vorhande, dann True andernfalls False
         """
         if not self.grid.hasPlants():
-            print('no more plants. simulation ending.')
+            print('no more plants')
             return True
         return False
     
@@ -67,7 +77,7 @@ class Simulation:
         return False
 
     
-    def run(self, maxGridEnergy, maxEnemyNum):
+    def run(self, maxGridEnergy, maxEnemyNum, plant):
         """_summary_
             Führt die Hauptsimulationsschleife aus und aktualisiert den Zustand des Grids in jedem Schritt.
             Die Methode beginnt mit der Anzeige des initialen Zustands des Grids ('initDisplay'). 
@@ -84,6 +94,9 @@ class Simulation:
         count = 1
 
         while True:
+            if self.noSpecificPlant(plant) == True:
+                break
+
             if self.noPlantsBreak() == True:
                 break
             
