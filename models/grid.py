@@ -260,7 +260,7 @@ class Grid():
     def handlePlantEnemyInteraction(self, ec, plant):
         if len(self.toxins) > 0:
             for toxin in self.toxins:
-                if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False):
+                if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False) or [ec.enemy.name, ec.num] not  in toxin.triggerCombination:
                     #print(f'[DEBUG]: {ec.enemy.name} is eating {plant.name} at position {plant.position}')
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                 elif toxin.deadly == False and plant.isPoisonous == True:
@@ -319,13 +319,10 @@ class Grid():
                     
                     if dist <= toxin.alarmDist and plant.alarmed == False:
                         # Pflanze wird alamiert und fängt an den Giftstoff zu produzieren, der Energie kostet
-                        #print('\n', dist, toxin.alarmDist, plant.alarmed, plant.isPoisonous)
                         plant.enemyAlarm()
                         toxin.toxinCosts(plant)
                         print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                        #print(dist, toxin.alarmDist, plant.alarmed, plant.isPoisonous)
                     elif dist > toxin.alarmDist and plant.isPoisonous == True:
-                        #print(dist, dist > toxin.alarmDist, toxin.alarmDist)
                         plant.alarmed = False
                         plant.isPoisonous = False
 

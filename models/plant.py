@@ -130,7 +130,7 @@ class Plant():
 
 
     def incrementProdCounter(self, ec, toxin):
-        key= (ec, toxin)
+        key = (ec, toxin)
         if key in self.toxinCounters:
             self.toxinCounters[ec, toxin] += 1
         else:
