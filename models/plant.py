@@ -125,11 +125,11 @@ class Plant():
         self.isPoisonous = True
 
     
-    def resetProdCounter(self, ec, toxin):
+    def resetToxinProdCounter(self, ec, toxin):
         self.toxinCounters[ec, toxin] = 0
 
 
-    def incrementProdCounter(self, ec, toxin):
+    def incrementToxinProdCounter(self, ec, toxin):
         key = (ec, toxin)
         if key in self.toxinCounters:
             self.toxinCounters[ec, toxin] += 1
@@ -137,6 +137,6 @@ class Plant():
             self.toxinCounters[ec, toxin] = 1
 
 
-    def getProdCounter(self, ec, toxin):
+    def getToxinProdCounter(self, ec, toxin):
         key = (ec, toxin)
         return self.toxinCounters.get(key, 0)

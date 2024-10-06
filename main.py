@@ -71,7 +71,7 @@ grid.addPlant(p2)
 #grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
+#grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 s1 = Substance(name='s1', type='signal')
@@ -90,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxGridEnergy=205, maxEnemyNum=2000, plant=None)
+sim.run(plant=None, ec=None, maxGridEnergy=215, maxEnemyNum=2000)
 
     
 

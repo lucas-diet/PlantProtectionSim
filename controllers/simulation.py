@@ -37,13 +37,28 @@ class Simulation:
         self.grid.displayGrid()
 
 
-    def noSpecificPlant(self, plant=None):
+    def noSpecificPlantBreak(self, plant=None):
         if plant is not None:
             if plant not in self.grid.plants:
                 print(f'no more plants of {plant.name}')
                 return True
         else:
             return False
+
+    
+    def noSpeceficEnemyBreak(self, ec=None):
+        if ec is not None:
+            if ec not in self.grid.enemies:
+                print(f'no more enemies of {ec.enemy.name}')
+                return True
+        else:
+            return False
+        
+        
+    def noEnemiesBreak(self):
+        if self.grid.hasEnemies() == False:
+            print('no more enemies')
+            return True
         return False
     
 
@@ -57,7 +72,7 @@ class Simulation:
         Returns:
             True | False: Wenn keine Pflanzen auf dem Grid vorhande, dann True andernfalls False
         """
-        if not self.grid.hasPlants():
+        if self.grid.hasPlants() == False:
             print('no more plants')
             return True
         return False
@@ -77,7 +92,7 @@ class Simulation:
         return False
 
     
-    def run(self, maxGridEnergy, maxEnemyNum, plant):
+    def run(self, plant, ec, maxGridEnergy, maxEnemyNum):
         """_summary_
             Führt die Hauptsimulationsschleife aus und aktualisiert den Zustand des Grids in jedem Schritt.
             Die Methode beginnt mit der Anzeige des initialen Zustands des Grids ('initDisplay'). 
@@ -94,7 +109,13 @@ class Simulation:
         count = 1
 
         while True:
-            if self.noSpecificPlant(plant) == True:
+            if self.noSpecificPlantBreak(plant) == True:
+                break
+
+            if self.noSpeceficEnemyBreak(ec) == True:
+                break
+
+            if self.noEnemiesBreak() == True:
                 break
 
             if self.noPlantsBreak() == True:

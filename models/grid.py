@@ -174,6 +174,14 @@ class Grid():
                 if any(isinstance(item, Plant) for item in cell):
                     return True
         return False
+    
+
+    def hasEnemies(self):
+        for row in self.grid:
+            for cell in row:
+                if any(isinstance(item, EnemyCluster) for item in cell):
+                    return True
+        return False
                     
     
     def displayMove(self, ec, oldPos, newPos):
@@ -291,8 +299,8 @@ class Grid():
 
                     if plant.alarmed == True:
                         # Prüfen ob der Produktions-Counter < produktionszeit für ein Giftstoff ist -> Falls ja erhöhe den Counter.
-                        if plant.getProdCounter(ec, toxin) < toxin.prodTime:
-                            plant.incrementProdCounter(ec, toxin)
+                        if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                            plant.incrementToxinProdCounter(ec, toxin)
                             print(f'[DEBUG]: Produktionszähler für {plant.name}: {plant.toxinCounters[ec, toxin]}')
                         else:
                             # Falls Counter >= Produktionszeit ist, soll Pflanze auf giftig gesetzt werden und die 
@@ -302,7 +310,7 @@ class Grid():
 
                         if ec.position == plant.position:
                             # prodCounter wird zurückgesetzt auf 0
-                            plant.resetProdCounter(ec, toxin)
+                            plant.resetToxinProdCounter(ec, toxin)
 
 
     def checkNearbyPlants(self, ec):
@@ -315,10 +323,9 @@ class Grid():
                 
             if plant.position == ec.position:
                 #ec.visitedPlants.add(plant.position)
+                ec.currentPath = []
                 self.handlePlantEnemyInteraction(ec, plant)
                 print(ec.currentPath)
-                ec.currentPath = []
-                #print(ec.targetPlant)
 
     
     def moveEachEnemyCluster(self, moveArr):
