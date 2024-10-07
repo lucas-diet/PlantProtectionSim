@@ -266,7 +266,8 @@ class Grid():
         ec.eatPlant(ec, oldPos, plant, newPos)
         self.totalEnergy -= plant.currEnergy
         ec.reproduce(ec)
-        
+    
+
     def getTriggers(self, toxin):
         for trigger in toxin.triggerCombination:
             ecName, minEcSize = trigger
@@ -277,7 +278,7 @@ class Grid():
         if len(self.toxins) > 0:
             for toxin in self.toxins:
                 minEcSize = self.getTriggers(toxin)[1]
-                if toxin.deadly == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
+                if toxin.deadly == True and plant in toxin.plantTransmitter and ec.num >= minEcSize and [ec.enemy.name, ec.num] in toxin.triggerCombination:
                     #print(f'[DEBUG]: {ec.enemy.name} is eating {plant.name} at position {plant.position}')
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                     toxin.empoisonEnemies(ec)
@@ -294,35 +295,36 @@ class Grid():
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
-            ecName, minEcSize = self.getTriggers(toxin)
-            if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
-                if ec.num < minEcSize:
-                    print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
-                    continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
-                    
-                if dist <= toxin.alarmDist and plant.alarmed == False:
-                    # Pflanze wird alamiert und fängt an den Giftstoff zu produzieren, der Energie kostet
-                    plant.enemyAlarm()
-                    toxin.toxinCosts(plant)
-                    print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                elif dist > toxin.alarmDist and plant.isPoisonous == True:
-                    plant.alarmed = False
-                    plant.isPoisonous = False
-
-                if plant.alarmed == True:
-                    # Prüfen ob der Produktions-Counter < produktionszeit für ein Giftstoff ist -> Falls ja erhöhe den Counter.
-                    if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
-                        plant.incrementToxinProdCounter(ec, toxin)
-                        print(f'[DEBUG]: Produktionszähler für {plant.name}: {plant.toxinCounters[ec, toxin]}')
-                    else:
-                        # Falls Counter >= Produktionszeit ist, soll Pflanze auf giftig gesetzt werden und die 
-                        plant.makeToxin()
+            for trigger in toxin.triggerCombination:
+                ecName, minEcSize = trigger
+                if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
+                    if ec.num < minEcSize:
+                        print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
+                        continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
+                        
+                    if dist <= toxin.alarmDist and plant.alarmed == False:
+                        # Pflanze wird alamiert und fängt an den Giftstoff zu produzieren, der Energie kostet
+                        plant.enemyAlarm()
                         toxin.toxinCosts(plant)
-                        print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+                        print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                    elif dist > toxin.alarmDist and plant.isPoisonous == True:
+                        plant.alarmed = False
+                        plant.isPoisonous = False
 
-                    if ec.position == plant.position:
-                        # prodCounter wird zurückgesetzt auf 0
-                        plant.resetToxinProdCounter(ec, toxin)
+                    if plant.alarmed == True:
+                        # Prüfen ob der Produktions-Counter < produktionszeit für ein Giftstoff ist -> Falls ja erhöhe den Counter.
+                        if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                            plant.incrementToxinProdCounter(ec, toxin)
+                            print(f'[DEBUG]: Produktionszähler für {plant.name}: {plant.toxinCounters[ec, toxin]}')
+                        else:
+                            # Falls Counter >= Produktionszeit ist, soll Pflanze auf giftig gesetzt werden und die 
+                            plant.makeToxin()
+                            toxin.toxinCosts(plant)
+                            print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+
+                        if ec.position == plant.position:
+                            # prodCounter wird zurückgesetzt auf 0
+                            plant.resetToxinProdCounter(ec, toxin)
 
 
     def checkNearbyPlants(self, ec):
