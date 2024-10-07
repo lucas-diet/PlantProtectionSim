@@ -19,6 +19,7 @@ class EnemyCluster():
         self.visitedPlants = set()
         self.targetPlant = None
         self.currentPath = []
+        self.intoxicated = False
 
         
     def detectPlant(self, grid):
@@ -155,9 +156,6 @@ class EnemyCluster():
         Returns:
            list[tuple[int, int]] | None: Eine Liste von Positionen, die die Schritte zur Pflanze darstellen, oder 'None', wenn kein Pfad gefunden wurde.
         """
-        start = self.position
-        #path = self.chooseRandomPlant(start)
-
         steps = []
 
         if path is None:

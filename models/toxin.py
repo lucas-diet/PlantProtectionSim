@@ -32,3 +32,11 @@ class Toxin(Substance):
                 tp = 0
 
         return np, tp
+    
+
+    def empoisonEnemies(self, ec):
+        ec.intoxicated = True
+
+
+    def killEnemies(self, ec):
+        ec.num -= self.eliminationStrength

@@ -268,8 +268,13 @@ class Grid():
     def handlePlantEnemyInteraction(self, ec, plant):
         if len(self.toxins) > 0:
             for toxin in self.toxins:
-                if toxin.deadly == True or (plant not in toxin.plantTransmitter and toxin.deadly == False) or [ec.enemy.name, ec.num] not  in toxin.triggerCombination:
+                if toxin.deadly == True:
                     #print(f'[DEBUG]: {ec.enemy.name} is eating {plant.name} at position {plant.position}')
+                    self.eatAndReproduce(ec, plant.position, plant, ec.position)
+                    toxin.empoisonEnemies(ec)
+                elif plant not in toxin.plantTransmitter and toxin.deadly == False:
+                    self.eatAndReproduce(ec, plant.position, plant, ec.position)
+                elif [ec.enemy.name, ec.num] not in toxin.triggerCombination:
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                 elif toxin.deadly == False and plant.isPoisonous == True:
                     #print(f'[DEBUG]: {ec.enemy.name} is being displaced by {plant.name} (poisonous)')
@@ -328,6 +333,12 @@ class Grid():
                 print(ec.currentPath)
 
     
+    def reduceClusterSize(self, ec):
+        for toxin in self.toxins:
+            if ec.intoxicated == True:
+                toxin.killEnemies(ec)
+
+    
     def moveEachEnemyCluster(self, moveArr):
         for ec, oldPos in moveArr:
             if not isinstance(ec, EnemyCluster):
@@ -338,6 +349,7 @@ class Grid():
             
             path = ec.chooseRandomPlant(ec.position)
             newPos = self.processEnemyMovement(ec, oldPos, path)
+            self.reduceClusterSize(ec)
 
             # Überprüfen, ob der Feind sich tatsächlich bewegt hat
             if newPos != oldPos:

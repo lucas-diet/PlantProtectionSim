@@ -78,18 +78,22 @@ class Simulation:
         return False
     
 
-    def upperGridEnergyBreak(self, maxGridEnergy):
-        if self.grid.getGridEnergy() > maxGridEnergy:
-            print('Upper Border -- Grid-Energy')
-            return True
-        return False
+    def upperGridEnergyBreak(self, maxGridEnergy=None):
+        if maxGridEnergy is not None:
+            if self.grid.getGridEnergy() > maxGridEnergy:
+                print('Upper Border -- Grid-Energy')
+                return True
+        else:
+            return False
     
 
-    def upperEnemyNumBreak(self, maxEnemyNum):
-        if self.grid.getGridEnemyNum() > maxEnemyNum:
-            print('Upper Border -- Enemies')
-            return True
-        return False
+    def upperEnemyNumBreak(self, maxEnemyNum=None):
+        if maxEnemyNum is not None:
+            if self.grid.getGridEnemyNum() > maxEnemyNum:
+                print('Upper Border -- Enemies')
+                return True
+        else:
+            return False
 
     
     def run(self, plant, ec, maxGridEnergy, maxEnemyNum):

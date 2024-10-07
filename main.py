@@ -71,7 +71,7 @@ grid.addPlant(p2)
 #grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-#grid.addEnemies(ec2)
+grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 s1 = Substance(name='s1', type='signal')
@@ -82,15 +82,15 @@ tox1 = Toxin(substance=s2,
              energyCosts=1,
              triggerCombination=[['e1', 2], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
-             deadly=False,
-             eliminationStrength=['e1', 1],
+             deadly=True,
+             eliminationStrength=2,
              alarmDist = 3,
             )
     
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(plant=None, ec=None, maxGridEnergy=215, maxEnemyNum=2000)
+sim.run(plant=None, ec=None, maxGridEnergy=215, maxEnemyNum=None)
 
     
 
