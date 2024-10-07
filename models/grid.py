@@ -278,13 +278,13 @@ class Grid():
         if len(self.toxins) > 0:
             for toxin in self.toxins:
                 minEcSize = self.getTriggers(toxin)[1]
-                if toxin.deadly == True and plant in toxin.plantTransmitter and ec.num >= minEcSize and [ec.enemy.name, ec.num] in toxin.triggerCombination:
+                if toxin.deadly == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
                     #print(f'[DEBUG]: {ec.enemy.name} is eating {plant.name} at position {plant.position}')
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                     toxin.empoisonEnemies(ec)
                 elif toxin.deadly == True or plant not in toxin.plantTransmitter and toxin.deadly == False:
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
-                elif toxin.deadly == True or [ec.enemy.name, ec.num] not in toxin.triggerCombination:
+                elif toxin.deadly == True or [ec.enemy.name, ec.num] not in toxin.triggerCombination and ec.num < minEcSize:
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                 elif toxin.deadly == False and plant.isPoisonous == True:
                     #print(f'[DEBUG]: {ec.enemy.name} is being displaced by {plant.name} (poisonous)')

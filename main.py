@@ -71,16 +71,16 @@ grid.addPlant(p2)
 #grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
+#grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 s1 = Substance(name='s1', type='signal')
 s2 = Substance(name='s2', type='toxin')
 
 tox1 = Toxin(substance=s2, 
-             plantTransmitter=[p1, p2],
+             plantTransmitter=[p1],
              energyCosts=1,
-             triggerCombination=[['e1', 2], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
+             triggerCombination=[['e1', 5], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
              deadly=True,
              eliminationStrength=1,
