@@ -145,7 +145,10 @@ class Grid():
                     else:
                         lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
                 elif isinstance(obj, EnemyCluster):
-                    lines.append(f'{obj.enemy.name}-#{obj.num}')
+                    if obj.intoxicated == True:
+                        lines.append(f'{obj.enemy.name}-#{obj.num}*')
+                    else:
+                        lines.append(f'{obj.enemy.name}-#{obj.num}')
             return lines if lines else ['------']  # Leeres Feld
 
         # Alle Zellen vorbereiten, jede Zelle wird zu einer Liste von Zeilen
@@ -264,17 +267,23 @@ class Grid():
         self.totalEnergy -= plant.currEnergy
         ec.reproduce(ec)
         
+    def getTriggers(self, toxin):
+        for trigger in toxin.triggerCombination:
+            ecName, minEcSize = trigger
+        return ecName, minEcSize
     
+
     def handlePlantEnemyInteraction(self, ec, plant):
         if len(self.toxins) > 0:
             for toxin in self.toxins:
-                if toxin.deadly == True:
+                minEcSize = self.getTriggers(toxin)[1]
+                if toxin.deadly == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
                     #print(f'[DEBUG]: {ec.enemy.name} is eating {plant.name} at position {plant.position}')
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                     toxin.empoisonEnemies(ec)
-                elif plant not in toxin.plantTransmitter and toxin.deadly == False:
+                elif toxin.deadly == True or plant not in toxin.plantTransmitter and toxin.deadly == False:
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
-                elif [ec.enemy.name, ec.num] not in toxin.triggerCombination:
+                elif toxin.deadly == True or [ec.enemy.name, ec.num] not in toxin.triggerCombination:
                     self.eatAndReproduce(ec, plant.position, plant, ec.position)
                 elif toxin.deadly == False and plant.isPoisonous == True:
                     #print(f'[DEBUG]: {ec.enemy.name} is being displaced by {plant.name} (poisonous)')
@@ -285,37 +294,35 @@ class Grid():
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
-            for trigger in toxin.triggerCombination:
-                ecName, minEcSize = trigger
-
-                if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
-                    if ec.num < minEcSize:
-                        print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
-                        continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
+            ecName, minEcSize = self.getTriggers(toxin)
+            if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
+                if ec.num < minEcSize:
+                    print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
+                    continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                     
-                    if dist <= toxin.alarmDist and plant.alarmed == False:
-                        # Pflanze wird alamiert und fängt an den Giftstoff zu produzieren, der Energie kostet
-                        plant.enemyAlarm()
+                if dist <= toxin.alarmDist and plant.alarmed == False:
+                    # Pflanze wird alamiert und fängt an den Giftstoff zu produzieren, der Energie kostet
+                    plant.enemyAlarm()
+                    toxin.toxinCosts(plant)
+                    print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                elif dist > toxin.alarmDist and plant.isPoisonous == True:
+                    plant.alarmed = False
+                    plant.isPoisonous = False
+
+                if plant.alarmed == True:
+                    # Prüfen ob der Produktions-Counter < produktionszeit für ein Giftstoff ist -> Falls ja erhöhe den Counter.
+                    if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                        plant.incrementToxinProdCounter(ec, toxin)
+                        print(f'[DEBUG]: Produktionszähler für {plant.name}: {plant.toxinCounters[ec, toxin]}')
+                    else:
+                        # Falls Counter >= Produktionszeit ist, soll Pflanze auf giftig gesetzt werden und die 
+                        plant.makeToxin()
                         toxin.toxinCosts(plant)
-                        print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                    elif dist > toxin.alarmDist and plant.isPoisonous == True:
-                        plant.alarmed = False
-                        plant.isPoisonous = False
+                        print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
 
-                    if plant.alarmed == True:
-                        # Prüfen ob der Produktions-Counter < produktionszeit für ein Giftstoff ist -> Falls ja erhöhe den Counter.
-                        if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
-                            plant.incrementToxinProdCounter(ec, toxin)
-                            print(f'[DEBUG]: Produktionszähler für {plant.name}: {plant.toxinCounters[ec, toxin]}')
-                        else:
-                            # Falls Counter >= Produktionszeit ist, soll Pflanze auf giftig gesetzt werden und die 
-                            plant.makeToxin()
-                            toxin.toxinCosts(plant)
-                            print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
-
-                        if ec.position == plant.position:
-                            # prodCounter wird zurückgesetzt auf 0
-                            plant.resetToxinProdCounter(ec, toxin)
+                    if ec.position == plant.position:
+                        # prodCounter wird zurückgesetzt auf 0
+                        plant.resetToxinProdCounter(ec, toxin)
 
 
     def checkNearbyPlants(self, ec):
@@ -338,7 +345,7 @@ class Grid():
             if ec.intoxicated == True:
                 toxin.killEnemies(ec)
 
-    
+
     def moveEachEnemyCluster(self, moveArr):
         for ec, oldPos in moveArr:
             if not isinstance(ec, EnemyCluster):
@@ -350,6 +357,7 @@ class Grid():
             path = ec.chooseRandomPlant(ec.position)
             newPos = self.processEnemyMovement(ec, oldPos, path)
             self.reduceClusterSize(ec)
+         
 
             # Überprüfen, ob der Feind sich tatsächlich bewegt hat
             if newPos != oldPos:
