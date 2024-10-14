@@ -39,4 +39,9 @@ class Toxin(Substance):
 
 
     def killEnemies(self, ec):
-        ec.num -= self.eliminationStrength
+        if ec.num > 0:
+            ec.num -= self.eliminationStrength
+
+            if ec.num <= 0:
+                ec.num = 0
+                ec.grid.removeEnemies(ec)

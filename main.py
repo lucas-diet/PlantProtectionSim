@@ -23,7 +23,7 @@ plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', 
 #name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
 p1 = Plant(name='p1', 
            initEnergy=100, 
-           growthRateEnegry=1, 
+           growthRateEnegry=2, 
            minEnegrgy=50, 
            reproductionIntervall=0, 
            offspingEnergy=60, 
@@ -35,7 +35,7 @@ p1 = Plant(name='p1',
     
 p2 = Plant(name='p2', 
            initEnergy=100,
-           growthRateEnegry=1,
+           growthRateEnegry=2,
            minEnegrgy=50, 
            reproductionIntervall=0, 
            offspingEnergy=60, 
@@ -53,7 +53,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(2, 5), 
+           position=(3, 5), 
            grid=grid,
            color = plantColor[1])
     
@@ -62,9 +62,9 @@ e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
-ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatVictory=10)
-ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(2,0), grid=grid, eatVictory=20)
-ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatVictory=20)
+ec1 = EnemyCluster(enemy=e1, num=5, speed=1, position=(2,0), grid=grid, eatingSpeed=10, eatVictory=10)
+ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=10, eatVictory=10)
+ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
 grid.addPlant(p1)
 grid.addPlant(p2)
@@ -80,7 +80,7 @@ s2 = Substance(name='s2', type='toxin')
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1],
              energyCosts=1,
-             triggerCombination=[['e1', 5], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
+             triggerCombination=[['e1', 2], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
              deadly=True,
              eliminationStrength=1,
@@ -90,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(plant=None, ec=None, maxGridEnergy=350, maxEnemyNum=None)
+sim.run(plant=None, ec=None, maxGridEnergy=230, maxEnemyNum=None)
 
     
 

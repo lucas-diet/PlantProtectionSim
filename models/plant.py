@@ -17,8 +17,8 @@ class Plant():
         self.grid = grid
         self.age = 0
         self.color = color
-        self.alarmed = False
-        self.isPoisonous = False
+        self.isAlarmed = False
+        self.isToxic = False
         self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
 
 
@@ -117,12 +117,12 @@ class Plant():
     
     
     def enemyAlarm(self):
-        self.alarmed = True
+        self.isAlarmed = True
     
 
     def makeToxin(self):
-        self.alarmed = False
-        self.isPoisonous = True
+        self.isAlarmed = False
+        self.isToxic = True
 
     
     def resetToxinProdCounter(self, ec, toxin):

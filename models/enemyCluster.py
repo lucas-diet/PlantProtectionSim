@@ -1,5 +1,4 @@
 
-
 from collections import deque
 import random
 
@@ -7,7 +6,7 @@ from models.plant import Plant
 
 class EnemyCluster():
     
-    def __init__(self, enemy, num, speed, position, grid, eatVictory):
+    def __init__(self, enemy, num, speed, position, grid, eatingSpeed, eatVictory):
         self.enemy = enemy
         self.num = num
         self.speed = speed
@@ -16,10 +15,13 @@ class EnemyCluster():
         self.stepCounter = 0
         self.eatVictory = eatVictory
         self.eatedEnergy = 0
+        self.eatingSpeed = eatingSpeed
+        self.newEnemy = 0
         self.visitedPlants = set()
         self.targetPlant = None
         self.currentPath = []
         self.intoxicated = False
+        
 
         
     def detectPlant(self, grid):
@@ -163,8 +165,6 @@ class EnemyCluster():
             return None
         else:
             for i in range(1, len(path)):
-                #nextStep = path[i]
-                #if nextStep not in self.visitedPlants:
                 steps.append(path[i])
 
         return steps
@@ -184,16 +184,19 @@ class EnemyCluster():
 
             if plant is not None:
                 print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
-                self.grid.removePlant(plant)  # Aktualisiere die Pflanzenliste im Grid
-                self.eatedEnergy += plant.currEnergy
-                self.targetPlant = None
-                #self.visitedPlants.add(plant.position)
+                plant.currEnergy -= self.eatingSpeed
+                self.eatedEnergy += self.eatingSpeed
+
+                if plant.currEnergy <= plant.minEnergy:
+                    self.targetPlant = None
+                    self.grid.removePlant(plant)
 
             # Signalisiere allen Feinden, dass eine Pflanze gegessen wurde
-            for enemyCluster in self.grid.enemies:
-                if enemyCluster.targetPlant == pPos:
-                    enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
-                    print(f'{enemyCluster.enemy.name} has lost its target and will look for a new plant')
+            if self.targetPlant is None:
+                for enemyCluster in self.grid.enemies:
+                    if enemyCluster.targetPlant == pPos:
+                        enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
+                        print(f'{enemyCluster.enemy.name} has lost its target and will look for a new plant')
 
             # Jetzt ein neues Ziel suchen
             return self.chooseRandomPlant(ePos)
@@ -202,18 +205,17 @@ class EnemyCluster():
             print(f'No plant found at position {pPos}.')
                     
 
-    def reproduce(self, ec):
-        newEnemy = 0
+    def reproduce(self):
         if self.eatedEnergy >= self.eatVictory:
-            for _ in range(self.eatVictory, round(self.eatedEnergy)+1, self.eatVictory):
-                newEnemy += 1    
-        ec.num += newEnemy
-        self.eatedEnergy -= newEnemy * self.eatVictory
-        print(f'{ec.enemy.name} leftover eated energy:', self.eatedEnergy)
+            self.newEnemy += 1
+            self.num += self.newEnemy
+            self.eatedEnergy -= self.newEnemy * self.eatedEnergy
+            self.newEnemy = 0
+        #print(f'Feind: {self.enemy.name, self.num}, Eaten Energy: {self.eatedEnergy}')
 
 
     def newPath(self, plant, allPlants):
-        if plant.isPoisonous:
+        if plant.isToxic:
             alternativePlants = []
             shortestDistance = float('inf')
 
