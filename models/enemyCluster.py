@@ -17,10 +17,10 @@ class EnemyCluster():
         self.eatedEnergy = 0
         self.eatingSpeed = eatingSpeed
         self.newEnemy = 0
-        self.visitedPlants = set()
         self.targetPlant = None
         self.currentPath = []
         self.intoxicated = False
+        self.lastVisitedPlant = None
         
 
         
@@ -114,7 +114,7 @@ class EnemyCluster():
         """
         
         # Wenn bereits eine Zielpflanze gesetzt ist, muss keine neue ausgewählt werden
-        if self.targetPlant is not None and self.targetPlant not in self.visitedPlants:
+        if self.targetPlant is not None:
             return self.findShortestPath(start, self.targetPlant)
         
         helperGrid = self.grid.helperGrid()

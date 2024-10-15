@@ -274,6 +274,8 @@ class Grid():
     
 
     def handlePlantEnemyInteraction(self, ec, plant):
+        ec.lastVisitedPlant = plant # Aktualisiere die zuletzt besuchte Pflanze
+
         if len(self.toxins) > 0:
             self.eatAndReproduce(ec, plant.position, plant, ec.position)
             for toxin in self.toxins:
@@ -287,6 +289,7 @@ class Grid():
 
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
+        #TODO: Wenn deadly==False, dann wird isToxic erst False, wenn andere Pflanze isToxic == True !?
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 ecName, minEcSize = trigger
@@ -313,11 +316,14 @@ class Grid():
                                 print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                          
 
                         # Giftigkeit zurücksetzen, wenn Feind weg ist
-                        if dist > 0 and plant.isToxic == True:
-                            plant.isToxic = False
-                            plant.resetToxinProdCounter(ec, toxin)
-                            print(f'[DEBUG]: {plant.name} ist nicht mehr giftig, da der Feind weg ist')             
-
+                        if ec.lastVisitedPlant is not None and toxin.deadly == False:
+                            #Berechnet Dist zur voher besuchten Pflanze. Wenn preDist > 0 und isToxic == True, dann soll isToxic = False und Produktionszähler zurückgesetzt werden.
+                            preDist = self.getDistance(ec.position, ec.lastVisitedPlant.position)
+                            if preDist == 1 and ec.lastVisitedPlant.isToxic == True:
+                                ec.lastVisitedPlant.isToxic = False
+                                ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
+                                print(f'[DEBUG]: {ec.lastVisitedPlant.name} ist nicht mehr giftig, da der Feind weg ist')            
+                
 
     def checkNearbyPlants(self, ec):
         for plant in self.plants:
