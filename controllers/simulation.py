@@ -96,7 +96,7 @@ class Simulation:
             return False
 
     
-    def run(self, plant, ec, maxGridEnergy, maxEnemyNum):
+    def run(self, maxSteps, plant, ec, maxGridEnergy, maxEnemyNum):
         """_summary_
             Führt die Hauptsimulationsschleife aus und aktualisiert den Zustand des Grids in jedem Schritt.
             Die Methode beginnt mit der Anzeige des initialen Zustands des Grids ('initDisplay'). 
@@ -113,6 +113,9 @@ class Simulation:
         count = 1
 
         while True:
+            if count - 1 == maxSteps:
+                break
+
             if self.noSpecificPlantBreak(plant) == True:
                 break
 

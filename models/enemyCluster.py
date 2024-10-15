@@ -22,8 +22,7 @@ class EnemyCluster():
         self.intoxicated = False
         self.lastVisitedPlant = None
         
-
-        
+     
     def detectPlant(self, grid):
         """_summary_
             Ermittelt die Positionen von Pflanzen im Grid.
@@ -211,7 +210,6 @@ class EnemyCluster():
             self.num += self.newEnemy
             self.eatedEnergy -= self.newEnemy * self.eatedEnergy
             self.newEnemy = 0
-        #print(f'Feind: {self.enemy.name, self.num}, Eaten Energy: {self.eatedEnergy}')
 
 
     def newPath(self, plant, allPlants):
@@ -221,13 +219,13 @@ class EnemyCluster():
 
             # Suche nach Pflanzen mit der kürzesten Entfernung
             for p in allPlants:
-                distance = self.grid.getDistance(self.position, p.position)
+                dist = self.grid.getDistance(self.position, p.position)
 
-                if distance < shortestDistance and self.position != p.position:
+                if dist < shortestDistance and self.position != p.position:
                     # Neue kürzeste Distanz gefunden, leere Liste und füge diese Pflanze hinzu
-                    shortestDistance = distance
+                    shortestDistance = dist
                     alternativePlants = [p]
-                elif distance == shortestDistance and self.position != p.position:
+                elif dist == shortestDistance and self.position != p.position:
                     # Pflanze hat die gleiche kürzeste Distanz, also füge sie zur Liste hinzu
                     alternativePlants.append(p)
 

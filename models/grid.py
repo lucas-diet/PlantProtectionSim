@@ -289,7 +289,6 @@ class Grid():
 
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
-        #TODO: Wenn deadly==False, dann wird isToxic erst False, wenn andere Pflanze isToxic == True !?
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 ecName, minEcSize = trigger
