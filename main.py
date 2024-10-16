@@ -25,7 +25,7 @@ p1 = Plant(name='p1',
            initEnergy=100, 
            growthRateEnegry=2, 
            minEnegrgy=50, 
-           reproductionIntervall=0, 
+           reproductionIntervall=3, 
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
@@ -82,7 +82,7 @@ tox1 = Toxin(substance=s2,
              energyCosts=1,
              triggerCombination=[['e1', 2], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
-             deadly=True,
+             deadly=False,
              eliminationStrength=1,
              alarmDist = 3,
             )
@@ -90,7 +90,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxSteps=3000, plant=None, ec=None, maxGridEnergy=230, maxEnemyNum=None)
+sim.run(maxSteps=70, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
     
 

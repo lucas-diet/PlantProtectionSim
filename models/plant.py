@@ -44,7 +44,7 @@ class Plant():
             self.grid.removePlant(self)
             
         
-    def reproduce(self):
+    def scatterSeed(self):
         """_summary_
             Ermöglicht der Pflanze die Fortpflanzung, wenn die Bedingungen erfüllt sind.
             Die Methode überprüft, ob die Pflanze gemäß ihrer Fortpflanzungszyklen ('reproductionSteps') zur Fortpflanzung bereit ist.
@@ -79,6 +79,17 @@ class Plant():
                     self.currEnergy -= 10 # Enegrie aufwenden, um Nachkommen zu produzieren!
 
 
+    def getDirections(self):
+        directions = []
+        for dx in range(-self.maxDist, self.maxDist+1):
+            for dy in range(-self.maxDist, self.maxDist+1):
+                dist = abs(dx) + abs(dy)
+                if self.minDist <= dist <= self.maxDist:
+                    directions.append((dx, dy))
+        
+        return directions
+    
+
     def setOffspringPos(self):
         """_summary_
             Bestimmt eine gültige Position für einen Nachkommen innerhalb eines definierten Radius.
@@ -91,24 +102,24 @@ class Plant():
             tuple[int, int] | None: Die neue Position für den Nachkommen als Koordinatenpaar oder 'None', wenn keine gültige Position gefunden wurde.
         """
         
-        directions = [(dx, dy) for dx in range(-self.maxDist, self.maxDist+1)
-                      for dy in range(-self.maxDist, self.maxDist+1)
-                      if self.minDist <= abs(dx) + abs(dy) <= self.maxDist]
-        
+        directions = self.getDirections()
         random.shuffle(directions)
 
         for dx, dy in directions:
             newX, newY = self.position[0] + dx, self.position[1] + dy
 
-            if self.grid.isWithinBounds(newX, newY) and not self.grid.isOccupied((newX, newY)):
-                print(f'{self.name} auf {self.position} erzeugt Nachkommen')
-                return (newX, newY)
-
-            #else:
-            #    print('kein Platz im Radius!')
-            #    pass
+            if self.grid.isWithinBounds(newX, newY):
+                if not self.grid.isOccupied((newX, newY)):
+                    print(f'[DEBUG]: {self.name} auf {self.position} erzeugt Nachkommen auf {newX, newY}')
+                    return (newX, newY)
+                else:
+                    print(f'[INFO]: Position {newX, newY} ist belegt. Nachkomme wird nicht erzeugt.')
+                    pass
+            else:
+                print(f'[INFO]: Position {newX, newY} liegt außerhalb der Grenzen.')
+                pass
             
-        return None 
+        return None
 
 
     def getColor(self):

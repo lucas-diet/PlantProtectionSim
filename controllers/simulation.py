@@ -17,7 +17,7 @@ class Simulation:
         for plant in self.grid.plants[:]:
             plant.grow()
             plant.survive()
-            plant.reproduce()
+            plant.scatterSeed()
 
 
     def displayInit(self):
