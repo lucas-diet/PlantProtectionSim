@@ -1,6 +1,7 @@
 
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
+from models.symConnection import SymbioticConnection
 
 class Grid():
 
@@ -393,4 +394,20 @@ class Grid():
 
         # Bewege alle gesammelten Feinde
         self.moveEachEnemyCluster(enemies_to_move)
+
+
+    def getAllGridConnections(self, plant, *scs):
+        connections = {}
+
+        for sc in scs:
+            # Stelle sicher, dass es sich um eine SymbioticConnection handelt und die Verbindung aktiv ist
+            if sc.connect == True:
+                # Prüfe, ob die übergebene Pflanze Teil der Verbindung ist
+                if sc.plant1 == plant:
+                    connections[sc.plant2.name] = sc.plant2.position
+                elif sc.plant2 == plant:
+                    connections[sc.plant1.name] = sc.plant1.position
+
+        print(connections)
+        return connections
   

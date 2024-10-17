@@ -20,6 +20,7 @@ class Plant():
         self.isAlarmed = False
         self.isToxic = False
         self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
+        self.gridConnections = {}
 
 
     def grow(self):

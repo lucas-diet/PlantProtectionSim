@@ -9,6 +9,8 @@ from models.enemy import Enemy
 from models.enemyCluster import EnemyCluster
 from models.grid import Grid
 
+from models.symConnection import SymbioticConnection
+
 from models.substance import Substance
 from models.toxin import Toxin
 
@@ -25,11 +27,11 @@ p1 = Plant(name='p1',
            initEnergy=100, 
            growthRateEnegry=2, 
            minEnegrgy=50, 
-           reproductionIntervall=3, 
+           reproductionIntervall=0, 
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
-           position=(0, 3), 
+           position=(5, 3), 
            grid=grid,
            color=plantColor[0])
     
@@ -53,7 +55,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(3, 5), 
+           position=(4, 2), 
            grid=grid,
            color = plantColor[1])
     
@@ -68,9 +70,9 @@ ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSp
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-#grid.addPlant(p3)
+grid.addPlant(p3)
 
-grid.addEnemies(ec1)
+#grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
@@ -90,9 +92,16 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxSteps=70, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=1, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
-    
+sc1 = SymbioticConnection(p2, p3)
+sc1.createConnection()
+
+sc2 = SymbioticConnection(p2, p1)
+sc2.createConnection()
+
+
+grid.getAllGridConnections(p2, sc1, sc2)
 
 #gui = Gui()
 #gui.mainloop()
