@@ -1,4 +1,7 @@
 
+import numpy as np
+
+
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
 from models.symConnection import SymbioticConnection
@@ -11,6 +14,7 @@ class Grid():
         
         self.plants = []
         self.enemies = []
+        self.signals = []
         self.toxins = []
         self.grid = [[[] for _ in range(width)] for _ in range(height)]
         self.totalEnergy = 0
@@ -59,14 +63,20 @@ class Grid():
 
         self.enemies.remove(ec)
         self.grid[pos[0]][pos[1]].remove(ec)
-    
 
-    def addToxin(self, toxin):
-        self.toxins.append(toxin)
+
+    def addSubstance(self, substance):
+        if substance.type == 'toxin':
+            self.toxins.append(substance)
+        elif substance.type == 'signal':
+            self.signals.append(substance)
     
     
-    def removeToxin(self, toxin):
-        self.toxins.remove(toxin)
+    def removeSubstance(self, substance):
+        if substance.type == 'toxin':
+            self.toxins.remove(substance)
+        elif substance.type == 'signal':
+            self.signals.remove(substance)
 
 
     def getDistance(self, pos1, pos2):
@@ -411,4 +421,22 @@ class Grid():
 
         print(connections)
         return connections
-  
+    
+
+    def fillMatrix(self, type, allSignals, allPlants):
+        eMat = np.zeros((len(allPlants), len(allSignals)), dtype=int)
+
+        for i , plant in enumerate(allPlants):  # Iteriere über die Pflanzen
+            for j, signal in enumerate(allSignals):  # Iteriere über die Signale
+                if plant in getattr(signal, type):  # Dynamisch auf 'emit' oder 'receive' zugreifen
+                    eMat[i][j] = 1
+        return eMat
+    
+
+    def createInteractionMatrix(self, allSignals, allPlants):
+        for type in ['emit', 'receive']:
+            if type == 'emit':
+                aMat = self.fillMatrix(type, allSignals, allPlants)
+            else:
+                bMat = self.fillMatrix(type, allSignals, allPlants)
+        return (aMat, bMat)

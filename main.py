@@ -12,6 +12,7 @@ from models.grid import Grid
 from models.symConnection import SymbioticConnection
 
 from models.substance import Substance
+from models.signal import Signal
 from models.toxin import Toxin
 
 from controllers.simulation import Simulation
@@ -78,6 +79,7 @@ grid.addEnemies(ec1)
 
 s1 = Substance(name='s1', type='signal')
 s2 = Substance(name='s2', type='toxin')
+s3 = Substance(name='s3', type='signal')
 
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1, p2],
@@ -89,10 +91,10 @@ tox1 = Toxin(substance=s2,
              alarmDist = 3,
             )
     
-grid.addToxin(tox1)
+grid.addSubstance(tox1)
     
 sim = Simulation(grid)
-sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=1, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 sc1 = SymbioticConnection(p2, p3)
 sc1.createConnection()
@@ -102,6 +104,31 @@ sc2.createConnection()
 
 
 grid.getAllGridConnections(p2, sc1, sc2)
+
+sig1 = Signal(substance=s1,
+              emit=[p1,p2],
+              receive=[p3],
+              triggerCombination=[['e1', 2]],
+              spreadType='symbiotic',
+              sendingSpeed=1,
+              energyCosts=2,
+              afterEffectTime=2)
+
+sig2 = Signal(substance=s3,
+              emit=[p1,p3],
+              receive=[p3],
+              triggerCombination=[['e1', 2]],
+              spreadType='symbiotic',
+              sendingSpeed=1,
+              energyCosts=2,
+              afterEffectTime=2)
+
+grid.addSubstance(sig1)
+grid.addSubstance(sig2)
+
+iMat = grid.createInteractionMatrix(grid.signals, grid.plants)
+for mat, type in zip(iMat, ['A', 'B']):
+    print(f'{type} = \n {mat}')
 
 #gui = Gui()
 #gui.mainloop()
