@@ -22,7 +22,7 @@ class Plant():
         self.isToxic = False
         self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
         self.gridConnections = {}
-
+        
 
     def grow(self):
         """_summary_
@@ -78,7 +78,6 @@ class Plant():
                                       color = self.color
                     )
                     self.grid.addPlant(offspring)
-                    self.currEnergy -= 10 # Enegrie aufwenden, um Nachkommen zu produzieren!
 
 
     def getDirections(self):

@@ -129,6 +129,7 @@ grid.addSubstance(sig2)
 iMat = grid.createInteractionMatrix(grid.signals, grid.plants)
 for mat, type in zip(iMat, ['A', 'B']):
     print(f'{type} = \n {mat}')
+''''''
 
 #gui = Gui()
 #gui.mainloop()

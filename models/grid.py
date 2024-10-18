@@ -310,7 +310,7 @@ class Grid():
                     toxin.empoisonEnemies(ec)
         else:
             self.eatAndReproduce(ec, plant.position, plant, ec.position)
-
+    
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
@@ -345,7 +345,7 @@ class Grid():
                             if preDist == 1 and ec.lastVisitedPlant.isToxic == True:
                                 ec.lastVisitedPlant.isToxic = False
                                 ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
-                                print(f'[DEBUG]: {ec.lastVisitedPlant.name} ist nicht mehr giftig, da der Feind weg ist')            
+                                print(f'[DEBUG]: {ec.lastVisitedPlant.name} ist nicht mehr giftig, da der Feind weg ist')
                 
 
     def checkNearbyPlants(self, ec):
