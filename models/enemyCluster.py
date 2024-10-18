@@ -6,16 +6,17 @@ from models.plant import Plant
 
 class EnemyCluster():
     
-    def __init__(self, enemy, num, speed, position, grid, eatingSpeed, eatVictory):
+    def __init__(self, enemy, num, speed, position, grid, eatVictory, eatingSpeed):
         self.enemy = enemy
         self.num = num
         self.speed = speed
         self.position = position
         self.grid = grid
-        self.stepCounter = 0
         self.eatVictory = eatVictory
-        self.eatedEnergy = 0
         self.eatingSpeed = eatingSpeed
+        
+        self.stepCounter = 0
+        self.eatedEnergy = 0
         self.newEnemy = 0
         self.targetPlant = None
         self.currentPath = []

@@ -15,8 +15,9 @@ class Plant():
         self.maxDist = maxDist
         self.position = position
         self.grid = grid
-        self.age = 0
         self.color = color
+        
+        self.age = 0
         self.isAlarmed = False
         self.isToxic = False
         self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.

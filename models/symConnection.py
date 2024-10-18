@@ -3,9 +3,10 @@
 class SymbioticConnection:
 
     def __init__(self, plant1, plant2):
-        self.connect = False
         self.plant1 = plant1
         self.plant2 = plant2
+
+        self.connect = False
 
 
     def getDistance(self, pos1, pos2):

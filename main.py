@@ -72,7 +72,7 @@ grid.addPlant(p1)
 grid.addPlant(p2)
 grid.addPlant(p3)
 
-#grid.addEnemies(ec1)
+grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
@@ -92,7 +92,7 @@ tox1 = Toxin(substance=s2,
 grid.addToxin(tox1)
     
 sim = Simulation(grid)
-sim.run(maxSteps=1, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 sc1 = SymbioticConnection(p2, p3)
 sc1.createConnection()
