@@ -47,6 +47,32 @@ class Grid():
         return 0 <= x < self.height and 0 <= y < self.width
     
 
+    def addEnemies(self, ec):
+        pos = ec.position
+
+        self.enemies.append(ec)
+        self.grid[pos[0]][pos[1]].append(ec)
+
+    
+    def removeEnemies(self, ec):
+        pos = ec.position
+
+        self.enemies.remove(ec)
+        self.grid[pos[0]][pos[1]].remove(ec)
+    
+
+    def addToxin(self, toxin):
+        self.toxins.append(toxin)
+    
+    
+    def removeToxin(self, toxin):
+        self.toxins.remove(toxin)
+
+
+    def getDistance(self, pos1, pos2):
+        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
+    
+
     def getGridEnergy(self):
         """_summary_
             Berechnet die Gesamtenergie aller Pflanzen im Gitter.
@@ -61,17 +87,7 @@ class Grid():
             self.totalEnergy += plant.currEnergy
         return self.totalEnergy
     
-
-    def displayGridEnergy(self):
-        """_summary_
-            Zeigt die Gesamtenergie des Gitters an.
-            Die Methode ruft `getGridEnergy` auf, um die Gesamtenergie aller Pflanzen zu berechnen,
-            und gibt diesen Wert in einem formatierten String auf der Konsole aus.
-
-        """
-        print(f'Grid-Energy: {self.getGridEnergy()}')
-        
-
+    
     def getGridEnemyNum(self):
         """_summary_
             Berechnet die Gesamtzahl aller Feinde im Gitter.
@@ -87,6 +103,16 @@ class Grid():
         return enemyNum
     
 
+    def displayGridEnergy(self):
+        """_summary_
+            Zeigt die Gesamtenergie des Gitters an.
+            Die Methode ruft `getGridEnergy` auf, um die Gesamtenergie aller Pflanzen zu berechnen,
+            und gibt diesen Wert in einem formatierten String auf der Konsole aus.
+
+        """
+        print(f'Grid-Energy: {self.getGridEnergy()}')
+    
+
     def displayEnemyNum(self):
         """_summary_
             Zeigt die Gesamtzahl der im Gird vorhanden Individuen aller Feinde.
@@ -95,20 +121,6 @@ class Grid():
 
         """
         print(f'Enemy-Number: {self.getGridEnemyNum()}')
-
-
-    def addEnemies(self, ec):
-        pos = ec.position
-
-        self.enemies.append(ec)
-        self.grid[pos[0]][pos[1]].append(ec)
-
-    
-    def removeEnemies(self, ec):
-        pos = ec.position
-
-        self.enemies.remove(ec)
-        self.grid[pos[0]][pos[1]].remove(ec)
 
     
     def helperGrid(self):
@@ -345,7 +357,7 @@ class Grid():
                 toxin.killEnemies(ec)
             
 
-    def moveEachEnemyCluster(self, moveArr):
+    def manageEnemyClusters(self, moveArr):
         for ec, oldPos in moveArr:
             if not isinstance(ec, EnemyCluster):
                 continue
@@ -357,23 +369,11 @@ class Grid():
             newPos = self.processEnemyMovement(ec, oldPos, path)
 
             self.updateEnemyClusterPos(ec, oldPos, newPos)
-            self.checkNearbyPlants(ec)  # Führe Interaktionen mit nahegelegenen Pflanzen durch 
+            self.checkNearbyPlants(ec)
             self.reduceClusterSize(ec)
-
-    
-    def addToxin(self, toxin):
-        self.toxins.append(toxin)
-    
-    
-    def removeToxin(self, toxin):
-        self.toxins.remove(toxin)
-
-
-    def getDistance(self, pos1, pos2):
-        return abs(pos1[0] - pos2[0]) + abs(pos1[1] - pos2[1])
     
 
-    def collectAndMoveEnemies(self):
+    def collectAndManageEnemies(self):
         """Sammelt alle Feinde im Gitter und bewegt sie.
 
         Die Methode erstellt eine Liste 'enemies_to_move', die Paare aus Feinden und deren Positionen enthält.
@@ -394,7 +394,7 @@ class Grid():
                     enemies_to_move.append((cell, (i, j)))
 
         # Bewege alle gesammelten Feinde
-        self.moveEachEnemyCluster(enemies_to_move)
+        self.manageEnemyClusters(enemies_to_move)
 
 
     def getAllGridConnections(self, plant, *scs):

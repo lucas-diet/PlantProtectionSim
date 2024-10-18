@@ -137,7 +137,7 @@ class Simulation:
  
             self.runStep()
             print('\nSimulation-Step:', count)
-            self.grid.collectAndMoveEnemies()
+            self.grid.collectAndManageEnemies()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
             self.grid.displayGrid()
