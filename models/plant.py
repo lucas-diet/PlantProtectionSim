@@ -18,11 +18,13 @@ class Plant():
         self.color = color
         
         self.age = 0
-        self.isAlarmed = False
+        self.gridConnections = {}
+        self.isAlarmed_signal = False
+        self.isSignaling = False
+        self.signalCounters = {}
+        self.isAlarmed_toxin = False
         self.isToxic = False
         self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
-        self.gridConnections = {}
-        
 
     def grow(self):
         """_summary_
@@ -128,12 +130,12 @@ class Plant():
         return self.color
     
     
-    def enemyAlarm(self):
-        self.isAlarmed = True
+    def enemyToxinAlarm(self):
+        self.isAlarmed_toxin = True
     
 
     def makeToxin(self):
-        self.isAlarmed = False
+        self.isAlarmed_toxin = False
         self.isToxic = True
 
     
@@ -152,3 +154,33 @@ class Plant():
     def getToxinProdCounter(self, ec, toxin):
         key = (ec, toxin)
         return self.toxinCounters.get(key, 0)
+    
+
+    def enemySignalAlarm(self):
+        self.isAlarmed_signal = True
+    
+
+    def makeSignal(self):
+        self.isAlarmed_signal = False
+        self.isSignaling = True
+
+    
+    def resetSignalProdCounter(self, ec, signal):
+        self.signalCounters[ec, signal] = 0
+
+
+    def incrementSignalProdCounter(self, ec, signal):
+        key = (ec, signal)
+        if key in self.signalCounters:
+            self.signalCounters[ec, signal] += 1
+        else:
+            self.signalCounters[ec, signal] = 1
+
+
+    def getSignalProdCounter(self, ec, signal):
+        key = (ec, signal)
+        return self.signalCounters.get(key, 0)
+    
+
+    def sendSignal(self, plant):
+        pass

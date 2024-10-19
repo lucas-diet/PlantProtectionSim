@@ -32,7 +32,7 @@ p1 = Plant(name='p1',
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
-           position=(5, 3), 
+           position=(0, 3), 
            grid=grid,
            color=plantColor[0])
     
@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(4, 2), 
+           position=(1, 3), 
            grid=grid,
            color = plantColor[1])
     
@@ -86,50 +86,47 @@ tox1 = Toxin(substance=s2,
              energyCosts=1,
              triggerCombination=[['e1', 2], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
-             deadly=False,
+             deadly=True,
              eliminationStrength=1,
              alarmDist = 3,
             )
-    
-grid.addSubstance(tox1)
-    
-sim = Simulation(grid)
-sim.run(maxSteps=1, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
-
-sc1 = SymbioticConnection(p2, p3)
-sc1.createConnection()
-
-sc2 = SymbioticConnection(p2, p1)
-sc2.createConnection()
-
-
-grid.getAllGridConnections(p2, sc1, sc2)
 
 sig1 = Signal(substance=s1,
-              emit=[p1,p2],
+              emit=[p1,p3],
               receive=[p3],
               triggerCombination=[['e1', 2]],
+              prodTime=2,
               spreadType='symbiotic',
               sendingSpeed=1,
               energyCosts=2,
               afterEffectTime=2)
 
 sig2 = Signal(substance=s3,
-              emit=[p1,p3],
+              emit=[p2],
               receive=[p3],
               triggerCombination=[['e1', 2]],
+              prodTime=2, 
               spreadType='symbiotic',
               sendingSpeed=1,
               energyCosts=2,
               afterEffectTime=2)
 
+
 grid.addSubstance(sig1)
 grid.addSubstance(sig2)
+grid.addSubstance(tox1)
+    
 
-iMat = grid.createInteractionMatrix(grid.signals, grid.plants)
-for mat, type in zip(iMat, ['A', 'B']):
-    print(f'{type} = \n {mat}')
-''''''
+sc1 = SymbioticConnection(p1, p3)
+#sc2 = SymbioticConnection(p2, p1)
+
+
+sc1.createConnection()
+#sc2.createConnection()
+#grid.getAllGridConnections(p1, sc1)
+
+sim = Simulation(grid)
+sim.run(maxSteps=None, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()

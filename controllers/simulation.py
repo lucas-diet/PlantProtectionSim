@@ -140,5 +140,7 @@ class Simulation:
             self.grid.collectAndManageEnemies()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
+            #self.grid.displayInteractionMatrix()
             self.grid.displayGrid()
             count += 1
+            

@@ -161,10 +161,14 @@ class Grid():
             lines = []
             for obj in cell:
                 if isinstance(obj, Plant):
-                    if obj.isAlarmed == True:
+                    if obj.isAlarmed_toxin == True:
                         lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%+')
                     elif obj.isToxic == True:
                         lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%*')
+                    elif obj.isAlarmed_signal == True:
+                        lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%!')
+                    elif obj.isSignaling == True:
+                        lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%^')
                     else:
                         lines.append(f'{(obj.currEnergy / obj.initEnergy) * 100:.1f}%')
                 elif isinstance(obj, EnemyCluster):
@@ -310,28 +314,55 @@ class Grid():
                     toxin.empoisonEnemies(ec)
         else:
             self.eatAndReproduce(ec, plant.position, plant, ec.position)
+
     
+    def plantAlarmAndSignalProd(self, ec, dist, plant):
+        # Bis jetzt wird die Pflanze nur alamiert, sodass es zu produktion vom Signalstoff führt.
+        #TODO: Was passiert nachdem der Signalstoff vorhanden ist. 1. Giftproduktion 2. Gridverbindung -> Nachbar wahrnen.
+
+        for signal in self.signals:
+            for trigger in signal.triggerCombination:
+                ecName, minClusterSize = trigger
+                if plant in signal.emit and ec.enemy.name == ecName and plant.position == ec.targetPlant:
+                    if ec.num < minClusterSize and ec.num > 0:
+                        print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
+                        continue
+                    else:
+                        if plant.isAlarmed_signal == False and plant.isSignaling == False and dist < 1:
+                            plant.enemySignalAlarm()
+                            signal.signalCosts(plant)
+                            print(f'[DEBUG-Signal]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                        elif plant.isAlarmed_signal == True and plant.isSignaling == False:
+                            if plant.getSignalProdCounter(ec, signal) < signal.prodTime - 1:
+                                plant.incrementSignalProdCounter(ec, signal)
+                                print(f'[DEBUG-Signal]: Produktionszähler nach Inkrementierung: {plant.signalCounters[ec, signal]}')
+                            else:
+                                plant.makeSignal()
+                                signal.activateSignal()
+                                signal.signalCosts(plant)
+                                print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+                        
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
-                ecName, minEcSize = trigger
+                ecName, minClusterSize = trigger
                 if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
-                    if ec.num < minEcSize and ec.num > 0:
-                        print(f'[DEBUG]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minEcSize}')
+                    if ec.num < minClusterSize and ec.num > 0:
+                        print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                     else:
                         # Alarmierung der Pflanze, falls nah genug
-                        if plant.isAlarmed == False and plant.isToxic == False and dist < 1:
-                            plant.enemyAlarm()
+                        if plant.isAlarmed_toxin == False and plant.isToxic == False and dist < 1:
+                            plant.enemyToxinAlarm()
                             toxin.toxinCosts(plant)
-                            print(f'[DEBUG]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                            print(f'[DEBUG-Gift]: {plant.name} ist alamiert durch {ec.enemy.name}')
                         
                         # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
-                        elif plant.isAlarmed == True and plant.isToxic == False:
-                            if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                        elif plant.isAlarmed_toxin == True and plant.isToxic == False:
+                            if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
                                 plant.incrementToxinProdCounter(ec, toxin)
-                                print(f'[DEBUG]: Produktionszähler nach Inkrementierung: {plant.toxinCounters[ec, toxin]}')
+                                print(f'[DEBUG-Gift]: Produktionszähler nach Inkrementierung: {plant.toxinCounters[ec, toxin]}')
                             else:
                                 # Pflanze wird giftig, wenn Produktionszeit erreicht
                                 plant.makeToxin()
@@ -346,7 +377,7 @@ class Grid():
                                 ec.lastVisitedPlant.isToxic = False
                                 ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
                                 print(f'[DEBUG]: {ec.lastVisitedPlant.name} ist nicht mehr giftig, da der Feind weg ist')
-                
+
 
     def checkNearbyPlants(self, ec):
         for plant in self.plants:
@@ -354,8 +385,10 @@ class Grid():
                 continue
             
             dist = self.getDistance(ec.position, plant.position)
+            self.plantAlarmAndSignalProd(ec, dist, plant)
             self.plantAlarmAndPoisonProd(ec, dist, plant)
-                
+            
+            
             if plant.position == ec.position:
                 ec.currentPath = []
                 self.handlePlantEnemyInteraction(ec, plant)
@@ -419,8 +452,8 @@ class Grid():
                 elif sc.plant2 == plant:
                     connections[sc.plant1.name] = sc.plant1.position
 
-        print(connections)
-        return connections
+        print(plant.name, connections)
+        return plant, connections
     
 
     def fillMatrix(self, type, allSignals, allPlants):
@@ -440,3 +473,9 @@ class Grid():
             else:
                 bMat = self.fillMatrix(type, allSignals, allPlants)
         return (aMat, bMat)
+    
+    
+    def displayInteractionMatrix(self):
+        iMat = self.createInteractionMatrix(self.signals, self.plants)
+        for mat, type in zip(iMat, ['A', 'B']):
+            print(f'{type} = \n {mat}')
