@@ -317,8 +317,10 @@ class Grid():
 
     
     def plantAlarmAndSignalProd(self, ec, dist, plant):
-        # Bis jetzt wird die Pflanze nur alamiert, sodass es zu produktion vom Signalstoff führt.
-        #TODO: Was passiert nachdem der Signalstoff vorhanden ist. 1. Giftproduktion 2. Gridverbindung -> Nachbar wahrnen.
+        # Bis jetzt wird die Pflanze nur alamiert, sodass es zur produktion vom Signalstoff führt.
+        #TODO: Was passiert nachdem der Signalstoff vorhanden ist. 
+        #   1. Giftproduktion.
+        #   2. Gridverbindung -> Nachbar warnen.
 
         for signal in self.signals:
             for trigger in signal.triggerCombination:
@@ -344,6 +346,7 @@ class Grid():
                         
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
+        #TODO: Signalstoff integieren in die Triggerkombination.
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 ecName, minClusterSize = trigger
