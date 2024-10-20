@@ -288,9 +288,9 @@ class Grid():
             return oldPos
         
     
-    def eatAndReproduce(self, ec, oldPos, plant, newPos):
+    def eatAndReproduce(self, ec, plant):
         self.totalEnergy = self.getGridEnergy()
-        ec.eatPlant(ec, oldPos, plant, newPos)
+        ec.eatPlant(ec, plant)
         self.totalEnergy -= plant.currEnergy
         ec.reproduce()
         
@@ -301,19 +301,15 @@ class Grid():
         return ecName, minEcSize
     
 
-    def handlePlantEnemyInteraction(self, ec, plant):
+    def handleToxinEffects(self, ec, plant):
         ec.lastVisitedPlant = plant # Aktualisiere die zuletzt besuchte Pflanze
 
-        if len(self.toxins) > 0:
-            self.eatAndReproduce(ec, plant.position, plant, ec.position)
-            for toxin in self.toxins:
-                minEcSize = self.getTriggers(toxin)[1]
-                if toxin.deadly == False and plant.isToxic == True:
-                    ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
-                elif toxin.deadly == True and plant.isToxic == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
-                    toxin.empoisonEnemies(ec)
-        else:
-            self.eatAndReproduce(ec, plant.position, plant, ec.position)
+        for toxin in self.toxins:
+            minEcSize = self.getTriggers(toxin)[1]
+            if toxin.deadly == False and plant.isToxic == True:
+                ec.currentPath, ec.targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
+            elif toxin.deadly == True and plant.isToxic == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
+                toxin.empoisonEnemies(ec)
 
     
     def plantAlarmAndSignalProd(self, ec, dist, plant):
@@ -382,6 +378,13 @@ class Grid():
                                 print(f'[DEBUG]: {ec.lastVisitedPlant.name} ist nicht mehr giftig, da der Feind weg ist')
 
 
+    def handleSignalEffects(self, ec, plant):
+        for key, pos in plant.gridConnections.items():
+            if key[0] == plant:
+                print(f'[INFO]: {plant.name}{plant.position} ist verbunden mit {key[1].name}{pos[1]}')
+            
+            
+
     def checkNearbyPlants(self, ec):
         for plant in self.plants:
             if not isinstance(plant, Plant):
@@ -394,7 +397,9 @@ class Grid():
             
             if plant.position == ec.position:
                 ec.currentPath = []
-                self.handlePlantEnemyInteraction(ec, plant)
+                self.eatAndReproduce(ec, plant)
+                self.handleSignalEffects(ec, plant)
+                self.handleToxinEffects(ec, plant)
 
     
     def reduceClusterSize(self, ec):
@@ -451,12 +456,13 @@ class Grid():
             if sc.connect == True:
                 # Prüfe, ob die übergebene Pflanze Teil der Verbindung ist
                 if sc.plant1 == plant:
-                    connections[sc.plant2.name] = sc.plant2.position
+                    connections[(sc.plant1.name,sc.plant2.name)] = sc.plant1.position, sc.plant2.position
                 elif sc.plant2 == plant:
-                    connections[sc.plant1.name] = sc.plant1.position
+                    connections[(sc.plant2.name,sc.plant1.name)] = sc.plant2.position,sc.plant1.position
 
-        print(plant.name, connections)
-        return plant, connections
+        for key, pos in connections.items():
+            print(f'{key[0]} auf {pos[0]} --- {key[1]} auf {pos[1]}')
+        return connections
     
 
     def fillMatrix(self, type, allSignals, allPlants):

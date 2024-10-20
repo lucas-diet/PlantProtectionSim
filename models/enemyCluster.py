@@ -170,10 +170,12 @@ class EnemyCluster():
         return steps
         
     
-    def eatPlant(self, ec, ePos, plant, pPos):
+    def eatPlant(self, ec, plant):
         # Prüfen, ob die Positionen übereinstimmen
         grid = self.grid.getGrid()
         hGrid = self.grid.helperGrid()
+        ePos = ec.position
+        pPos = plant.position
         
         if ePos == pPos and 'P' in hGrid[ePos[0]][ePos[1]]:
             plant = None
