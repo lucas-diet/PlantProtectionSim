@@ -316,7 +316,7 @@ class Grid():
         # Bis jetzt wird die Pflanze nur alamiert, sodass es zur produktion vom Signalstoff führt.
         #TODO: Was passiert nachdem der Signalstoff vorhanden ist. 
         #   1. Giftproduktion.
-        #   2. Gridverbindung -> Nachbar warnen.
+        #   2. Gridverbindung -> Nachbar warnen -> wird in der Funktion handleSignalEffects bearbeitet.
 
         for signal in self.signals:
             for trigger in signal.triggerCombination:
@@ -333,7 +333,7 @@ class Grid():
                         elif plant.isAlarmed_signal == True and plant.isSignaling == False:
                             if plant.getSignalProdCounter(ec, signal) < signal.prodTime - 1:
                                 plant.incrementSignalProdCounter(ec, signal)
-                                print(f'[DEBUG-Signal]: Produktionszähler nach Inkrementierung: {plant.signalCounters[ec, signal]}')
+                                print(f'[DEBUG-Signal]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}')
                             else:
                                 plant.makeSignal()
                                 signal.activateSignal()
@@ -379,11 +379,26 @@ class Grid():
 
 
     def handleSignalEffects(self, ec, plant):
-        for key, pos in plant.gridConnections.items():
-            if key[0] == plant:
-                print(f'[INFO]: {plant.name}{plant.position} ist verbunden mit {key[1].name}{pos[1]}')
-            
-            
+        # Wenn Gridverbindung existiert, dann wird Signal gesendet (falls cluster Trigger ist).
+        # Nach ablauf der sendezeit produziert nachbarpflanze auch Signal.
+
+        # TODO: Wenn es mehrere Verbindungen gibt, dann wird SignalSeningCounter doppelt hochgetählt -> Noch keine Idee zum umsetzen! -> IDEE: key für signalSendingCounters von (ec, signal) auf (ec,signal,rplant) oä änden.
+        # TODO-Frage: Soll nach Ankuft des Signals, das Signal direkt präsent sein oder erst produziert werden und danach erst präsent sein?
+        for signal in self.signals:
+            for key, pos in plant.gridConnections.items():
+                sPlant = key[0]
+                rPlant = key[1]
+                sPos = pos[0]
+                rPos = pos[1]
+                if sPlant == plant:
+                    print(f'[DEBUG]: {plant.name}{plant.position} ist verbunden mit {key[1].name}{pos[1]}')
+                    if sPos == ec.position and sPlant.isSignaling == True and rPlant in signal.receive:
+                        print(plant.getSignalSendCounter(ec, signal), signal.sendingSpeed)
+                        if plant.getSignalSendCounter(ec, signal) < signal.sendingSpeed:
+                            plant.incrementSignalSendCounter(ec, signal) 
+                        else:
+                            plant.sendSignal(rPlant)
+                        
 
     def checkNearbyPlants(self, ec):
         for plant in self.plants:
@@ -461,7 +476,7 @@ class Grid():
                     connections[(sc.plant2.name,sc.plant1.name)] = sc.plant2.position,sc.plant1.position
 
         for key, pos in connections.items():
-            print(f'{key[0]} auf {pos[0]} --- {key[1]} auf {pos[1]}')
+            print(f'[DEBUG]: {key[0]} auf {pos[0]} --- {key[1]} auf {pos[1]}')
         return connections
     
 

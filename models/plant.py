@@ -21,10 +21,11 @@ class Plant():
         self.gridConnections = {}
         self.isAlarmed_signal = False
         self.isSignaling = False
-        self.signalCounters = {}
+        self.signalProdCounters = {}
+        self.signalSendingCounters = {}
         self.isAlarmed_toxin = False
         self.isToxic = False
-        self.toxinCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
+        self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
 
     def grow(self):
         """_summary_
@@ -116,10 +117,10 @@ class Plant():
                     print(f'[DEBUG]: {self.name} auf {self.position} erzeugt Nachkommen auf {newX, newY}')
                     return (newX, newY)
                 else:
-                    print(f'[INFO]: Position {newX, newY} ist belegt. Nachkomme wird nicht erzeugt.')
+                    print(f'[DEGUB]: Position {newX, newY} ist belegt. Nachkomme wird nicht erzeugt.')
                     pass
             else:
-                print(f'[INFO]: Position {newX, newY} liegt außerhalb der Grenzen.')
+                print(f'[DEBUG]: Position {newX, newY} liegt außerhalb der Grenzen.')
                 pass
             
         return None
@@ -140,20 +141,20 @@ class Plant():
 
     
     def resetToxinProdCounter(self, ec, toxin):
-        self.toxinCounters[ec, toxin] = 0
+        self.toxinProdCounters[ec, toxin] = 0
 
 
     def incrementToxinProdCounter(self, ec, toxin):
         key = (ec, toxin)
-        if key in self.toxinCounters:
-            self.toxinCounters[ec, toxin] += 1
+        if key in self.toxinProdCounters:
+            self.toxinProdCounters[ec, toxin] += 1
         else:
-            self.toxinCounters[ec, toxin] = 1
+            self.toxinProdCounters[ec, toxin] = 1
 
 
     def getToxinProdCounter(self, ec, toxin):
         key = (ec, toxin)
-        return self.toxinCounters.get(key, 0)
+        return self.toxinProdCounters.get(key, 0)
     
 
     def enemySignalAlarm(self):
@@ -166,21 +167,38 @@ class Plant():
 
     
     def resetSignalProdCounter(self, ec, signal):
-        self.signalCounters[ec, signal] = 0
+        self.signalProdCounters[ec, signal] = 0
 
 
     def incrementSignalProdCounter(self, ec, signal):
         key = (ec, signal)
-        if key in self.signalCounters:
-            self.signalCounters[ec, signal] += 1
+        if key in self.signalProdCounters:
+            self.signalProdCounters[ec, signal] += 1
         else:
-            self.signalCounters[ec, signal] = 1
+            self.signalProdCounters[ec, signal] = 1
 
 
     def getSignalProdCounter(self, ec, signal):
         key = (ec, signal)
-        return self.signalCounters.get(key, 0)
+        return self.signalProdCounters.get(key, 0)
     
 
-    def sendSignal(self, plant):
-        pass
+    def resetSignalSendCounter(self, ec, signal):
+        self.signalSendingCounters[ec, signal] = 0
+
+
+    def incrementSignalSendCounter(self, ec, signal):
+        key = (ec, signal)
+        if key in self.signalSendingCounters:
+            self.signalSendingCounters[ec, signal] += 1
+        else:
+            self.signalSendingCounters[ec, signal] = 1
+
+
+    def getSignalSendCounter(self, ec, signal):
+        key = (ec, signal)
+        return self.signalSendingCounters.get(key, 0)
+    
+
+    def sendSignal(self, rplant):
+        rplant.isSignaling = True

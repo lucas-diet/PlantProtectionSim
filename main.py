@@ -93,11 +93,11 @@ tox1 = Toxin(substance=s2,
 
 sig1 = Signal(substance=s1,
               emit=[p1,p3],
-              receive=[p3],
+              receive=[p1],
               triggerCombination=[['e1', 2]],
               prodTime=2,
               spreadType='symbiotic',
-              sendingSpeed=1,
+              sendingSpeed=2,
               energyCosts=2,
               afterEffectTime=2)
 
@@ -107,7 +107,7 @@ sig2 = Signal(substance=s3,
               triggerCombination=[['e1', 2]],
               prodTime=2, 
               spreadType='symbiotic',
-              sendingSpeed=1,
+              sendingSpeed=2,
               energyCosts=2,
               afterEffectTime=2)
 
@@ -118,7 +118,7 @@ grid.addSubstance(sig1)
     
 
 sc1 = SymbioticConnection(p1, p3)
-#sc2 = SymbioticConnection(p2, p1)
+sc2 = SymbioticConnection(p3, p2)
 
 
 sc1.createConnection()
