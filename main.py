@@ -44,7 +44,7 @@ p2 = Plant(name='p2',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(4, 3), 
+           position=(1, 4), 
            grid=grid,
            color = plantColor[1])
 
@@ -92,7 +92,7 @@ tox1 = Toxin(substance=s2,
             )
 
 sig1 = Signal(substance=s1,
-              emit=[p1,p3],
+              emit=[p3],
               receive=[p1],
               triggerCombination=[['e1', 2]],
               prodTime=2,
@@ -122,7 +122,7 @@ sc2 = SymbioticConnection(p3, p2)
 
 
 sc1.createConnection()
-#sc2.createConnection()
+sc2.createConnection()
 grid.getAllGridConnections(p3, sc1)
 
 sim = Simulation(grid)

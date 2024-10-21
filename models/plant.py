@@ -183,20 +183,20 @@ class Plant():
         return self.signalProdCounters.get(key, 0)
     
 
-    def resetSignalSendCounter(self, ec, signal):
-        self.signalSendingCounters[ec, signal] = 0
+    def resetSignalSendCounter(self, ec, signal, rPlant):
+        self.signalSendingCounters[ec, signal, rPlant] = 0
 
 
-    def incrementSignalSendCounter(self, ec, signal):
-        key = (ec, signal)
+    def incrementSignalSendCounter(self, ec, signal, rPlant):
+        key = (ec, signal, rPlant)
         if key in self.signalSendingCounters:
-            self.signalSendingCounters[ec, signal] += 1
+            self.signalSendingCounters[ec, signal, rPlant] += 1
         else:
-            self.signalSendingCounters[ec, signal] = 1
+            self.signalSendingCounters[ec, signal, rPlant] = 1
 
 
-    def getSignalSendCounter(self, ec, signal):
-        key = (ec, signal)
+    def getSignalSendCounter(self, ec, signal, rPlant):
+        key = (ec, signal, rPlant)
         return self.signalSendingCounters.get(key, 0)
     
 

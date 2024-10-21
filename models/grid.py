@@ -382,20 +382,19 @@ class Grid():
         # Wenn Gridverbindung existiert, dann wird Signal gesendet (falls cluster Trigger ist).
         # Nach ablauf der sendezeit produziert nachbarpflanze auch Signal.
 
-        # TODO: Wenn es mehrere Verbindungen gibt, dann wird SignalSeningCounter doppelt hochgetählt -> Noch keine Idee zum umsetzen! -> IDEE: key für signalSendingCounters von (ec, signal) auf (ec,signal,rplant) oä änden.
         # TODO-Frage: Soll nach Ankuft des Signals, das Signal direkt präsent sein oder erst produziert werden und danach erst präsent sein?
         for signal in self.signals:
-            for key, pos in plant.gridConnections.items():
-                sPlant = key[0]
-                rPlant = key[1]
+            for plants, pos in plant.gridConnections.items():
+                sPlant = plants[0]
+                rPlant = plants[1]
                 sPos = pos[0]
                 rPos = pos[1]
                 if sPlant == plant:
-                    print(f'[DEBUG]: {plant.name}{plant.position} ist verbunden mit {key[1].name}{pos[1]}')
+                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPos}')
                     if sPos == ec.position and sPlant.isSignaling == True and rPlant in signal.receive:
-                        print(plant.getSignalSendCounter(ec, signal), signal.sendingSpeed)
-                        if plant.getSignalSendCounter(ec, signal) < signal.sendingSpeed:
-                            plant.incrementSignalSendCounter(ec, signal) 
+                        print(plant.getSignalSendCounter(ec, signal, rPlant), signal.sendingSpeed)
+                        if plant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
+                            plant.incrementSignalSendCounter(ec, signal, rPlant) 
                         else:
                             plant.sendSignal(rPlant)
                         
