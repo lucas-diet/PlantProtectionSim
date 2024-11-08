@@ -396,9 +396,7 @@ class Grid():
 
 
     def plantAlarmAndSignalProd(self, ec, dist, plant):
-        # Diese Funktion alarmiert eine Pflanze, sodass sie Signalstoffe produziert.
-        # TODO: Weitere Logik hinzufügen, z.B. Giftproduktion und Nachbarwarnung.
-        
+               
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 ecName, minClusterSize = trigger

@@ -44,7 +44,7 @@ p2 = Plant(name='p2',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(1, 4), 
+           position=(2, 5), 
            grid=grid,
            color = plantColor[1])
 
@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(1, 3), 
+           position=(4, 3), 
            grid=grid,
            color = plantColor[1])
     
@@ -112,9 +112,9 @@ sig2 = Signal(substance=s3,
               afterEffectTime=2)
 
 
-grid.addSubstance(sig1)
-grid.addSubstance(sig2)
-#grid.addSubstance(tox1)
+#grid.addSubstance(sig1)
+#grid.addSubstance(sig2)
+grid.addSubstance(tox1)
     
 
 sc1 = SymbioticConnection(p1, p3)
