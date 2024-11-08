@@ -34,7 +34,8 @@ class Plant():
             die als Prozentsatz angegeben ist. Außerdem wird das Alter der Pflanze ('age') um 1 Jahr erhöht.
 
         """
-        self.currEnergy += self.currEnergy * (self.growthRateEnegry / 100)
+        energyIncrease =  self.initEnergy * (self.growthRateEnegry / 100)
+        self.currEnergy += energyIncrease
         self.age += 1
 
 

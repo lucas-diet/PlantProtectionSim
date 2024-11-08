@@ -54,14 +54,14 @@ class Simulation:
         else:
             return False
         
-        
+    
     def noEnemiesBreak(self):
         if self.grid.hasEnemies() == False:
             print('no more enemies')
             return True
         return False
     
-
+    
     def noPlantsBreak(self):
         """_summary_
             Überprüft, ob keine Pflanzen mehr im Grid vorhanden sind, und beendet die Simulation falls erforderlich.
@@ -76,7 +76,7 @@ class Simulation:
             print('no more plants')
             return True
         return False
-    
+
 
     def upperGridEnergyBreak(self, maxGridEnergy=None):
         if maxGridEnergy is not None:
