@@ -101,8 +101,8 @@ class Grid():
             substance (Substance): Die Substanz, die entfernt werden soll (entweder ein Toxin oder ein Signal).
         """
         # Iteriere durch das gesamte Grid
-        for i, row in enumerate(self.grid):
-            for j, (plant, ec) in enumerate(row):
+        for _, row in enumerate(self.grid):
+            for _, (plant, ec) in enumerate(row):
                 # Überprüfen, ob die Substanz ein Toxin ist und entferne es aus den Toxinen
                 if substance.type == 'toxin':
                     if substance in self.toxins:
