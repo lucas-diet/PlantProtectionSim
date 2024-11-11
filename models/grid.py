@@ -357,43 +357,6 @@ class Grid():
         self.totalEnergy -= plant.currEnergy
         ec.reproduce()
 
-    
-    def getTriggers(self, toxin):
-        triggers = []  # Liste zur Speicherung der Trigger
-        for trigger in toxin.triggerCombination:
-            ecName, minEcSize = trigger
-            triggers.append((ecName, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
-        return triggers
-    
-
-    def handleToxinEffects(self, ec, plant):
-        # Setze die zuletzt besuchte Pflanze des Feindes
-        ec.lastVisitedPlant = plant
-        
-        # Durchlaufe die Toxine, um die Effekte zu prüfen
-        for toxin in self.toxins:
-            # Hole die Trigger-Kombination für das Toxin
-            triggers = self.getTriggers(toxin)
-            
-            # Durchlaufe jedes Trigger-Tupel und prüfe, ob die Bedingungen zutreffen
-            for ecName, minEcSize in triggers:
-                # Wenn das Toxin nicht tödlich ist und die Pflanze toxisch ist
-                if toxin.deadly == False and plant.isToxic == True:
-                    # Versuche, den Feind zu verscheuchen
-                    newPath, targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
-                    
-                    # Wenn der Pfad erfolgreich berechnet wurde und eine neue Position vorhanden ist
-                    if newPath and newPath != ec.currentPath:
-                        ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
-                        ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
-                        print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht.')
-                    else:
-                        print(f'[DEBUG]: {ec.enemy.name} bleibt an der aktuellen Position.')
-                    
-                # Wenn das Toxin tödlich ist und die Pflanze toxisch ist und die Bedingungen erfüllt sind
-                elif toxin.deadly == True and plant.isToxic == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
-                    toxin.empoisonEnemies(ec)
-
 
     def plantAlarmAndSignalProd(self, ec, dist, plant):
                
@@ -483,6 +446,43 @@ class Grid():
                             plant.incrementSignalSendCounter(ec, signal, rPlant)
                         else:
                             plant.sendSignal(rPlant)
+
+    
+    def getTriggers(self, toxin):
+        triggers = []  # Liste zur Speicherung der Trigger
+        for trigger in toxin.triggerCombination:
+            ecName, minEcSize = trigger
+            triggers.append((ecName, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
+        return triggers
+    
+
+    def handleToxinEffects(self, ec, plant):
+        # Setze die zuletzt besuchte Pflanze des Feindes
+        ec.lastVisitedPlant = plant
+        
+        # Durchlaufe die Toxine, um die Effekte zu prüfen
+        for toxin in self.toxins:
+            # Hole die Trigger-Kombination für das Toxin
+            triggers = self.getTriggers(toxin)
+            
+            # Durchlaufe jedes Trigger-Tupel und prüfe, ob die Bedingungen zutreffen
+            for ecName, minEcSize in triggers:
+                # Wenn das Toxin nicht tödlich ist und die Pflanze toxisch ist
+                if toxin.deadly == False and plant.isToxic == True:
+                    # Versuche, den Feind zu verscheuchen
+                    newPath, targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
+                    
+                    # Wenn der Pfad erfolgreich berechnet wurde und eine neue Position vorhanden ist
+                    if newPath and newPath != ec.currentPath:
+                        ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
+                        ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
+                        print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht.')
+                    else:
+                        print(f'[DEBUG]: {ec.enemy.name} bleibt an der aktuellen Position.')
+                    
+                # Wenn das Toxin tödlich ist und die Pflanze toxisch ist und die Bedingungen erfüllt sind
+                elif toxin.deadly == True and plant.isToxic == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
+                    toxin.empoisonEnemies(ec)
 
 
     def checkNearbyPlants(self, ec):

@@ -74,7 +74,7 @@ grid.addPlant(p2)
 grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-#grid.addEnemies(ec2)
+grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 s1 = Substance(name='s1', type='signal')
