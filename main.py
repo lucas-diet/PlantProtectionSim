@@ -28,7 +28,7 @@ p1 = Plant(name='p1',
            initEnergy=100, 
            growthRateEnegry=2, 
            minEnegrgy=50, 
-           reproductionIntervall=0, 
+           reproductionIntervall=10, 
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
@@ -44,7 +44,7 @@ p2 = Plant(name='p2',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(2, 5), 
+           position=(4, 3), 
            grid=grid,
            color = plantColor[1])
 
@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(4, 3), 
+           position=(2, 5), 
            grid=grid,
            color = plantColor[1])
     
@@ -71,10 +71,10 @@ ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSp
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-grid.addPlant(p3)
+#grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
+#grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 s1 = Substance(name='s1', type='signal')
@@ -84,7 +84,7 @@ s3 = Substance(name='s3', type='signal')
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1, p2],
              energyCosts=1,
-             triggerCombination=[['e1', 2], ['e2', 2]],             #TODO: Signal muss noch mit integiert werden.   
+             triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
              deadly=True,
              eliminationStrength=1,

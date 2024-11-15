@@ -114,6 +114,7 @@ class Simulation:
 
         while True:
             if count - 1 == maxSteps:
+                print('maximum number of steps reached')
                 break
 
             if self.noSpecificPlantBreak(plant) == True:
@@ -134,9 +135,9 @@ class Simulation:
             if self.upperEnemyNumBreak(maxEnemyNum) == True:
                 break
             
- 
-            self.runStep()
+
             print('\nSimulation-Step:', count)
+            self.runStep()
             self.grid.collectAndManageEnemies()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()

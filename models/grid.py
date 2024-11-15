@@ -43,7 +43,7 @@ class Grid():
     
     def isOccupied(self, position):
         x,y = position
-        if len(self.grid[x][y]) == 0:
+        if self.grid[x][y][0] is None:
             return False
         return True
     

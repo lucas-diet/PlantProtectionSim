@@ -166,7 +166,6 @@ class EnemyCluster():
         else:
             for i in range(1, len(path)):
                 steps.append(path[i])
-
         return steps
         
     
@@ -216,7 +215,7 @@ class EnemyCluster():
 
 
     def newPath(self, plant, allPlants):
-        if plant.isToxic:
+        if plant.isToxic == True:
             alternativePlants = []
             shortestDistance = float('inf')
 

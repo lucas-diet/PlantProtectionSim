@@ -59,6 +59,7 @@ class Plant():
             Die Energie der Pflanze wird um 10 reduziert, um die Fortpflanzung zu unterstützen.
 
         """
+    
         if self.reproductionIntervall == 0:
             pass
 
@@ -79,7 +80,7 @@ class Plant():
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 
                                       grid=self.grid,
-                                      color = self.color
+                                      color=self.color
                     )
                     self.grid.addPlant(offspring)
 
