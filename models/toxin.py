@@ -3,7 +3,7 @@ from models.substance import Substance
 
 class Toxin(Substance):
 
-    def __init__(self, substance, plantTransmitter, energyCosts, triggerCombination, prodTime, deadly, eliminationStrength, alarmDist):
+    def __init__(self, substance, plantTransmitter, energyCosts, triggerCombination, prodTime, deadly, eliminationStrength):
         super().__init__(name=substance.name, type=substance.type)
         self.substance = substance
         self.plantTransmitter = plantTransmitter
@@ -12,7 +12,6 @@ class Toxin(Substance):
         self.prodTime = prodTime
         self.deadly = deadly
         self.eliminationStrength = eliminationStrength
-        self.alarmDist = alarmDist
    
 
     def toxinCosts(self, plant):

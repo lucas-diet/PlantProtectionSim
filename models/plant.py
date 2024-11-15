@@ -15,7 +15,7 @@ class Plant():
         self.maxDist = maxDist
         self.position = position
         self.grid = grid
-        self.color = color
+        self.color = color[int(self.name[1])-1]
         
         self.age = 0
         self.gridConnections = {}

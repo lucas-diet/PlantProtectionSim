@@ -34,7 +34,7 @@ p1 = Plant(name='p1',
            maxDist=2,
            position=(0, 3), 
            grid=grid,
-           color=plantColor[0])
+           color=plantColor)
     
 p2 = Plant(name='p2', 
            initEnergy=100,
@@ -46,7 +46,7 @@ p2 = Plant(name='p2',
            maxDist=2, 
            position=(4, 3), 
            grid=grid,
-           color = plantColor[1])
+           color=plantColor)
 
 p3 = Plant(name='p3', 
            initEnergy=100,
@@ -58,8 +58,7 @@ p3 = Plant(name='p3',
            maxDist=2, 
            position=(2, 5), 
            grid=grid,
-           color = plantColor[1])
-    
+           color=plantColor)
 
 e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
@@ -87,9 +86,7 @@ tox1 = Toxin(substance=s2,
              triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
              prodTime=2,
              deadly=True,
-             eliminationStrength=1,
-             alarmDist = 3,
-            )
+             eliminationStrength=1)
 
 sig1 = Signal(substance=s1,
               emit=[p3],
