@@ -211,6 +211,10 @@ class Grid():
                     lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%!')
                 elif plant.isSignaling:
                     lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%^')
+                elif plant.isSignaling and plant.isAlarmed_toxin:
+                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%^+')
+                elif plant.isSignaling and plant.isToxic:
+                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%^*')
                 else:
                     lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%')
 
@@ -362,10 +366,10 @@ class Grid():
                
         for signal in self.signals:
             for trigger in signal.triggerCombination:
-                cluster, minClusterSize = trigger
+                enemy, minClusterSize = trigger
                 
                 # Überprüfen, ob der Feind-Cluster zur Pflanze gehört und die Bedingungen für den Alarm erfüllt sind
-                if plant in signal.emit and ec.enemy.name == cluster and plant.position == ec.targetPlant:
+                if plant in signal.emit and ec.enemy == enemy and plant.position == ec.targetPlant:
                     if ec.num < minClusterSize and ec.num > 0:
                         print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue
@@ -389,12 +393,14 @@ class Grid():
                                 print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
 
 
-    def plantAlarmAndPoisonProd(self, ec, dist, plant):
-        # TODO: Signalstoff integrieren in die Triggerkombination
+    def plantAlarmAndPoisonProd(self, ec, dist, plant, signal):
+        
+        # TODO: Signalstoff integrieren in die Triggerkombination!!!!!!!!!
+
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
-                sig, cluster, minClusterSize = trigger
-                if plant in toxin.plantTransmitter and ec == cluster and plant.position == ec.targetPlant:
+                sig, enemy, minClusterSize = trigger
+                if plant in toxin.plantTransmitter and sig == signal and ec.enemy == enemy and plant.position == ec.targetPlant:
                     if ec.num < minClusterSize and ec.num > 0:
                         print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
@@ -414,7 +420,7 @@ class Grid():
                                 # Pflanze wird giftig, wenn Produktionszeit erreicht
                                 plant.makeToxin()
                                 toxin.toxinCosts(plant)
-                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                          
+                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                       
 
                         # Giftigkeit zurücksetzen, wenn Feind weg ist
                         if ec.lastVisitedPlant is not None and toxin.deadly == False:
@@ -435,7 +441,7 @@ class Grid():
                 sPos, rPos = pos
 
                 # Prüfen, ob die Pflanzen in der Verbindung übereinstimmen
-                if sPlant == plant:
+                if sPlant == plant and signal.spreadType == 'symbiotic':
                     print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPos}')
                     
                     if sPos == ec.position and sPlant.isSignaling == True and rPlant in signal.receive:
@@ -446,13 +452,17 @@ class Grid():
                             plant.incrementSignalSendCounter(ec, signal, rPlant)
                         else:
                             plant.sendSignal(rPlant)
+                
+                elif sPlant == plant and signal.spreadType == 'air':
+                    #TODO: Senden via Luft!!!
+                    pass
 
     
     def getTriggers(self, toxin):
         triggers = []  # Liste zur Speicherung der Trigger
         for trigger in toxin.triggerCombination:
-            signal, cluster, minEcSize = trigger
-            triggers.append((signal, cluster, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
+            signal, enemy, minEcSize = trigger
+            triggers.append((signal, enemy, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
         return triggers
     
 
@@ -466,7 +476,7 @@ class Grid():
             triggers = self.getTriggers(toxin)
             
             # Durchlaufe jedes Trigger-Tupel und prüfe, ob die Bedingungen zutreffen
-            for signal, ecName, minEcSize in triggers:
+            for sig, enemy, minClusterSize in triggers:
                 # Wenn das Toxin nicht tödlich ist und die Pflanze toxisch ist
                 if toxin.deadly == False and plant.isToxic == True:
                     # Versuche, den Feind zu verscheuchen
@@ -481,7 +491,7 @@ class Grid():
                         print(f'[DEBUG]: {ec.enemy.name} bleibt an der aktuellen Position.')
                     
                 # Wenn das Toxin tödlich ist und die Pflanze toxisch ist und die Bedingungen erfüllt sind
-                elif toxin.deadly == True and plant.isToxic == True and plant in toxin.plantTransmitter and ec.num >= minEcSize:
+                elif toxin.deadly == True and plant.isToxic == True and plant in toxin.plantTransmitter and ec.num >= minClusterSize:
                     toxin.empoisonEnemies(ec)
 
 
@@ -492,8 +502,9 @@ class Grid():
                 if isinstance(plant, Plant):  # Nur Pflanzen betrachten
                     dist = self.getDistance(ec.position, (i, j))  # Berechne die Distanz zur Pflanze
                     self.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
-                    self.plantAlarmAndPoisonProd(ec, dist, plant)  # Alarm und Giftproduktion prüfen
-                    
+                    for signal in self.signals:
+                        self.plantAlarmAndPoisonProd(ec, dist, plant, signal)  # Alarm und Giftproduktion prüfen
+                        
                     if (i, j) == ec.position:  # Wenn der Feind auf der Pflanze steht
                         ec.currentPath = []  # Setze den aktuellen Pfad zurück
                         self.eatAndReproduce(ec, plant)  # Feind frisst und reproduziert sich
