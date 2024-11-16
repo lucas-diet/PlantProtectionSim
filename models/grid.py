@@ -362,10 +362,10 @@ class Grid():
                
         for signal in self.signals:
             for trigger in signal.triggerCombination:
-                ecName, minClusterSize = trigger
+                cluster, minClusterSize = trigger
                 
                 # Überprüfen, ob der Feind-Cluster zur Pflanze gehört und die Bedingungen für den Alarm erfüllt sind
-                if plant in signal.emit and ec.enemy.name == ecName and plant.position == ec.targetPlant:
+                if plant in signal.emit and ec.enemy.name == cluster and plant.position == ec.targetPlant:
                     if ec.num < minClusterSize and ec.num > 0:
                         print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue
@@ -393,8 +393,8 @@ class Grid():
         # TODO: Signalstoff integrieren in die Triggerkombination
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
-                ecName, minClusterSize = trigger
-                if plant in toxin.plantTransmitter and ec.enemy.name == ecName and plant.position == ec.targetPlant:
+                sig, cluster, minClusterSize = trigger
+                if plant in toxin.plantTransmitter and ec == cluster and plant.position == ec.targetPlant:
                     if ec.num < minClusterSize and ec.num > 0:
                         print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
@@ -451,8 +451,8 @@ class Grid():
     def getTriggers(self, toxin):
         triggers = []  # Liste zur Speicherung der Trigger
         for trigger in toxin.triggerCombination:
-            ecName, minEcSize = trigger
-            triggers.append((ecName, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
+            signal, cluster, minEcSize = trigger
+            triggers.append((signal, cluster, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
         return triggers
     
 
@@ -466,7 +466,7 @@ class Grid():
             triggers = self.getTriggers(toxin)
             
             # Durchlaufe jedes Trigger-Tupel und prüfe, ob die Bedingungen zutreffen
-            for ecName, minEcSize in triggers:
+            for signal, ecName, minEcSize in triggers:
                 # Wenn das Toxin nicht tödlich ist und die Pflanze toxisch ist
                 if toxin.deadly == False and plant.isToxic == True:
                     # Versuche, den Feind zu verscheuchen
@@ -578,6 +578,7 @@ class Grid():
             else:
                 bMat = self.fillMatrix(type, allSignals, allPlants)
         return (aMat, bMat)
+
 
     def displayInteractionMatrix(self):
         iMat = self.createInteractionMatrix(self.signals, self.plants)

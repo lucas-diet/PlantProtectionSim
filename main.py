@@ -28,7 +28,7 @@ p1 = Plant(name='p1',
            initEnergy=100, 
            growthRateEnegry=2, 
            minEnegrgy=50, 
-           reproductionIntervall=10, 
+           reproductionIntervall=0, 
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(2, 5), 
+           position=(0, 4), 
            grid=grid,
            color=plantColor)
 
@@ -70,7 +70,7 @@ ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSp
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-#grid.addPlant(p3)
+grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
@@ -80,18 +80,11 @@ s1 = Substance(name='s1', type='signal')
 s2 = Substance(name='s2', type='toxin')
 s3 = Substance(name='s3', type='signal')
 
-tox1 = Toxin(substance=s2, 
-             plantTransmitter=[p1, p2],
-             energyCosts=1,
-             triggerCombination=[['e1', 2]],             #TODO: Signal muss noch mit integiert werden.   
-             prodTime=2,
-             deadly=True,
-             eliminationStrength=1)
 
 sig1 = Signal(substance=s1,
-              emit=[p3],
-              receive=[p1],
-              triggerCombination=[['e1', 2]],
+              emit=[p1, p3],
+              receive=[p3],
+              triggerCombination=[[e1, 2]],
               prodTime=2,
               spreadType='symbiotic',
               sendingSpeed=2,
@@ -101,12 +94,20 @@ sig1 = Signal(substance=s1,
 sig2 = Signal(substance=s3,
               emit=[p2],
               receive=[p3],
-              triggerCombination=[['e1', 2]],
+              triggerCombination=[[e1, 2]],
               prodTime=2, 
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=2,
               afterEffectTime=2)
+
+tox1 = Toxin(substance=s2, 
+             plantTransmitter=[p1, p2],
+             energyCosts=1,
+             triggerCombination=[[sig1, e1, 2]],             #TODO: Signal muss noch mit integiert werden.   
+             prodTime=2,
+             deadly=True,
+             eliminationStrength=1)
 
 
 #grid.addSubstance(sig1)
