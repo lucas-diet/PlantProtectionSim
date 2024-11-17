@@ -300,12 +300,12 @@ class Grid():
         Entfernt den Feind von seiner alten Position und fügt ihn an die neue Position hinzu.
         """
         # Entferne den Feind von der alten Position, falls er dort ist
-        _, old_ecs = self.grid[oldPos[0]][oldPos[1]]  # Holen Sie sich den Feind-Cluster aus der alten Position
+        _, old_ecs = self.grid[oldPos[0]][oldPos[1]]
         if ec in old_ecs:
             old_ecs.remove(ec)
 
         # Füge den Feind an der neuen Position hinzu, falls er dort noch nicht existiert
-        _, new_ecs = self.grid[newPos[0]][newPos[1]]  # Holen Sie sich den Feind-Cluster aus der neuen Position
+        _, new_ecs = self.grid[newPos[0]][newPos[1]]
         if ec not in new_ecs:
             new_ecs.append(ec)
 
@@ -363,7 +363,6 @@ class Grid():
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 enemy, minClusterSize = trigger
-                
                 # Überprüfen, ob der Feind-Cluster zur Pflanze gehört und die Bedingungen für den Alarm erfüllt sind
                 if plant in signal.emit and ec.enemy == enemy and plant.position == ec.targetPlant:
                     if ec.num < minClusterSize and ec.num > 0:
@@ -387,7 +386,6 @@ class Grid():
                                 signal.activateSignal()
                                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
                                 print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
-
                         # Nachwirkzeit von Signalstoffen    
                         if ec.lastVisitedPlant is not None and ec.lastVisitedPlant.isSignaling == True:
                             if ec.position != ec.lastVisitedPlant.position:
@@ -410,18 +408,16 @@ class Grid():
                         print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                     else:
-                        # Alarmierung der Pflanze, falls nah genug und Signalstoff vorhanden ist.
+                        # Alarmierung der Pflanze, falls nah genug, genug großes Cluster und Signalstoff vorhanden ist.
                         if plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == False and dist < 1:
                             plant.enemyToxinAlarm()
                             toxin.toxinCosts(plant)
                             print(f'[DEBUG-Gift]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                        
                         # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
                         elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False:
                             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
                                 plant.incrementToxinProdCounter(ec, toxin)
                                 print(f'[DEBUG-Gift]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
-                            
                             else:
                                 # Pflanze wird giftig, wenn Produktionszeit erreicht
                                 plant.makeToxin()
@@ -456,7 +452,6 @@ class Grid():
                             plant.incrementSignalSendCounter(ec, signal, rPlant)
                         else:
                             plant.sendSignal(rPlant)
-                
                 elif sPlant == plant and signal.spreadType == 'air':
                     #TODO: Senden via Luft!!!
                     pass
