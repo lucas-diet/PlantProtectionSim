@@ -408,18 +408,15 @@ class Grid():
                         
                         # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
                         elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False:
-                            print(plant.isSignaling, plant.isAlarmed_toxin, plant.isToxic)
                             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
                                 plant.incrementToxinProdCounter(ec, toxin)
                                 print(f'[DEBUG-Gift]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
                             
                             else:
                                 # Pflanze wird giftig, wenn Produktionszeit erreicht
-                                print(plant.isSignaling, plant.isAlarmed_toxin, plant.isToxic)
                                 plant.makeToxin()
                                 toxin.toxinCosts(plant)
-                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
-                                print(plant.isSignaling, plant.isAlarmed_toxin, plant.isToxic)                       
+                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                      
 
                         # Giftigkeit zurücksetzen, wenn Feind weg ist
                         if ec.lastVisitedPlant is not None and toxin.deadly == False:
@@ -443,9 +440,7 @@ class Grid():
                 if sPlant == plant and signal.spreadType == 'symbiotic':
                     print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPos}')
                     
-                    if sPos == ec.position and sPlant.isSignaling == True and rPlant in signal.receive:
-                        print(plant.getSignalSendCounter(ec, signal, rPlant), signal.sendingSpeed)
-                        
+                    if sPos == ec.position and sPlant.isSignaling == True and rPlant in signal.receive:                        
                         # Überprüfe, ob das Signal gesendet werden kann
                         if plant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                             plant.incrementSignalSendCounter(ec, signal, rPlant)

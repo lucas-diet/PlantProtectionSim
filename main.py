@@ -104,7 +104,7 @@ sig2 = Signal(substance=s3,
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1],
              energyCosts=1,
-             triggerCombination=[[sig1, e1, 2]],   
+             triggerCombination=[[sig2, e1, 2]],   
              prodTime=2,
              deadly=True,
              eliminationStrength=1)
@@ -119,7 +119,7 @@ sc1 = SymbioticConnection(p1, p3)
 sc2 = SymbioticConnection(p3, p2)
 
 
-#sc1.createConnection()
+sc1.createConnection()
 #sc2.createConnection()
 #grid.getAllGridConnections(p3, sc1)
 
