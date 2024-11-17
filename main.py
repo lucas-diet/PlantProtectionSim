@@ -104,7 +104,7 @@ sig2 = Signal(substance=s3,
 tox1 = Toxin(substance=s2, 
              plantTransmitter=[p1],
              energyCosts=1,
-             triggerCombination=[[sig1, e1, 2]],             #TODO: Signal muss noch mit integiert werden.   
+             triggerCombination=[[sig1, e1, 2]],   
              prodTime=2,
              deadly=True,
              eliminationStrength=1)

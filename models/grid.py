@@ -392,9 +392,6 @@ class Grid():
 
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant, signal):
-        
-        # TODO: Signalstoff integrieren in die Triggerkombination!!!!!!!!!
-
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 triggerSignal, enemy, minClusterSize = trigger
