@@ -394,6 +394,7 @@ class Grid():
                                     ec.lastVisitedPlant.afterEffectTime -= 1
                                 else:
                                     ec.lastVisitedPlant.isSignaling = False
+                                    signal.deactivateSignal()
                             else:
                                 ec.lastVisitedPlant.afterEffectTime = signal.afterEffectTime
                         
@@ -414,7 +415,7 @@ class Grid():
                             toxin.toxinCosts(plant)
                             print(f'[DEBUG-Gift]: {plant.name} ist alamiert durch {ec.enemy.name}')
                         # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
-                        elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False:
+                        elif signal in signal.activeSignals and plant.isAlarmed_toxin == True and plant.isToxic == False:
                             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
                                 plant.incrementToxinProdCounter(ec, toxin)
                                 print(f'[DEBUG-Gift]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')

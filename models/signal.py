@@ -28,6 +28,12 @@ class Signal(Substance):
             self.activeSignals.append(self)
         else:
             pass
+    
+    def deactivateSignal(self):
+        if self in self.activeSignals:
+            self.activeSignals.remove(self)
+        else:
+            pass
 
     
     def warnPlant(self):
