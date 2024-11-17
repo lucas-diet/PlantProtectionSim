@@ -25,12 +25,14 @@ class Signal(Substance):
 
     def activateSignal(self):
         if self not in self.activeSignals:
+            self.active = True
             self.activeSignals.append(self)
         else:
             pass
     
     def deactivateSignal(self):
         if self in self.activeSignals:
+            self.active = False
             self.activeSignals.remove(self)
         else:
             pass

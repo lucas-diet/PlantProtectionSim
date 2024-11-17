@@ -424,7 +424,6 @@ class Grid():
                                 plant.makeToxin()
                                 toxin.toxinCosts(plant)
                                 print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                      
-
                         # Giftigkeit zurücksetzen, wenn Feind weg ist
                         if ec.lastVisitedPlant is not None and toxin.deadly == False:
                             # Berechnet Distanz zur vorher besuchten Pflanze. Wenn preDist > 0 und isToxic == True, dann soll isToxic = False und Produktionszähler zurückgesetzt werden.
