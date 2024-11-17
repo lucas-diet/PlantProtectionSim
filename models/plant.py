@@ -23,6 +23,7 @@ class Plant():
         self.isSignaling = False
         self.signalProdCounters = {}
         self.signalSendingCounters = {}
+        self.afterEffectTime = 0
         self.isAlarmed_toxin = False
         self.isToxic = False
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.

@@ -387,8 +387,18 @@ class Grid():
                                 signal.activateSignal()
                                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
                                 print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+
+                        # Nachwirkzeit von Signalstoffen    
+                        if ec.lastVisitedPlant is not None and ec.lastVisitedPlant.isSignaling == True:
+                            if ec.position != ec.lastVisitedPlant.position:
+                                if ec.lastVisitedPlant.afterEffectTime > 0:
+                                    ec.lastVisitedPlant.isSignaling = True
+                                    ec.lastVisitedPlant.afterEffectTime -= 1
+                                else:
+                                    ec.lastVisitedPlant.isSignaling = False
+                            else:
+                                ec.lastVisitedPlant.afterEffectTime = signal.afterEffectTime
                         
-                        #TODO: Nachwirkzeit!!!
 
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant, signal):

@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(0, 4), 
+           position=(2, 5), 
            grid=grid,
            color=plantColor)
 
@@ -82,7 +82,7 @@ s3 = Substance(name='s3', type='signal')
 
 
 sig1 = Signal(substance=s1,
-              emit=[p1, p3],
+              emit=[p1, p2, p3],
               receive=[p3],
               triggerCombination=[[e1, 2]],
               prodTime=2,
@@ -102,11 +102,11 @@ sig2 = Signal(substance=s3,
               afterEffectTime=2)
 
 tox1 = Toxin(substance=s2, 
-             plantTransmitter=[p1],
+             plantTransmitter=[p1, p2, p3],
              energyCosts=1,
-             triggerCombination=[[sig2, e1, 2]],   
+             triggerCombination=[[sig1, e1, 2]],   
              prodTime=2,
-             deadly=True,
+             deadly=False,
              eliminationStrength=1)
 
 
@@ -124,7 +124,7 @@ sc1.createConnection()
 #grid.getAllGridConnections(p3, sc1)
 
 sim = Simulation(grid)
-sim.run(maxSteps=25, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()
