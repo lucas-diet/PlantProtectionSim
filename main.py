@@ -92,7 +92,7 @@ sig1 = Signal(substance=s1,
               afterEffectTime=2)
 
 sig2 = Signal(substance=s3,
-              emit=[p2],
+              emit=[p3],
               receive=[p3],
               triggerCombination=[[e1, 2]],
               prodTime=2, 
@@ -110,7 +110,7 @@ tox1 = Toxin(substance=s2,
              eliminationStrength=1)
 
 
-#grid.addSubstance(sig1)
+grid.addSubstance(sig1)
 #grid.addSubstance(sig2)
 grid.addSubstance(tox1)
     
@@ -119,12 +119,12 @@ sc1 = SymbioticConnection(p1, p3)
 sc2 = SymbioticConnection(p3, p2)
 
 
-sc1.createConnection()
-sc2.createConnection()
+#sc1.createConnection()
+#sc2.createConnection()
 #grid.getAllGridConnections(p3, sc1)
 
 sim = Simulation(grid)
-sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=25, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()

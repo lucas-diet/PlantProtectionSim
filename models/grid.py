@@ -203,18 +203,14 @@ class Grid():
             plant, ecs = cell  # Entpacke das Tupel in Pflanze und Feindgruppen
 
             if isinstance(plant, Plant):  # Wenn Pflanze vorhanden
-                if plant.isAlarmed_toxin:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%+')
-                elif plant.isToxic:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%*')
-                elif plant.isAlarmed_signal:
+                if plant.isAlarmed_signal == True:
                     lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%!')
-                elif plant.isSignaling:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%^')
-                elif plant.isSignaling and plant.isAlarmed_toxin:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%^+')
-                elif plant.isSignaling and plant.isToxic:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%^*')
+                elif plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == False:
+                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%>')
+                elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False:
+                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%+')
+                elif plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == True:
+                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%*')
                 else:
                     lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%')
 
@@ -375,12 +371,12 @@ class Grid():
                         continue
                     else:
                         # Wenn die Pflanze noch nicht alarmiert wurde und das Signal produziert werden soll
-                        if not plant.isAlarmed_signal and not plant.isSignaling and dist < 1:
+                        if plant.isAlarmed_signal == False and plant.isSignaling == False and dist < 1:
                             plant.enemySignalAlarm()  # Alarmiere die Pflanze
                             signal.signalCosts(plant)  # Reduziere Signal-Kosten
                             print(f'[DEBUG-Signal]: {plant.name} ist alamiert durch {ec.enemy.name}')
                         # Falls die Pflanze schon alarmiert wurde, aber noch kein Signal produziert
-                        elif plant.isAlarmed_signal and not plant.isSignaling:
+                        elif plant.isAlarmed_signal == True and plant.isSignaling == False:
                             # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
                             if plant.getSignalProdCounter(ec, signal) < signal.prodTime - 1:
                                 plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
@@ -391,6 +387,8 @@ class Grid():
                                 signal.activateSignal()
                                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
                                 print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+                        
+                        #TODO: Nachwirkzeit!!!
 
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant, signal):
@@ -399,28 +397,32 @@ class Grid():
 
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
-                sig, enemy, minClusterSize = trigger
-                if plant in toxin.plantTransmitter and sig == signal and ec.enemy == enemy and plant.position == ec.targetPlant:
+                triggerSignal, enemy, minClusterSize = trigger
+                if plant in toxin.plantTransmitter and triggerSignal == signal and ec.enemy == enemy and plant.position == ec.targetPlant:                
                     if ec.num < minClusterSize and ec.num > 0:
                         print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
                         continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                     else:
-                        # Alarmierung der Pflanze, falls nah genug
-                        if plant.isAlarmed_toxin == False and plant.isToxic == False and dist < 1:
+                        # Alarmierung der Pflanze, falls nah genug und Signalstoff vorhanden ist.
+                        if plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == False and dist < 1:
                             plant.enemyToxinAlarm()
                             toxin.toxinCosts(plant)
                             print(f'[DEBUG-Gift]: {plant.name} ist alamiert durch {ec.enemy.name}')
                         
                         # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
-                        elif plant.isAlarmed_toxin == True and plant.isToxic == False:
+                        elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False:
+                            print(plant.isSignaling, plant.isAlarmed_toxin, plant.isToxic)
                             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
                                 plant.incrementToxinProdCounter(ec, toxin)
                                 print(f'[DEBUG-Gift]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
+                            
                             else:
                                 # Pflanze wird giftig, wenn Produktionszeit erreicht
+                                print(plant.isSignaling, plant.isAlarmed_toxin, plant.isToxic)
                                 plant.makeToxin()
                                 toxin.toxinCosts(plant)
-                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                       
+                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+                                print(plant.isSignaling, plant.isAlarmed_toxin, plant.isToxic)                       
 
                         # Giftigkeit zurücksetzen, wenn Feind weg ist
                         if ec.lastVisitedPlant is not None and toxin.deadly == False:
