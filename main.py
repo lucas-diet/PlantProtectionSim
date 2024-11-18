@@ -70,7 +70,7 @@ ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSp
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-grid.addPlant(p3)
+#grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
@@ -82,7 +82,7 @@ s3 = Substance(name='s3', type='signal')
 
 
 sig1 = Signal(substance=s1,
-              emit=[p1, p2, p3],
+              emit=[p1, p2],
               receive=[p3],
               triggerCombination=[[e1, 2]],
               prodTime=2,
@@ -92,7 +92,7 @@ sig1 = Signal(substance=s1,
               afterEffectTime=2)
 
 sig2 = Signal(substance=s3,
-              emit=[p3],
+              emit=[p1, p2],
               receive=[p3],
               triggerCombination=[[e1, 2]],
               prodTime=2, 
@@ -102,10 +102,10 @@ sig2 = Signal(substance=s3,
               afterEffectTime=2)
 
 tox1 = Toxin(substance=s2, 
-             plantTransmitter=[p1, p2, p3],
+             plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
-             prodTime=2,
+             prodTime=1,
              deadly=False,
              eliminationStrength=1)
 

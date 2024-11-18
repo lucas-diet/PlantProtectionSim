@@ -76,11 +76,6 @@ class Grid():
 
 
     def addSubstance(self, substance):
-        """Fügt eine Substanz entweder zu den Toxinen oder den Signalen hinzu, abhängig vom Typ der Substanz.
-        
-        Args:
-            substance (Substance): Die Substanz, die hinzugefügt werden soll (entweder ein Toxin oder ein Signal).
-        """
         # Iteriere durch das gesamte Grid
         for _, row in enumerate(self.grid):
             for _, (plant, ec) in enumerate(row):
@@ -95,11 +90,6 @@ class Grid():
 
 
     def removeSubstance(self, substance):
-        """Entfernt eine Substanz entweder aus den Toxinen oder den Signalen, abhängig vom Typ der Substanz.
-        
-        Args:
-            substance (Substance): Die Substanz, die entfernt werden soll (entweder ein Toxin oder ein Signal).
-        """
         # Iteriere durch das gesamte Grid
         for _, row in enumerate(self.grid):
             for _, (plant, ec) in enumerate(row):
@@ -120,14 +110,6 @@ class Grid():
     
 
     def getGridEnergy(self):
-        """_summary_
-            Berechnet die Gesamtenergie aller Pflanzen im Gitter.
-            Die Methode summiert die aktuelle Energie ('currEnergy') jeder Pflanze in der Pflanzenliste 'plants' 
-            und gibt die Gesamtsumme als Energiewert zurück.
-
-        Returns:
-            energy (int): Summe der vorhanden Energieeinheiten im Netzwerk
-        """
         self.totalEnergy = 0
         for plant in self.plants:
             self.totalEnergy += plant.currEnergy
@@ -135,14 +117,6 @@ class Grid():
     
     
     def getGridEnemyNum(self):
-        """_summary_
-            Berechnet die Gesamtzahl aller Feinde im Gitter.
-            Die Methode summiert die Anzahl ('num') jedes Feindes in der Feindesliste 'enemies' 
-            und gibt die Gesamtsumme zurück.
-
-        Returns:
-            enemyNum (int): Gesamtzahl aller Feinde im Netzwerk
-        """
         enemyNum = 0
         for enemy in self.enemies:
             enemyNum += enemy.num
@@ -150,22 +124,10 @@ class Grid():
     
 
     def displayGridEnergy(self):
-        """_summary_
-            Zeigt die Gesamtenergie des Gitters an.
-            Die Methode ruft `getGridEnergy` auf, um die Gesamtenergie aller Pflanzen zu berechnen,
-            und gibt diesen Wert in einem formatierten String auf der Konsole aus.
-
-        """
         print(f'Grid-Energy: {self.getGridEnergy()}')
     
 
     def displayEnemyNum(self):
-        """_summary_
-            Zeigt die Gesamtzahl der im Gird vorhanden Individuen aller Feinde.
-            Die Methode ruft 'getGridEnemyNum' auf, um die Gesamtzahl aller Feinde zu berechnen,
-            und gibt diesen Wert in einem formatierten String auf der Konsole aus.
-
-        """
         print(f'Enemy-Number: {self.getGridEnemyNum()}')
 
 
@@ -193,7 +155,6 @@ class Grid():
             hGrid.append(row)
         
         return hGrid
-
     
 
     def displayGrid(self):
@@ -203,16 +164,18 @@ class Grid():
             plant, ecs = cell  # Entpacke das Tupel in Pflanze und Feindgruppen
 
             if isinstance(plant, Plant):  # Wenn Pflanze vorhanden
+                energy = f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%'
+
                 if plant.isAlarmed_signal == True:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%!')
+                    lines.append(f'{energy}!')
                 elif plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == False:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%>')
+                    lines.append(f'{energy}>')
                 elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%+')
+                    lines.append(f'{energy}+')
                 elif plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == True:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%*')
+                    lines.append(f'{energy}*')
                 else:
-                    lines.append(f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%')
+                    lines.append(f'{energy}')
 
             for ec in ecs:  # Iteriere über alle Feindgruppen
                 if isinstance(ec, EnemyCluster):
@@ -241,7 +204,7 @@ class Grid():
                 print()  # Neue Zeile nach jeder Zeile im Grid
             print()
         print('#################### \n')
-
+        
     
     def hasPlants(self):
         for row in self.grid:
@@ -261,31 +224,10 @@ class Grid():
 
 
     def displayMove(self, ec, oldPos, newPos):
-        """_summary_
-            Zeigt die Bewegung eines Feindes im Gitter an.
-            Die Methode gibt eine Nachricht auf der Konsole aus, die den Namen des Feindes ('species'),
-            die alte Position ('oldPos') und die neue Position ('newPos') angibt. 
-
-        Args:
-            enemy: Objekt der Klasse Enemy
-            oldPos: Tupel (x,y) -> alte Position
-            newPos: Tupel (x,y) -> neue Position
-        """
         print(f'{ec.enemy.name} moved from {oldPos} to {newPos}')
 
     
     def getNewPosition(self, steps):
-        """Bestimmt eine neue Position basierend auf den angegebenen Schritten.
-        Die Methode prüft jede Position in der Liste 'steps' und gibt die erste Position zurück,
-        die innerhalb der Grid-Grenzen liegt, wie von 'isWithinBounds' überprüft. 
-        Wenn keine der angegebenen Positionen gültig ist, wird 'None' zurückgegeben.
-
-        Args:
-            steps (list of tuples): Liste der möglichen Schritte, als Tupel von (x, y)-Koordinaten.
-
-        Returns:
-            tuple: Die erste gültige Position, die innerhalb der Grid-Grenzen liegt, oder None, wenn keine gültige Position gefunden wurde.
-        """
         for step in steps:
             x, y = step
             if self.isWithinBounds(x, y):  # Überprüfe, ob die Position innerhalb der Grenzen des Grids liegt
@@ -359,7 +301,9 @@ class Grid():
 
 
     def plantAlarmAndSignalProd(self, ec, dist, plant):
-               
+        # TODO: Mehrere Signalstoff produzieren können von einer Pflanze!!
+        # Via Dict für Signalstoffe und Giftstoffe lösen!!
+        
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 enemy, minClusterSize = trigger
