@@ -111,7 +111,7 @@ tox1 = Toxin(substance=s2,
 
 
 grid.addSubstance(sig1)
-#grid.addSubstance(sig2)
+grid.addSubstance(sig2)
 grid.addSubstance(tox1)
     
 
@@ -119,7 +119,7 @@ sc1 = SymbioticConnection(p1, p3)
 sc2 = SymbioticConnection(p3, p2)
 
 
-sc1.createConnection()
+#sc1.createConnection()
 #sc2.createConnection()
 #grid.getAllGridConnections(p3, sc1)
 

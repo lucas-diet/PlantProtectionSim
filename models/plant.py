@@ -19,48 +19,40 @@ class Plant():
         
         self.age = 0
         self.gridConnections = {}
+
         self.isAlarmed_signal = False
+        self.signalAlarms = {}
+
         self.isSignaling = False
+        self.isSignalSignaling = {}
+
         self.signalProdCounters = {}
         self.signalSendingCounters = {}
         self.afterEffectTime = 0
+
         self.isAlarmed_toxin = False
+        self.toxinAlarms = {}
+
         self.isToxic = False
+        self.isToxically = {}
+
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
 
     def grow(self):
-        """_summary_
-            Lässt die Pflanze wachsen, indem sie ihre Energie erhöht und ihr Alter steigert.
-            Die Methode erhöht die aktuelle Energie ('currEnergy') der Pflanze basierend auf der Wachstumsrate ('growthRateEnegry'),
-            die als Prozentsatz angegeben ist. Außerdem wird das Alter der Pflanze ('age') um 1 Jahr erhöht.
-
-        """
+        
         energyIncrease = self.initEnergy * (self.growthRateEnegry / 100)
         self.currEnergy += energyIncrease
         self.age += 1
 
 
     def survive(self):
-        """_summary_
-            Überprüft, ob die Pflanze überleben kann und entfernt sie andernfalls.
-            Die Methode vergleicht die aktuelle Energie ('currEnergy') der Pflanze mit einem Minimalwert ('minEnergy').
-            Wenn die aktuelle Energie unter dem Minimalwert liegt, wird die Pflanze aus dem Gitter entfernt, indem 'removePlant' aufgerufen wird.
-
-        """
+        
         if self.currEnergy < self.minEnergy:
             self.grid.removePlant(self)
             
         
     def scatterSeed(self):
-        """_summary_
-            Ermöglicht der Pflanze die Fortpflanzung, wenn die Bedingungen erfüllt sind.
-            Die Methode überprüft, ob die Pflanze gemäß ihrer Fortpflanzungszyklen ('reproductionSteps') zur Fortpflanzung bereit ist.
-            Falls die Pflanze das Fortpflanzungsalter erreicht hat, erzeugt sie eine zufällige Anzahl von Nachkommen (zwischen 1 und 4).
-            Jeder Nachkomme wird an einer neu bestimmten Position ('offspringPosition') im Gitter erstellt und zur Gitterstruktur hinzugefügt.
-            Die Energie der Pflanze wird um 10 reduziert, um die Fortpflanzung zu unterstützen.
-
-        """
-    
+            
         if self.reproductionIntervall == 0:
             pass
 
@@ -97,18 +89,7 @@ class Plant():
         return directions
     
 
-    def setOffspringPos(self):
-        """_summary_
-            Bestimmt eine gültige Position für einen Nachkommen innerhalb eines definierten Radius.
-            Die Methode erstellt eine Liste aller möglichen Richtungen innerhalb eines Kreises um die aktuelle Position
-            mit einer maximalen Distanz ('maxDist') und mischt diese zufällig. Anschließend wird jede Richtung geprüft, um
-            eine neue Position zu finden, die innerhalb der Gittergrenzen liegt und nicht bereits besetzt ist.
-            Falls eine gültige Position gefunden wird, wird diese zurückgegeben. Andernfalls wird 'None' zurückgegeben.
-
-        Returns:
-            tuple[int, int] | None: Die neue Position für den Nachkommen als Koordinatenpaar oder 'None', wenn keine gültige Position gefunden wurde.
-        """
-        
+    def setOffspringPos(self):        
         directions = self.getDirections()
         random.shuffle(directions)
 
@@ -132,41 +113,6 @@ class Plant():
     def getColor(self):
         print(self.color)
         return self.color
-    
-    
-    def enemyToxinAlarm(self):
-        self.isAlarmed_toxin = True
-    
-
-    def makeToxin(self):
-        self.isAlarmed_toxin = False
-        self.isToxic = True
-
-    
-    def resetToxinProdCounter(self, ec, toxin):
-        self.toxinProdCounters[ec, toxin] = 0
-
-
-    def incrementToxinProdCounter(self, ec, toxin):
-        key = (ec, toxin)
-        if key in self.toxinProdCounters:
-            self.toxinProdCounters[ec, toxin] += 1
-        else:
-            self.toxinProdCounters[ec, toxin] = 1
-
-
-    def getToxinProdCounter(self, ec, toxin):
-        key = (ec, toxin)
-        return self.toxinProdCounters.get(key, 0)
-    
-
-    def enemySignalAlarm(self):
-        self.isAlarmed_signal = True
-    
-
-    def makeSignal(self):
-        self.isAlarmed_signal = False
-        self.isSignaling = True
 
     
     def resetSignalProdCounter(self, ec, signal):
@@ -178,7 +124,7 @@ class Plant():
         if key in self.signalProdCounters:
             self.signalProdCounters[ec, signal] += 1
         else:
-            self.signalProdCounters[ec, signal] = 1
+            self.signalProdCounters[ec, signal] = 2
 
 
     def getSignalProdCounter(self, ec, signal):
@@ -196,6 +142,89 @@ class Plant():
             self.signalSendingCounters[ec, signal, rPlant] += 1
         else:
             self.signalSendingCounters[ec, signal, rPlant] = 1
+
+    
+    def isSignalAlarmed(self, signal):
+        return self.signalAlarms.get(signal, False)
+    
+
+    def setSignalAlarm(self, signal, status):
+        self.signalAlarms[signal] = status
+
+
+    def isSignalPresent(self, signal):
+        return self.isSignalSignaling.get(signal, False)
+    
+
+    def setSignalPresence(self, signal, status):
+        self.isSignalSignaling[signal] = status
+        
+        if self.isSignalPresent(signal) == False:
+            self.isSignaling = False
+
+    
+    def enemySignalAlarm(self, toxin):
+        self.isAlarmed_signal = True
+        
+        self.setSignalAlarm(toxin, True)
+    
+
+    def makeSignal(self, signal):
+        self.isAlarmed_signal = False
+        self.isSignaling = True
+        
+        self.setSignalAlarm(signal, False)
+        self.setSignalPresence(signal, True)
+
+    
+    def resetToxinProdCounter(self, ec, toxin):
+        self.toxinProdCounters[ec, toxin] = 0
+
+
+    def incrementToxinProdCounter(self, ec, toxin):
+        key = (ec, toxin)
+        if key in self.toxinProdCounters:
+            self.toxinProdCounters[ec, toxin] += 1
+        else:
+            self.toxinProdCounters[ec, toxin] = 2
+
+
+    def getToxinProdCounter(self, ec, toxin):
+        key = (ec, toxin)
+        return self.toxinProdCounters.get(key, 0)
+    
+
+    def isToxinAlarmed(self, toxin):
+        return self.toxinAlarms.get(toxin, False)
+    
+
+    def setToxinAlarm(self, toxin, status):
+        self.toxinAlarms[toxin] = status
+
+
+    def isToxinPresent(self, toxin):
+        return self.isToxically.get(toxin, False)
+    
+
+    def setToxinPresence(self, toxin, status):
+        self.isToxically[toxin] = status
+
+        if self.isToxinPresent(toxin) == False:
+            self.isToxic = False
+
+    
+    def enemyToxinAlarm(self, toxin):
+        self.isAlarmed_toxin = True
+        
+        self.setToxinAlarm(toxin, True)
+    
+
+    def makeToxin(self, toxin):
+        self.isAlarmed_toxin = False
+        self.isToxic = True
+        
+        self.setToxinAlarm(toxin, False)
+        self.setToxinPresence(toxin, True)
 
 
     def getSignalSendCounter(self, ec, signal, rPlant):
