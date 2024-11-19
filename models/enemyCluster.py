@@ -50,6 +50,16 @@ class EnemyCluster():
         return positions
     
 
+    def dynamicDirections(self, currPos, directions, goal):
+        """
+            Berechnet eine dynamische Reihenfolge für die Bewegungsrichtungen, 
+            basierend auf der Nähe zum Ziel ohne Priorisierung der Achsen.
+            Dabei berechnet sie die quadratische euklidische Distanz zu jedem potenziellen Nachbarn des aktuellen Punktes.
+            """
+        return sorted(directions, key=lambda d: (currPos[0] + d[0] - goal[0]) ** 2 + (currPos[1] + d[1] - goal[1]) ** 2)
+
+    
+
     def findShortestPath(self, start, goal):
         """_summary_
             Finde den kürzesten Pfad zwischen zwei Punkten im Gitter mittels Breitensuche (BFS).
@@ -70,7 +80,7 @@ class EnemyCluster():
         grid = self.grid.getGrid()
         rows, cols = len(grid), len(grid[0])
         directions = [(-1,0), (1,0), (0,-1), (0,1)] # Bewegungsmöglichkeiten: Oben, Unten, Links, Rechts
-
+        
         queue = deque([start])
         distances = {start: 0}
         previous = {start: None}
@@ -85,13 +95,12 @@ class EnemyCluster():
                     currPos = previous[currPos]
                 return path[::-1]
 
-            for direction in directions:
+            for direction in self.dynamicDirections(currPos, directions, goal):
                 nextRow = currPos[0] + direction[0]
                 nextCol = currPos[1] + direction[1]
                 nextPos = (nextRow, nextCol)
 
                 if 0 <= nextRow < rows and 0 <= nextCol < cols and nextPos not in distances:
-                    #print(currPos, f'::{currPos}+{direction} =' , nextPos)
                     queue.append(nextPos)
                     distances[nextPos] = distances[currPos] + 1
                     previous[nextPos] = currPos
