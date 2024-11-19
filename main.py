@@ -23,7 +23,6 @@ from views.gui import Gui
 grid = Grid(height=6, width=6)
 plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
-#name, initEnergy, growthRateEnegry, minEnegrgy, reproduction, offspingEnergy, minDist, maxDist, position, grid
 p1 = Plant(name='p1', 
            initEnergy=100, 
            growthRateEnegry=2, 
@@ -68,19 +67,10 @@ ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatingSp
 ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=10, eatVictory=10)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
-grid.addPlant(p1)
-grid.addPlant(p2)
-#grid.addPlant(p3)
-
-grid.addEnemies(ec1)
-#grid.addEnemies(ec2)
-#grid.addEnemies(ec3)
-
 s1 = Substance(name='s1', type='signal')
 s2 = Substance(name='s2', type='signal')
 s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
-
 
 sig1 = Signal(substance=s1,
               emit=[p1, p2],
@@ -89,7 +79,7 @@ sig1 = Signal(substance=s1,
               prodTime=2,
               spreadType='symbiotic',
               sendingSpeed=2,
-              energyCosts=2,
+              energyCosts=1,
               afterEffectTime=2)
 
 sig2 = Signal(substance=s2,
@@ -99,7 +89,7 @@ sig2 = Signal(substance=s2,
               prodTime=2, 
               spreadType='symbiotic',
               sendingSpeed=2,
-              energyCosts=2,
+              energyCosts=1,
               afterEffectTime=2)
 
 tox1 = Toxin(substance=s3, 
@@ -118,6 +108,13 @@ tox2 = Toxin(substance=s4,
              deadly=False,
              eliminationStrength=1)
 
+grid.addPlant(p1)
+grid.addPlant(p2)
+#grid.addPlant(p3)
+
+grid.addEnemies(ec1)
+#grid.addEnemies(ec2)
+#grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)
 grid.addSubstance(sig2)

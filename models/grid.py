@@ -318,7 +318,7 @@ class Grid():
                         # Falls die Pflanze schon alarmiert wurde, aber noch kein Signal produziert
                         elif plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
                             # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
-                            if plant.getSignalProdCounter(ec, signal) < signal.prodTime - 1:
+                            if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
                                 plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
                                 print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}')
                             else:
@@ -358,7 +358,7 @@ class Grid():
                             print(f'[DEBUG-Gift]: {plant.name} ist alamiert durch {ec.enemy.name}')
                         # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
                         elif signal in signal.activeSignals and plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
-                            if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
+                            if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
                                 plant.incrementToxinProdCounter(ec, toxin)
                                 print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
                             else:
@@ -428,8 +428,6 @@ class Grid():
                         ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
                         ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
                         print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht')
-                    else:
-                        print(f'[DEBUG]: {ec.enemy.name} bleibt an der aktuellen Position')
                     
                 # Wenn das Toxin tödlich ist und die Pflanze toxisch ist und die Bedingungen erfüllt sind
                 elif toxin.deadly == True and plant.isToxinPresent(toxin) == True and plant in toxin.plantTransmitter and ec.num >= minClusterSize:

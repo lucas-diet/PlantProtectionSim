@@ -120,7 +120,7 @@ class Plant():
         if key in self.signalProdCounters:
             self.signalProdCounters[ec, signal] += 1
         else:
-            self.signalProdCounters[ec, signal] = 2
+            self.signalProdCounters[ec, signal] = 1
 
 
     def getSignalProdCounter(self, ec, signal):
@@ -185,7 +185,7 @@ class Plant():
         if key in self.toxinProdCounters:
             self.toxinProdCounters[ec, toxin] += 1
         else:
-            self.toxinProdCounters[ec, toxin] = 2
+            self.toxinProdCounters[ec, toxin] = 1
 
 
     def getToxinProdCounter(self, ec, toxin):
