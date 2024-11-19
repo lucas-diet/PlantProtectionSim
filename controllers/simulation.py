@@ -1,4 +1,7 @@
 
+import os
+import time
+
 class Simulation:
 
     def __init__(self, grid):
@@ -20,6 +23,10 @@ class Simulation:
             plant.scatterSeed()
 
 
+    def clearConsole(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
+
     def displayInit(self):
         """_summary_
             Zeigt den initialen Zustand des Gitters an.
@@ -35,6 +42,7 @@ class Simulation:
         self.grid.displayEnemyNum()
         print()
         self.grid.displayGrid()
+        time.sleep(2)
 
 
     def noSpecificPlantBreak(self, plant=None):
@@ -109,8 +117,10 @@ class Simulation:
             Die Schleife wiederholt sich, bis eine der Beendigungsbedingungen erfüllt ist. Jeder Schritt wird mit einer Schrittzahl ('count') angezeigt.
 
         """
+        
         self.displayInit()
         count = 1
+        
 
         while True:
             if count - 1 == maxSteps:
@@ -135,7 +145,7 @@ class Simulation:
             if self.upperEnemyNumBreak(maxEnemyNum) == True:
                 break
             
-
+            self.clearConsole()
             print('\nSimulation-Step:', count)
             self.runStep()
             self.grid.collectAndManageEnemies()
@@ -144,4 +154,6 @@ class Simulation:
             #self.grid.displayInteractionMatrix()
             self.grid.displayGrid()
             count += 1
+            time.sleep(2)
+
             
