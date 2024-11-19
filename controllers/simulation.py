@@ -23,10 +23,6 @@ class Simulation:
             plant.scatterSeed()
 
 
-    def clearConsole(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
-
-
     def displayInit(self):
         """_summary_
             Zeigt den initialen Zustand des Gitters an.
@@ -42,7 +38,7 @@ class Simulation:
         self.grid.displayEnemyNum()
         print()
         self.grid.displayGrid()
-        time.sleep(2)
+        #time.sleep(2)
 
 
     def noSpecificPlantBreak(self, plant=None):
@@ -103,6 +99,10 @@ class Simulation:
         else:
             return False
 
+
+    def clearConsole(self):
+        os.system('cls' if os.name == 'nt' else 'clear')
+
     
     def run(self, maxSteps, plant, ec, maxGridEnergy, maxEnemyNum):
         """_summary_
@@ -145,7 +145,7 @@ class Simulation:
             if self.upperEnemyNumBreak(maxEnemyNum) == True:
                 break
             
-            self.clearConsole()
+            #self.clearConsole()
             print('\nSimulation-Step:', count)
             self.runStep()
             self.grid.collectAndManageEnemies()
@@ -154,6 +154,6 @@ class Simulation:
             #self.grid.displayInteractionMatrix()
             self.grid.displayGrid()
             count += 1
-            time.sleep(2)
+            #time.sleep(2)
 
             

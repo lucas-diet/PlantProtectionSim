@@ -166,13 +166,13 @@ class Grid():
             if isinstance(plant, Plant):  # Wenn Pflanze vorhanden
                 energy = f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%'
 
-                if plant.isAlarmed_signal == True: #len(plant.signalAlarms) > 0: #
+                if any(plant.signalAlarms.values()) == True:
                     lines.append(f'{energy}!')
-                elif plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == False: #len(plant.isSignalSignaling) > 0 and len(plant.signalAlarms) == 0 and len(plant.isToxically) == 0: #
+                elif any(plant.isSignalSignaling.values()) == True and any(plant.toxinAlarms.values()) == False and any(plant.isToxically.values()) == False:
                     lines.append(f'{energy}>')
-                elif plant.isSignaling == True and plant.isAlarmed_toxin == True and plant.isToxic == False: #len(plant.isSignalSignaling) > 0 and len(plant.signalAlarms) > 0 and len(plant.isToxically) == 0: #
+                elif any(plant.isSignalSignaling.values()) == True and any(plant.toxinAlarms.values()) == True and any(plant.isToxically.values()) == False:
                     lines.append(f'{energy}+')
-                elif plant.isSignaling == True and plant.isAlarmed_toxin == False and plant.isToxic == True: #len(plant.isSignalSignaling) > 0 and len(plant.signalAlarms) == 0 and len(plant.isToxically) > 0: #
+                elif any(plant.isSignalSignaling.values()) == True and any(plant.toxinAlarms.values()) == False and any(plant.isToxically.values()) == True:
                     lines.append(f'{energy}*')
                 else:
                     lines.append(f'{energy}')

@@ -22,7 +22,6 @@ class Plant():
 
         self.isAlarmed_signal = False
         self.signalAlarms = {}
-
         self.isSignaling = False
         self.isSignalSignaling = {}
 
@@ -32,7 +31,6 @@ class Plant():
 
         self.isAlarmed_toxin = False
         self.toxinAlarms = {}
-
         self.isToxic = False
         self.isToxically = {}
 
@@ -151,6 +149,12 @@ class Plant():
     def setSignalAlarm(self, signal, status):
         self.signalAlarms[signal] = status
 
+        # Wenn kein Signalalarm aktiv ist, setze `isSignaling` auf True
+        if any(self.signalAlarms.values()) == False:
+            self.isSignaling = True
+        else:
+            self.isSignaling = False
+
 
     def isSignalPresent(self, signal):
         return self.isSignalSignaling.get(signal, False)
@@ -158,21 +162,18 @@ class Plant():
 
     def setSignalPresence(self, signal, status):
         self.isSignalSignaling[signal] = status
-        
-        if self.isSignalPresent(signal) == False:
+
+        if any(self.isSignalSignaling.values()) == False:
             self.isSignaling = False
+        else:
+            self.isSignaling = True
 
     
-    def enemySignalAlarm(self, toxin):
-        self.isAlarmed_signal = True
-        
+    def enemySignalAlarm(self, toxin):      
         self.setSignalAlarm(toxin, True)
     
 
     def makeSignal(self, signal):
-        self.isAlarmed_signal = False
-        self.isSignaling = True
-        
         self.setSignalAlarm(signal, False)
         self.setSignalPresence(signal, True)
 
@@ -201,6 +202,11 @@ class Plant():
     def setToxinAlarm(self, toxin, status):
         self.toxinAlarms[toxin] = status
 
+        if any(self.toxinAlarms.values()) == False:
+            self.isAlarmed_toxin = True
+        else:
+            self.isAlarmed_toxin = False
+
 
     def isToxinPresent(self, toxin):
         return self.isToxically.get(toxin, False)
@@ -209,20 +215,17 @@ class Plant():
     def setToxinPresence(self, toxin, status):
         self.isToxically[toxin] = status
 
-        if self.isToxinPresent(toxin) == False:
+        if any(self.isToxically.values()) == False:
             self.isToxic = False
+        else:
+            self.isToxic = True
 
     
     def enemyToxinAlarm(self, toxin):
-        self.isAlarmed_toxin = True
-        
         self.setToxinAlarm(toxin, True)
     
 
     def makeToxin(self, toxin):
-        self.isAlarmed_toxin = False
-        self.isToxic = True
-        
         self.setToxinAlarm(toxin, False)
         self.setToxinPresence(toxin, True)
 
