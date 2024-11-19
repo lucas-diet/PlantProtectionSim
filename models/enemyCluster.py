@@ -192,7 +192,7 @@ class EnemyCluster():
                     break
 
             if plant is not None:
-                print(f'{ec.enemy.name} is eating {plant.name} at position {pPos}')
+                print(f'[INFO]: {ec.enemy.name} frisst an {plant.name} auf Position {pPos}')
                 plant.currEnergy -= self.eatingSpeed
                 self.eatedEnergy += self.eatingSpeed
 
@@ -205,13 +205,13 @@ class EnemyCluster():
                 for enemyCluster in self.grid.enemies:
                     if enemyCluster.targetPlant == pPos:
                         enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
-                        print(f'{enemyCluster.enemy.name} has lost its target and will look for a new plant')
+                        print(f'[INFO]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
 
             # Jetzt ein neues Ziel suchen
             return self.chooseRandomPlant(ePos)
         
         else:
-            print(f'No plant found at position {pPos}.')
+            print(f'[INfO]: keine Pflanze an Position {pPos} gefunden')
                     
 
     def reproduce(self):

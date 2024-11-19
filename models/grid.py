@@ -224,7 +224,7 @@ class Grid():
 
 
     def displayMove(self, ec, oldPos, newPos):
-        print(f'{ec.enemy.name} moved from {oldPos} to {newPos}')
+        print(f'[INFO]: {ec.enemy.name} bewegt sich von {oldPos} zu {newPos}')
 
     
     def getNewPosition(self, steps):
@@ -417,7 +417,7 @@ class Grid():
             triggers = self.getTriggers(toxin)
             
             # Durchlaufe jedes Trigger-Tupel und prüfe, ob die Bedingungen zutreffen
-            for sig, enemy, minClusterSize in triggers:
+            for signal, enemy, minClusterSize in triggers:
                 # Wenn das Toxin nicht tödlich ist und die Pflanze toxisch ist
                 if toxin.deadly == False and plant.isToxinPresent(toxin) == True:
                     # Versuche, den Feind zu verscheuchen
@@ -427,9 +427,9 @@ class Grid():
                     if newPath and newPath != ec.currentPath:
                         ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
                         ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
-                        print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht.')
+                        print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht')
                     else:
-                        print(f'[DEBUG]: {ec.enemy.name} bleibt an der aktuellen Position.')
+                        print(f'[DEBUG]: {ec.enemy.name} bleibt an der aktuellen Position')
                     
                 # Wenn das Toxin tödlich ist und die Pflanze toxisch ist und die Bedingungen erfüllt sind
                 elif toxin.deadly == True and plant.isToxinPresent(toxin) == True and plant in toxin.plantTransmitter and ec.num >= minClusterSize:

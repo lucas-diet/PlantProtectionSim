@@ -36,7 +36,3 @@ class Signal(Substance):
             self.activeSignals.remove(self)
         else:
             pass
-
-    
-    def warnPlant(self):
-        pass

@@ -154,6 +154,6 @@ class Simulation:
             #self.grid.displayInteractionMatrix()
             self.grid.displayGrid()
             count += 1
-            #time.sleep(2)
+            #time.sleep(1)
 
             

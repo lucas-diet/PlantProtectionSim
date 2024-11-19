@@ -37,9 +37,7 @@ class Plant():
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
 
     def grow(self):
-        
-        energyIncrease = self.initEnergy * (self.growthRateEnegry / 100)
-        self.currEnergy += energyIncrease
+        self.currEnergy += self.initEnergy * (self.growthRateEnegry / 100)
         self.age += 1
 
 
