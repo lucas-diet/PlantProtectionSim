@@ -300,9 +300,7 @@ class Grid():
         ec.reproduce()
 
 
-    def plantAlarmAndSignalProd(self, ec, dist, plant):
-        # TODO: Mehrere Signalstoff produzieren können von einer Pflanze!!
-        
+    def plantAlarmAndSignalProd(self, ec, dist, plant):      
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 enemy, minClusterSize = trigger
@@ -343,7 +341,7 @@ class Grid():
                         
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
-        # TODO: Mehrere Giftstoffe muss noch beachtet werden!
+        # TODO: Was ist wenn verschiedene Giftstoffe durch den gleichen Signalstoff ausgelöst werden?
 
         for toxin, signal in zip(self.toxins, self.signals):
             for trigger in toxin.triggerCombination:

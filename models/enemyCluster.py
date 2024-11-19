@@ -59,7 +59,6 @@ class EnemyCluster():
         return sorted(directions, key=lambda d: (currPos[0] + d[0] - goal[0]) ** 2 + (currPos[1] + d[1] - goal[1]) ** 2)
 
     
-
     def findShortestPath(self, start, goal):
         """_summary_
             Finde den kürzesten Pfad zwischen zwei Punkten im Gitter mittels Breitensuche (BFS).

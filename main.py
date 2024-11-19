@@ -77,8 +77,9 @@ grid.addEnemies(ec1)
 #grid.addEnemies(ec3)
 
 s1 = Substance(name='s1', type='signal')
-s2 = Substance(name='s2', type='toxin')
-s3 = Substance(name='s3', type='signal')
+s2 = Substance(name='s2', type='signal')
+s3 = Substance(name='s3', type='toxin')
+s4 = Substance(name='s4', type='toxin')
 
 
 sig1 = Signal(substance=s1,
@@ -91,7 +92,7 @@ sig1 = Signal(substance=s1,
               energyCosts=2,
               afterEffectTime=2)
 
-sig2 = Signal(substance=s3,
+sig2 = Signal(substance=s2,
               emit=[p1, p2],
               receive=[p3],
               triggerCombination=[[e1, 2]],
@@ -101,10 +102,18 @@ sig2 = Signal(substance=s3,
               energyCosts=2,
               afterEffectTime=2)
 
-tox1 = Toxin(substance=s2, 
+tox1 = Toxin(substance=s3, 
              plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
+             prodTime=1,
+             deadly=False,
+             eliminationStrength=1)
+
+tox2 = Toxin(substance=s4, 
+             plantTransmitter=[p1, p2],
+             energyCosts=1,
+             triggerCombination=[[sig2, e1, 2]],   
              prodTime=1,
              deadly=False,
              eliminationStrength=1)
@@ -113,6 +122,7 @@ tox1 = Toxin(substance=s2,
 grid.addSubstance(sig1)
 grid.addSubstance(sig2)
 grid.addSubstance(tox1)
+grid.addSubstance(tox2)
     
 
 sc1 = SymbioticConnection(p1, p3)
