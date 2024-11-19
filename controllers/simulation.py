@@ -38,7 +38,7 @@ class Simulation:
         self.grid.displayEnemyNum()
         print()
         self.grid.displayGrid()
-        #time.sleep(2)
+        time.sleep(2)
 
 
     def noSpecificPlantBreak(self, plant=None):
@@ -145,7 +145,7 @@ class Simulation:
             if self.upperEnemyNumBreak(maxEnemyNum) == True:
                 break
             
-            #self.clearConsole()
+            self.clearConsole()
             print('\nSimulation-Step:', count)
             self.runStep()
             self.grid.collectAndManageEnemies()
@@ -154,6 +154,6 @@ class Simulation:
             #self.grid.displayInteractionMatrix()
             self.grid.displayGrid()
             count += 1
-            #time.sleep(1)
+            time.sleep(1)
 
             

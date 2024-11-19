@@ -26,10 +26,13 @@ class Grid():
 
     def addPlant(self, plant):
         x,y = plant.position
-        self.plants.append(plant)
+        if len(self.plants) >= 1 or len(self.plants) <= 16:
+            self.plants.append(plant)
 
-        _, ecs = self.grid[x][y]
-        self.grid[x][y] = (plant, ecs)
+            _, ecs = self.grid[x][y]
+            self.grid[x][y] = (plant, ecs)
+        else:
+            print('[INFO]: maximale anzahl an pflanzen überschritten/ unterschritten')
 
     
     def removePlant(self, plant):
@@ -54,12 +57,15 @@ class Grid():
 
     def addEnemies(self, ec):
         x,y = ec.position
-        self.enemies.append(ec)
+        if len(self.enemies) >= 0 or len(self.enemies) <= 15:
+            self.enemies.append(ec)
 
-        plant, ecs = self.grid[x][y]  # Hole das bestehende Tupel
-        ecs.append(ec)  # Füge den Feind zur Liste der Feindgruppen hinzu
+            plant, ecs = self.grid[x][y]  # Hole das bestehende Tupel
+            ecs.append(ec)  # Füge den Feind zur Liste der Feindgruppen hinzu
 
-        self.grid[x][y] = (plant, ecs)  # Speichere das aktualisierte Tupel zurück
+            self.grid[x][y] = (plant, ecs)  # Speichere das aktualisierte Tupel zurück
+        else:
+            print('[INFO]: maximale anzahl an fressfeinden überschritten/ unterschritten')
 
 
     def removeEnemies(self, ec):
@@ -79,14 +85,18 @@ class Grid():
         # Iteriere durch das gesamte Grid
         for _, row in enumerate(self.grid):
             for _, (plant, ec) in enumerate(row):
-                # Überprüfen, ob die Substanz ein Toxin ist und füge sie zu den Toxinen hinzu
-                if substance.type == 'toxin':
-                    if substance not in self.toxins:
-                        self.toxins.append(substance)
                 # Überprüfen, ob die Substanz ein Signal ist und füge es zu den Signalen hinzu
-                elif substance.type == 'signal':
-                    if substance not in self.signals:
-                        self.signals.append(substance)
+                if len(self.signals) + len(self.toxins) >= 0 or len(self.signals) + len(self.toxins) <= 15:
+                    if substance.type == 'signal':
+                        if substance not in self.signals:
+                            self.signals.append(substance)
+                    # Überprüfen, ob die Substanz ein Toxin ist und füge sie zu den Toxinen hinzu
+                    elif substance.type == 'toxin':
+                        if substance not in self.toxins:
+                            self.toxins.append(substance)
+                else:
+                    print('maximale anzhal an substanzen überschritten/ unterschritten')
+                
 
 
     def removeSubstance(self, substance):
@@ -222,10 +232,6 @@ class Grid():
                     return True
         return False
 
-
-    def displayMove(self, ec, oldPos, newPos):
-        print(f'[INFO]: {ec.enemy.name} bewegt sich von {oldPos} zu {newPos}')
-
     
     def getNewPosition(self, steps):
         for step in steps:
@@ -256,7 +262,7 @@ class Grid():
 
     
     def canMove(self, ec):
-        # Überprüfe, ob der Feind genug Schritte gemacht hat, um sich zu bewegen
+        # Überprüfe, ob genug Zeitschritte vergangen sind, bis Feind sich bewegen darf
         if ec.stepCounter < ec.speed - 1:
             ec.stepCounter += 1
             return False
