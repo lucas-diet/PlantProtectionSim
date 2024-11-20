@@ -20,18 +20,18 @@ class Plant():
         self.age = 0
         self.gridConnections = {}
 
-        self.isAlarmed_signal = False
+        #self.isAlarmed_signal = False
         self.signalAlarms = {}
-        self.isSignaling = False
+        #self.isSignaling = False
         self.isSignalSignaling = {}
 
         self.signalProdCounters = {}
         self.signalSendingCounters = {}
         self.afterEffectTime = 0
 
-        self.isAlarmed_toxin = False
+        #self.isAlarmed_toxin = False
         self.toxinAlarms = {}
-        self.isToxic = False
+        #self.isToxic = False
         self.isToxically = {}
 
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
@@ -148,10 +148,10 @@ class Plant():
         self.signalAlarms[signal] = status
 
         # Wenn kein Signalalarm aktiv ist, setze `isSignaling` auf True
-        if any(self.signalAlarms.values()) == False:
-            self.isSignaling = True
-        else:
-            self.isSignaling = False
+        #if any(self.signalAlarms.values()) == False:
+        #    self.isSignaling = True
+        #else:
+        #    self.isSignaling = False
 
 
     def isSignalPresent(self, signal):
@@ -200,10 +200,10 @@ class Plant():
     def setToxinAlarm(self, toxin, status):
         self.toxinAlarms[toxin] = status
 
-        if any(self.toxinAlarms.values()) == False:
-            self.isAlarmed_toxin = True
-        else:
-            self.isAlarmed_toxin = False
+        #if any(self.toxinAlarms.values()) == False:
+        #    self.isAlarmed_toxin = True
+        #else:
+        #    self.isAlarmed_toxin = False
 
 
     def isToxinPresent(self, toxin):
@@ -233,5 +233,5 @@ class Plant():
         return self.signalSendingCounters.get(key, 0)
     
 
-    def sendSignal(self, rplant):
-        rplant.isSignaling = True
+    def sendSignal(self, rplant, signal):
+        rplant.setSignalPresence(signal, True)

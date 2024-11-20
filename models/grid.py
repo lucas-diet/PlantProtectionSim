@@ -398,12 +398,13 @@ class Grid():
                 if sPlant == plant and signal.spreadType == 'symbiotic':
                     print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPos}')
                     
-                    if sPos == ec.position and sPlant.isSignaling == True and rPlant in signal.receive:                        
+                    if sPos == ec.position and sPlant.isSignalPresent(signal) == True and rPlant in signal.receive:                        
                         # Überprüfe, ob das Signal gesendet werden kann
                         if plant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                             plant.incrementSignalSendCounter(ec, signal, rPlant)
                         else:
-                            plant.sendSignal(rPlant)
+                            print(sPlant.name, rPlant.name)
+                            sPlant.sendSignal(rPlant, signal)
                 elif sPlant == plant and signal.spreadType == 'air':
                     #TODO: Senden via Luft!!!
                     pass
