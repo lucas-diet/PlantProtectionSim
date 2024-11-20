@@ -24,11 +24,17 @@ class Grid():
         return self.grid
     
 
+    def canAddItem(self, min, max, list):
+        if len(list) >= min or len(list) <= max:
+            return True
+        else:
+            False
+
+    
     def addPlant(self, plant):
         x,y = plant.position
-        if len(self.plants) >= 1 or len(self.plants) <= 16:
+        if self.canAddItem(1, 16, self.plants) == True:
             self.plants.append(plant)
-
             _, ecs = self.grid[x][y]
             self.grid[x][y] = (plant, ecs)
         else:
@@ -57,12 +63,10 @@ class Grid():
 
     def addEnemies(self, ec):
         x,y = ec.position
-        if len(self.enemies) >= 0 or len(self.enemies) <= 15:
+        if self.canAddItem(0, 15, self.enemies):
             self.enemies.append(ec)
-
             plant, ecs = self.grid[x][y]  # Hole das bestehende Tupel
             ecs.append(ec)  # Füge den Feind zur Liste der Feindgruppen hinzu
-
             self.grid[x][y] = (plant, ecs)  # Speichere das aktualisierte Tupel zurück
         else:
             print('[INFO]: maximale anzahl an fressfeinden überschritten/ unterschritten')
@@ -86,7 +90,8 @@ class Grid():
         for _, row in enumerate(self.grid):
             for _, (plant, ec) in enumerate(row):
                 # Überprüfen, ob die Substanz ein Signal ist und füge es zu den Signalen hinzu
-                if len(self.signals) + len(self.toxins) >= 0 or len(self.signals) + len(self.toxins) <= 15:
+                substances = self.signals + self.toxins
+                if self.canAddItem(0 , 15, substances) == True:
                     if substance.type == 'signal':
                         if substance not in self.signals:
                             self.signals.append(substance)
@@ -95,8 +100,7 @@ class Grid():
                         if substance not in self.toxins:
                             self.toxins.append(substance)
                 else:
-                    print('maximale anzhal an substanzen überschritten/ unterschritten')
-                
+                    print('maximale anzhal an substanzen überschritten/ unterschritten')     
 
 
     def removeSubstance(self, substance):

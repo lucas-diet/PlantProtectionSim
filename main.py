@@ -131,7 +131,7 @@ sc2 = SymbioticConnection(p3, p2)
 #grid.getAllGridConnections(p3, sc1)
 
 sim = Simulation(grid)
-sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=0, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()
