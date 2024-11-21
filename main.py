@@ -73,7 +73,7 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=[p1],
+              emit=[p1, p2],
               receive=[p2],
               triggerCombination=[[e1, 2]],
               prodTime=2,
@@ -93,7 +93,7 @@ sig2 = Signal(substance=s2,
               afterEffectTime=1)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1],
+             plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
              prodTime=1,
@@ -101,7 +101,7 @@ tox1 = Toxin(substance=s3,
              eliminationStrength=1)
 
 tox2 = Toxin(substance=s4, 
-             plantTransmitter=[p2],
+             plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[[sig2, e1, 2]],   
              prodTime=1,

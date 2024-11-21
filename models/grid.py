@@ -309,10 +309,27 @@ class Grid():
         self.totalEnergy -= plant.currEnergy
         ec.reproduce()
 
+
+    def handelAfterEffectTime(self, ec, plant, signal, prodPlant1):
+        for prodPlant2 in signal.emit:
+            if plant == prodPlant2 and plant == prodPlant1 and ec.lastVisitedPlant is not None and ec.lastVisitedPlant.isSignalPresent(signal) == True:
+                if ec.position != ec.lastVisitedPlant.position:
+                    currAfterEffectTime = ec.lastVisitedPlant.getAfterEffectTime(signal)
+                    if currAfterEffectTime > 0:
+                        currAfterEffectTime -= 1
+                        ec.lastVisitedPlant.setAfterEffectTime(signal, currAfterEffectTime)
+                        print('1.', plant.name, signal.name, plant.getAfterEffectTime(signal))
+                    if currAfterEffectTime == 0:
+                        ec.lastVisitedPlant.setSignalPresence(signal, False)
+                        ec.lastVisitedPlant.signalAlarms[signal] = False
+                        signal.deactivateSignal()
+                        print('2.', plant.name, signal.name, plant.getAfterEffectTime(signal))
+                else:
+                    ec.lastVisitedPlant.setAfterEffectTime(signal, signal.afterEffectTime)
+            break # Wichtig!!!
+
     
-    def plantAlarmAndSignalProd(self, ec, dist, plant):
-        # TODO: Warum wird der Giftzustand / Signalzustand nur korrekt aktualisiert, wenn jede Pflanze jedes Signal/ Gift produzieren kann?
-     
+    def plantAlarmAndSignalProd(self, ec, dist, plant):    
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 triggerEnemy, minClusterSize = trigger
@@ -340,27 +357,20 @@ class Grid():
                                     signal.signalCosts(plant)  # Reduziere Signal-Kosten
                                     print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
                     # Nachwirkzeit
-                    for prodPlant2 in signal.emit:
-                        if plant == prodPlant2 and plant == prodPlant1 and ec.lastVisitedPlant is not None and ec.lastVisitedPlant.isSignalPresent(signal) == True:
-                            if ec.position != ec.lastVisitedPlant.position:
-                                currAfterEffectTime = ec.lastVisitedPlant.getAfterEffectTime(signal)
-                                if currAfterEffectTime > 0:
-                                    currAfterEffectTime -= 1
-                                    ec.lastVisitedPlant.setAfterEffectTime(signal, currAfterEffectTime)
-                                    print('1.', plant.name, signal.name, plant.getAfterEffectTime(signal))
-                                if currAfterEffectTime == 0:
-                                    ec.lastVisitedPlant.setSignalPresence(signal, False)
-                                    ec.lastVisitedPlant.signalAlarms[signal] = False
-                                    signal.deactivateSignal()
-                                    print('2.', plant.name, signal.name, plant.getAfterEffectTime(signal))
-                            else:
-                                #plant.setAfterEffectTime(signal, signal.afterEffectTime)
-                                ec.lastVisitedPlant.setAfterEffectTime(signal, signal.afterEffectTime)
+                    self.handelAfterEffectTime(ec, plant, signal, prodPlant1)
+                    
     
+    def resetToxically(self, ec, toxin, plant):
+        if ec.lastVisitedPlant is not None and toxin.deadly == False:
+            for prodPlant2 in toxin.plantTransmitter:
+                if prodPlant2 == plant:
+                    preDist = self.getDistance(ec.position, ec.lastVisitedPlant.position)
+                    if preDist > 0 and ec.lastVisitedPlant.isToxinPresent(toxin) == True:
+                        ec.lastVisitedPlant.setToxinPresence(toxin, False)
+                        ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
+
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
-        # TODO: Was ist wenn verschiedene Giftstoffe durch den gleichen Signalstoff ausgelöst werden?
-
         for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 triggerSignal, enemy, minClusterSize = trigger
@@ -384,14 +394,8 @@ class Grid():
                                         plant.makeToxin(toxin)
                                         toxin.toxinCosts(plant)
                                         print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
-            #self.resetToxically(ec, toxin, plant)
-            if ec.lastVisitedPlant is not None and toxin.deadly == False:
-                for prodPlant2 in toxin.plantTransmitter:
-                    if prodPlant2 == plant:
-                        preDist = self.getDistance(ec.position, ec.lastVisitedPlant.position)
-                        if preDist > 0 and ec.lastVisitedPlant.isToxinPresent(toxin) == True:
-                            ec.lastVisitedPlant.setToxinPresence(toxin, False)
-                            ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
+            self.resetToxically(ec, toxin, plant)
+            
                             
     
     def handleSignalEffects(self, ec, plant):
