@@ -318,12 +318,12 @@ class Grid():
                     if currAfterEffectTime > 0:
                         currAfterEffectTime -= 1
                         ec.lastVisitedPlant.setAfterEffectTime(signal, currAfterEffectTime)
-                        print('1.', plant.name, signal.name, plant.getAfterEffectTime(signal))
+                        #print('1.', plant.name, signal.name, plant.getAfterEffectTime(signal))
                     if currAfterEffectTime == 0:
                         ec.lastVisitedPlant.setSignalPresence(signal, False)
                         ec.lastVisitedPlant.signalAlarms[signal] = False
                         signal.deactivateSignal()
-                        print('2.', plant.name, signal.name, plant.getAfterEffectTime(signal))
+                        #print('2.', plant.name, signal.name, plant.getAfterEffectTime(signal))
                 else:
                     ec.lastVisitedPlant.setAfterEffectTime(signal, signal.afterEffectTime)
             break # Wichtig!!!
@@ -417,9 +417,12 @@ class Grid():
                         else:
                             print(sPlant.name, rPlant.name)
                             sPlant.sendSignal(rPlant, signal)
+                
                 elif sPlant == plant and signal.spreadType == 'air':
                     #TODO: Senden via Luft!!!
                     pass
+                
+                
 
     
     def getTriggers(self, toxin):
