@@ -1,6 +1,6 @@
 
 
-class SymbioticConnection:
+class SymbioticConnection():
 
     def __init__(self, plant1, plant2):
         self.plant1 = plant1

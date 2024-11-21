@@ -10,6 +10,7 @@ from models.enemyCluster import EnemyCluster
 from models.grid import Grid
 
 from models.symCon import SymbioticConnection
+from models.airCon import AirConnection
 
 from models.substance import Substance
 from models.signal import Signal

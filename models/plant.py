@@ -43,13 +43,11 @@ class Plant():
 
 
     def survive(self):
-        
         if self.currEnergy < self.minEnergy:
             self.grid.removePlant(self)
             
         
     def scatterSeed(self):
-            
         if self.reproductionIntervall == 0:
             pass
 

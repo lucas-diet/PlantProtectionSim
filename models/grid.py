@@ -1,7 +1,6 @@
 
 import numpy as np
 
-
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
 from models.symCon import SymbioticConnection

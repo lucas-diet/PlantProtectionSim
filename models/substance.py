@@ -1,6 +1,6 @@
 
 
-class Substance:
+class Substance():
 
     def __init__(self, name, type):
         self.name = name

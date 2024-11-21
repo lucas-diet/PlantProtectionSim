@@ -2,7 +2,7 @@
 import os
 import time
 
-class Simulation:
+class Simulation():
 
     def __init__(self, grid):
         self.grid = grid

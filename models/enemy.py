@@ -1,6 +1,6 @@
 
 
-class Enemy:
+class Enemy():
 
     def __init__(self, name, symbol):
         self.name = name

@@ -1,6 +1,6 @@
 
 
-class AirConnection:
+class AirConnection():
 
     def __init__(self, senderPlant):
         self.senderPlant = senderPlant
