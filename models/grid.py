@@ -4,7 +4,7 @@ import numpy as np
 
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
-from models.symConnection import SymbioticConnection
+from models.symCon import SymbioticConnection
 
 class Grid():
 
@@ -396,27 +396,28 @@ class Grid():
                                         print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
             self.resetToxically(ec, toxin, plant)
             
-                            
+
+    def symbioticConnComunication(self, ec, plant, signal, sendPlant, receivePlant, sPos, rPos): 
+        if sPos == ec.position and sendPlant.isSignalPresent(signal) == True and receivePlant in signal.receive:
+            print(f'[DEBUG]: {sendPlant.name}{sendPlant.position} ist verbunden mit {receivePlant.name}{rPos}')                       
+            # Überprüfe, ob das Signal gesendet werden kann
+            if plant.getSignalSendCounter(ec, signal, receivePlant) < signal.sendingSpeed:
+                plant.incrementSignalSendCounter(ec, signal, receivePlant)
+            else:
+                #print(sPlant.name, rPlant.name)
+                sendPlant.sendSignal(receivePlant, signal)
     
     def handleSignalEffects(self, ec, plant):
         # Wenn Gridverbindung existiert, dann wird Signal gesendet (falls Cluster-Trigger aktiv)
         for signal in self.signals:
             # Iteriere durch alle Grid-Verbindungen der Pflanze
-            for plants, pos in plant.gridConnections.items():
+            for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
-                sPos, rPos = pos
+                sPos, rPos = plantsPos
 
-                # Prüfen, ob die Pflanzen in der Verbindung übereinstimmen
+                # Prüfen, die Art der Verbindung und verwende die entsprechende verbindung zur Kommunikation
                 if sPlant == plant and signal.spreadType == 'symbiotic':
-                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPos}')
-                    
-                    if sPos == ec.position and sPlant.isSignalPresent(signal) == True and rPlant in signal.receive:                        
-                        # Überprüfe, ob das Signal gesendet werden kann
-                        if plant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
-                            plant.incrementSignalSendCounter(ec, signal, rPlant)
-                        else:
-                            print(sPlant.name, rPlant.name)
-                            sPlant.sendSignal(rPlant, signal)
+                    self.symbioticConnComunication(ec, plant, signal, sPlant, rPlant, sPos, rPos)
                 
                 elif sPlant == plant and signal.spreadType == 'air':
                     #TODO: Senden via Luft!!!

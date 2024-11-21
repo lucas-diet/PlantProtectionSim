@@ -9,7 +9,7 @@ from models.enemy import Enemy
 from models.enemyCluster import EnemyCluster
 from models.grid import Grid
 
-from models.symConnection import SymbioticConnection
+from models.symCon import SymbioticConnection
 
 from models.substance import Substance
 from models.signal import Signal
@@ -78,7 +78,7 @@ sig1 = Signal(substance=s1,
               triggerCombination=[[e1, 2]],
               prodTime=2,
               spreadType='symbiotic',
-              sendingSpeed=2,
+              sendingSpeed=1,
               energyCosts=1,
               afterEffectTime=2)
 
@@ -88,7 +88,7 @@ sig2 = Signal(substance=s2,
               triggerCombination=[[e1, 2]],
               prodTime=2, 
               spreadType='symbiotic',
-              sendingSpeed=2,
+              sendingSpeed=1,
               energyCosts=1,
               afterEffectTime=1)
 
