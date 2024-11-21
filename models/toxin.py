@@ -27,7 +27,7 @@ class Toxin(Substance):
                 tp = np[-1]
             else:
                 tp = 0
-
+    
         return np, tp
     
 

@@ -309,82 +309,90 @@ class Grid():
         self.totalEnergy -= plant.currEnergy
         ec.reproduce()
 
-
-    def plantAlarmAndSignalProd(self, ec, dist, plant):      
+    
+    def plantAlarmAndSignalProd(self, ec, dist, plant):
+        # TODO: Warum wird der Giftzustand / Signalzustand nur korrekt aktualisiert, wenn jede Pflanze jedes Signal/ Gift produzieren kann?
+     
         for signal in self.signals:
             for trigger in signal.triggerCombination:
-                enemy, minClusterSize = trigger
-                # Überprüfen, ob der Feind-Cluster zur Pflanze gehört und die Bedingungen für den Alarm erfüllt sind
-                if plant in signal.emit and ec.enemy == enemy and plant.position == ec.targetPlant:
-                    if ec.num < minClusterSize and ec.num > 0:
-                        print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
-                        continue
-                    else:
-                        # Wenn die Pflanze noch nicht alarmiert wurde und das Signal produziert werden soll
-                        if plant.isSignalAlarmed(signal) == False and plant.isSignalPresent(signal) == False and dist < 1:
-                            plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
-                            signal.signalCosts(plant)  # Reduziere Signal-Kosten
-                            print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                        # Falls die Pflanze schon alarmiert wurde, aber noch kein Signal produziert
-                        elif plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
-                            # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
-                            if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
-                                plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
-                                print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}')
-                            else:
-                                # Wenn der Produktionszähler groß genug ist, produziere das Signal
-                                plant.makeSignal(signal)
-                                signal.activateSignal()
+                triggerEnemy, minClusterSize = trigger
+
+                for prodPlant1 in signal.emit:
+                    if ec.enemy == triggerEnemy and plant == prodPlant1 and ec.targetPlant == plant.position:
+                        if ec.num < minClusterSize and ec.num > 0:
+                            print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
+                            continue
+                        else:
+                            if plant.isSignalAlarmed(signal) == False and plant.isSignalPresent(signal) == False and dist < 1:
+                                plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
                                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
-                                print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
-                        # Nachwirkzeit von Signalstoffen    
-                        if ec.lastVisitedPlant is not None and ec.lastVisitedPlant.isSignalPresent(signal) == True:
-                            if ec.position != ec.lastVisitedPlant.position:
-                                if ec.lastVisitedPlant.afterEffectTime > 0:
-                                    ec.lastVisitedPlant.setSignalPresence(signal, True)
-                                    ec.lastVisitedPlant.afterEffectTime -= 1
+                                print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
+                            # Falls die Pflanze schon alarmiert wurde, aber noch kein Signal produziert
+                            elif plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
+                                # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
+                                if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
+                                    plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
+                                    print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}')
                                 else:
+                                    # Wenn der Produktionszähler groß genug ist, produziere das Signal
+                                    plant.makeSignal(signal)
+                                    signal.activateSignal()
+                                    signal.signalCosts(plant)  # Reduziere Signal-Kosten
+                                    print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+                    # Nachwirkzeit
+                    for prodPlant2 in signal.emit:
+                        if plant == prodPlant2 and plant == prodPlant1 and ec.lastVisitedPlant is not None and ec.lastVisitedPlant.isSignalPresent(signal) == True:
+                            if ec.position != ec.lastVisitedPlant.position:
+                                currAfterEffectTime = ec.lastVisitedPlant.getAfterEffectTime(signal)
+                                if currAfterEffectTime > 0:
+                                    currAfterEffectTime -= 1
+                                    ec.lastVisitedPlant.setAfterEffectTime(signal, currAfterEffectTime)
+                                    print('1.', plant.name, signal.name, plant.getAfterEffectTime(signal))
+                                if currAfterEffectTime == 0:
                                     ec.lastVisitedPlant.setSignalPresence(signal, False)
+                                    ec.lastVisitedPlant.signalAlarms[signal] = False
                                     signal.deactivateSignal()
+                                    print('2.', plant.name, signal.name, plant.getAfterEffectTime(signal))
                             else:
-                                ec.lastVisitedPlant.afterEffectTime = signal.afterEffectTime
-                        
+                                #plant.setAfterEffectTime(signal, signal.afterEffectTime)
+                                ec.lastVisitedPlant.setAfterEffectTime(signal, signal.afterEffectTime)
+    
 
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         # TODO: Was ist wenn verschiedene Giftstoffe durch den gleichen Signalstoff ausgelöst werden?
 
-        for toxin, signal in zip(self.toxins, self.signals):
+        for toxin in self.toxins:
             for trigger in toxin.triggerCombination:
                 triggerSignal, enemy, minClusterSize = trigger
-                if plant in toxin.plantTransmitter and triggerSignal == signal and ec.enemy == enemy and plant.position == ec.targetPlant:                
-                    if ec.num < minClusterSize and ec.num > 0:
-                        print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
-                        continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
-                    else:
-                        # Alarmierung der Pflanze, falls nah genug, genug großes Cluster und Signalstoff vorhanden ist.
-                        if plant.isSignalPresent(signal) == True and plant.isToxinAlarmed(toxin) == False and plant.isToxinPresent(toxin) == False and dist < 1:
-                            plant.enemyToxinAlarm(toxin)
-                            toxin.toxinCosts(plant)
-                            print(f'[DEBUG-Gift]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                        # Giftproduktion nur wenn Pflanze alarmiert ist, nicht giftig, und Zähler unter Produktionszeit ist
-                        elif signal in signal.activeSignals and plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
-                            if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
-                                plant.incrementToxinProdCounter(ec, toxin)
-                                print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
+                for prodPlant1 in toxin.plantTransmitter:
+                    for signal in self.signals:
+                        if signal == triggerSignal and plant == prodPlant1 and ec.position == ec.targetPlant:
+                            #print(plant.name, toxin.name, triggerSignal.name, enemy.name, minClusterSize, plant.position, ec.targetPlant)
+                            if ec.num < minClusterSize and ec.num > 0:
+                                print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
+                                continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
                             else:
-                                # Pflanze wird giftig, wenn Produktionszeit erreicht
-                                plant.makeToxin(toxin)
-                                toxin.toxinCosts(plant)
-                                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')                      
-                        # Giftigkeit zurücksetzen, wenn Feind weg ist
-                        if ec.lastVisitedPlant is not None and toxin.deadly == False:
-                            # Berechnet Distanz zur vorher besuchten Pflanze. Wenn preDist > 0 und isToxic == True, dann soll isToxic = False und Produktionszähler zurückgesetzt werden.
-                            preDist = self.getDistance(ec.position, ec.lastVisitedPlant.position)
-                            if preDist == 1 and ec.lastVisitedPlant.isToxinPresent(toxin) == True:
-                                ec.lastVisitedPlant.setToxinPresence(toxin, False)
-                                ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
-                                print(f'[DEBUG]: {ec.lastVisitedPlant.name} ist nicht mehr giftig, da der Feind weg ist')
-
+                                if plant.isSignalPresent(signal) == True and plant.isToxinAlarmed(toxin) == False and plant.isToxinPresent(toxin) == False and dist < 1:
+                                    plant.enemyToxinAlarm(toxin)
+                                    toxin.toxinCosts(plant)
+                                elif signal in signal.activeSignals and plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
+                                    if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                                        plant.incrementToxinProdCounter(ec, toxin)
+                                        print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
+                                    else:
+                                        # Pflanze wird giftig, wenn Produktionszeit erreicht
+                                        plant.makeToxin(toxin)
+                                        toxin.toxinCosts(plant)
+                                        print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+            #self.resetToxically(ec, toxin, plant)
+            if ec.lastVisitedPlant is not None and toxin.deadly == False:
+                for prodPlant2 in toxin.plantTransmitter:
+                    if prodPlant2 == plant:
+                        preDist = self.getDistance(ec.position, ec.lastVisitedPlant.position)
+                        if preDist > 0 and ec.lastVisitedPlant.isToxinPresent(toxin) == True:
+                            ec.lastVisitedPlant.setToxinPresence(toxin, False)
+                            ec.lastVisitedPlant.resetToxinProdCounter(ec, toxin)
+                            
     
     def handleSignalEffects(self, ec, plant):
         # Wenn Gridverbindung existiert, dann wird Signal gesendet (falls Cluster-Trigger aktiv)
@@ -421,7 +429,6 @@ class Grid():
     def handleToxinEffects(self, ec, plant):
         # Setze die zuletzt besuchte Pflanze des Feindes
         ec.lastVisitedPlant = plant
-        
         # Durchlaufe die Toxine, um die Effekte zu prüfen
         for toxin in self.toxins:
             # Hole die Trigger-Kombination für das Toxin

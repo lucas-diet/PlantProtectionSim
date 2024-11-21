@@ -63,7 +63,7 @@ e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
-ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=1, eatVictory=10)
+ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=1, eatVictory=1)
 ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=10, eatVictory=10)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
@@ -73,8 +73,8 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=[p1, p2],
-              receive=[p3],
+              emit=[p1],
+              receive=[p2],
               triggerCombination=[[e1, 2]],
               prodTime=2,
               spreadType='symbiotic',
@@ -83,17 +83,17 @@ sig1 = Signal(substance=s1,
               afterEffectTime=2)
 
 sig2 = Signal(substance=s2,
-              emit=[p1, p2],
-              receive=[p3],
+              emit=[p2],
+              receive=[p1],
               triggerCombination=[[e1, 2]],
               prodTime=2, 
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=1,
-              afterEffectTime=2)
+              afterEffectTime=1)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1, p2],
+             plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
              prodTime=1,
@@ -101,7 +101,7 @@ tox1 = Toxin(substance=s3,
              eliminationStrength=1)
 
 tox2 = Toxin(substance=s4, 
-             plantTransmitter=[p1, p2],
+             plantTransmitter=[p2],
              energyCosts=1,
              triggerCombination=[[sig2, e1, 2]],   
              prodTime=1,
@@ -110,7 +110,7 @@ tox2 = Toxin(substance=s4,
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-grid.addPlant(p3)
+#grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
@@ -126,9 +126,9 @@ sc1 = SymbioticConnection(p1, p3)
 sc2 = SymbioticConnection(p3, p2)
 
 
-sc1.createConnection()
+#sc1.createConnection()
 #sc2.createConnection()
-grid.getAllGridConnections(p3, sc1)
+#grid.getAllGridConnections(p3, sc1)
 
 sim = Simulation(grid)
 sim.run(maxSteps=25, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)

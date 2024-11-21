@@ -28,6 +28,7 @@ class Plant():
         self.signalProdCounters = {}
         self.signalSendingCounters = {}
         self.afterEffectTime = 0
+        self.afterEffectTimes = {}
 
         #self.isAlarmed_toxin = False
         self.toxinAlarms = {}
@@ -174,6 +175,15 @@ class Plant():
     def makeSignal(self, signal):
         self.setSignalAlarm(signal, False)
         self.setSignalPresence(signal, True)
+
+
+    def setAfterEffectTime(self, signal, aft):
+        self.afterEffectTimes[self, signal] = aft
+
+    
+    def getAfterEffectTime(self, signal):
+        key = (self, signal)
+        return self.afterEffectTimes.get(key, 0)
 
     
     def resetToxinProdCounter(self, ec, toxin):
