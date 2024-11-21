@@ -17,7 +17,7 @@ class EnemyCluster():
         
         self.stepCounter = 0
         self.eatedEnergy = 0
-        self.newEnemy = 0
+        self.newBorns = 0
         self.targetPlant = None
         self.currentPath = []
         self.intoxicated = False
@@ -216,10 +216,10 @@ class EnemyCluster():
 
     def reproduce(self):
         if self.eatedEnergy >= self.eatVictory:
-            self.newEnemy += 1
-            self.num += self.newEnemy
-            self.eatedEnergy -= self.newEnemy * self.eatedEnergy
-            self.newEnemy = 0
+            self.newBorns += int(self.eatedEnergy / self.eatVictory)
+            self.num += self.newBorns
+            self.eatedEnergy -= self.newBorns * self.eatedEnergy
+            self.newBorns = 0
 
 
     def newPath(self, plant, allPlants):
