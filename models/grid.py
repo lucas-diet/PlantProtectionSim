@@ -406,6 +406,7 @@ class Grid():
                 #print(sPlant.name, rPlant.name)
                 sendPlant.sendSignal(receivePlant, signal)
     
+    
     def handleSignalEffects(self, ec, plant):
         # Wenn Gridverbindung existiert, dann wird Signal gesendet (falls Cluster-Trigger aktiv)
         for signal in self.signals:
@@ -422,9 +423,7 @@ class Grid():
                     #TODO: Senden via Luft!!!
                     pass
                 
-                
 
-    
     def getTriggers(self, toxin):
         triggers = []  # Liste zur Speicherung der Trigger
         for trigger in toxin.triggerCombination:

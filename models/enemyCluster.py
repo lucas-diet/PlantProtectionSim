@@ -222,8 +222,9 @@ class EnemyCluster():
             self.newBorns = 0
 
 
-    def newPath(self, plant, allPlants):
-        if plant.isToxic == True:
+    def newPath(self, plant, toxin, allPlants):
+        #TODO: es sollen nur pflanzen beachtet werden, die nicht durch ein Giftststoff blockiert sind!
+        if plant.isToxinPresent(toxin) == True:
             alternativePlants = []
             shortestDistance = float('inf')
 

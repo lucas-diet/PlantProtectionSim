@@ -22,7 +22,7 @@ class Toxin(Substance):
         np = []
         tp = 0
         if len(ec.currentPath) == 0:
-            np = ec.newPath(plant, allPlants)
+            np = ec.newPath(plant, self, allPlants)
             if len(np) > 0:
                 tp = np[-1]
             else:
