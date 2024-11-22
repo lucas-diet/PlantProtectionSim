@@ -243,3 +243,8 @@ class Plant():
 
     def sendSignal(self, rplant, signal):
         rplant.setSignalPresence(signal, True)
+
+    
+    def airSpreadSignal(self, ec, signal):
+        if self.isSignalPresent(signal) == True:
+            print(f'[DEBUG]: {self.name} verbreitet {signal.name} via Luft')

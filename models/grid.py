@@ -346,7 +346,7 @@ class Grid():
                             # Falls die Pflanze schon alarmiert wurde, aber noch kein Signal produziert
                             elif plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
                                 # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
-                                if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
+                                if plant.getSignalProdCounter(ec, signal) < signal.prodTime - 1:
                                     plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
                                     print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}')
                                 else:
@@ -385,7 +385,7 @@ class Grid():
                                     plant.enemyToxinAlarm(toxin)
                                     toxin.toxinCosts(plant)
                                 elif signal in signal.activeSignals and plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
-                                    if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                                    if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
                                         plant.incrementToxinProdCounter(ec, toxin)
                                         print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
                                     else:
@@ -396,33 +396,33 @@ class Grid():
             self.resetToxically(ec, toxin, plant)
             
 
-    def symbioticConnComunication(self, ec, plant, signal, sendPlant, receivePlant, sPos, rPos): 
-        if sPos == ec.position and sendPlant.isSignalPresent(signal) == True and receivePlant in signal.receive:
-            print(f'[DEBUG]: {sendPlant.name}{sendPlant.position} ist verbunden mit {receivePlant.name}{rPos}')                       
-            # Überprüfe, ob das Signal gesendet werden kann
-            if plant.getSignalSendCounter(ec, signal, receivePlant) < signal.sendingSpeed:
-                plant.incrementSignalSendCounter(ec, signal, receivePlant)
-            else:
-                #print(sPlant.name, rPlant.name)
-                sendPlant.sendSignal(receivePlant, signal)
-    
-    
-    def handleSignalEffects(self, ec, plant):
-        # Wenn Gridverbindung existiert, dann wird Signal gesendet (falls Cluster-Trigger aktiv)
-        for signal in self.signals:
-            # Iteriere durch alle Grid-Verbindungen der Pflanze
+    def symSignalCom(self, ec, plant, signal):
+        if plant in signal.emit and signal.spreadType == 'symbiotic':
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
                 sPos, rPos = plantsPos
 
-                # Prüfen, die Art der Verbindung und verwende die entsprechende verbindung zur Kommunikation
-                if sPlant == plant and signal.spreadType == 'symbiotic':
-                    self.symbioticConnComunication(ec, plant, signal, sPlant, rPlant, sPos, rPos)
-                
-                elif sPlant == plant and signal.spreadType == 'air':
-                    #TODO: Senden via Luft!!!
-                    pass
-                
+                if sPlant == plant and sPos == ec.position and sPlant.isSignalPresent(signal):
+                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
+
+                    if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
+                        sPlant.incrementSignalSendCounter(ec, signal, rPlant)
+                    else:
+                        sPlant.sendSignal(rPlant, signal)
+
+    
+    def airSignalCom(self, ec, plant, signal):
+        if plant in signal.emit and signal.spreadType == 'air':
+            if ec.position == plant.position:
+                plant.airSpreadSignal(ec, signal)
+    
+    
+    def handleSignalEffects(self, ec, plant):
+        for signal in self.signals:
+            
+            self.symSignalCom(ec, plant, signal)
+            self.airSignalCom(ec, plant, signal)
+
 
     def getTriggers(self, toxin):
         triggers = []  # Liste zur Speicherung der Trigger
