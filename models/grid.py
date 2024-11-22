@@ -17,6 +17,7 @@ class Grid():
         self.toxins = []
         self.grid = [[(None, []) for _ in range(width)] for _ in range(height)]
         self.totalEnergy = 0
+        self.radiusFields = []
 
 
     def getGrid(self):
@@ -410,11 +411,35 @@ class Grid():
                     else:
                         sPlant.sendSignal(rPlant, signal)
 
+    def getFieldsInAirRadius(self, plant, radius):
+        x0, y0 = plant.position
+        radiusFields = []
+        for x in range(0, len(self.grid)):
+            for y in range(0, len(self.grid[0])):
+                dist = int(np.sqrt((x - x0)**2 + (y - y0)**2))
+                if dist <= radius:
+                    radiusFields.append((x,y))
+        return radiusFields
+
     
     def airSignalCom(self, ec, plant, signal):
+        # TODO: Nachwirkzerit muss noch beachtet werden.
         if plant in signal.emit and signal.spreadType == 'air':
-            if ec.position == plant.position:
-                plant.airSpreadSignal(ec, signal)
+            if ec.position == plant.position and plant.isSignalPresent(signal) == True:
+                radius = plant.airSpreadSignal(signal)
+                print(radius)
+                self.radiusFields = self.getFieldsInAirRadius(plant, radius)
+                #print(self.radiusFields)
+                #if plant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
+                if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1:
+                    plant.incrementSignalRadius(ec, signal)
+                else:
+                    plant.resetSignalRadiusCounter(ec, signal)
+                    signal.radius += 1
+            else:
+                self.radiusFields = []
+                signal.radius = 0
+            print(self.radiusFields)
     
     
     def handleSignalEffects(self, ec, plant):

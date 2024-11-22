@@ -36,6 +36,7 @@ class Plant():
         self.isToxically = {}
 
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
+        self.airSignalCounter = {}
 
     def grow(self):
         self.currEnergy += self.initEnergy * (self.growthRateEnegry / 100)
@@ -245,6 +246,26 @@ class Plant():
         rplant.setSignalPresence(signal, True)
 
     
-    def airSpreadSignal(self, ec, signal):
-        if self.isSignalPresent(signal) == True:
-            print(f'[DEBUG]: {self.name} verbreitet {signal.name} via Luft')
+    def airSpreadSignal(self, signal):
+        print(f'[DEBUG]: {self.name} verbreitet {signal.name} via Luft')
+        #print(signal.radius)
+        return signal.radius
+    
+
+    def incrementSignalRadius(self, ec, signal):
+        key = (ec, signal)
+        if key in self.airSignalCounter:
+            self.airSignalCounter[ec, signal] += 1
+        else:
+            self.airSignalCounter[ec, signal] = 1
+
+    
+    def getSignalRadiusCounter(self, ec, signal):
+        key = (ec, signal)
+        return self.airSignalCounter.get(key, 0)
+    
+
+    def resetSignalRadiusCounter(self, ec, signal):
+        key = (ec, signal)
+        if key in self.airSignalCounter:
+            self.airSignalCounter[key] = 0
