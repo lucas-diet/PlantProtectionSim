@@ -25,8 +25,8 @@ grid = Grid(height=6, width=6)
 plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
 p1 = Plant(name='p1', 
-           initEnergy=100, 
-           growthRateEnegry=2, 
+           initEnergy=200, 
+           growthRateEnegry=1, 
            minEnegrgy=50, 
            reproductionIntervall=0, 
            offspingEnergy=60, 
@@ -80,8 +80,9 @@ sig1 = Signal(substance=s1,
               prodTime=1,
               spreadType='symbiotic',
               sendingSpeed=2,
-              energyCosts=1,
-              afterEffectTime=2)
+              energyCosts=3,
+              afterEffectTime=2,
+              spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
               emit=[p2],
@@ -92,10 +93,10 @@ sig2 = Signal(substance=s2,
               sendingSpeed=1,
               energyCosts=1,
               afterEffectTime=1,
-              spreadSpeed = 2)
+              spreadSpeed=3)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1, p3],
+             plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
              prodTime=5,

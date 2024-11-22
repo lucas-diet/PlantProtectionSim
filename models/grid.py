@@ -165,61 +165,127 @@ class Grid():
                         row.append('E')  # Nur Feindgruppe
                 else:
                     row.append('#')  # Leeres Feld
-
             hGrid.append(row)
-        
         return hGrid
     
 
     def displayGrid(self):
-        # Hilfsfunktion, um den Inhalt einer Zelle als mehrzeilige Darstellung zu generieren
-        def format_cell(cell):
-            lines = []
+        """
+        Zeigt das Grid an und markiert alle Felder innerhalb von `radiusFields` mit '#', 
+        außer wenn eine Pflanze oder ein Feind auf dem Feld ist.
+        """
+        def format_cell(cell, position):
+            """Formatiert eine Zelle im Grid basierend auf ihrer Position."""
             plant, ecs = cell  # Entpacke das Tupel in Pflanze und Feindgruppen
 
-            if isinstance(plant, Plant):  # Wenn Pflanze vorhanden
-                energy = f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%'
+            # Wenn das Feld im Radius ist, markiere es entsprechend
+            if position in self.radiusFields:
+                return format_cell_in_radius(plant, ecs, position)
 
-                if any(plant.signalAlarms.values()) == True:
-                    lines.append(f'{energy}!')
-                elif any(plant.isSignalSignaling.values()) == True and any(plant.toxinAlarms.values()) == False and any(plant.isToxically.values()) == False:
-                    lines.append(f'{energy}>')
-                elif any(plant.isSignalSignaling.values()) == True and any(plant.toxinAlarms.values()) == True and any(plant.isToxically.values()) == False:
-                    lines.append(f'{energy}+')
-                elif any(plant.isSignalSignaling.values()) == True and any(plant.toxinAlarms.values()) == False and any(plant.isToxically.values()) == True:
-                    lines.append(f'{energy}*')
-                else:
-                    lines.append(f'{energy}')
+            # Normale Darstellung, wenn das Feld nicht im Radius ist
+            return format_normal_cell(plant, ecs)
 
-            for ec in ecs:  # Iteriere über alle Feindgruppen
+        def format_cell_in_radius(plant, ecs, position):
+            """Markiert Zellen im Radius mit '#' oder zeigt eine Pflanze/Feind an."""
+            # Erstelle eine Liste, die sowohl Pflanze als auch Feind darstellt
+            lines = []
+
+            if position not in self.radiusFields:
+                return lines if lines else ['------']
+            
+            # Wenn eine Pflanze vorhanden ist, füge sie zur Anzeige hinzu
+            if isinstance(plant, Plant):
+                lines.extend(format_plant(plant))
+            
+            # Wenn Feindgruppen vorhanden sind, füge sie zur Anzeige hinzu
+            if any(isinstance(ec, EnemyCluster) for ec in ecs):  # Wenn ein Feind da ist
+                lines.extend(format_enemy_clusters(ecs))          
+            
+            # Wenn keine Pflanze und kein Feind vorhanden ist, markiere mit #
+            if not lines:
+                lines.append('??????')
+
+            return lines
+
+        def format_normal_cell(plant, ecs):
+            """Formatiert eine normale Zelle ohne Radius-Markierung."""
+            lines = []
+
+            # Wenn eine Pflanze vorhanden ist, füge sie zur Anzeige hinzu
+            if isinstance(plant, Plant):
+                lines.extend(format_plant(plant))
+
+            # Wenn Feindgruppen vorhanden sind, füge sie zur Anzeige hinzu
+            for ec in ecs:
                 if isinstance(ec, EnemyCluster):
-                    if ec.intoxicated:
-                        lines.append(f'{ec.enemy.name}-#{ec.num}*')
-                    else:
-                        lines.append(f'{ec.enemy.name}-#{ec.num}')
+                    lines.extend(format_enemy_cluster(ec))
 
-            return lines if lines else ['------']  # Wenn nichts da ist, zeige leeres Feld an
+            return lines if lines else ['------']
 
-        # Alle Zellen vorbereiten, jede Zelle wird zu einer Liste von Zeilen
-        formatted_grid = [list(map(format_cell, row)) for row in self.grid]
+        def format_plant(plant):
+            """Formatiert die Darstellung einer Pflanze."""
+            energy = f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%'
+
+            if any(plant.signalAlarms.values()):
+                return [f'{energy}!']
+            elif any(plant.isSignalSignaling.values()) and not any(plant.toxinAlarms.values()) and not any(plant.isToxically.values()):
+                return [f'{energy}>']
+            elif any(plant.isSignalSignaling.values()) and any(plant.toxinAlarms.values()) and not any(plant.isToxically.values()):
+                return [f'{energy}+']
+            elif any(plant.isSignalSignaling.values()) and not any(plant.toxinAlarms.values()) and any(plant.isToxically.values()):
+                return [f'{energy}*']
+            else:
+                return [f'{energy}']
+
+        def format_enemy_cluster(ec):
+            """Formatiert die Darstellung einer Feindgruppe."""
+            if ec.intoxicated:
+                return [f'{ec.enemy.name}-#{ec.num}*']
+            else:
+                return [f'{ec.enemy.name}-#{ec.num}']
+
+        def format_enemy_clusters(ecs):
+            """Formatiert mehrere Feindgruppen auf dem Feld."""
+            lines = []
+            for ec in ecs:
+                lines.extend(format_enemy_cluster(ec))
+            return lines
+
+        def get_max_lines_per_row(formatted_grid):
+            """Berechnet die maximale Anzahl der Zeilen für jede Spalte."""
+            return [max(len(cell) for cell in row) for row in formatted_grid]
+
+        def print_grid(formatted_grid, max_lines_per_row):
+            """Druckt das formatierte Grid Zeile für Zeile."""
+            for row_idx, row in enumerate(formatted_grid):
+                for line_idx in range(max_lines_per_row[row_idx]):
+                    for col_idx, cell in enumerate(row):
+                        # Wenn die Zelle nicht genügend Zeilen hat, füllen wir mit Leerzeichen auf
+                        if line_idx < len(cell):
+                            print(f'{cell[line_idx]:<10}', end='  ')  # Links ausgerichtet mit fester Breite
+                        else:
+                            print(f'{"":<10}', end='  ')  # Leerzeilen auffüllen
+                    print()  # Neue Zeile nach jeder Zeile im Grid
+                print()
+
+        # Iteriere über alle Zellen im Grid und erstelle die Darstellung
+        formatted_grid = []
+        for x, row in enumerate(self.grid):
+            formatted_row = []
+            for y, cell in enumerate(row):
+                formatted_cell = format_cell(cell, (x, y))
+                formatted_row.append(formatted_cell)
+            formatted_grid.append(formatted_row)
 
         # Bestimme die maximale Anzahl der Zeilen in jeder Spalte, um Zeilen korrekt auszurichten
-        max_lines_per_row = [max(len(cell) for cell in row) for row in formatted_grid]
+        max_lines_per_row = get_max_lines_per_row(formatted_grid)
 
         # Drucke jede Zeile des Gitters
-        for row_idx, row in enumerate(formatted_grid):
-            for line_idx in range(max_lines_per_row[row_idx]):
-                for cell in row:
-                    # Wenn die Zelle nicht genügend Zeilen hat, füllen wir mit Leerzeichen auf
-                    if line_idx < len(cell):
-                        print(f'{cell[line_idx]:<10}', end='  ')  # Links ausgerichtet mit fester Breite
-                    else:
-                        print(f'{"":<10}', end='  ')  # Leerzeilen auffüllen
-                print()  # Neue Zeile nach jeder Zeile im Grid
-            print()
+        print_grid(formatted_grid, max_lines_per_row)
+
         print('#################### \n')
-        
-    
+
+
     def hasPlants(self):
         for row in self.grid:
             for cell in row:
@@ -242,7 +308,6 @@ class Grid():
             x, y = step
             if self.isWithinBounds(x, y):  # Überprüfe, ob die Position innerhalb der Grenzen des Grids liegt
                 return (x, y)
-        
         return None
     
 
@@ -321,7 +386,8 @@ class Grid():
                         #print('1.', plant.name, signal.name, plant.getAfterEffectTime(signal))
                     if currAfterEffectTime == 0:
                         ec.lastVisitedPlant.setSignalPresence(signal, False)
-                        ec.lastVisitedPlant.signalAlarms[signal] = False
+                        #ec.lastVisitedPlant.signalAlarms[signal] = False
+                        ec.lastVisitedPlant.setSignalAlarm(signal, False)
                         signal.deactivateSignal()
                         #print('2.', plant.name, signal.name, plant.getAfterEffectTime(signal))
                 else:
@@ -411,6 +477,7 @@ class Grid():
                     else:
                         sPlant.sendSignal(rPlant, signal)
 
+
     def getFieldsInAirRadius(self, plant, radius):
         x0, y0 = plant.position
         radiusFields = []
@@ -422,29 +489,33 @@ class Grid():
         return radiusFields
 
     
-    def airSignalCom(self, ec, plant, signal):
-        # TODO: Nachwirkzerit muss noch beachtet werden.
-        if plant in signal.emit and signal.spreadType == 'air':
-            if ec.position == plant.position and plant.isSignalPresent(signal) == True:
-                radius = plant.airSpreadSignal(signal)
-                print(radius)
-                self.radiusFields = self.getFieldsInAirRadius(plant, radius)
-                #print(self.radiusFields)
-                #if plant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
-                if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1:
-                    plant.incrementSignalRadius(ec, signal)
-                else:
-                    plant.resetSignalRadiusCounter(ec, signal)
-                    signal.radius += 1
-            else:
-                self.radiusFields = []
-                signal.radius = 0
-            print(self.radiusFields)
+    def airSignalCom(self, ec, plant, signal): 
+        # TODO: Nachwirkzeit muss noch beachtet werden.
+        for prodPlant in signal.emit: 
+            if signal.spreadType == 'air': 
+                if ec.position != prodPlant.position: 
+                    # Reset wenn Feind nicht bei der produzierenden Pflanze ist 
+                    signal.radius = 0
+                    self.radiusFields = []
+                    #print(f"[DEBUG]: Signalradius und Felder zurückgesetzt, da {ec.enemy.name} nicht bei {prodPlant.name} ist.") 
+                    continue
+                if ec.position == prodPlant.position:  
+                    radius = plant.airSpreadSignal(signal) 
+                    self.radiusFields = self.getFieldsInAirRadius(plant, radius) 
+                    #print(radius, self.radiusFields) 
+                    if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1: 
+                        plant.incrementSignalRadius(ec, signal) 
+                        signal.signalCosts(plant) # Reduziere Signal-Kosten
+                    else:
+                        plant.resetSignalRadiusCounter(ec, signal)
+                        signal.radius += 1
+        
+    def resetSignalRadius(self):
+        return []
     
     
     def handleSignalEffects(self, ec, plant):
         for signal in self.signals:
-            
             self.symSignalCom(ec, plant, signal)
             self.airSignalCom(ec, plant, signal)
 
@@ -491,7 +562,10 @@ class Grid():
                     dist = self.getDistance(ec.position, (i, j))  # Berechne die Distanz zur Pflanze
                     self.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
                     self.plantAlarmAndPoisonProd(ec, dist, plant)  # Alarm und Giftproduktion prüfen
-                        
+                    
+                    if plant.position in self.radiusFields and (i,j) != ec.position: # TODO: Nachwirkzeit muss noch beachtet werden!
+                        self.radiusFields = self.resetSignalRadius()
+
                     if (i, j) == ec.position:  # Wenn der Feind auf der Pflanze steht
                         ec.currentPath = []  # Setze den aktuellen Pfad zurück
                         self.eatAndReproduce(ec, plant)  # Feind frisst und reproduziert sich
