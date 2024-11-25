@@ -21,9 +21,31 @@ class EnemyCluster():
         self.targetPlant = None
         self.currentPath = []
         self.intoxicated = False
-        self.lastVisitedPlant = None
-        
-     
+        #self.lastVisitedPlant = None
+        self.lastVisitedPlants = {}
+
+    
+    def insertLastVisits(self, plant, signal):
+        if signal is not None:
+            self.lastVisitedPlants[plant] = signal.afterEffectTime
+        else:
+            self.lastVisitedPlants[plant] = 0  # Standardwert setzen, wenn kein Signal übergeben wurde
+
+    
+    def deleteLastVisits(self, plant):
+        if plant.afterEffectTime == 0:
+            self.lastVisitedPlants.pop(plant, None)
+    
+
+    def getAfterEffectTime(self, plant):
+        key = (plant)
+        return self.lastVisitedPlants.get(key, 0)
+    
+
+    def isPlantInLastVisits(self, plant):
+        return plant in self.lastVisitedPlants
+
+ 
     def detectPlant(self, grid):
         """_summary_
             Ermittelt die Positionen von Pflanzen im Grid.

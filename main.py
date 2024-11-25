@@ -32,7 +32,7 @@ p1 = Plant(name='p1',
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
-           position=(2, 2), 
+           position=(3, 1), 
            grid=grid,
            color=plantColor)
     
@@ -44,7 +44,7 @@ p2 = Plant(name='p2',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(2, 4), 
+           position=(3, 4), 
            grid=grid,
            color=plantColor)
 
@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(1, 2), 
+           position=(3, 4), 
            grid=grid,
            color=plantColor)
 
@@ -81,7 +81,7 @@ sig1 = Signal(substance=s1,
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=2,
+              afterEffectTime=7,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
@@ -92,7 +92,7 @@ sig2 = Signal(substance=s2,
               spreadType='air',
               sendingSpeed=1,
               energyCosts=1,
-              afterEffectTime=1,
+              afterEffectTime=2,
               spreadSpeed=3)
 
 tox1 = Toxin(substance=s3, 
