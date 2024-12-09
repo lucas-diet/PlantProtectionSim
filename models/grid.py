@@ -397,7 +397,7 @@ class Grid():
                 if key in ec.lastVisitedPlants:
                     currAfterEffectTime = ec.getAfterEffectTime(plant, signal)
                     print(f"[DEBUG-{signal.name}]: {plant.name} Nachwirkzeit: {currAfterEffectTime}")
-                    print(currAfterEffectTime)
+                    #print(currAfterEffectTime)
 
                     if currAfterEffectTime > 0:
                         currAfterEffectTime -= 1
@@ -417,10 +417,9 @@ class Grid():
                             elif signal.spreadType == 'symbiotic':
                                 print(f"[DEBUG-{signal.name}]: {plant.name} wurde aus lastViditedPlants entfernt (symbiotic Signal)")
                           
-                    #break  # Wichtiger Abbruch nach der Verarbeitung
+                #break  # Wichtiger Abbruch nach der Verarbeitung
                 
 
-    
     def plantAlarmAndSignalProd(self, ec, dist, plant):    
         for signal in self.signals:
             for trigger in signal.triggerCombination:
@@ -523,6 +522,7 @@ class Grid():
                     signal.radius = 0
                     self.radiusFields = []
                     continue
+                
                 if ec.position == prodPlant.position:  
                     radius = plant.airSpreadSignal(signal) 
                     self.radiusFields = self.getFieldsInAirRadius(plant, radius) 

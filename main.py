@@ -74,7 +74,7 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=[p1],
+              emit=[p1, p2],
               receive=[p3],
               triggerCombination=[[e1, 2]],
               prodTime=3,
@@ -85,7 +85,7 @@ sig1 = Signal(substance=s1,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
-              emit=[p1],
+              emit=[p1, p2],
               receive=[p3],
               triggerCombination=[[e2, 2]],
               prodTime=3, 
