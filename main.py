@@ -25,7 +25,7 @@ grid = Grid(height=6, width=6)
 plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
 p1 = Plant(name='p1', 
-           initEnergy=200, 
+           initEnergy=300, 
            growthRateEnegry=1, 
            minEnegrgy=50, 
            reproductionIntervall=0, 
@@ -77,37 +77,37 @@ sig1 = Signal(substance=s1,
               emit=[p1],
               receive=[p3],
               triggerCombination=[[e1, 2]],
-              prodTime=1,
+              prodTime=3,
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=7,
+              afterEffectTime=2,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
-              emit=[p2],
-              receive=[p1],
-              triggerCombination=[[e1, 2]],
-              prodTime=1, 
-              spreadType='air',
+              emit=[p1],
+              receive=[p3],
+              triggerCombination=[[e2, 2]],
+              prodTime=3, 
+              spreadType='symbiotic',
               sendingSpeed=1,
               energyCosts=1,
-              afterEffectTime=2,
-              spreadSpeed=3)
+              afterEffectTime=3,
+              spreadSpeed=None)
 
 tox1 = Toxin(substance=s3, 
              plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
-             prodTime=5,
+             prodTime=2,
              deadly=False,
              eliminationStrength=1)
 
 tox2 = Toxin(substance=s4, 
              plantTransmitter=[p1, p2],
              energyCosts=1,
-             triggerCombination=[[sig2, e1, 2]],   
-             prodTime=5,
+             triggerCombination=[[sig2, e2, 2]],   
+             prodTime=3,
              deadly=False,
              eliminationStrength=1)
 
@@ -116,7 +116,7 @@ grid.addPlant(p2)
 #grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-#grid.addEnemies(ec2)
+grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)

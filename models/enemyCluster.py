@@ -27,23 +27,29 @@ class EnemyCluster():
     
     def insertLastVisits(self, plant, signal):
         if signal is not None:
-            self.lastVisitedPlants[plant] = signal.afterEffectTime
+            key = (plant, signal)  # Verwende den kombinierten Schlüssel aus Pflanze und Signal
+            self.lastVisitedPlants[key] = signal.afterEffectTime
         else:
-            self.lastVisitedPlants[plant] = 0  # Standardwert setzen, wenn kein Signal übergeben wurde
+            self.lastVisitedPlants[(plant, None)] = 0  # Standardwert setzen, wenn kein Signal übergeben wurde
+
 
     
     def deleteLastVisits(self, plant):
-        if plant.afterEffectTime == 0:
-            self.lastVisitedPlants.pop(plant, None)
+        keys_to_remove = [key for key in self.lastVisitedPlants if key[0] == plant]
+        for key in keys_to_remove:
+            self.lastVisitedPlants.pop(key, None)
+
     
 
-    def getAfterEffectTime(self, plant):
-        key = (plant)
+    def getAfterEffectTime(self, plant, signal):
+        key = (plant, signal)  # Verwende den kombinierten Schlüssel aus Pflanze und Signal
         return self.lastVisitedPlants.get(key, 0)
+
     
 
     def isPlantInLastVisits(self, plant):
-        return plant in self.lastVisitedPlants
+        return any(key[0] == plant for key in self.lastVisitedPlants.keys())
+
 
  
     def detectPlant(self, grid):
