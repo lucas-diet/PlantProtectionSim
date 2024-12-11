@@ -502,23 +502,25 @@ class Grid():
         currAfterEffectTime = ec.getAfterEffectTime(plant, signal)
 
         # Reduziere die Nachwirkzeit, falls sie größer als 0 ist
-        if currAfterEffectTime > 0:
-            ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
-            print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
+        for trigger in signal.triggerCombination:
+            triggerEnemy, _ = trigger
+            if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
+                ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
+                print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} {ec.enemy.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
 
-        # Wenn die Nachwirkzeit abgelaufen ist
-        if currAfterEffectTime < 1:
-            ec.deleteLastVisits(plant, signal)
-            plant.setSignalPresence(signal, False)
-            print(f'[DEBUG-{signal.name}]: Nachwirkzeit abgelaufen. Signal entfernen für {plant.name}')
+            # Wenn die Nachwirkzeit abgelaufen ist
+            if currAfterEffectTime < 1 and ec.enemy == triggerEnemy:
+                ec.deleteLastVisits(plant, signal)
+                plant.setSignalPresence(signal, False)
+                print(f'[DEBUG-{signal.name}]: Nachwirkzeit abgelaufen. Signal entfernen für {plant.name}')
 
-            # Zusätzliche Aktionen basierend auf dem Signaltyp
-            if signal.spreadType == 'symbiotic':
-                pass
-            elif signal.spreadType == 'air':
-                # Setzte den entstandenen Radius zurück
-                self.radiusFields = []
-                signal.radius = 0
+                # Zusätzliche Aktionen basierend auf dem Signaltyp
+                if signal.spreadType == 'symbiotic':
+                    pass
+                elif signal.spreadType == 'air':
+                    # Setzte den entstandenen Radius zurück
+                    self.radiusFields = []
+                    signal.radius = 0
 
     
     def plantAlarmAndPoisonProd(self, ec, dist, plant):

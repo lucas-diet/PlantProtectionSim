@@ -132,7 +132,7 @@ class Plant():
 
     def getSignalProdCounter(self, ec, signal):
         key = (ec, signal)
-        return self.signalProdCounters.get(key, 0)
+        return self.signalProdCounters.get(key, 1)
     
 
     def resetSignalSendCounter(self, ec, signal, rPlant):
@@ -195,7 +195,7 @@ class Plant():
 
     def getToxinProdCounter(self, ec, toxin):
         key = (ec, toxin)
-        return self.toxinProdCounters.get(key, 0)
+        return self.toxinProdCounters.get(key, 1)
     
 
     def isToxinAlarmed(self, toxin):
