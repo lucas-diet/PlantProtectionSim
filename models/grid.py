@@ -640,12 +640,16 @@ class Grid():
                 if sPlant == plant and sPos == ec.position and sPlant.isSignalPresent(signal):
                     print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
 
-                    if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
-                        sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-                        print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {plant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
-                    else:
-                        sPlant.sendSignal(rPlant, signal)
-                        print(f'[DEBUG]: Signal gesendet von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+                    self.symInteraction(sPlant, rPlant, signal, ec)
+
+
+    def symInteraction(self, sPlant, rPlant, signal, ec):
+        if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed and rPlant in signal.receive:
+            sPlant.incrementSignalSendCounter(ec, signal, rPlant)
+            print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {rPlant.getSignalSendCounter(ec, signal, rPlant) + 1}/{signal.sendingSpeed}')
+        else:
+            sPlant.sendSignal(rPlant, signal)
+            print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
 
 
     def airCommunication(self, ec, plant, signal):
@@ -656,7 +660,7 @@ class Grid():
                 print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
                 self.radiusFields = self.getFieldsInAirRadius(plant, radius)
 
-                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name}: {plant.getSignalRadiusCounter(ec, signal)}/{signal.spreadSpeed}')
+                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name}: {plant.getSignalRadiusCounter(ec, signal) + 1}/{signal.spreadSpeed}')
                 if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1:
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
@@ -670,8 +674,10 @@ class Grid():
                         # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere ihn
                         plant.resetSignalRadiusCounter(ec, signal)
                         signal.radius += 1
-                        print(f'[DEBUG]: Signalradius für {plant.name} auf Maximum erhöht')
-
+                        
+                #print(self.radiusFields)
+                self.airInteraction(plant, signal, ec)
+    
 
     def getFieldsInAirRadius(self, plant, radius):
         x0, y0 = plant.position
@@ -685,6 +691,23 @@ class Grid():
                     radiusFields.append((x, y))
 
         return radiusFields
+                
+    
+    def airInteraction(self, plant, signal, ec):
+        for otherPlant in self.plants:
+            if otherPlant != plant and otherPlant.position in self.radiusFields and otherPlant in signal.receive:
+                sPlant, rPlant = plant, otherPlant
+                sPos, rPos = plant.position, otherPlant.position
+                if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
+                    sPlant.incrementSignalSendCounter(ec, signal, rPlant)
+                else:
+                    sPlant.sendSignal(rPlant, signal)
+                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+                print(sPlant.name, sPos, rPlant.name, rPos)
+
+
+
+
 
 
     def getAllGridConnections(self, plant, *scs):

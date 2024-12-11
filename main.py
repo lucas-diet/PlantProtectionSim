@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(3, 2), 
+           position=(2, 4), 
            grid=grid,
            color=plantColor)
 
@@ -107,13 +107,13 @@ tox2 = Toxin(substance=s4,
              plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[[sig2, e1, 2]],   
-             prodTime=2,
+             prodTime=4,
              deadly=False,
              eliminationStrength=1)
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-#grid.addPlant(p3)
+grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
