@@ -1,5 +1,6 @@
 
 import random
+import numpy as np
 
 class Plant():
 
@@ -78,7 +79,7 @@ class Plant():
         directions = []
         for dx in range(-self.maxDist, self.maxDist+1):
             for dy in range(-self.maxDist, self.maxDist+1):
-                dist = abs(dx) + abs(dy)
+                dist = int(np.sqrt(dx**2 + dy**2))
                 if self.minDist <= dist <= self.maxDist:
                     directions.append((dx, dy))
         
@@ -87,11 +88,17 @@ class Plant():
 
     def setOffspringPos(self):        
         directions = self.getDirections()
+        
+        #print(f'[DEBUG]: Alle möglichen Felder innerhalb des Radius {self.minDist} - {self.maxDist}:')
+        #for dx, dy in directions:
+        #    newX, newY = self.position[0] + dx, self.position[1] + dy
+        #    print(f'Potenzielle Position: ({newX}, {newY})')
+        
         random.shuffle(directions)
 
         for dx, dy in directions:
             newX, newY = self.position[0] + dx, self.position[1] + dy
-
+            
             if self.grid.isWithinBounds(newX, newY):
                 if not self.grid.isOccupied((newX, newY)):
                     print(f'[DEBUG]: {self.name} auf {self.position} erzeugt Nachkommen auf {newX, newY}')
