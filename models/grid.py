@@ -516,7 +516,9 @@ class Grid():
             if signal.spreadType == 'symbiotic':
                 pass
             elif signal.spreadType == 'air':
+                # Setzte den entstandenen Radius zurück
                 self.radiusFields = []
+                signal.radius = 0
 
     
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
@@ -656,7 +658,6 @@ class Grid():
 
 
     def airCommunication(self, ec, plant, signal):
-        #TODO: Wenn mehrere Feinde existieren, dann wird Radius doppelt erhöht in einem Schritt
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
@@ -669,7 +670,7 @@ class Grid():
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
                 else:
-                    self.processSignalRadius(ec, plant, signal)             
+                    self.processSignalRadiusSize(ec, plant, signal)             
                 #print(self.radiusFields)
                 self.airInteraction(plant, signal, ec)
     
@@ -688,16 +689,10 @@ class Grid():
         return radiusFields
     
 
-    def processSignalRadius(self, ec, plant, signal):
-        # Wenn Nachwirkzeit noch nicht abgelaufen, erweitere Signalradius
-        if ec.getAfterEffectTime(plant, signal) == 0 and ec.position != plant.position:
-            plant.resetSignalRadiusCounter(ec, signal)
-            signal.radius = 0
-            print(f'[DEBUG]: Nachwirkzeit abgelaufen. Signalradius für {plant.name} zurückgesetzt')
-        else:
-            # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere ihn
-            plant.resetSignalRadiusCounter(ec, signal)
-            signal.radius += 1
+    def processSignalRadiusSize(self, ec, plant, signal):
+        # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere Radius
+        plant.resetSignalRadiusCounter(ec, signal)
+        signal.radius += 1
                 
     
     def airInteraction(self, plant, signal, ec):
