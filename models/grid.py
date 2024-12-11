@@ -665,16 +665,7 @@ class Grid():
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
                 else:
-                    # Wenn Nachwirkzeit noch nicht abgelaufen, erweitere Signalradius
-                    if ec.getAfterEffectTime(plant, signal) == 0 and ec.position != plant.position:
-                        plant.resetSignalRadiusCounter(ec, signal)
-                        signal.radius = 0
-                        print(f'[DEBUG]: Nachwirkzeit abgelaufen. Signalradius für {plant.name} zurückgesetzt')
-                    else:
-                        # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere ihn
-                        plant.resetSignalRadiusCounter(ec, signal)
-                        signal.radius += 1
-                        
+                    self.processSignalRadius(ec, plant, signal)             
                 #print(self.radiusFields)
                 self.airInteraction(plant, signal, ec)
     
@@ -691,6 +682,18 @@ class Grid():
                     radiusFields.append((x, y))
 
         return radiusFields
+    
+    
+    def processSignalRadius(self, ec, plant, signal):
+        # Wenn Nachwirkzeit noch nicht abgelaufen, erweitere Signalradius
+        if ec.getAfterEffectTime(plant, signal) == 0 and ec.position != plant.position:
+            plant.resetSignalRadiusCounter(ec, signal)
+            signal.radius = 0
+            print(f'[DEBUG]: Nachwirkzeit abgelaufen. Signalradius für {plant.name} zurückgesetzt')
+        else:
+            # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere ihn
+            plant.resetSignalRadiusCounter(ec, signal)
+            signal.radius += 1
                 
     
     def airInteraction(self, plant, signal, ec):
