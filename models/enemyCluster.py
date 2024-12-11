@@ -33,15 +33,15 @@ class EnemyCluster():
             self.lastVisitedPlants[(plant, None)] = 0  # Standardwert setzen, wenn kein Signal übergeben wurde
 
 
-    def deleteLastVisits(self, plant):
-        keys_to_remove = [key for key in self.lastVisitedPlants if key[0] == plant]
+    def deleteLastVisits(self, plant, signal):
+        keys_to_remove = [(p, s) for (p, s) in self.lastVisitedPlants if p == plant and s == signal]
         for key in keys_to_remove:
             self.lastVisitedPlants.pop(key, None)
 
-    
+
     def getAfterEffectTime(self, plant, signal):
         key = (plant, signal)  # Verwende den kombinierten Schlüssel aus Pflanze und Signal
-        return self.lastVisitedPlants.get(key, 0)
+        return self.lastVisitedPlants.get(key, signal.afterEffectTime)
 
 
     def isPlantInLastVisits(self, plant):
@@ -216,7 +216,7 @@ class EnemyCluster():
                     break
 
             if plant is not None:
-                print(f'[INFO]: {ec.enemy.name} frisst an {plant.name} auf Position {pPos}')
+                #print(f'[INFO]: {ec.enemy.name} frisst an {plant.name} auf Position {pPos}')
                 plant.currEnergy -= self.eatingSpeed
                 self.eatedEnergy += self.eatingSpeed
 
@@ -242,8 +242,9 @@ class EnemyCluster():
         if self.eatedEnergy >= self.eatVictory:
             self.newBorns += int(self.eatedEnergy / self.eatVictory)
             self.num += self.newBorns
-            self.eatedEnergy -= self.newBorns * self.eatedEnergy
+            self.eatedEnergy -= self.newBorns * self.eatVictory  # Energie für neue Feinde abziehen
             self.newBorns = 0
+
 
 
     def newPath(self, plant, toxin, allPlants):

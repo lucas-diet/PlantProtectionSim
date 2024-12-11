@@ -37,7 +37,7 @@ p1 = Plant(name='p1',
            color=plantColor)
     
 p2 = Plant(name='p2', 
-           initEnergy=100,
+           initEnergy=200,
            growthRateEnegry=2,
            minEnegrgy=50, 
            reproductionIntervall=0, 
@@ -56,7 +56,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(3, 4), 
+           position=(3, 2), 
            grid=grid,
            color=plantColor)
 
@@ -74,40 +74,40 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=[p1, p2],
+              emit=[p1],
               receive=[p3],
               triggerCombination=[[e1, 2]],
-              prodTime=3,
+              prodTime=2,
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=2,
+              afterEffectTime=1,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
-              emit=[p1, p2],
+              emit=[p2],
               receive=[p3],
-              triggerCombination=[[e2, 2]],
+              triggerCombination=[[e1, 2]],
               prodTime=3, 
-              spreadType='symbiotic',
+              spreadType='air',
               sendingSpeed=1,
               energyCosts=1,
-              afterEffectTime=3,
-              spreadSpeed=None)
+              afterEffectTime=1,
+              spreadSpeed=2)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1],
+             plantTransmitter=[p1, p2],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
-             prodTime=2,
+             prodTime=3,
              deadly=False,
              eliminationStrength=1)
 
 tox2 = Toxin(substance=s4, 
              plantTransmitter=[p1, p2],
              energyCosts=1,
-             triggerCombination=[[sig2, e2, 2]],   
-             prodTime=3,
+             triggerCombination=[[sig2, e1, 2]],   
+             prodTime=2,
              deadly=False,
              eliminationStrength=1)
 
@@ -116,7 +116,7 @@ grid.addPlant(p2)
 #grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
+#grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)
@@ -138,7 +138,7 @@ ac = AirConnection(p1)
 
 
 sim = Simulation(grid)
-sim.run(maxSteps=35, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()

@@ -223,28 +223,24 @@ class Grid():
             return lines if lines else ['------']
 
         def format_plant(plant):
-            """Formatiert die Darstellung einer Pflanze."""
+            """Formatiert die Darstellung einer Pflanze basierend auf ihren Zuständen und Toxinen."""
+
             energy = f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%'
 
-            if any(plant.isToxically.values()):  
-                # Mindestens ein Giftstoff fertig produziert
+            if any(plant.isToxically.values()):  # Mindestens ein Giftstoff fertig produziert
                 return [f'{energy}*']
-            elif any(plant.toxinAlarms.values()):  
-                # Giftstoff in Produktion, aber keiner fertig
+            elif any(plant.toxinAlarms.values()):  # Giftstoff in Produktion, aber keiner fertig
                 return [f'{energy}+']
-            elif any(plant.signalAlarms.values()):  
-                # Signal-Alarm
-                if any(plant.isSignalSignaling.values()):  
-                    # Signal fertig
+            elif any(plant.signalAlarms.values()):  # Signal-Alarm
+                if any(plant.isSignalSignaling.values()):  # Signal fertig
                     return [f'{energy}>']
                 return [f'{energy}!']
-            elif any(plant.isSignalSignaling.values()):  
-                # Signal fertig, keine Alarm-Phase
+            elif any(plant.isSignalSignaling.values()):  # Signal fertig, keine Alarm-Phase
                 return [f'{energy}>']
             else:
                 # Keine Alarme oder Zustände
                 return [f'{energy}']
-
+            
         def format_enemy_cluster(ec):
             """Formatiert die Darstellung einer Feindgruppe."""
             if ec.intoxicated:
@@ -290,7 +286,6 @@ class Grid():
 
         # Drucke jede Zeile des Gitters
         print_grid(formatted_grid, max_lines_per_row)
-
         print('#################### \n')
 
 
@@ -317,27 +312,45 @@ class Grid():
             if self.isWithinBounds(x, y):  # Überprüfe, ob die Position innerhalb der Grenzen des Grids liegt
                 return (x, y)
         return None
-    
 
-    def updateEnemyClusterPos(self, ec, oldPos, newPos):
-        """Aktualisiert die Position eines Feindes im Grid.
-        
-        Entfernt den Feind von seiner alten Position und fügt ihn an die neue Position hinzu.
+
+    def collectAndManageEnemies(self):
+        """Sammelt alle Feinde im Gitter und bewegt sie.
+
+        Die Methode erstellt eine Liste 'enemies_to_move', die Paare aus Feinden und deren Positionen enthält.
+        Dabei werden alle Feinde aus Zellen, die Listen von Feinden enthalten, sowie einzelne Feinde
+        in Zellen durchlaufen. Anschließend wird die Methode 'moveEachEnemy' aufgerufen, um die Feinde
+        auf Grundlage der gesammelten Daten zu bewegen.
         """
-        # Entferne den Feind von der alten Position, falls er dort ist
-        _, old_ecs = self.grid[oldPos[0]][oldPos[1]]
-        if ec in old_ecs:
-            old_ecs.remove(ec)
+        enemies_to_move = []
 
-        # Füge den Feind an der neuen Position hinzu, falls er dort noch nicht existiert
-        _, new_ecs = self.grid[newPos[0]][newPos[1]]
-        if ec not in new_ecs:
-            new_ecs.append(ec)
+        # Durchlaufe jede Zelle im Gitter
+        for i, row in enumerate(self.grid):
+            for j, (_, ec) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
+                if ec:  # Wenn die Liste der Feind-Cluster nicht leer ist
+                    for ec in ec:
+                        enemies_to_move.append((ec, (i, j)))
 
-        # Aktualisiere die Position des Feindes
-        ec.position = newPos
+        # Bewege alle gesammelten Feinde
+        self.manageEnemyClusters(enemies_to_move)
 
     
+    def manageEnemyClusters(self, moveArr):
+        for ec, oldPos in moveArr:
+            if not isinstance(ec, EnemyCluster):
+                continue
+
+            if not self.canMove(ec):
+                continue
+            
+            path = ec.chooseRandomPlant(ec.position)
+            newPos = self.processEnemyMovement(ec, oldPos, path)
+
+            self.updateEnemyClusterPos(ec, oldPos, newPos)
+            self.checkNearbyPlants(ec)
+            self.reduceClusterSize(ec)
+
+
     def canMove(self, ec):
         # Überprüfe, ob genug Zeitschritte vergangen sind, bis Feind sich bewegen darf
         if ec.stepCounter < ec.speed - 1:
@@ -346,7 +359,7 @@ class Grid():
         # Setze den Schrittzähler zurück und erlaube die Bewegung
         ec.stepCounter = 0
         return True
-
+    
 
     def processEnemyMovement(self, ec, oldPos, path):
         # Bewege den Feind gemäß dem Pfad
@@ -374,8 +387,51 @@ class Grid():
             return newPos
         else:
             return oldPos
+
+
+    def updateEnemyClusterPos(self, ec, oldPos, newPos):
+        """Aktualisiert die Position eines Feindes im Grid.
         
+        Entfernt den Feind von seiner alten Position und fügt ihn an die neue Position hinzu.
+        """
+        # Entferne den Feind von der alten Position, falls er dort ist
+        _, old_ecs = self.grid[oldPos[0]][oldPos[1]]
+        if ec in old_ecs:
+            old_ecs.remove(ec)
+
+        # Füge den Feind an der neuen Position hinzu, falls er dort noch nicht existiert
+        _, new_ecs = self.grid[newPos[0]][newPos[1]]
+        if ec not in new_ecs:
+            new_ecs.append(ec)
+
+        # Aktualisiere die Position des Feindes
+        ec.position = newPos
+
     
+    def checkNearbyPlants(self, ec):
+        # Gehe jede Zeile im Gitter durch
+        for i, row in enumerate(self.grid):
+            for j, (plant, _) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
+                if isinstance(plant, Plant):  # Nur Pflanzen betrachten
+                    dist = self.getDistance(ec.position, (i, j))  # Berechne die Distanz zur Pflanze
+                                        
+                    self.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
+                    self.plantAlarmAndPoisonProd(ec, dist, plant)  # Alarm und Giftproduktion prüfen
+
+                    if (i, j) == ec.position:  # Wenn der Feind auf der Pflanze steht
+                        ec.currentPath = []  # Setze den aktuellen Pfad zurück
+                        self.eatAndReproduce(ec, plant)  # Feind frisst und reproduziert sich
+                        
+                        self.processSignalEffects(ec, plant)  # Signalwirkungen
+                        self.processToxinEffects(ec, plant)  # Giftwirkungen
+
+
+    def reduceClusterSize(self, ec):
+        for toxin in self.toxins:
+            if ec.intoxicated == True:
+                toxin.killEnemies(ec)
+
+
     def eatAndReproduce(self, ec, plant):
         self.totalEnergy = self.getGridEnergy()
         ec.eatPlant(ec, plant)
@@ -383,112 +439,199 @@ class Grid():
         ec.reproduce()
 
     
-    def resetSignalRadius(self):
-        self.radiusFields = []
+    def plantAlarmAndSignalProd(self, ec, dist, plant):
+        processed_by_enemy = set()  # Zwischenspeicher für Feind-spezifische Bearbeitung
 
-
-    def handelAfterEffectTime(self, ec, plant, signal, prodPlant1):
-        for prodPlant2 in signal.emit:
-            if plant == prodPlant2 and plant == prodPlant1 and ec.isPlantInLastVisits(plant) and plant.isSignalPresent(signal):
-                # Verwende den spezifischen Schlüssel (plant, signal)
-                key = (plant, signal)
-                
-                # Überprüfe, ob der Schlüssel in lastVisitedPlants vorhanden ist
-                if key in ec.lastVisitedPlants:
-                    currAfterEffectTime = ec.getAfterEffectTime(plant, signal)
-                    print(f"[DEBUG-{signal.name}]: {plant.name} Nachwirkzeit: {currAfterEffectTime}")
-                    #print(currAfterEffectTime)
-
-                    if currAfterEffectTime > 0:
-                        currAfterEffectTime -= 1
-                        ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime
-                        print(f"[DEBUG-{signal.name}]: Nachwirkzeit von {plant.name} reduziert auf {currAfterEffectTime}")
-                    
-                        # Überprüfe die Art der Signalverbreitung
-                        if currAfterEffectTime == 0:
-                            ec.deleteLastVisits(plant)  # Entferne die Pflanze aus lastViditedPlants
-                            plant.setSignalPresence(signal, False)  # Entferne das Signal von der Pflanze
-                          
-                            if signal.spreadType == 'air':
-                                # Entferne Radiusfelder, da das Signal nicht mehr verfügbar ist
-                                self.resetSignalRadius()
-                                print(f"[DEBUG]: Signalradius für {signal.name} entfernt, da Nachwirkzeit abgelaufen")
-                            
-                            elif signal.spreadType == 'symbiotic':
-                                print(f"[DEBUG-{signal.name}]: {plant.name} wurde aus lastViditedPlants entfernt (symbiotic Signal)")
-                          
-                #break  # Wichtiger Abbruch nach der Verarbeitung
-                
-
-    def plantAlarmAndSignalProd(self, ec, dist, plant):    
         for signal in self.signals:
             for trigger in signal.triggerCombination:
-                triggerEnemy, minClusterSize = trigger
+                triggerEnemy, _ = trigger
+                if plant in signal.emit and ec.enemy == triggerEnemy and ec.position == plant.position:
+                    print('Sig: ', plant.name, ec.enemy.name, signal.name, triggerEnemy.name)
+                    # Alarmprozess
+                    self.processSignalAlarm(ec, dist, plant, signal, trigger)
+                    # Produktionsprozess
+                    self.processSignalProduction(ec, plant, signal)
 
-                for prodPlant1 in signal.emit:
-                    if ec.enemy == triggerEnemy and plant == prodPlant1 and ec.targetPlant == plant.position:
-                        if ec.num < minClusterSize and ec.num > 0:
-                            print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
-                            continue
-                        else:
-                            if plant.isSignalAlarmed(signal) == False and plant.isSignalPresent(signal) == False and dist < 1:
-                                plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
-                                signal.signalCosts(plant)  # Reduziere Signal-Kosten
-                                print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
-                            # Falls die Pflanze schon alarmiert wurde, aber noch kein Signal produziert
-                            elif plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
-                                # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
-                                if plant.getSignalProdCounter(ec, signal) < signal.prodTime - 1:
-                                    plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
-                                    print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}')
-                                else:
-                                    # Wenn der Produktionszähler groß genug ist, produziere das Signal
-                                    plant.makeSignal(signal)
-                                    signal.activateSignal()
-                                    signal.signalCosts(plant)  # Reduziere Signal-Kosten
-                                    print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
-                    # Nachwirkzeit
-                    self.handelAfterEffectTime(ec, plant, signal, prodPlant1)
-                    
+            # Nachwirkzeit verarbeiten
+            key = (plant, signal)
+            if key not in processed_by_enemy:
+                self.handleAfterEffectTime(ec, plant, signal)
+                processed_by_enemy.add(key)
+
+
+    def processSignalAlarm(self, ec, dist, plant, signal, trigger):
+        """
+        Verarbeitet den Alarmzustand einer Pflanze.
+        """
+        _, minClusterSize = trigger
+        if ec.num < minClusterSize and ec.num > 0:
+            print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {signal.triggerCombination[0][1]}')
+            return
+        if plant.isSignalAlarmed(signal) == False and plant.isSignalPresent(signal) == False and dist < 1:
+            plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
+            signal.signalCosts(plant)  # Reduziere Signal-Kosten
+            print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
+
+
+    def processSignalProduction(self, ec, plant, signal):
+        """
+        Verarbeitet die Signalproduktion einer Pflanze.
+        """
+        if plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
+            # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
+            if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
+                plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
+                print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
+            else:
+                # Wenn der Produktionszähler groß genug ist, produziere das Signal
+                plant.makeSignal(signal)
+                signal.activateSignal()
+                signal.signalCosts(plant)  # Reduziere Signal-Kosten
+                print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+
     
-    def resetToxically(self, ec, toxin, plant):
-        if ec.isPlantInLastVisits(plant) and toxin.deadly == False:
-            for prodPlant2 in toxin.plantTransmitter:
-                if prodPlant2 == plant:
-                    preDist = self.getDistance(ec.position, plant.position)
-                    if preDist > 0 and plant.isToxinPresent(toxin) == True:
-                        plant.setToxinPresence(toxin, False)
-                        plant.resetToxinProdCounter(ec, toxin)
+    def handleAfterEffectTime(self, ec, plant, signal):
+        """
+        Verarbeitet die Nachwirkzeit eines Signals für eine Pflanze.
+        """
+        # Überprüfen, ob das Signal behandelt werden soll
+        if not (plant in signal.emit and ec.isPlantInLastVisits(plant) and plant.isSignalPresent(signal)):
+            return
 
+        # Holen der aktuellen Nachwirkzeit
+        currAfterEffectTime = ec.getAfterEffectTime(plant, signal)
 
+        # Reduziere die Nachwirkzeit, falls sie größer als 0 ist
+        if currAfterEffectTime > 0:
+            ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
+            print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
+
+        # Wenn die Nachwirkzeit abgelaufen ist
+        if currAfterEffectTime < 1:
+            ec.deleteLastVisits(plant, signal)
+            plant.setSignalPresence(signal, False)
+            print(f'[DEBUG-{signal.name}]: Nachwirkzeit abgelaufen. Signal entfernen für {plant.name}')
+
+            # Zusätzliche Aktionen basierend auf dem Signaltyp
+            if signal.spreadType == 'symbiotic':
+                pass
+            elif signal.spreadType == 'air':
+                self.radiusFields = []
+
+    
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
         for toxin in self.toxins:
-            for trigger in toxin.triggerCombination:
-                triggerSignal, triggerEnemy, minClusterSize = trigger
-                for prodPlant1 in toxin.plantTransmitter:
-                    for signal in self.signals:
-                        if signal == triggerSignal and ec.enemy == triggerEnemy and plant == prodPlant1 and ec.position == ec.targetPlant:
-                            #print(plant.name, toxin.name, triggerSignal.name, enemy.name, minClusterSize, plant.position, ec.targetPlant)
-                            if ec.num < minClusterSize and ec.num > 0:
-                                print(f'[DEBUG-Gift]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
-                                continue  # Springe zur nächsten Iteration, wenn die Mindestanzahl nicht erreicht ist
-                            else:
-                                if plant.isSignalPresent(signal) == True and plant.isToxinAlarmed(toxin) == False and plant.isToxinPresent(toxin) == False and dist < 1:
-                                    plant.enemyToxinAlarm(toxin)
-                                    toxin.toxinCosts(plant)
-                                elif signal in signal.activeSignals and plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
-                                    if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime - 1:
-                                        plant.incrementToxinProdCounter(ec, toxin)
-                                        print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}')
-                                    else:
-                                        # Pflanze wird giftig, wenn Produktionszeit erreicht
-                                        plant.makeToxin(toxin)
-                                        toxin.toxinCosts(plant)
-                                        print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+            for signal in self.signals:
+                for trigger in toxin.triggerCombination:
+                    triggerSignal, triggerEnemy, minClusterSize = trigger
+                    
+                    if plant in toxin.plantTransmitter and signal == triggerSignal and ec.enemy == triggerEnemy and ec.position == plant.position:
+                        # Alarmprozess
+                        self.processToxinAlarm(ec, dist, plant, signal, toxin, trigger)
+                        # Produktionsprozess
+                        self.processToxinProduction(ec, plant, toxin)
+ 
             self.resetToxically(ec, toxin, plant)
+
+
+    def processToxinAlarm(self, ec, dist, plant, signal, toxin, trigger):
+
+        triggerSignal, triggerEnemy, minClusterSize = trigger
+
+        if ec.num < minClusterSize and ec.num > 0:
+            print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
+            return
+        if plant.isSignalPresent(signal) == True and plant.isToxinAlarmed(toxin) == False and plant.isToxinPresent(toxin) == False and dist < 1:
+            plant.enemyToxinAlarm(toxin)
+            toxin.toxinCosts(plant)
+
+    
+    def processToxinProduction(self, ec, plant, toxin):
+        """
+        Verarbeitet die Giftproduktion einer Pflanze.
+        """
+        if plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
+            # Überprüfen, ob die Pflanze genug Zeit hatte, das Gift zu produzieren
+            if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
+                plant.incrementToxinProdCounter(ec, toxin)  # Erhöhe den Produktionszähler
+                print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
+            else:
+                # Wenn der Produktionszähler groß genug ist, produziere das Gift
+                plant.makeToxin(toxin)
+                toxin.toxinCosts(plant)  # Reduziere Gift-Kosten
+                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+
+
+    def processSignalEffects(self, ec, plant):
+        for signal in self.signals:
+            self.symCommunication(ec, plant, signal)
+            self.airCommunication(ec, plant, signal)
+
+
+    def processToxinEffects(self, ec, plant):
+        """
+        Verarbeitet die Effekte von Toxinen auf einen Feind und dessen Interaktion mit einer Pflanze.
+        """
+        for toxin in self.toxins:
+            for signal in self.signals:
+                for trigger in toxin.triggerCombination:
+                    triggerSignal, triggerEnemy, minClusterSize = trigger
+
+                    # Verarbeite nicht-tödliche Toxine
+                    if toxin.deadly == False and plant.isToxinPresent(toxin) == True and ec.enemy == triggerEnemy and signal == triggerSignal:
+                        self.processNonDeadlyToxin(toxin, ec, plant, signal)
+                        print(f'[DEBUG-Toxin-{toxin.name}]: Nicht-tödliches Toxin verarbeitet für {ec.enemy.name}')
+
+                    # Verarbeite tödliche Toxine
+                    elif toxin.deadly == True and plant.isToxinPresent(toxin) == True and plant in toxin.plantTransmitter:
+                        self.processDeadlyToxin(toxin, ec, plant, signal)
+                        print(f'[DEBUG-Toxin-{toxin.name}]: Tödliches Toxin verarbeitet für {ec.enemy.name}')
+                
+                #print(triggerSignal.name, triggerEnemy.name, minClusterSize)
+
+
+    def processNonDeadlyToxin(self, toxin, ec, plant, signal):
+        """
+        Verarbeitet die Effekte nicht-tödlicher Toxine, einschließlich Feind-Verscheuchen.
+        """
+        # Füge die Pflanze zu den letzten Besuchen des Feindes hinzu
+        ec.insertLastVisits(plant, signal)
+
+        # Versuche, den Feind zu verscheuchen
+        newPath, targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
+
+        # Wenn ein neuer Pfad gefunden wurde und er sich vom aktuellen unterscheidet
+        if newPath and newPath != ec.currentPath:
+            ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
+            ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
+            print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht')
+
+
+    def processDeadlyToxin(self, toxin, ec, plant, signal):
+        """
+        Verarbeitet die Effekte tödlicher Toxine, einschließlich Feind-Vergiftung.
+        """
+        # Wende den Effekt des tödlichen Toxins auf den Feind an
+        toxin.empoisonEnemies(ec)
+        print(f'[DEBUG]: {ec.enemy.name} wurde durch das tödliche Toxin {toxin.name} vergiftet')
             
 
-    def symSignalCom(self, ec, plant, signal):
+    def resetToxically(self, ec, toxin, plant):
+        """
+        Setzt den Zustand der Pflanze zurück, falls sie nicht mehr toxisch sein sollte.
+        """
+        if ec.isPlantInLastVisits(plant) == True and toxin.deadly == False:
+            preDist = self.getDistance(ec.position, plant.position)
+            
+            if preDist > 0:
+                plant.setToxinPresence(toxin, False)
+                plant.resetToxinProdCounter(ec, toxin)
+                plant.setToxinAlarm(toxin, False)
+                #print(plant.name, toxin.name, plant.getToxinProdCounter(ec, toxin))
+                #print(plant.isToxinPresent(toxin), plant.isToxinAlarmed(toxin))
+
+
+    def symCommunication(self, ec, plant, signal):
         if plant in signal.emit and signal.spreadType == 'symbiotic':
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
@@ -499,138 +642,49 @@ class Grid():
 
                     if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                         sPlant.incrementSignalSendCounter(ec, signal, rPlant)
+                        print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {plant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
                     else:
                         sPlant.sendSignal(rPlant, signal)
+                        print(f'[DEBUG]: Signal gesendet von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+
+
+    def airCommunication(self, ec, plant, signal):
+        if plant in signal.emit and signal.spreadType == 'air':
+            if plant.isSignalPresent(signal):
+                # Berechnung der Signalreichweite
+                radius = plant.airSpreadSignal(signal)
+                print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
+                self.radiusFields = self.getFieldsInAirRadius(plant, radius)
+
+                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name}: {plant.getSignalRadiusCounter(ec, signal)}/{signal.spreadSpeed}')
+                if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1:
+                    plant.incrementSignalRadius(ec, signal)
+                    signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
+                else:
+                    # Wenn Nachwirkzeit noch nicht abgelaufen, erweitere Signalradius
+                    if ec.getAfterEffectTime(plant, signal) == 0 and ec.position != plant.position:
+                        plant.resetSignalRadiusCounter(ec, signal)
+                        signal.radius = 0
+                        print(f'[DEBUG]: Nachwirkzeit abgelaufen. Signalradius für {plant.name} zurückgesetzt')
+                    else:
+                        # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere ihn
+                        plant.resetSignalRadiusCounter(ec, signal)
+                        signal.radius += 1
+                        print(f'[DEBUG]: Signalradius für {plant.name} auf Maximum erhöht')
 
 
     def getFieldsInAirRadius(self, plant, radius):
         x0, y0 = plant.position
         radiusFields = []
-        for x in range(0, len(self.grid)):
-            for y in range(0, len(self.grid[0])):
-                dist = int(np.sqrt((x - x0)**2 + (y - y0)**2))
+
+        # Iteriere durch die gesamte Grid-Matrix
+        for x in range(len(self.grid)):
+            for y in range(len(self.grid[0])):
+                dist = int(np.sqrt((x - x0) ** 2 + (y - y0) ** 2))
                 if dist <= radius:
-                    radiusFields.append((x,y))
+                    radiusFields.append((x, y))
+
         return radiusFields
-
-    
-    def airSignalCom(self, ec, plant, signal): 
-        for prodPlant in signal.emit: 
-            if signal.spreadType == 'air': 
-                if ec.position != prodPlant.position: 
-                    # Reset wenn Feind nicht bei der produzierenden Pflanze ist 
-                    signal.radius = 0
-                    self.radiusFields = []
-                    continue
-                
-                if ec.position == prodPlant.position:  
-                    radius = plant.airSpreadSignal(signal) 
-                    self.radiusFields = self.getFieldsInAirRadius(plant, radius) 
-                    
-                    if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1: 
-                        plant.incrementSignalRadius(ec, signal) 
-                        signal.signalCosts(plant) # Reduziere Signal-Kosten
-                    else:
-                        plant.resetSignalRadiusCounter(ec, signal)
-                        signal.radius += 1
-    
-    
-    def handleSignalEffects(self, ec, plant):
-        for signal in self.signals:
-            self.symSignalCom(ec, plant, signal)
-            self.airSignalCom(ec, plant, signal)
-
-
-    def getTriggers(self, toxin):
-        triggers = []  # Liste zur Speicherung der Trigger
-        for trigger in toxin.triggerCombination:
-            signal, enemy, minEcSize = trigger
-            triggers.append((signal, enemy, minEcSize))  # Rückgabe der Trigger-Kombinationen als Tupel
-        return triggers
-    
-
-    def handleToxinEffects(self, ec, plant):        
-        # Durchlaufe die Toxine, um die Effekte zu prüfen
-        for toxin in self.toxins:
-            # Hole die Trigger-Kombination für das Toxin
-            triggers = self.getTriggers(toxin)
-            
-            # Durchlaufe jedes Trigger-Tupel und prüfe, ob die Bedingungen zutreffen
-            for signal, triggerEnemy, minClusterSize in triggers:
-                # Wenn das Toxin nicht tödlich ist und die Pflanze toxisch ist
-                if toxin.deadly == False and plant.isToxinPresent(toxin) == True and ec.enemy == triggerEnemy:
-                    ec.insertLastVisits(plant, signal)
-                    # Versuche, den Feind zu verscheuchen
-                    newPath, targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
-                    
-                    # Wenn der Pfad erfolgreich berechnet wurde und eine neue Position vorhanden ist
-                    if newPath and newPath != ec.currentPath:
-                        ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
-                        ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
-                        print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht')
-                    
-                # Wenn das Toxin tödlich ist und die Pflanze toxisch ist und die Bedingungen erfüllt sind
-                elif toxin.deadly == True and plant.isToxinPresent(toxin) == True and plant in toxin.plantTransmitter and ec.num >= minClusterSize:
-                    toxin.empoisonEnemies(ec)
-
-
-    def checkNearbyPlants(self, ec):
-        # Gehe jede Zeile im Gitter durch
-        for i, row in enumerate(self.grid):
-            for j, (plant, _) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
-                if isinstance(plant, Plant):  # Nur Pflanzen betrachten
-                    dist = self.getDistance(ec.position, (i, j))  # Berechne die Distanz zur Pflanze
-                    self.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
-                    self.plantAlarmAndPoisonProd(ec, dist, plant)  # Alarm und Giftproduktion prüfen
-
-                    if (i, j) == ec.position:  # Wenn der Feind auf der Pflanze steht
-                        ec.currentPath = []  # Setze den aktuellen Pfad zurück
-                        self.eatAndReproduce(ec, plant)  # Feind frisst und reproduziert sich
-                        self.handleSignalEffects(ec, plant)  # Signalwirkungen bearbeiten
-                        self.handleToxinEffects(ec, plant)  # Giftwirkungen bearbeiten
-
-
-    def reduceClusterSize(self, ec):
-        for toxin in self.toxins:
-            if ec.intoxicated == True:
-                toxin.killEnemies(ec)
-
-
-    def manageEnemyClusters(self, moveArr):
-        for ec, oldPos in moveArr:
-            if not isinstance(ec, EnemyCluster):
-                continue
-
-            if not self.canMove(ec):
-                continue
-            
-            path = ec.chooseRandomPlant(ec.position)
-            newPos = self.processEnemyMovement(ec, oldPos, path)
-
-            self.updateEnemyClusterPos(ec, oldPos, newPos)
-            self.checkNearbyPlants(ec)
-            self.reduceClusterSize(ec)
-
-
-    def collectAndManageEnemies(self):
-        """Sammelt alle Feinde im Gitter und bewegt sie.
-
-        Die Methode erstellt eine Liste 'enemies_to_move', die Paare aus Feinden und deren Positionen enthält.
-        Dabei werden alle Feinde aus Zellen, die Listen von Feinden enthalten, sowie einzelne Feinde
-        in Zellen durchlaufen. Anschließend wird die Methode 'moveEachEnemy' aufgerufen, um die Feinde
-        auf Grundlage der gesammelten Daten zu bewegen.
-        """
-        enemies_to_move = []
-
-        # Durchlaufe jede Zelle im Gitter
-        for i, row in enumerate(self.grid):
-            for j, (_, ec) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
-                if ec:  # Wenn die Liste der Feind-Cluster nicht leer ist
-                    for ec in ec:
-                        enemies_to_move.append((ec, (i, j)))
-
-        # Bewege alle gesammelten Feinde
-        self.manageEnemyClusters(enemies_to_move)
 
 
     def getAllGridConnections(self, plant, *scs):
