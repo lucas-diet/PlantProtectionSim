@@ -564,8 +564,11 @@ class Grid():
 
     def processSignalEffects(self, ec, plant):
         for signal in self.signals:
-            self.symCommunication(ec, plant, signal)
-            self.airCommunication(ec, plant, signal)
+            for trigger in signal.triggerCombination:
+                triggerEnemy, minClusterSize = trigger
+                if triggerEnemy == ec.enemy:
+                    self.symCommunication(ec, plant, signal)
+                    self.airCommunication(ec, plant, signal)
 
 
     def processToxinEffects(self, ec, plant):
@@ -653,6 +656,7 @@ class Grid():
 
 
     def airCommunication(self, ec, plant, signal):
+        #TODO: Wenn mehrere Feinde existieren, dann wird Radius doppelt erhöht in einem Schritt
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
@@ -660,7 +664,7 @@ class Grid():
                 print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
                 self.radiusFields = self.getFieldsInAirRadius(plant, radius)
 
-                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name}: {plant.getSignalRadiusCounter(ec, signal) + 1}/{signal.spreadSpeed}')
+                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalRadiusCounter(ec, signal) + 1}/{signal.spreadSpeed}')
                 if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1:
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
@@ -683,7 +687,7 @@ class Grid():
 
         return radiusFields
     
-    
+
     def processSignalRadius(self, ec, plant, signal):
         # Wenn Nachwirkzeit noch nicht abgelaufen, erweitere Signalradius
         if ec.getAfterEffectTime(plant, signal) == 0 and ec.position != plant.position:

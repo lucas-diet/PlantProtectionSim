@@ -1,8 +1,6 @@
 
-###  bequemlichkeit  ###
-import os            ###
-os.system('clear')   ###
-########################
+import os
+os.system('clear')
 
 from models.plant import Plant
 from models.enemy import Enemy
@@ -85,14 +83,14 @@ sig1 = Signal(substance=s1,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
-              emit=[p2],
+              emit=[p1, p2],
               receive=[p3],
-              triggerCombination=[[e1, 2]],
-              prodTime=3, 
+              triggerCombination=[[e2, 2]],
+              prodTime=2, 
               spreadType='air',
               sendingSpeed=1,
               energyCosts=1,
-              afterEffectTime=1,
+              afterEffectTime=3,
               spreadSpeed=2)
 
 tox1 = Toxin(substance=s3, 
@@ -106,7 +104,7 @@ tox1 = Toxin(substance=s3,
 tox2 = Toxin(substance=s4, 
              plantTransmitter=[p1, p2],
              energyCosts=1,
-             triggerCombination=[[sig2, e1, 2]],   
+             triggerCombination=[[sig2, e2, 2]],   
              prodTime=4,
              deadly=False,
              eliminationStrength=1)
@@ -116,7 +114,7 @@ grid.addPlant(p2)
 grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-#grid.addEnemies(ec2)
+grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)
@@ -133,7 +131,7 @@ sc2 = SymbioticConnection(p3, p2)
 #grid.getAllGridConnections(p3, sc1)
 
 
-ac = AirConnection(p1)
+#ac = AirConnection(p1)
 #p2.airSpreadSignal(ec1, sig1)
 
 
