@@ -1,8 +1,9 @@
 
+
 import numpy as np
 
 from models.plant import Plant
-from models.enemyCluster import Enemy, EnemyCluster
+from models.enemyCluster import EnemyCluster
 from models.symCon import SymbioticConnection
 
 class Grid():
@@ -446,7 +447,7 @@ class Grid():
             for trigger in signal.triggerCombination:
                 triggerEnemy, _ = trigger
                 if plant in signal.emit and ec.enemy == triggerEnemy and ec.position == plant.position:
-                    print('Sig: ', plant.plantType.name, ec.enemy.name, signal.name, triggerEnemy.name)
+                    print('Sig: ', plant.name, ec.enemy.name, signal.name, triggerEnemy.name)
                     # Alarmprozess
                     self.processSignalAlarm(ec, dist, plant, signal, trigger)
                     # Produktionsprozess
@@ -470,7 +471,7 @@ class Grid():
         if plant.isSignalAlarmed(signal) == False and plant.isSignalPresent(signal) == False and dist < 1:
             plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
             signal.signalCosts(plant)  # Reduziere Signal-Kosten
-            print(f'[DEBUG-Signal-{signal.name}]: {plant.plantType.name} ist alamiert durch {ec.enemy.name}')
+            print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
 
 
     def processSignalProduction(self, ec, plant, signal):
@@ -487,7 +488,7 @@ class Grid():
                 plant.makeSignal(signal)
                 signal.activateSignal()
                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
-                print(f'[DEBUG]: {plant.plantType.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+                print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
 
     
     def handleAfterEffectTime(self, ec, plant, signal):
@@ -506,13 +507,13 @@ class Grid():
             triggerEnemy, _ = trigger
             if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
-                print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.plantType.name} {ec.enemy.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
+                print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} {ec.enemy.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
 
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
                 plant.setSignalPresence(signal, False)
-                print(f'[DEBUG-{signal.name}]: Nachwirkzeit abgelaufen. Signal entfernen für {plant.plantType.name}')
+                print(f'[DEBUG-{signal.name}]: Nachwirkzeit abgelaufen. Signal entfernen für {plant.name}')
 
                 # Zusätzliche Aktionen basierend auf dem Signaltyp
                 if signal.spreadType == 'symbiotic':
@@ -563,7 +564,7 @@ class Grid():
                 # Wenn der Produktionszähler groß genug ist, produziere das Gift
                 plant.makeToxin(toxin)
                 toxin.toxinCosts(plant)  # Reduziere Gift-Kosten
-                print(f'[DEBUG]: {plant.plantType.name} ist jetzt giftig durch {ec.enemy.name}')
+                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
 
 
     def processSignalEffects(self, ec, plant):
@@ -601,8 +602,6 @@ class Grid():
         """
         Verarbeitet die Effekte nicht-tödlicher Toxine, einschließlich Feind-Verscheuchen.
         """
-        # TODO: Blockierte Pflanzen muss für Fressfeinde noch beachtet werden!
-
         # Füge die Pflanze zu den letzten Besuchen des Feindes hinzu
         ec.insertLastVisits(plant, signal)
 
@@ -613,7 +612,7 @@ class Grid():
         if newPath and newPath != ec.currentPath:
             ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
             ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
-            print(f'[DEBUG]: {ec.enemy.name} wird von {plant.plantType.name} verscheucht')
+            print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht')
 
 
     def processDeadlyToxin(self, toxin, ec, plant, signal):
@@ -647,7 +646,7 @@ class Grid():
                 sPos, rPos = plantsPos
 
                 if sPlant == plant and sPos == ec.position and sPlant.isSignalPresent(signal):
-                    print(f'[DEBUG]: {sPlant.plantType.name}{sPlant.position} ist verbunden mit {rPlant.plantType.name}{rPlant.position}')
+                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
 
                     self.symInteraction(sPlant, rPlant, signal, ec)
 
@@ -655,10 +654,10 @@ class Grid():
     def symInteraction(self, sPlant, rPlant, signal, ec):
         if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed and rPlant in signal.receive:
             sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-            print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.plantType.name}{sPlant.position} -> {rPlant.plantType.name}{rPlant.position}: {rPlant.getSignalSendCounter(ec, signal, rPlant) + 1}/{signal.sendingSpeed}')
+            print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {rPlant.getSignalSendCounter(ec, signal, rPlant) + 1}/{signal.sendingSpeed}')
         else:
             sPlant.sendSignal(rPlant, signal)
-            print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.plantType.name}{sPlant.position} zu {rPlant.plantType.name}{rPlant.position}')
+            print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
 
 
     def airCommunication(self, ec, plant, signal):
@@ -669,7 +668,7 @@ class Grid():
                 print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
                 self.radiusFields = self.getFieldsInAirRadius(plant, radius)
 
-                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.plantType.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.spreadSpeed}')
+                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.spreadSpeed}')
                 if plant.getSignalAirSpreadCounter(ec, signal) < signal.spreadSpeed - 1:
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
@@ -708,8 +707,8 @@ class Grid():
                     sPlant.incrementSignalSendCounter(ec, signal, rPlant)
                 else:
                     sPlant.sendSignal(rPlant, signal)
-                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.plantType.name}{sPlant.position} zu {rPlant.plantType.name}{rPlant.position}')
-                print(sPlant.plantType.name, sPos, rPlant.plantType.name, rPos)
+                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+                print(sPlant.name, sPos, rPlant.name, rPos)
 
 
 

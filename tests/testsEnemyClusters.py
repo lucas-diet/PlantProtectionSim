@@ -1,4 +1,5 @@
 
+
 import os  
 os.system('clear')
 
@@ -10,7 +11,7 @@ from collections import Counter
 
 from customTestResults import CustomTestRunner
 from models.grid import Grid
-from models.plant import PlantType, Plant
+from models.plant import Plant
 from models.enemyCluster import Enemy, EnemyCluster
 
 # === Konstanten ===
@@ -31,22 +32,17 @@ class TestsCluster(unittest.TestCase):
         self.enemy2 = Enemy(name='e2', symbol='E2')
         self.enemy3 = Enemy(name='e3', symbol='E3')
 
-        self.pt1 = PlantType(name='e1', color=PLANT_COLORS)
-        self.pt2 = PlantType(name='e2', color=PLANT_COLORS)
-        self.pt3 = PlantType(name='e3', color=PLANT_COLORS)
-        self.pt4 = PlantType(name='e4', color=PLANT_COLORS)
-
     # ---- Tests ----
     def test_enemy_moves_to_closest_plant(self):
-        p1 = Plant(plantType=self.pt1, initEnergy=300, growthRateEnegry=1, minEnegrgy=50,
+        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50,
               reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2,
-              position=(3, 1), grid=self.grid)
-        p2 = Plant(plantType=self.pt2, initEnergy=100, growthRateEnegry=2, minEnegrgy=50,
+              position=(3, 1), grid=self.grid, color=PLANT_COLORS)
+        p2 = Plant(name='p2', initEnergy=100, growthRateEnegry=2, minEnegrgy=50,
               reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2,
-              position=(3, 4), grid=self.grid)
-        p3 = Plant(plantType=self.pt3, initEnergy=100, growthRateEnegry=1, minEnegrgy=50,
+              position=(3, 4), grid=self.grid, color=PLANT_COLORS)
+        p3 = Plant(name='p3', initEnergy=100, growthRateEnegry=1, minEnegrgy=50,
               reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2,
-              position=(5, 0), grid=self.grid)
+              position=(5, 0), grid=self.grid, color=PLANT_COLORS)
 
         ec1 = EnemyCluster(enemy=self.enemy1, num=2, speed=1, position=(2, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
         ec2 = EnemyCluster(enemy=self.enemy2, num=2, speed=1, position=(2, 0), grid=self.grid, eatingSpeed=10, eatVictory=10)
@@ -77,10 +73,10 @@ class TestsCluster(unittest.TestCase):
         ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(2, 2), grid=self.grid, eatingSpeed=5, eatVictory=10)
 
         # Definiere Pflanzen in gleicher Entfernung
-        p1 = Plant(plantType=self.pt1, initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 0), grid=self.grid)
-        p2 = Plant(plantType=self.pt2, initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 4), grid=self.grid)
-        p3 = Plant(plantType=self.pt3, initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(4, 0), grid=self.grid)
-        p4 = Plant(plantType=self.pt4, initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(4, 4), grid=self.grid)
+        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 0), grid=self.grid, color=PLANT_COLORS)
+        p2 = Plant(name='p2', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 4), grid=self.grid, color=PLANT_COLORS)
+        p3 = Plant(name='p3', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(4, 0), grid=self.grid, color=PLANT_COLORS)
+        p4 = Plant(name='p4', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(4, 4), grid=self.grid, color=PLANT_COLORS)
 
         plants = [p1, p2, p3, p4]
 
@@ -128,7 +124,7 @@ class TestsCluster(unittest.TestCase):
 
     def test_chooseRandomPlant_one_plant(self):
         # Testen, wenn es genau eine Pflanze gibt
-        p1 = Plant(plantType=self.pt1, initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(3, 3), grid=self.grid)
+        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(3, 3), grid=self.grid, color=PLANT_COLORS)
         self.grid.addPlant(p1)
 
         ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(0, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
@@ -157,9 +153,9 @@ class TestsCluster(unittest.TestCase):
 
     def test_enemy_eats_plant(self):
         # Prüft, ob Feinde Pflanzen fressen und die Energie korrekt reduziert wird.
-        plant = Plant(plantType=self.pt1, initEnergy=50, growthRateEnegry=1, minEnegrgy=10,
+        plant = Plant(name='p1', initEnergy=50, growthRateEnegry=1, minEnegrgy=10,
                       reproductionIntervall=0, offspingEnergy=20, minDist=1, maxDist=2,
-                      position=(2, 2), grid=self.grid)
+                      position=(2, 2), grid=self.grid, color=PLANT_COLORS)
         ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(2, 2), grid=self.grid, eatingSpeed=10, eatVictory=10)
 
         # Hinzufügen zum Grid

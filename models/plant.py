@@ -1,28 +1,12 @@
 
+
 import random
 import numpy as np
 
-class PlantType():
-
-    def __init__(self, name, color):
-        self.name = name
-        self.color = color[int(self.name[1])-1]
-
-    
-    def getPlantName(self):
-        return self.name
-    
-    
-    def getColor(self):
-        print(self.color)
-        return self.color
-
-
-
 class Plant():
 
-    def __init__(self, plantType, initEnergy, growthRateEnegry, minEnegrgy, reproductionIntervall, offspingEnergy, minDist, maxDist, position, grid):
-        self.plantType = plantType
+    def __init__(self, name, initEnergy, growthRateEnegry, minEnegrgy, reproductionIntervall, offspingEnergy, minDist, maxDist, position, grid, color):
+        self.name = name
         self.initEnergy = initEnergy
         self.currEnergy = initEnergy
         self.growthRateEnegry = growthRateEnegry
@@ -33,7 +17,7 @@ class Plant():
         self.maxDist = maxDist
         self.position = position
         self.grid = grid
-        
+        self.color = color[int(self.name[1])-1]
         
         self.age = 0
         self.gridConnections = {}
@@ -55,7 +39,6 @@ class Plant():
 
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
         self.airSpreadCounters = {}
-
 
     def grow(self):
         self.currEnergy += self.initEnergy * (self.growthRateEnegry / 100)
@@ -129,6 +112,11 @@ class Plant():
                 pass
             
         return None
+
+
+    def getColor(self):
+        print(self.color)
+        return self.color
 
     
     def resetSignalProdCounter(self, ec, signal):
@@ -246,7 +234,7 @@ class Plant():
 
     
     def airSpreadSignal(self, signal):
-        print(f'[DEBUG]: {self.plantType.name} verbreitet {signal.name} via Luft')
+        print(f'[DEBUG]: {self.name} verbreitet {signal.name} via Luft')
         #print(signal.radius)
         return signal.radius
     
