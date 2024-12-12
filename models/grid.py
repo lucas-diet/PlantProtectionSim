@@ -667,8 +667,8 @@ class Grid():
                 print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
                 self.radiusFields = self.getFieldsInAirRadius(plant, radius)
 
-                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalRadiusCounter(ec, signal) + 1}/{signal.spreadSpeed}')
-                if plant.getSignalRadiusCounter(ec, signal) < signal.spreadSpeed - 1:
+                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.spreadSpeed}')
+                if plant.getSignalAirSpreadCounter(ec, signal) < signal.spreadSpeed - 1:
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
                 else:
@@ -693,7 +693,7 @@ class Grid():
 
     def processSignalRadiusSize(self, ec, plant, signal):
         # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere Radius
-        plant.resetSignalRadiusCounter(ec, signal)
+        plant.resetSignalAirSpreadCounter(ec, signal)
         signal.radius += 1
                 
     

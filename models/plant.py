@@ -37,7 +37,7 @@ class Plant():
         self.isToxically = {}
 
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
-        self.airSignalCounter = {}
+        self.airSpreadCounters = {}
 
     def grow(self):
         self.currEnergy += self.initEnergy * (self.growthRateEnegry / 100)
@@ -240,18 +240,18 @@ class Plant():
 
     def incrementSignalRadius(self, ec, signal):
         key = (ec, signal)
-        if key in self.airSignalCounter:
-            self.airSignalCounter[ec, signal] += 1
+        if key in self.airSpreadCounters:
+            self.airSpreadCounters[ec, signal] += 1
         else:
-            self.airSignalCounter[ec, signal] = 1
+            self.airSpreadCounters[ec, signal] = 1
 
     
-    def getSignalRadiusCounter(self, ec, signal):
+    def getSignalAirSpreadCounter(self, ec, signal):
         key = (ec, signal)
-        return self.airSignalCounter.get(key, 0)
+        return self.airSpreadCounters.get(key, 0)
     
 
-    def resetSignalRadiusCounter(self, ec, signal):
+    def resetSignalAirSpreadCounter(self, ec, signal):
         key = (ec, signal)
-        if key in self.airSignalCounter:
-            self.airSignalCounter[key] = 0
+        if key in self.airSpreadCounters:
+            self.airSpreadCounters[key] = 0
