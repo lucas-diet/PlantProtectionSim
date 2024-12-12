@@ -647,7 +647,7 @@ class Grid():
                 sPos, rPos = plantsPos
 
                 if sPlant == plant and sPos == ec.position and sPlant.isSignalPresent(signal):
-                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
+                    print(f'[DEBUG]: {sPlant.plantType.name}{sPlant.position} ist verbunden mit {rPlant.plantType.name}{rPlant.position}')
 
                     self.symInteraction(sPlant, rPlant, signal, ec)
 
@@ -655,10 +655,10 @@ class Grid():
     def symInteraction(self, sPlant, rPlant, signal, ec):
         if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed and rPlant in signal.receive:
             sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-            print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {rPlant.getSignalSendCounter(ec, signal, rPlant) + 1}/{signal.sendingSpeed}')
+            print(f'[DEBUG]: Fortschritt beim Senden für {sPlant.plantType.name}{sPlant.position} -> {rPlant.plantType.name}{rPlant.position}: {rPlant.getSignalSendCounter(ec, signal, rPlant) + 1}/{signal.sendingSpeed}')
         else:
             sPlant.sendSignal(rPlant, signal)
-            print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+            print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.plantType.name}{sPlant.position} zu {rPlant.plantType.name}{rPlant.position}')
 
 
     def airCommunication(self, ec, plant, signal):
@@ -708,8 +708,8 @@ class Grid():
                     sPlant.incrementSignalSendCounter(ec, signal, rPlant)
                 else:
                     sPlant.sendSignal(rPlant, signal)
-                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
-                print(sPlant.name, sPos, rPlant.name, rPos)
+                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.plantType.name}{sPlant.position} zu {rPlant.plantType.name}{rPlant.position}')
+                print(sPlant.plantType.name, sPos, rPlant.plantType.name, rPos)
 
 
 

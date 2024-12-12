@@ -33,7 +33,7 @@ p1 = Plant(plantType=pt1,
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
-           position=(4, 3), 
+           position=(0, 3), 
            grid=grid)
     
 p2 = Plant(plantType=pt2, 
@@ -44,7 +44,7 @@ p2 = Plant(plantType=pt2,
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(0, 3), 
+           position=(4, 3), 
            grid=grid)
 
 p3 = Plant(plantType=pt3, 
@@ -55,7 +55,7 @@ p3 = Plant(plantType=pt3,
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(2, 5), 
+           position=(4, 4), 
            grid=grid)
 
 e1 = Enemy(name='e1', symbol='E1')
@@ -111,7 +111,7 @@ tox2 = Toxin(substance=s4,
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-#grid.addPlant(p3)
+grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
