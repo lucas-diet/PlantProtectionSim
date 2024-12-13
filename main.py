@@ -30,7 +30,7 @@ p1 = Plant(name='p1',
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
-           position=(3, 1), 
+           position=(0, 1), 
            grid=grid,
            color=plantColor)
     
@@ -42,7 +42,7 @@ p2 = Plant(name='p2',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(3, 4), 
+           position=(4, 1), 
            grid=grid,
            color=plantColor)
 
@@ -62,8 +62,8 @@ e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
-ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=5, eatVictory=10)
-ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(2,0), grid=grid, eatingSpeed=10, eatVictory=10)
+ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,0), grid=grid, eatingSpeed=5, eatVictory=10)
+ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(4,0), grid=grid, eatingSpeed=10, eatVictory=10)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
 s1 = Substance(name='s1', type='signal')
@@ -75,7 +75,7 @@ sig1 = Signal(substance=s1,
               emit=[p1],
               receive=[p3],
               triggerCombination=[[e1, 2]],
-              prodTime=2,
+              prodTime=1,
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
@@ -83,10 +83,10 @@ sig1 = Signal(substance=s1,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
-              emit=[p1, p2],
+              emit=[p2],
               receive=[p3],
               triggerCombination=[[e2, 2]],
-              prodTime=2, 
+              prodTime=1, 
               spreadType='air',
               sendingSpeed=1,
               energyCosts=1,
@@ -94,18 +94,18 @@ sig2 = Signal(substance=s2,
               spreadSpeed=2)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1, p2],
+             plantTransmitter=[p1, p2, p3],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
-             prodTime=3,
+             prodTime=2,
              deadly=False,
              eliminationStrength=1)
 
-tox2 = Toxin(substance=s4, 
-             plantTransmitter=[p1, p2],
+tox2 = Toxin(substance=s3, 
+             plantTransmitter=[p1, p2, p3],
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
-             prodTime=4,
+             prodTime=2,
              deadly=False,
              eliminationStrength=1)
 

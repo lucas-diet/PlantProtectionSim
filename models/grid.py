@@ -1,5 +1,4 @@
 
-
 import numpy as np
 
 from models.plant import Plant
@@ -23,23 +22,13 @@ class Grid():
 
     def getGrid(self):
         return self.grid
-    
-
-    def canAddItem(self, min, max, list):
-        if len(list) >= min or len(list) <= max:
-            return True
-        else:
-            False
 
     
     def addPlant(self, plant):
         x,y = plant.position
-        if self.canAddItem(1, 16, self.plants) == True:
-            self.plants.append(plant)
-            _, ecs = self.grid[x][y]
-            self.grid[x][y] = (plant, ecs)
-        else:
-            print('[INFO]: maximale anzahl an pflanzen überschritten/ unterschritten')
+        self.plants.append(plant)
+        _, ecs = self.grid[x][y]
+        self.grid[x][y] = (plant, ecs)
 
     
     def removePlant(self, plant):
@@ -64,13 +53,10 @@ class Grid():
 
     def addEnemies(self, ec):
         x,y = ec.position
-        if self.canAddItem(0, 15, self.enemies):
-            self.enemies.append(ec)
-            plant, ecs = self.grid[x][y]  # Hole das bestehende Tupel
-            ecs.append(ec)  # Füge den Feind zur Liste der Feindgruppen hinzu
-            self.grid[x][y] = (plant, ecs)  # Speichere das aktualisierte Tupel zurück
-        else:
-            print('[INFO]: maximale anzahl an fressfeinden überschritten/ unterschritten')
+        self.enemies.append(ec)
+        plant, ecs = self.grid[x][y]  # Hole das bestehende Tupel
+        ecs.append(ec)  # Füge den Feind zur Liste der Feindgruppen hinzu
+        self.grid[x][y] = (plant, ecs)  # Speichere das aktualisierte Tupel
 
 
     def removeEnemies(self, ec):
@@ -91,17 +77,13 @@ class Grid():
         for _, row in enumerate(self.grid):
             for _, (plant, ec) in enumerate(row):
                 # Überprüfen, ob die Substanz ein Signal ist und füge es zu den Signalen hinzu
-                substances = self.signals + self.toxins
-                if self.canAddItem(0 , 15, substances) == True:
-                    if substance.type == 'signal':
-                        if substance not in self.signals:
-                            self.signals.append(substance)
-                    # Überprüfen, ob die Substanz ein Toxin ist und füge sie zu den Toxinen hinzu
-                    elif substance.type == 'toxin':
-                        if substance not in self.toxins:
-                            self.toxins.append(substance)
-                else:
-                    print('maximale anzhal an substanzen überschritten/ unterschritten')     
+                if substance.type == 'signal':
+                    if substance not in self.signals:
+                        self.signals.append(substance)
+                # Überprüfen, ob die Substanz ein Toxin ist und füge sie zu den Toxinen hinzu
+                elif substance.type == 'toxin':
+                    if substance not in self.toxins:
+                        self.toxins.append(substance)
 
 
     def removeSubstance(self, substance):
@@ -327,9 +309,9 @@ class Grid():
 
         # Durchlaufe jede Zelle im Gitter
         for i, row in enumerate(self.grid):
-            for j, (_, ec) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
-                if ec:  # Wenn die Liste der Feind-Cluster nicht leer ist
-                    for ec in ec:
+            for j, (plant, ecs) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
+                if ecs:  # Wenn die Liste der Feind-Cluster nicht leer ist
+                    for ec in ecs:
                         enemies_to_move.append((ec, (i, j)))
 
         # Bewege alle gesammelten Feinde
@@ -445,9 +427,8 @@ class Grid():
 
         for signal in self.signals:
             for trigger in signal.triggerCombination:
-                triggerEnemy, _ = trigger
+                triggerEnemy, minClusterSize = trigger
                 if plant in signal.emit and ec.enemy == triggerEnemy and ec.position == plant.position:
-                    print('Sig: ', plant.name, ec.enemy.name, signal.name, triggerEnemy.name)
                     # Alarmprozess
                     self.processSignalAlarm(ec, dist, plant, signal, trigger)
                     # Produktionsprozess
@@ -464,7 +445,7 @@ class Grid():
         """
         Verarbeitet den Alarmzustand einer Pflanze.
         """
-        _, minClusterSize = trigger
+        triggerEnemy, minClusterSize = trigger
         if ec.num < minClusterSize and ec.num > 0:
             print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {signal.triggerCombination[0][1]}')
             return
@@ -504,7 +485,7 @@ class Grid():
 
         # Reduziere die Nachwirkzeit, falls sie größer als 0 ist
         for trigger in signal.triggerCombination:
-            triggerEnemy, _ = trigger
+            triggerEnemy, minClusterSize = trigger
             if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
                 print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} {ec.enemy.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
@@ -565,7 +546,7 @@ class Grid():
                 plant.makeToxin(toxin)
                 toxin.toxinCosts(plant)  # Reduziere Gift-Kosten
                 print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
-
+                
 
     def processSignalEffects(self, ec, plant):
         for signal in self.signals:
@@ -580,6 +561,7 @@ class Grid():
         """
         Verarbeitet die Effekte von Toxinen auf einen Feind und dessen Interaktion mit einer Pflanze.
         """
+
         for toxin in self.toxins:
             for signal in self.signals:
                 for trigger in toxin.triggerCombination:
@@ -709,7 +691,6 @@ class Grid():
                     sPlant.sendSignal(rPlant, signal)
                     print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
                 print(sPlant.name, sPos, rPlant.name, rPos)
-
 
 
 
