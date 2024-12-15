@@ -106,7 +106,7 @@ tox2 = Toxin(substance=s4,
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
              prodTime=3,
-             deadly=False,
+             deadly=True,
              eliminationStrength=1)
 
 grid.addPlant(p1)

@@ -591,7 +591,7 @@ class Grid():
                     triggerSignal, triggerEnemy, minClusterSize = trigger
 
                     # Verarbeite nicht-tödliche Toxine
-                    if toxin.deadly == False and plant.isToxinPresent(toxin) == True and ec.enemy == triggerEnemy and signal == triggerSignal:
+                    if toxin.deadly == False and plant.isToxinPresent(toxin) == True and ec.enemy == triggerEnemy and signal == triggerSignal and plant in toxin.plantTransmitter:
                         self.processNonDeadlyToxin(toxin, ec, plant, signal)
                         print(f'[DEBUG-Toxin-{toxin.name}]: Nicht-tödliches Toxin verarbeitet für {ec.enemy.name}')
 
@@ -616,9 +616,12 @@ class Grid():
         """
         Verarbeitet die Effekte tödlicher Toxine, einschließlich Feind-Vergiftung.
         """
-        # Wende den Effekt des tödlichen Toxins auf den Feind an
-        toxin.empoisonEnemies(ec)
-        print(f'[DEBUG]: {ec.enemy.name} wurde durch das tödliche Toxin {toxin.name} vergiftet')
+        # Wende den Effekt des tödlichen Toxins auf den Feind an wenn er in dem Trigger vorhanden ist.
+        for trigger in toxin.triggerCombination:
+            triggerSignal, triggerEnemy, minClusterSize = trigger
+            if triggerEnemy == ec.enemy:
+                toxin.empoisonEnemies(ec)
+                print(f'[DEBUG]: {ec.enemy.name} wurde durch das tödliche Toxin {toxin.name} vergiftet')
             
 
     def resetToxically(self, ec, toxin, plant):
