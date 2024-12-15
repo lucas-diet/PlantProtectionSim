@@ -18,6 +18,7 @@ class Grid():
         self.grid = [[(None, []) for _ in range(width)] for _ in range(height)]
         self.totalEnergy = 0
         self.radiusFields = []
+        self.displaceComps = []
 
 
     def getGrid(self):
@@ -296,7 +297,7 @@ class Grid():
                 return (x, y)
         return None
 
-
+    
     def collectAndManageEnemies(self):
         """Sammelt alle Feinde im Gitter und bewegt sie.
 
@@ -561,7 +562,7 @@ class Grid():
         """
         Verarbeitet die Effekte von Toxinen auf einen Feind und dessen Interaktion mit einer Pflanze.
         """
-
+        
         for toxin in self.toxins:
             for signal in self.signals:
                 for trigger in toxin.triggerCombination:
@@ -588,7 +589,7 @@ class Grid():
         ec.insertLastVisits(plant, signal)
 
         # Versuche, den Feind zu verscheuchen
-        newPath, targetPlant = toxin.displaceEnemies(ec, plant, self.plants)
+        newPath, targetPlant = toxin.displaceEnemies(ec, plant)
 
         # Wenn ein neuer Pfad gefunden wurde und er sich vom aktuellen unterscheidet
         if newPath and newPath != ec.currentPath:

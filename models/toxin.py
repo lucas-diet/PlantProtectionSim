@@ -15,18 +15,20 @@ class Toxin(Substance):
    
 
     def toxinCosts(self, plant):
-        plant.currEnergy -= self.energyCosts               # Produktion kostet energie 
+        plant.currEnergy -= self.energyCosts               # Produktion kostet energie
 
 
-    def displaceEnemies(self, ec, plant, allPlants):
+    def displaceEnemies(self, ec, plant):
         np = []
-        tp = 0
+        tp = None
+        
         if len(ec.currentPath) == 0:
-            np = ec.newPath(plant, self, allPlants)
+            np = ec.newPath(plant, self)
             if len(np) > 0:
                 tp = np[-1]
             else:
-                tp = 0
+                pass
+                tp = None
     
         return np, tp
     
@@ -41,4 +43,5 @@ class Toxin(Substance):
 
             if ec.num <= 0:
                 ec.num = 0
+                ec.lastToxin = None
                 ec.grid.removeEnemies(ec)

@@ -262,13 +262,14 @@ class EnemyCluster():
             self.newBorns = 0
 
 
-    def newPath(self, plant, toxin, allPlants):
+    def newPath(self, plant, toxin):
         if plant.isToxinPresent(toxin) == True:
-            alternativePlants = []
             shortestDistance = float('inf')
 
+            alternativePlants = self.filterUnblockedPlants(plant, toxin)
+
             # Suche nach Pflanzen mit der kürzesten Entfernung
-            for p in allPlants:
+            for p in alternativePlants:
                 dist = self.grid.getDistance(self.position, p.position)
 
                 if dist < shortestDistance and self.position != p.position:
@@ -290,3 +291,18 @@ class EnemyCluster():
                 return []
         else:
             return None
+        
+    
+    def filterUnblockedPlants(self, plant, toxin):
+       # Filtere die Pflanzen, die nicht durch das aktuelle Toxin blockiert sind
+        unblockedPlants = [
+            p for p in self.grid.plants 
+            if not p.isToxinPresent(toxin)  # Prüfen, ob die Pflanze durch das Toxin blockiert ist
+            and p != plant  # Die Pflanze darf nicht die aktuelle sein
+            and all(tox.name != toxin.name for tox in p.isToxically.keys())  # Toxin darf nicht von den Blockierenden Toxinen der Pflanze sein
+        ]
+
+        return unblockedPlants
+
+
+

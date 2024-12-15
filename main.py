@@ -30,7 +30,7 @@ p1 = Plant(name='p1',
            offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
-           position=(0, 1), 
+           position=(0, 2), 
            grid=grid,
            color=plantColor)
     
@@ -42,7 +42,7 @@ p2 = Plant(name='p2',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(4, 1), 
+           position=(4, 2), 
            grid=grid,
            color=plantColor)
 
@@ -54,7 +54,7 @@ p3 = Plant(name='p3',
            offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
-           position=(2, 4), 
+           position=(2, 5), 
            grid=grid,
            color=plantColor)
 
@@ -62,8 +62,8 @@ e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
-ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,0), grid=grid, eatingSpeed=5, eatVictory=10)
-ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(4,0), grid=grid, eatingSpeed=10, eatVictory=10)
+ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,0), grid=grid, eatingSpeed=20, eatVictory=20)
+ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(4,0), grid=grid, eatingSpeed=20, eatVictory=20)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
 s1 = Substance(name='s1', type='signal')
@@ -94,15 +94,15 @@ sig2 = Signal(substance=s2,
               spreadSpeed=2)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1, p2, p3],
+             plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
              prodTime=2,
              deadly=False,
              eliminationStrength=1)
 
-tox2 = Toxin(substance=s3, 
-             plantTransmitter=[p1, p2, p3],
+tox2 = Toxin(substance=s3,
+             plantTransmitter=[p2],
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
              prodTime=2,
