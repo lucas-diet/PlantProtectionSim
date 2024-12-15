@@ -39,6 +39,7 @@ class EnemyCluster():
         self.intoxicated = False
         #self.lastVisitedPlant = None
         self.lastVisitedPlants = {}
+        self.unblockedPlants = []
 
     
     def insertLastVisits(self, plant, signal):
@@ -279,30 +280,37 @@ class EnemyCluster():
                 elif dist == shortestDistance and self.position != p.position:
                     # Pflanze hat die gleiche kürzeste Distanz, also füge sie zur Liste hinzu
                     alternativePlants.append(p)
-
             if alternativePlants:
                 # Wähle zufällig eine der Pflanzen mit der kürzesten Distanz
                 alternativePlant = random.choice(alternativePlants)
                 # Berechne den kürzesten Pfad zur gewählten Pflanze
                 np = self.findShortestPath(self.position, alternativePlant.position)
+                self.unblockedPlants = []
                 return np
             else:
-                print('[DEBUG]: Keine alternative Pflanze gefunden!')
+                print(f'[DEBUG]: {self.enemy.name} Keine alternative Pflanze gefunden!')
                 return []
         else:
             return None
         
+        
     
     def filterUnblockedPlants(self, plant, toxin):
-       # Filtere die Pflanzen, die nicht durch das aktuelle Toxin blockiert sind
-        unblockedPlants = [
-            p for p in self.grid.plants 
+        """
+        Filtere die Pflanzen, die nicht durch das aktuelle Toxin blockiert sind.
+        """
+        self.unblockedPlants = [
+            p for p in self.grid.plants
             if not p.isToxinPresent(toxin)  # Prüfen, ob die Pflanze durch das Toxin blockiert ist
             and p != plant  # Die Pflanze darf nicht die aktuelle sein
             and all(tox.name != toxin.name for tox in p.isToxically.keys())  # Toxin darf nicht von den Blockierenden Toxinen der Pflanze sein
         ]
 
-        return unblockedPlants
+        # Wenn keine unblockierten Pflanzen gefunden wurden, alle Pflanzen zurückgeben
+        if not self.unblockedPlants:
+            self.unblockedPlants = self.grid.plants
+
+        return self.unblockedPlants
 
 
 

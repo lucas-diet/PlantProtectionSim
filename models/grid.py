@@ -333,6 +333,8 @@ class Grid():
             self.updateEnemyClusterPos(ec, oldPos, newPos)
             self.checkNearbyPlants(ec)
             self.reduceClusterSize(ec)
+        
+        self.processNewPathAfterDisplace()
 
 
     def canMove(self, ec):
@@ -415,6 +417,27 @@ class Grid():
             if ec.intoxicated == True:
                 toxin.killEnemies(ec)
 
+    
+    def processNewPathAfterDisplace(self):
+        """
+            Verarbeitet den neuen Weg nachdem ein Feindcluster durch ein nicht tötliches Gift vertieben wurde.
+        """
+        # Zustand: Vertreibung durch Gift
+        for toxin, ec, plant, signal in self.displaceComps:            
+            # Neuer Pfad durch Giftwirkung
+            newPath, targetPlant = toxin.displaceEnemies(ec, plant)
+            #print(f'{ec.enemy.name} neuer Pfad: {newPath}')
+
+            # Setze den neuen Pfad in `currentPath`
+            ec.currentPath = newPath
+            ec.targetPlant = targetPlant
+            while ec.currentPath:
+                step = ec.currentPath.pop(0)  # Hole den nächsten Schritt
+                newPos = self.processEnemyMovement(ec, ec.position, [step])
+                self.updateEnemyClusterPos(ec, ec.position, newPos)  # Aktualisiere Position im Grid
+        # Liste der Vertriebenen leeren
+        self.displaceComps = []
+        
 
     def eatAndReproduce(self, ec, plant):
         self.totalEnergy = self.getGridEnergy()
@@ -561,8 +584,7 @@ class Grid():
     def processToxinEffects(self, ec, plant):
         """
         Verarbeitet die Effekte von Toxinen auf einen Feind und dessen Interaktion mit einer Pflanze.
-        """
-        
+        """  
         for toxin in self.toxins:
             for signal in self.signals:
                 for trigger in toxin.triggerCombination:
@@ -583,19 +605,11 @@ class Grid():
 
     def processNonDeadlyToxin(self, toxin, ec, plant, signal):
         """
-        Verarbeitet die Effekte nicht-tödlicher Toxine, einschließlich Feind-Verscheuchen.
+        Speichert (leitet Verarbeitung ein) die Effekte nicht-tödlicher Toxine.
         """
         # Füge die Pflanze zu den letzten Besuchen des Feindes hinzu
         ec.insertLastVisits(plant, signal)
-
-        # Versuche, den Feind zu verscheuchen
-        newPath, targetPlant = toxin.displaceEnemies(ec, plant)
-
-        # Wenn ein neuer Pfad gefunden wurde und er sich vom aktuellen unterscheidet
-        if newPath and newPath != ec.currentPath:
-            ec.currentPath = newPath  # Setze den neuen Pfad des Feindes
-            ec.targetPlant = targetPlant  # Setze die Zielpflanze des Feindes
-            print(f'[DEBUG]: {ec.enemy.name} wird von {plant.name} verscheucht')
+        self.displaceComps.append((toxin, ec, plant, signal))
 
 
     def processDeadlyToxin(self, toxin, ec, plant, signal):
