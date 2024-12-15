@@ -7,8 +7,7 @@ from models.plant import Plant
 from models.enemyCluster import Enemy, EnemyCluster
 from models.grid import Grid
 
-from models.symCon import SymbioticConnection
-from models.airCon import AirConnection
+from models.communication import SymbioticConnection, AirConnection
 
 from models.substance import Substance
 from models.signal import Signal

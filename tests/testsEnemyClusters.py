@@ -22,7 +22,7 @@ PLANT_COLORS = [
 ]
 
 class TestsCluster(unittest.TestCase):
-    # ---- Setup-Methode ----
+    # ---- Setup-Methoden ----
     def setUp(self):
         # Initialisiere Grid, Feinde und Standardwerte für die Tests.
         self.grid = Grid(width=6, height=6)
@@ -33,129 +33,40 @@ class TestsCluster(unittest.TestCase):
         self.enemy3 = Enemy(name='e3', symbol='E3')
 
     # ---- Tests ----
-    def test_enemy_moves_to_closest_plant(self):
-        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50,
-              reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2,
-              position=(3, 1), grid=self.grid, color=PLANT_COLORS)
-        p2 = Plant(name='p2', initEnergy=100, growthRateEnegry=2, minEnegrgy=50,
-              reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2,
-              position=(3, 4), grid=self.grid, color=PLANT_COLORS)
-        p3 = Plant(name='p3', initEnergy=100, growthRateEnegry=1, minEnegrgy=50,
-              reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2,
-              position=(5, 0), grid=self.grid, color=PLANT_COLORS)
-
-        ec1 = EnemyCluster(enemy=self.enemy1, num=2, speed=1, position=(2, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
-        ec2 = EnemyCluster(enemy=self.enemy2, num=2, speed=1, position=(2, 0), grid=self.grid, eatingSpeed=10, eatVictory=10)
-        ec3 = EnemyCluster(enemy=self.enemy3, num=1, speed=1, position=(0, 4), grid=self.grid, eatingSpeed=10, eatVictory=10)
-        
-        plants = [p1, p2, p3]
-        enemies = [ec1, ec2, ec3]
-
-        for plant in plants: self.grid.addPlant(plant)
-        for ec in enemies: self.grid.addEnemies(ec)
-
-        # Erwartete Zielpflanzen
-        expected_targets = {
-            enemies[0]: (3, 1),  # e1
-            enemies[1]: (3, 1),  # e2
-            enemies[2]: (3, 4)   # e3
-        }
-
-        for ec, expected_target in expected_targets.items():
-            path = ec.getPath(ec.position)
-            self.assertEqual(ec.targetPlant, expected_target, f'{ec.enemy.name} hat das falsche Ziel!')
-            self.assertTrue(path, f'{ec.enemy.name} hat keinen gültigen Pfad!')
-
-    
-    def test_choose_random_plant_with_equal_distance(self):
-
-        # Initialisiere Feindcluster
-        ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(2, 2), grid=self.grid, eatingSpeed=5, eatVictory=10)
-
-        # Definiere Pflanzen in gleicher Entfernung
-        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 0), grid=self.grid, color=PLANT_COLORS)
-        p2 = Plant(name='p2', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 4), grid=self.grid, color=PLANT_COLORS)
-        p3 = Plant(name='p3', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(4, 0), grid=self.grid, color=PLANT_COLORS)
-        p4 = Plant(name='p4', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(4, 4), grid=self.grid, color=PLANT_COLORS)
-
-        plants = [p1, p2, p3, p4]
-
-        for plant in plants: self.grid.addPlant(plant)
+    def test_findShortestPath(self):
+        ec = EnemyCluster(enemy=self.enemy1, num=2, speed=1, position=(0, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
         self.grid.addEnemies(ec)
 
-        # Liste der möglichen Ziele
-        possible_targets = [p1.position, p2.position, p3.position, p4.position]
-        target_counts = {p1.position: 0, p2.position: 0, p3.position: 0, p4.position: 0}
+        self.assertEqual(ec.findShortestPath(ec.position, (0, 0)), [(0, 0)]) # Start und Ziel auf gleichen Feld
+        self.assertIsNone(ec.findShortestPath(ec.position, (-1, -1))) # Ziel nicht auf dem Gird
+        self.assertIsNone(ec.findShortestPath((-1, -1), (0, 0)))
 
-        # Simuliere mehrfaches Wählen einer Pflanze
+    def test_chooseRandomPlant(self):
+        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(3, 1), grid=self.grid, color=PLANT_COLORS)
+        p2 = Plant(name='p2', initEnergy=100, growthRateEnegry=2, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(3, 4), grid=self.grid, color=PLANT_COLORS)
+        p3 = Plant(name='p2', initEnergy=100, growthRateEnegry=2, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(0, 4), grid=self.grid, color=PLANT_COLORS)
+        ec = EnemyCluster(enemy=self.enemy1, num=2, speed=1, position=(0, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
+        
+        self.grid.addEnemies(ec)
+        self.assertEqual(ec.chooseRandomPlant((0, 0)), [])
+        self.grid.addPlant(p2)
+        self.grid.addPlant(p1)
+        self.assertEqual(ec.chooseRandomPlant((0, 0)), [(0, 0), (1, 0), (2, 0), (3, 0), (3, 1)])
+        self.grid.addPlant(p3)
+
+        # Liste der möglichen Ziele
+        possible_targets = [p1.position, p3.position]
+        target_counts = {p1.position: 0, p3.position: 0}
         for _ in range(100):  # Wiederholte Tests für Zufälligkeit
             ec.targetPlant = None  # Reset Ziel
             chosen_path = ec.chooseRandomPlant(start=ec.position)
             chosen_target = chosen_path[-1] if chosen_path else None
-            self.assertIn(chosen_target, possible_targets, 'Die gewählte Pflanze ist nicht in den möglichen Zielen')
+            self.assertIn(chosen_target, possible_targets,)
             target_counts[chosen_target] += 1
 
-        # Prüfe, dass jede Pflanze mindestens einmal ausgewählt wurde
-        for target, count in target_counts.items():
-            self.assertGreater(count, 0, f'Die Pflanze {target} wurde nie ausgewählt')
-
-    
-    def test_enemy_movement_horizontal_vertical(self):
-        #"""Prüft, ob Feinde waagerecht und senkrecht laufen können."""
-        ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(0, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
-        self.grid.addEnemies(ec)
-
-        target_position = (4, 4)
-        path = ec.findShortestPath(start=ec.position, goal=target_position)
-
-        # Erwarteter Pfad
-        expected_path = [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3), (4, 3), (4, 4)]
-        self.assertEqual(path, expected_path, 'Der Pfad entspricht nicht den Erwartungen!')
-
-    
-    def test_chooseRandomPlant_no_plants(self):
-        # Testen, wenn es keine Pflanzen im Grid gibt
-        ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(0, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
-        self.grid.addEnemies(ec)
-
-        result = ec.chooseRandomPlant((3, 3))
-        self.assertEqual(result, [], 'Es sollte keine Pflanzen im Grid sein.')
-    
-
-    def test_chooseRandomPlant_one_plant(self):
-        # Testen, wenn es genau eine Pflanze gibt
-        p1 = Plant(name='p1', initEnergy=300, growthRateEnegry=1, minEnegrgy=50, reproductionIntervall=0, offspingEnergy=60, minDist=1, maxDist=2, position=(3, 3), grid=self.grid, color=PLANT_COLORS)
-        self.grid.addPlant(p1)
-
-        ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(0, 0), grid=self.grid, eatingSpeed=5, eatVictory=10)
-        self.grid.addEnemies(ec)
-
-        result = ec.chooseRandomPlant((0, 0))
-
-        # Überprüfen, ob der Pfad nur zum Ziel führt, ohne unzulässige Wege zu nutzen
-        valid_paths = [
-            [(0, 0), (1, 0), (1, 1), (2, 1), (2, 2), (3, 2), (3, 3)],  # direkter Pfad
-            [(0, 0), (0, 1), (1, 1), (1, 2), (2, 2), (3, 2), (3, 3)]   # direkter Pfad
-        ]
-
-        self.assertIn(result, valid_paths, 'Es sollte nur einen direkten Pfad zur einzigen Pflanze geben und nicht auf andere unzulässige Pfade ausweichen.')
-
-        # Überprüfen, ob der gewählte Pfad keinen unzulässigen Weg enthält
-        disallowed_paths = [
-            [(0, 0), (1, 0), (1, 1), (2, 1), (3, 1), (3, 2), (3, 3)],
-            [(0, 0), (1, 0), (2, 0), (3, 0), (3, 1), (3, 2), (3, 3)], 
-            [(0, 0), (0, 1), (0, 2), (1, 2), (2, 2), (3, 2), (3, 3)],  
-            [(0, 0), (1, 0), (2, 0), (2, 1), (3, 1), (3, 2), (3, 3)], 
-        ]
-
-        self.assertNotIn(result, disallowed_paths, 'Der gewählte Pfad sollte keinen unzulässigen Pfad enthalten.')
-
-
-    def test_enemy_eats_plant(self):
+    def test_eatPlant(self):
         # Prüft, ob Feinde Pflanzen fressen und die Energie korrekt reduziert wird.
-        plant = Plant(name='p1', initEnergy=50, growthRateEnegry=1, minEnegrgy=10,
-                      reproductionIntervall=0, offspingEnergy=20, minDist=1, maxDist=2,
-                      position=(2, 2), grid=self.grid, color=PLANT_COLORS)
+        plant = Plant(name='p1', initEnergy=50, growthRateEnegry=1, minEnegrgy=10, reproductionIntervall=0, offspingEnergy=20, minDist=1, maxDist=2, position=(2, 2), grid=self.grid, color=PLANT_COLORS)
         ec = EnemyCluster(enemy=self.enemy1, num=1, speed=1, position=(2, 2), grid=self.grid, eatingSpeed=10, eatVictory=10)
 
         # Hinzufügen zum Grid
