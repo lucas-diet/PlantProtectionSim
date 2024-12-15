@@ -414,7 +414,7 @@ class Grid():
 
     def reduceClusterSize(self, ec):
         for toxin in self.toxins:
-            if ec.intoxicated == True:
+            if ec.intoxicated:
                 toxin.killEnemies(ec)
 
     
@@ -473,7 +473,7 @@ class Grid():
         if ec.num < minClusterSize and ec.num > 0:
             print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {signal.triggerCombination[0][1]}')
             return
-        if plant.isSignalAlarmed(signal) == False and plant.isSignalPresent(signal) == False and dist < 1:
+        if plant.isSignalAlarmed(signal) == False and not plant.isSignalPresent(signal) and dist < 1:
             plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
             signal.signalCosts(plant)  # Reduziere Signal-Kosten
             print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
@@ -483,7 +483,7 @@ class Grid():
         """
         Verarbeitet die Signalproduktion einer Pflanze.
         """
-        if plant.isSignalAlarmed(signal) == True and plant.isSignalPresent(signal) == False:
+        if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
             if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
                 plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
@@ -551,7 +551,7 @@ class Grid():
         if ec.num < minClusterSize and ec.num > 0:
             print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
             return
-        if plant.isSignalPresent(signal) == True and plant.isToxinAlarmed(toxin) == False and plant.isToxinPresent(toxin) == False and dist < 1:
+        if plant.isSignalPresent(signal) and not plant.isToxinAlarmed(toxin) and not plant.isToxinPresent(toxin) and dist < 1:
             plant.enemyToxinAlarm(toxin)
             toxin.toxinCosts(plant)
 
@@ -560,7 +560,7 @@ class Grid():
         """
         Verarbeitet die Giftproduktion einer Pflanze.
         """
-        if plant.isToxinAlarmed(toxin) == True and plant.isToxinPresent(toxin) == False:
+        if plant.isToxinAlarmed(toxin) and not plant.isToxinPresent(toxin):
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Gift zu produzieren
             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
                 plant.incrementToxinProdCounter(ec, toxin)  # Erhöhe den Produktionszähler
@@ -591,12 +591,12 @@ class Grid():
                     triggerSignal, triggerEnemy, minClusterSize = trigger
 
                     # Verarbeite nicht-tödliche Toxine
-                    if toxin.deadly == False and plant.isToxinPresent(toxin) == True and ec.enemy == triggerEnemy and signal == triggerSignal and plant in toxin.plantTransmitter:
+                    if not toxin.deadly and plant.isToxinPresent(toxin) and ec.enemy == triggerEnemy and signal == triggerSignal and plant in toxin.plantTransmitter:
                         self.processNonDeadlyToxin(toxin, ec, plant, signal)
                         print(f'[DEBUG-Toxin-{toxin.name}]: Nicht-tödliches Toxin verarbeitet für {ec.enemy.name}')
 
                     # Verarbeite tödliche Toxine
-                    elif toxin.deadly == True and plant.isToxinPresent(toxin) == True and plant in toxin.plantTransmitter:
+                    elif toxin.deadly and plant.isToxinPresent(toxin) and plant in toxin.plantTransmitter:
                         self.processDeadlyToxin(toxin, ec, plant, signal)
                         print(f'[DEBUG-Toxin-{toxin.name}]: Tödliches Toxin verarbeitet für {ec.enemy.name}')
                 
@@ -628,7 +628,7 @@ class Grid():
         """
         Setzt den Zustand der Pflanze zurück, falls sie nicht mehr toxisch sein sollte.
         """
-        if ec.isPlantInLastVisits(plant) == True and toxin.deadly == False:
+        if ec.isPlantInLastVisits(plant) and not toxin.deadly:
             preDist = self.getDistance(ec.position, plant.position)
             
             if preDist > 0:
@@ -719,7 +719,7 @@ class Grid():
 
         for sc in scs:
             # Stelle sicher, dass es sich um eine SymbioticConnection handelt und die Verbindung aktiv ist
-            if sc.connect == True:
+            if sc.connect:
                 # Prüfe, ob die übergebene Pflanze Teil der Verbindung ist
                 if sc.plant1 == plant:
                     connections[((sc.plant1.name, sc.plant2.name), (sc.plant1.position, sc.plant2.position))] = True

@@ -19,7 +19,7 @@ class SymbioticConnection():
         pos2 = self.plant2.position
         dist = self.getDistance(pos1, pos2)
 
-        if dist == 1 and self.connect == True:
+        if dist == 1 and self.connect:
             key1 = (self.plant1, self.plant2)
             key2 = (self.plant2, self.plant1)
             self.plant1.gridConnections[key1] = pos1, pos2

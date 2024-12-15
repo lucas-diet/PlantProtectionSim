@@ -263,7 +263,7 @@ class EnemyCluster():
             self.newBorns = 0
 
 
-    def newPath(self, plant, toxin):
+    def newPathAfterDisplace(self, plant, toxin):
         if plant.isToxinPresent(toxin) == True:
             shortestDistance = float('inf')
 
@@ -292,8 +292,7 @@ class EnemyCluster():
                 return []
         else:
             return None
-        
-        
+            
     
     def filterUnblockedPlants(self, plant, toxin):
         """

@@ -235,7 +235,6 @@ class Plant():
     
     def airSpreadSignal(self, signal):
         print(f'[DEBUG]: {self.name} verbreitet {signal.name} via Luft')
-        #print(signal.radius)
         return signal.radius
     
 

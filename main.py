@@ -101,12 +101,12 @@ tox1 = Toxin(substance=s3,
              deadly=False,
              eliminationStrength=1)
 
-tox2 = Toxin(substance=s4,
+tox2 = Toxin(substance=s3,
              plantTransmitter=[p2],
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
-             prodTime=3,
-             deadly=True,
+             prodTime=2,
+             deadly=False,
              eliminationStrength=1)
 
 grid.addPlant(p1)
