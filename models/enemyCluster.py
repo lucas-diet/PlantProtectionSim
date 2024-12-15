@@ -37,9 +37,7 @@ class EnemyCluster():
         self.targetPlant = None
         self.currentPath = []
         self.intoxicated = False
-        #self.lastVisitedPlant = None
         self.lastVisitedPlants = {}
-        self.unblockedPlants = []
 
     
     def insertLastVisits(self, plant, signal):
@@ -233,7 +231,6 @@ class EnemyCluster():
                     break
 
             if plant is not None:
-                #print(f'[INFO]: {ec.enemy.name} frisst an {plant.name} auf Position {pPos}')
                 plant.currEnergy -= self.eatingSpeed
                 self.eatedEnergy += self.eatingSpeed
 
@@ -285,7 +282,6 @@ class EnemyCluster():
                 alternativePlant = random.choice(alternativePlants)
                 # Berechne den kürzesten Pfad zur gewählten Pflanze
                 np = self.findShortestPath(self.position, alternativePlant.position)
-                self.unblockedPlants = []
                 return np
             else:
                 print(f'[DEBUG]: {self.enemy.name} Keine alternative Pflanze gefunden!')
@@ -296,9 +292,9 @@ class EnemyCluster():
     
     def filterUnblockedPlants(self, plant, toxin):
         """
-        Filtere die Pflanzen, die nicht durch das aktuelle Toxin blockiert sind.
+        Filtere die Pflanzen, die nicht durch das Toxin blockiert sind.
         """
-        self.unblockedPlants = [
+        unblockedPlants = [
             p for p in self.grid.plants
             if not p.isToxinPresent(toxin)  # Prüfen, ob die Pflanze durch das Toxin blockiert ist
             and p != plant  # Die Pflanze darf nicht die aktuelle sein
@@ -306,10 +302,10 @@ class EnemyCluster():
         ]
 
         # Wenn keine unblockierten Pflanzen gefunden wurden, alle Pflanzen zurückgeben
-        if not self.unblockedPlants:
-            self.unblockedPlants = self.grid.plants
+        if not unblockedPlants:
+            unblockedPlants = self.grid.plants
 
-        return self.unblockedPlants
+        return unblockedPlants
 
 
 

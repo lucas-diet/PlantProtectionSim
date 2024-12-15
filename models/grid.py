@@ -268,7 +268,7 @@ class Grid():
         # Bestimme die maximale Anzahl der Zeilen in jeder Spalte, um Zeilen korrekt auszurichten
         max_lines_per_row = get_max_lines_per_row(formatted_grid)
 
-        # Drucke jede Zeile des Gitters
+        # Drucke jede Zeile des Grids
         print_grid(formatted_grid, max_lines_per_row)
         print('#################### \n')
 
@@ -299,7 +299,7 @@ class Grid():
 
     
     def collectAndManageEnemies(self):
-        """Sammelt alle Feinde im Gitter und bewegt sie.
+        """Sammelt alle Feinde im Grid und bewegt sie.
 
         Die Methode erstellt eine Liste 'enemies_to_move', die Paare aus Feinden und deren Positionen enthält.
         Dabei werden alle Feinde aus Zellen, die Listen von Feinden enthalten, sowie einzelne Feinde
@@ -308,7 +308,7 @@ class Grid():
         """
         enemies_to_move = []
 
-        # Durchlaufe jede Zelle im Gitter
+        # Durchlaufe jede Zelle im Grid
         for i, row in enumerate(self.grid):
             for j, (plant, ecs) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
                 if ecs:  # Wenn die Liste der Feind-Cluster nicht leer ist
@@ -395,7 +395,7 @@ class Grid():
 
     
     def checkNearbyPlants(self, ec):
-        # Gehe jede Zeile im Gitter durch
+        # Gehe jede Zeile im Grid durch
         for i, row in enumerate(self.grid):
             for j, (plant, _) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
                 if isinstance(plant, Plant):  # Nur Pflanzen betrachten
@@ -599,8 +599,6 @@ class Grid():
                     elif toxin.deadly and plant.isToxinPresent(toxin) and plant in toxin.plantTransmitter:
                         self.processDeadlyToxin(toxin, ec, plant, signal)
                         print(f'[DEBUG-Toxin-{toxin.name}]: Tödliches Toxin verarbeitet für {ec.enemy.name}')
-                
-                #print(triggerSignal.name, triggerEnemy.name, minClusterSize)
 
 
     def processNonDeadlyToxin(self, toxin, ec, plant, signal):
@@ -635,8 +633,6 @@ class Grid():
                 plant.setToxinPresence(toxin, False)
                 plant.resetToxinProdCounter(ec, toxin)
                 plant.setToxinAlarm(toxin, False)
-                #print(plant.name, toxin.name, plant.getToxinProdCounter(ec, toxin))
-                #print(plant.isToxinPresent(toxin), plant.isToxinAlarmed(toxin))
 
 
     def symCommunication(self, ec, plant, signal):
