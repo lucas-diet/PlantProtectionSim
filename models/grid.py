@@ -473,7 +473,7 @@ class Grid():
         if ec.num < minClusterSize and ec.num > 0:
             print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {signal.triggerCombination[0][1]}')
             return
-        if plant.isSignalAlarmed(signal) == False and not plant.isSignalPresent(signal) and dist < 1:
+        if not plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal) and dist < 1:
             plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
             signal.signalCosts(plant)  # Reduziere Signal-Kosten
             print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
