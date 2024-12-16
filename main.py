@@ -87,10 +87,10 @@ sig2 = Signal(substance=s2,
               triggerCombination=[[e2, 2]],
               prodTime=1, 
               spreadType='air',
-              sendingSpeed=1,
+              sendingSpeed=2,
               energyCosts=1,
               afterEffectTime=3,
-              spreadSpeed=2)
+              spreadSpeed=1)
 
 tox1 = Toxin(substance=s3, 
              plantTransmitter=[p1],
@@ -104,7 +104,7 @@ tox2 = Toxin(substance=s3,
              plantTransmitter=[p2],
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
-             prodTime=2,
+             prodTime=5,
              deadly=False,
              eliminationStrength=1)
 
