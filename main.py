@@ -7,7 +7,7 @@ from models.plant import Plant
 from models.enemyCluster import Enemy, EnemyCluster
 from models.grid import Grid
 
-from models.communication import SymbioticConnection, AirConnection
+from models.connection import SymbioticConnection, AirConnection
 
 from models.substance import Substance
 from models.signal import Signal
@@ -19,7 +19,7 @@ from views.gui import Gui
 
 
 grid = Grid(height=6, width=6)
-plantColor = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
+PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
 p1 = Plant(name='p1', 
            initEnergy=300, 
@@ -31,7 +31,7 @@ p1 = Plant(name='p1',
            maxDist=2,
            position=(0, 2), 
            grid=grid,
-           color=plantColor)
+           color=PLANT_COLORS)
     
 p2 = Plant(name='p2', 
            initEnergy=200,
@@ -43,7 +43,7 @@ p2 = Plant(name='p2',
            maxDist=2, 
            position=(4, 2), 
            grid=grid,
-           color=plantColor)
+           color=PLANT_COLORS)
 
 p3 = Plant(name='p3', 
            initEnergy=100,
@@ -55,7 +55,7 @@ p3 = Plant(name='p3',
            maxDist=2, 
            position=(2, 5), 
            grid=grid,
-           color=plantColor)
+           color=PLANT_COLORS)
 
 e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
@@ -104,7 +104,7 @@ tox2 = Toxin(substance=s3,
              plantTransmitter=[p2],
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
-             prodTime=5,
+             prodTime=2,
              deadly=False,
              eliminationStrength=1)
 
@@ -135,7 +135,7 @@ sc2 = SymbioticConnection(p3, p2)
 
 
 sim = Simulation(grid)
-sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=35, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()

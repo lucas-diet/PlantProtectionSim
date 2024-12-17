@@ -60,7 +60,7 @@ class Simulation():
         
     
     def noEnemiesBreak(self):
-        if self.grid.hasEnemies() == False:
+        if not self.grid.hasEnemies():
             print('no more enemies')
             return True
         return False
@@ -76,7 +76,7 @@ class Simulation():
         Returns:
             True | False: Wenn keine Pflanzen auf dem Grid vorhande, dann True andernfalls False
         """
-        if self.grid.hasPlants() == False:
+        if not self.grid.hasPlants():
             print('no more plants')
             return True
         return False
@@ -101,7 +101,7 @@ class Simulation():
 
 
     def clearConsole(self):
-        os.system('cls' if os.name == 'nt' else 'clear')
+        os.system('clear')
 
     
     def run(self, maxSteps, plant, ec, maxGridEnergy, maxEnemyNum):
@@ -127,22 +127,22 @@ class Simulation():
                 print('maximum number of steps reached')
                 break
 
-            if self.noSpecificPlantBreak(plant) == True:
+            if self.noSpecificPlantBreak(plant):
                 break
 
-            if self.noSpeceficEnemyBreak(ec) == True:
+            if self.noSpeceficEnemyBreak(ec):
                 break
 
-            if self.noEnemiesBreak() == True:
+            if self.noEnemiesBreak():
                 break
 
-            if self.noPlantsBreak() == True:
+            if self.noPlantsBreak():
                 break
             
-            if self.upperGridEnergyBreak(maxGridEnergy) == True:
+            if self.upperGridEnergyBreak(maxGridEnergy):
                 break
 
-            if self.upperEnemyNumBreak(maxEnemyNum) == True:
+            if self.upperEnemyNumBreak(maxEnemyNum):
                 break
             
             #self.clearConsole()

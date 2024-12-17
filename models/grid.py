@@ -3,7 +3,7 @@ import numpy as np
 
 from models.plant import Plant
 from models.enemyCluster import EnemyCluster
-from models.communication import SymbioticConnection
+from models.connection import SymbioticConnection, AirConnection
 
 class Grid():
 
@@ -154,12 +154,21 @@ class Grid():
     
 
     def displayGrid(self):
-        """
-        Zeigt das Grid an und markiert alle Felder innerhalb von `radiusFields` mit '#', 
-        außer wenn eine Pflanze oder ein Feind auf dem Feld ist.
+        """_summary_
+            Zeigt das Grid an und formatiert die Darstellung für jede Zelle entsprechend der Belegung.
         """
         def format_cell(cell, position):
-            """Formatiert eine Zelle im Grid basierend auf ihrer Position."""
+            """_summary_
+                Formatiert eine einzelne Zelle basierend auf ihrer Position:
+                - Wenn die Zelle im Signalradius liegt, benutze 'format_cell_in_radius'.
+                - Andernfalls benutze 'format_normal_cell'.
+            Args:
+                cell (tuple): Ein Tupel (plant, enemy_clusters) aus dem Grid.
+                position (tuple): Position der Zelle (x, y).
+
+            Returns:
+                list: Eine Liste von Strings, die die visuelle Darstellung der Zelle repräsentieren.
+            """
             plant, ecs = cell  # Entpacke das Tupel in Pflanze und Feindgruppen
 
             # Wenn das Feld im Radius ist, markiere es entsprechend
@@ -170,7 +179,16 @@ class Grid():
             return format_normal_cell(plant, ecs)
 
         def format_cell_in_radius(plant, ecs, position):
-            """Markiert Zellen im Radius mit '#' oder zeigt eine Pflanze/Feind an."""
+            """_summary_
+                Formatiert Zellen, die sich innerhalb des Radius befinden.
+                - Markiert Zellen ohne Pflanze oder Feind mit '??????'.
+            Args:
+                plant (Plant): Eine Pflanzen-Instanz.
+                ecs (list): Eine Liste von EnemyCluster-Objekten.
+                position (tuple): Die Position der Zelle im Grid.
+            Returns:
+                list: Eine Liste von Strings, die die Zelle darstellen.
+            """
             # Erstelle eine Liste, die sowohl Pflanze als auch Feind darstellt
             lines = []
 
@@ -192,7 +210,14 @@ class Grid():
             return lines
 
         def format_normal_cell(plant, ecs):
-            """Formatiert eine normale Zelle ohne Radius-Markierung."""
+            """_summary_
+                Formatiert eine normale Zelle (außerhalb des Radius).
+            Args:
+                lant (Plant): Eine Pflanzen-Instanz.
+                ecs (list): Liste der Fressfeindcluster auf dem Feld.
+            Returns:
+                list: Eine Liste von Strings für die Anzeige.
+            """
             lines = []
 
             # Wenn eine Pflanze vorhanden ist, füge sie zur Anzeige hinzu
@@ -207,8 +232,15 @@ class Grid():
             return lines if lines else ['------']
 
         def format_plant(plant):
-            """Formatiert die Darstellung einer Pflanze basierend auf ihren Zuständen und Toxinen."""
-
+            """_summary_
+                Formatiert die Darstellung einer Pflanze:
+                - Zeigt den Energiezustand.
+                - Markiert ob eine Pflanze alamiert ist oder Substanz (Signalstoff, Giftstoff) produziert (*, +, >, !).
+            Args:
+                plant (Plant): Die Pflanzen-Instanz.
+            Returns:
+                list: Eine Liste mit dem formatierten Energiezustand der Pflanze.
+            """
             energy = f'{(plant.currEnergy / plant.initEnergy) * 100:.1f}%'
 
             if any(plant.isToxically.values()):  # Mindestens ein Giftstoff fertig produziert
@@ -226,25 +258,49 @@ class Grid():
                 return [f'{energy}']
             
         def format_enemy_cluster(ec):
-            """Formatiert die Darstellung einer Feindgruppe."""
+            """_summary_
+                Formatiert eine einzelnes Fressfeindcluster.
+            Args:
+                ec (EnemyCluster): Eine Fressfeindcluster-Instanz.
+
+            Returns:
+                list: Eine Liste, die die Fressfeindcluster darstellt.
+            """
             if ec.intoxicated:
                 return [f'{ec.enemy.name}-#{ec.num}*']
             else:
                 return [f'{ec.enemy.name}-#{ec.num}']
 
         def format_enemy_clusters(ecs):
-            """Formatiert mehrere Feindgruppen auf dem Feld."""
+            """_summary_
+                Formatiert mehrere Fressfeindcluster auf einem Feld.
+            Args:
+                ecs (list): Eine Liste von EnemyCluster-Instanzen.
+            Returns:
+                list: Eine Liste von Strings für die Darstellung.
+            """
             lines = []
             for ec in ecs:
                 lines.extend(format_enemy_cluster(ec))
             return lines
 
         def get_max_lines_per_row(formatted_grid):
-            """Berechnet die maximale Anzahl der Zeilen für jede Spalte."""
+            """_summary_
+                Berechnet die maximale Anzahl von Zeilen pro Spalte.
+            Args:
+                formatted_grid (list): Das formatierte Grid.
+            Returns:
+                list: Eine Liste der maximalen Zeilenzahlen für jede Spalte.
+            """
             return [max(len(cell) for cell in row) for row in formatted_grid]
 
         def print_grid(formatted_grid, max_lines_per_row):
-            """Druckt das formatierte Grid Zeile für Zeile."""
+            """_summary_
+                Druckt das Grid, Zeile für Zeile, mit gleichmäßiger Ausrichtung.
+            Args:
+                formatted_grid (list): Das formatierte Grid.
+                max_lines_per_row (list): Maximale Zeilenanzahl pro Spalte.
+            """
             for row_idx, row in enumerate(formatted_grid):
                 for line_idx in range(max_lines_per_row[row_idx]):
                     for col_idx, cell in enumerate(row):
@@ -331,7 +387,7 @@ class Grid():
             newPos = self.processEnemyMovement(ec, oldPos, path)
 
             self.updateEnemyClusterPos(ec, oldPos, newPos)
-            self.checkNearbyPlants(ec)
+            self.processInteractionWithPlant(ec)
             self.reduceClusterSize(ec)
         
         self.processNewPathAfterDisplace()
@@ -394,7 +450,7 @@ class Grid():
         ec.position = newPos
 
     
-    def checkNearbyPlants(self, ec):
+    def processInteractionWithPlant(self, ec):
         # Gehe jede Zeile im Grid durch
         for i, row in enumerate(self.grid):
             for j, (plant, _) in enumerate(row):  # Entpacke Tupel: (plant, enemy_clusters)
@@ -512,7 +568,7 @@ class Grid():
             triggerEnemy, minClusterSize = trigger
             if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
-                print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} {ec.enemy.name} auf {currAfterEffectTime - 1}/{signal.afterEffectTime}')
+                print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} {ec.enemy.name} auf {currAfterEffectTime}/{signal.afterEffectTime}')
 
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy == triggerEnemy:
@@ -645,18 +701,21 @@ class Grid():
                     print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
 
                     self.symInteraction(sPlant, rPlant, signal, ec)
-
+                
 
     def symInteraction(self, sPlant, rPlant, signal, ec):
         if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed and rPlant in signal.receive:
             sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-            print(f'[DEBUG]: Fortschritt Senden (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+            print(f'[DEBUG]: Sendenstatus (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
         else:
             sPlant.sendSignal(rPlant, signal)
+            sPlant.resetSignalSendCounter(ec, signal, rPlant)
             print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
 
 
     def airCommunication(self, ec, plant, signal):
+        if plant.currEnergy < plant.minEnergy:
+            self.radiusFields = []
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
@@ -670,8 +729,8 @@ class Grid():
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
                 else:
                     self.processSignalRadiusSize(ec, plant, signal)             
-                #print(self.radiusFields)
-                self.airInteraction(plant, signal, ec)
+                    
+                self.airInteraction(plant, signal, ec)  
     
 
     def getFieldsInAirRadius(self, plant, radius):
@@ -701,11 +760,10 @@ class Grid():
                 sPos, rPos = plant.position, otherPlant.position
                 if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                     sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-                    print(f'[DEBUG]: Fortschritt Senden (Luft) {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+                    print(f'[DEBUG]: Sendenstatus (Luft): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
                 else:
                     sPlant.sendSignal(rPlant, signal)
-                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
-                print(sPlant.name, sPos, rPlant.name, rPos)
+                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')  
 
 
 
