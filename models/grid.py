@@ -692,7 +692,6 @@ class Grid():
 
 
     def symCommunication(self, ec, plant, signal):
-        processed_connections = set()
         if plant in signal.emit and signal.spreadType == 'symbiotic':
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
@@ -703,7 +702,6 @@ class Grid():
                         next_sPlant, next_rPlant = con[0], con[1]
                         if con and len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant):
                             self.symInteraction(next_sPlant, next_rPlant, signal, ec)
-                            processed_connections.add((next_sPlant, next_rPlant))
                         break
                 else:
                     if sPlant == plant and sPlant.isSignalPresent(signal):
