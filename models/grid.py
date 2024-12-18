@@ -692,30 +692,46 @@ class Grid():
 
 
     def symCommunication(self, ec, plant, signal):
+        processed_connections = set()
         if plant in signal.emit and signal.spreadType == 'symbiotic':
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
                 sPos, rPos = plantsPos
 
-                if sPlant == plant and sPos == ec.position and sPlant.isSignalPresent(signal):
-                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
-
-                    self.symInteraction(sPlant, rPlant, signal, ec)
+                if rPlant.isSignalPresent(signal):
+                    for con in rPlant.gridConnections:
+                        next_sPlant, next_rPlant = con[0], con[1]
+                        if con and len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant):
+                            self.symInteraction(next_sPlant, next_rPlant, signal, ec)
+                            processed_connections.add((next_sPlant, next_rPlant))
+                        break
+                else:
+                    if sPlant == plant and sPlant.isSignalPresent(signal):
+                        self.symInteraction(sPlant, rPlant, signal, ec)
                 
 
     def symInteraction(self, sPlant, rPlant, signal, ec):
         if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed and rPlant in signal.receive:
+            if not rPlant.isSignalPresent(signal):
+                print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
             sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-            print(f'[DEBUG]: Sendenstatus (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+            print(f'[DEBUG]: Sendenstatus {signal.name} (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
         else:
             sPlant.sendSignal(rPlant, signal)
             sPlant.resetSignalSendCounter(ec, signal, rPlant)
-            print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+            if not rPlant.isSignalPresent(signal):
+                print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+            self.symCommunication(ec, sPlant, signal)
+
+                
+                    
+                
 
 
     def airCommunication(self, ec, plant, signal):
         if plant.currEnergy < plant.minEnergy:
             self.radiusFields = []
+            signal.radius = 0
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
@@ -728,9 +744,10 @@ class Grid():
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
                 else:
-                    self.processSignalRadiusSize(ec, plant, signal)             
-                    
-                self.airInteraction(plant, signal, ec)  
+                    self.processSignalRadiusSize(ec, plant, signal) 
+                         
+                self.airInteraction(plant, signal, ec)
+            #print(self.radiusFields)
     
 
     def getFieldsInAirRadius(self, plant, radius):
@@ -740,7 +757,7 @@ class Grid():
         # Iteriere durch die gesamte Grid-Matrix
         for x in range(len(self.grid)):
             for y in range(len(self.grid[0])):
-                dist = int(np.sqrt((x - x0) ** 2 + (y - y0) ** 2))
+                dist = np.floor(np.sqrt((x - x0) ** 2 + (y - y0) ** 2))
                 if dist <= radius:
                     radiusFields.append((x, y))
 
