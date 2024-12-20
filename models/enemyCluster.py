@@ -238,19 +238,23 @@ class EnemyCluster():
                     self.targetPlant = None
                     self.grid.removePlant(plant)
 
-            # Signalisiere allen Feinden, dass eine Pflanze gegessen wurde
-            if self.targetPlant is None:
-                for enemyCluster in self.grid.enemies:
-                    if enemyCluster.targetPlant == pPos:
-                        enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
-                        print(f'[INFO]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
+            self.notifyPlantEaten(pPos)
 
             # Jetzt ein neues Ziel suchen
             return self.chooseRandomPlant(ePos)
         
         else:
             print(f'[INfO]: keine Pflanze an Position {pPos} gefunden')
-                    
+
+
+    def notifyPlantEaten(self, pPos):
+        # Signalisiere allen Feinden, dass eine Pflanze gegessen wurde
+        if self.targetPlant is None:
+            for enemyCluster in self.grid.enemies:
+                if enemyCluster.targetPlant == pPos:
+                    enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
+                    print(f'[INFO]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
+             
 
     def reproduce(self):
         if self.eatedEnergy >= self.eatVictory:

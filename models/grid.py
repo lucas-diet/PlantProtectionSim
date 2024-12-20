@@ -726,10 +726,6 @@ class Grid():
             print(f'[DEBUG]: {sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
             pass 
 
-                
-                    
-                
-
 
     def airCommunication(self, ec, plant, signal):
         if plant.currEnergy < plant.minEnergy:
