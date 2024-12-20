@@ -22,8 +22,8 @@ class SymbioticConnection():
         if dist == 1 and self.connect:
             key1 = (self.plant1, self.plant2)
             key2 = (self.plant2, self.plant1)
-            self.plant1.gridConnections[key1] = pos1, pos2
-            self.plant2.gridConnections[key2] = pos2, pos1
+            self.plant1.gridConnections[key1] = (pos1, pos2)
+            self.plant2.gridConnections[key2] = (pos2, pos1)
         else:
             if dist > 1:
                 print(f'[INFO]: {self.plant1.name} und {self.plant2.name} sind nicht benachbart')

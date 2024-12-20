@@ -696,13 +696,15 @@ class Grid():
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
                 sPos, rPos = plantsPos
-
+                
                 if rPlant.isSignalPresent(signal):
+                    
                     for con in rPlant.gridConnections:
                         next_sPlant, next_rPlant = con[0], con[1]
-                        if con and len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant):
+                        if con and len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant) != (rPlant, sPlant):
+                            #print(next_sPlant.name, next_rPlant.name)
                             self.symInteraction(next_sPlant, next_rPlant, signal, ec)
-                        break
+             
                 else:
                     if sPlant == plant and sPlant.isSignalPresent(signal):
                         self.symInteraction(sPlant, rPlant, signal, ec)

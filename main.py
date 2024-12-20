@@ -72,7 +72,7 @@ s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
               emit=[p1, p2, p3],
-              receive=[p2, p3],
+              receive=[p1, p2, p3],
               triggerCombination=[[e2, 2]],
               prodTime=2,
               spreadType='symbiotic',
@@ -82,12 +82,12 @@ sig1 = Signal(substance=s1,
               spreadSpeed=None)
 
 sig2 = Signal(substance=s2,
-              emit=[p1],
-              receive=[p2],
+              emit=[p1, p2, p3],
+              receive=[p1, p2, p3],
               triggerCombination=[[e2, 2]],
-              prodTime=1, 
+              prodTime=2, 
               spreadType='symbiotic',
-              sendingSpeed=2,
+              sendingSpeed=3,
               energyCosts=1,
               afterEffectTime=2,
               spreadSpeed=2)
@@ -135,7 +135,7 @@ sc2.createConnection()
 
 
 sim = Simulation(grid)
-sim.run(maxSteps=35, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 #gui = Gui()
 #gui.mainloop()
