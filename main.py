@@ -18,7 +18,7 @@ from controllers.simulation import Simulation
 from views.gui import Gui
 
 
-grid = Grid(height=10, width=10)
+grid = Grid(height=8, width=8)
 PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 
 p1 = Plant(name='p1', 
@@ -62,7 +62,7 @@ e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
 ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,0), grid=grid, eatingSpeed=1, eatVictory=1)
-ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(5,2), grid=grid, eatingSpeed=5, eatVictory=5)
+ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(3,5), grid=grid, eatingSpeed=5, eatVictory=5)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
 s1 = Substance(name='s1', type='signal')
@@ -71,8 +71,8 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=[p1, p2, p3],
-              receive=[p1, p2, p3],
+              emit=[p1, p2],
+              receive=[p1, p2],
               triggerCombination=[[e2, 2]],
               prodTime=2,
               spreadType='symbiotic',
@@ -84,7 +84,7 @@ sig1 = Signal(substance=s1,
 sig2 = Signal(substance=s2,
               emit=[p1, p2, p3],
               receive=[p1, p2, p3],
-              triggerCombination=[[e2, 2]],
+              triggerCombination=[[e1, 2]],
               prodTime=2, 
               spreadType='symbiotic',
               sendingSpeed=3,

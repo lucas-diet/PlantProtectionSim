@@ -698,30 +698,33 @@ class Grid():
                 sPos, rPos = plantsPos
                 
                 if rPlant.isSignalPresent(signal):
-                    
                     for con in rPlant.gridConnections:
                         next_sPlant, next_rPlant = con[0], con[1]
-                        if con and len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant) != (rPlant, sPlant):
-                            #print(next_sPlant.name, next_rPlant.name)
+                        if len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant) != (rPlant, sPlant):
+                            #print('T1',next_sPlant.name, next_rPlant.name)
                             self.symInteraction(next_sPlant, next_rPlant, signal, ec)
-             
                 else:
                     if sPlant == plant and sPlant.isSignalPresent(signal):
                         self.symInteraction(sPlant, rPlant, signal, ec)
                 
 
     def symInteraction(self, sPlant, rPlant, signal, ec):
-        if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed and rPlant in signal.receive:
-            if not rPlant.isSignalPresent(signal):
-                print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
-            sPlant.incrementSignalSendCounter(ec, signal, rPlant)
-            print(f'[DEBUG]: Sendenstatus {signal.name} (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+        if rPlant in signal.receive:
+            if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
+                if not rPlant.isSignalPresent(signal):
+                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
+                sPlant.incrementSignalSendCounter(ec, signal, rPlant)
+                print(f'[DEBUG]: Sendenstatus {signal.name} (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+            else:
+                sPlant.sendSignal(rPlant, signal)
+                # Um Rückkopplungen zu vermeiden wird der Counter erst zurückgesetzt wenn die empfangende Pflanze stirbt oder der Sender kein Signalstoff mehr hat.
+                if rPlant.currEnergy <= rPlant.minEnergy or not sPlant.isSignalPresent(signal):
+                    sPlant.resetSignalSendCounter(ec, signal, rPlant)
+                if not rPlant.isSignalPresent(signal):
+                    print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
         else:
-            sPlant.sendSignal(rPlant, signal)
-            sPlant.resetSignalSendCounter(ec, signal, rPlant)
-            if not rPlant.isSignalPresent(signal):
-                print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
-            self.symCommunication(ec, sPlant, signal)
+            print(f'[DEBUG]: {sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
+            pass 
 
                 
                     
