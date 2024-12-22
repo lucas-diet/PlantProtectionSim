@@ -17,7 +17,7 @@ class Signal(Substance):
 
         self.active = False
         self.activeSignals = []
-        self.radius = 0
+        self.radius = {}
 
     
     def signalCosts(self, plant):

@@ -445,17 +445,23 @@ class Plant():
         rplant.setSignalPresence(signal, True)
 
     
-    def airSpreadSignal(self, signal):
+    def airSignalRange(self, signal):
         """_summary_
-            Verbreitet ein Signal über die Luft.
+            Diese Methode prüft, ob der Schlüssel für das aktuelle Signal und die Pflanze bereits im 'radius' Dictionary von 'signal' existiert. 
+            Falls der Schlüssel noch nicht vorhanden ist, wird er mit einem Standardwert 0 hinzugefügt. 
+            Wenn der Schlüssel bereits existiert, wird keine Änderung vorgenommen. 
+            Die Methode gibt den Radiuswert für den entsprechenden Schlüssel zurück.
         Args:
             signal (Signal): Das Signal, das verbreitet werden soll.
-
         Returns:
-            int: Der Ausbreitungsradius des Signals.
+            int: Der Ausbreitungsradius des Signals für den aktuellen Schlüssel (Pflanze, Signal).
         """
-        print(f'[DEBUG]: {self.name} verbreitet {signal.name} via Luft')
-        return signal.radius
+        key = (self, signal)
+        if key in signal.radius:
+            pass
+        else:
+            signal.radius[key] = 0
+        return signal.radius[key]
     
 
     def incrementSignalRadius(self, ec, signal):

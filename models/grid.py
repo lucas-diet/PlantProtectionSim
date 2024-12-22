@@ -582,7 +582,7 @@ class Grid():
                 elif signal.spreadType == 'air':
                     # Setzte den entstandenen Radius zurück
                     self.radiusFields[(plant, signal)] = []
-                    signal.radius = 0
+                    signal.radius[(plant, signal)] = 0
 
     
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
@@ -729,11 +729,11 @@ class Grid():
     def airCommunication(self, ec, plant, signal):
         if plant.currEnergy < plant.minEnergy:
             self.radiusFields[(plant, signal)] = []
-            signal.radius = 0
+            signal.radius[(plant, signal)] = 0
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
-                radius = plant.airSpreadSignal(signal)
+                radius = plant.airSignalRange(signal)
                 print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
                 self.radiusFields[(plant, signal)] = self.getFieldsInAirRadius(plant, radius)
 
@@ -764,7 +764,7 @@ class Grid():
     def processSignalRadiusSize(self, ec, plant, signal):
         # Wenn die Nachwirkzeit nicht abgelaufen ist, erweitere Radius
         plant.resetSignalAirSpreadCounter(ec, signal)
-        signal.radius += 1
+        signal.radius[(plant, signal)] += 1
                 
     
     def airInteraction(self, plant, signal, ec):
