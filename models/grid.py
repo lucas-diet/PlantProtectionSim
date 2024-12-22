@@ -17,7 +17,7 @@ class Grid():
         self.toxins = []
         self.grid = [[(None, []) for _ in range(width)] for _ in range(height)]
         self.totalEnergy = 0
-        self.radiusFields = []
+        self.radiusFields = {}
         self.displaceComps = []
 
 
@@ -171,17 +171,18 @@ class Grid():
             """
             plant, ecs = cell  # Entpacke das Tupel in Pflanze und Feindgruppen
 
-            # Wenn das Feld im Radius ist, markiere es entsprechend
-            if position in self.radiusFields:
-                return format_cell_in_radius(plant, ecs, position)
+            # Prüfe, ob die Position in einem Signalradius liegt
+            for (cPlant, signal), fields in self.radiusFields.items():
+                if position in fields:
+                    return format_cell_in_radius(plant, ecs, position)
 
-            # Normale Darstellung, wenn das Feld nicht im Radius ist
+            # Normale Darstellung, wenn die Position nicht im Radius liegt
             return format_normal_cell(plant, ecs)
 
         def format_cell_in_radius(plant, ecs, position):
-            """_summary_
-                Formatiert Zellen, die sich innerhalb des Radius befinden.
-                - Markiert Zellen ohne Pflanze oder Feind mit '??????'.
+            """
+            Formatiert Zellen, die sich innerhalb des Radius befinden.
+            - Markiert Zellen ohne Pflanze oder Feind mit mehreren Zeilen '??????' entsprechend der Anzahl überlappender Radien.
             Args:
                 plant (Plant): Eine Pflanzen-Instanz.
                 ecs (list): Eine Liste von EnemyCluster-Objekten.
@@ -192,20 +193,21 @@ class Grid():
             # Erstelle eine Liste, die sowohl Pflanze als auch Feind darstellt
             lines = []
 
-            if position not in self.radiusFields:
-                return lines if lines else ['------']
-            
             # Wenn eine Pflanze vorhanden ist, füge sie zur Anzeige hinzu
             if isinstance(plant, Plant):
                 lines.extend(format_plant(plant))
-            
+
             # Wenn Feindgruppen vorhanden sind, füge sie zur Anzeige hinzu
-            if any(isinstance(ec, EnemyCluster) for ec in ecs):  # Wenn ein Feind da ist
+            if any(isinstance(ec, EnemyCluster) for ec in ecs):
                 lines.extend(format_enemy_clusters(ecs))          
-            
-            # Wenn keine Pflanze und kein Feind vorhanden ist, markiere mit #
+
+            # Anzahl der Radien, die diese Position überdecken
+            overlappingRadii = sum(1 for (p, s), fields in self.radiusFields.items() if position in fields)
+
+
+            # Wenn keine Pflanze und kein Feind vorhanden ist, füge '??????' entsprechend der Anzahl der Radien hinzu
             if not lines:
-                lines.append('??????')
+                lines.extend(['??????'] * overlappingRadii)
 
             return lines
 
@@ -581,7 +583,7 @@ class Grid():
                     pass
                 elif signal.spreadType == 'air':
                     # Setzte den entstandenen Radius zurück
-                    self.radiusFields = []
+                    self.radiusFields[(plant, signal)] = []
                     signal.radius = 0
 
     
@@ -729,14 +731,14 @@ class Grid():
 
     def airCommunication(self, ec, plant, signal):
         if plant.currEnergy < plant.minEnergy:
-            self.radiusFields = []
+            self.radiusFields[(plant, signal)] = []
             signal.radius = 0
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
                 radius = plant.airSpreadSignal(signal)
                 print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
-                self.radiusFields = self.getFieldsInAirRadius(plant, radius)
+                self.radiusFields[(plant, signal)] = self.getFieldsInAirRadius(plant, radius)
 
                 print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.spreadSpeed}')
                 if plant.getSignalAirSpreadCounter(ec, signal) < signal.spreadSpeed - 1:
@@ -771,7 +773,7 @@ class Grid():
     
     def airInteraction(self, plant, signal, ec):
         for otherPlant in self.plants:
-            if otherPlant != plant and otherPlant.position in self.radiusFields and otherPlant in signal.receive:
+            if otherPlant != plant and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant in signal.receive:
                 sPlant, rPlant = plant, otherPlant
                 sPos, rPos = plant.position, otherPlant.position
                 if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
