@@ -180,15 +180,15 @@ class Grid():
             return format_normal_cell(plant, ecs)
 
         def format_cell_in_radius(plant, ecs, position):
-            """
-            Formatiert Zellen, die sich innerhalb des Radius befinden.
-            - Markiert Zellen ohne Pflanze oder Feind mit mehreren Zeilen '??????' entsprechend der Anzahl überlappender Radien.
-            Args:
-                plant (Plant): Eine Pflanzen-Instanz.
-                ecs (list): Eine Liste von EnemyCluster-Objekten.
-                position (tuple): Die Position der Zelle im Grid.
-            Returns:
-                list: Eine Liste von Strings, die die Zelle darstellen.
+            """_summary_
+                Formatiert Zellen, die sich innerhalb des Radius befinden.
+                - Markiert Zellen ohne Pflanze oder Feind mit mehreren Zeilen '??????' entsprechend der Anzahl überlappender Radien.
+                Args:
+                    plant (Plant): Eine Pflanzen-Instanz.
+                    ecs (list): Eine Liste von EnemyCluster-Objekten.
+                    position (tuple): Die Position der Zelle im Grid.
+                Returns:
+                    list: Eine Liste von Strings, die die Zelle darstellen.
             """
             # Erstelle eine Liste, die sowohl Pflanze als auch Feind darstellt
             lines = []
@@ -203,7 +203,6 @@ class Grid():
 
             # Anzahl der Radien, die diese Position überdecken
             overlappingRadii = sum(1 for (p, s), fields in self.radiusFields.items() if position in fields)
-
 
             # Wenn keine Pflanze und kein Feind vorhanden ist, füge '??????' entsprechend der Anzahl der Radien hinzu
             if not lines:
@@ -484,7 +483,6 @@ class Grid():
         for toxin, ec, plant, signal in self.displaceComps:            
             # Neuer Pfad durch Giftwirkung
             newPath, targetPlant = toxin.displaceEnemies(ec, plant)
-            #print(f'{ec.enemy.name} neuer Pfad: {newPath}')
 
             # Setze den neuen Pfad in `currentPath`
             ec.currentPath = newPath
@@ -703,7 +701,6 @@ class Grid():
                     for con in rPlant.gridConnections:
                         next_sPlant, next_rPlant = con[0], con[1]
                         if len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant) != (rPlant, sPlant):
-                            #print('T1',next_sPlant.name, next_rPlant.name)
                             self.symInteraction(next_sPlant, next_rPlant, signal, ec)
                 else:
                     if sPlant == plant and sPlant.isSignalPresent(signal):
@@ -746,9 +743,8 @@ class Grid():
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
                 else:
                     self.processSignalRadiusSize(ec, plant, signal) 
-                         
+    
                 self.airInteraction(plant, signal, ec)
-            #print(self.radiusFields)
     
 
     def getFieldsInAirRadius(self, plant, radius):
