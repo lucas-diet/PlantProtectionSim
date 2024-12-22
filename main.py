@@ -78,8 +78,7 @@ sig1 = Signal(substance=s1,
               spreadType='air',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=2,
-              spreadSpeed=2)
+              afterEffectTime=2)
 
 sig2 = Signal(substance=s2,
               emit=[p1, p2, p3],
@@ -89,8 +88,7 @@ sig2 = Signal(substance=s2,
               spreadType='air',
               sendingSpeed=3,
               energyCosts=1,
-              afterEffectTime=2,
-              spreadSpeed=2)
+              afterEffectTime=2)
 
 tox1 = Toxin(substance=s3, 
              plantTransmitter=[p1],

@@ -3,7 +3,7 @@ from models.substance import Substance
 
 class Signal(Substance):
 
-    def __init__(self, substance, emit, receive, triggerCombination, prodTime, spreadType, sendingSpeed, energyCosts, afterEffectTime, spreadSpeed=None):
+    def __init__(self, substance, emit, receive, triggerCombination, prodTime, spreadType, sendingSpeed, energyCosts, afterEffectTime):
         super().__init__(name=substance.name, type=substance.type)
         self.substance = substance
         self.emit = emit
@@ -14,9 +14,6 @@ class Signal(Substance):
         self.sendingSpeed = sendingSpeed
         self.energyCosts = energyCosts
         self.afterEffectTime = afterEffectTime
-
-        if self.spreadType == 'air':
-            self.spreadSpeed = spreadSpeed
 
         self.active = False
         self.activeSignals = []
