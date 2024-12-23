@@ -581,8 +581,8 @@ class Grid():
                     pass
                 elif signal.spreadType == 'air':
                     # Setzte den entstandenen Radius zurück
-                    self.radiusFields[(plant, signal)] = []
-                    signal.radius[(plant, signal)] = 0
+                    self.removeSignalRadius(plant, signal)
+                    return
 
     
     def plantAlarmAndPoisonProd(self, ec, dist, plant):
@@ -635,12 +635,13 @@ class Grid():
                 if triggerEnemy == ec.enemy:
                     self.symCommunication(ec, plant, signal)
                     self.airCommunication(ec, plant, signal)
-
+                if plant.currEnergy <= plant.minEnergy:
+                    self.removeSignalRadius(plant, signal)
 
     def processToxinEffects(self, ec, plant):
         """
         Verarbeitet die Effekte von Toxinen auf einen Feind und dessen Interaktion mit einer Pflanze.
-        """  
+        """ 
         for toxin in self.toxins:
             for signal in self.signals:
                 for trigger in toxin.triggerCombination:
@@ -727,9 +728,6 @@ class Grid():
 
 
     def airCommunication(self, ec, plant, signal):
-        if plant.currEnergy < plant.minEnergy:
-            self.radiusFields[(plant, signal)] = []
-            signal.radius[(plant, signal)] = 0
         if plant in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
@@ -745,7 +743,18 @@ class Grid():
                     self.processSignalRadiusSize(ec, plant, signal) 
     
                 self.airInteraction(plant, signal, ec)
-    
+
+  
+    def removeSignalRadius(self, plant, signal):
+        # Entferne alle Radien und Signale der Pflanze
+        keys_to_remove = [(p, s) for (p, s) in self.radiusFields.keys() if p == plant and s == signal]
+        for key in keys_to_remove:
+            del self.radiusFields[key]
+        #signal.radius = {k: v for k, v in signal.radius.items() if k[0] != plant}
+
+        print(f"[DEBUG]: Pflanze {plant.name} ist tot. Radien entfernt.")
+        return  # Abbruch, da Pflanze tot ist
+
 
     def getFieldsInAirRadius(self, plant, radius):
         x0, y0 = plant.position
