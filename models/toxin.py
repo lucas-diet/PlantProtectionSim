@@ -22,13 +22,12 @@ class Toxin(Substance):
         np = []
         tp = None
         
-        if len(ec.currentPath) == 0:
+        if not ec.currentPath:
             np = ec.newPathAfterDisplace(plant, self)
-            if len(np) > 0:
+            if np:
                 tp = np[-1]
             else:
                 pass
-                tp = None
     
         return np, tp
     
