@@ -138,7 +138,9 @@ sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 dia = Diagrams(grid)
 dia.plotPlantEnergy()
 dia.plotEnemyClusterSize()
-
+dia.plotSpeciesOverTime(data_dict=grid.plantTypeCounter, label_type='Plant', title='Number of Plant Species Over Time', ylabel='Count')
+dia.plotSpeciesOverTime(data_dict=grid.clusterTypeCounter, label_type='EnemyCluster', title='Number of Enemy Clusters Over Time', ylabel='Count'
+)
 
 #gui = Gui()
 #gui.mainloop()

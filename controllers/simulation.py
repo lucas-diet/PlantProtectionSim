@@ -114,6 +114,22 @@ class Simulation():
             self.grid.sizeChanges_enemies[(ec, timeStep)] = ec.num
 
     
+    def getPlantCounterByType(self, timeStemp):
+        for plant in self.grid.plants:
+            if (plant.name, timeStemp) not in self.grid.plantTypeCounter:
+                self.grid.plantTypeCounter[(plant.name, timeStemp)] = 1
+            else:
+                self.grid.plantTypeCounter[(plant.name, timeStemp)] += 1
+    
+
+    def getClusterCounterByType(self, timeStemp):
+        for ec in self.grid.enemies:
+            if (ec.enemy.name, timeStemp) not in self.grid.clusterTypeCounter:
+                self.grid.clusterTypeCounter[(ec.enemy.name, timeStemp)] = 1
+            else:
+                self.grid.clusterTypeCounter[(ec.enemy.name, timeStemp)] += 1
+
+    
     def run(self, maxSteps, plant, ec, maxGridEnergy, maxEnemyNum):
         """_summary_
             Führt die Hauptsimulationsschleife aus und aktualisiert den Zustand des Grids in jedem Schritt.
@@ -131,6 +147,9 @@ class Simulation():
         self.displayInit()
         self.getPlantEnergyData(0)
         self.getEnemyClusterSizeData(0)
+
+        self.getPlantCounterByType(0)
+        self.getClusterCounterByType(0)
         count = 1
         
 
@@ -167,6 +186,9 @@ class Simulation():
             self.grid.displayGrid()
             self.getPlantEnergyData(count)
             self.getEnemyClusterSizeData(count)
+            
+            self.getPlantCounterByType(count)
+            self.getClusterCounterByType(count)
             count += 1
             #time.sleep(1)
 

@@ -7,6 +7,7 @@ class Diagrams:
     def __init__(self, grid):
         self.grid = grid
     
+
     def plotPlantEnergy(self):
         """_summary_
             Erstellt den Plot für die Pflanzenenergie über die Zeit
@@ -14,12 +15,14 @@ class Diagrams:
         # Erstelle den Plot für Pflanzenenergie
         self.createTimeSeriesPlot(self.grid.energyChanges_plants, 'Plant', 'Energy of Plants Over Time', 'Energy')
 
+
     def plotEnemyClusterSize(self):
         """_summary_
             Erstellt den Plot für die Clustergröße der Fressfeinde über die Zeit
         """
         # Erstelle den Plot für Clustergrößen der Fressfeinde
         self.createTimeSeriesPlot(self.grid.sizeChanges_enemies, 'EnemyCluster', 'Size of Enemy-Cluster Over Time', 'Size')
+
 
     def createTimeSeriesPlot(self, data_dict, label_type, title, ylabel):
         """_summary_
@@ -42,6 +45,7 @@ class Diagrams:
         # Schritt 3: Erstelle den Plot
         self.plotTimeSeries(value_arrays, grouped_data, label_type, title, ylabel)
     
+
     def groupDataByLabel(self, data_dict):
         """_summary_
             Gruppiert die Daten nach Label (z.B. Pflanzen oder Fressfeinde).
@@ -125,10 +129,77 @@ class Diagrams:
         plt.xlabel('Time')
         plt.xticks(ticks=all_times)
         plt.ylabel(ylabel)
-        plt.legend()  # Legende hinzufügen
+        plt.legend(loc='center left', bbox_to_anchor=(1.0, 0.5))
         plt.grid(True)
         
         plt.show()
+
+
+    def plotSpeciesOverTime(self, data_dict, label_type, title, ylabel):
+        """_summary_
+            Erstellt einen Plot der Anzahl der Arten über die Zeit.
+        Args:
+            data_dict (dict): Ein Dictionary mit Daten pro Art und Zeit.
+            label_type (str): Der Typ der Labels ('Plant' oder 'EnemyCluster').
+            title (str): Der Titel des Plots.
+            ylabel (str): Die Beschriftung der Y-Achse.
+        """
+        # Schritt 1: Zähle die Einträge pro Art
+        species_count = self.countBySpecies(data_dict)
+        
+        # Schritt 2: Erstelle den Plot
+        self.plotSpeciesCount(species_count, title, ylabel)
+
+    
+    def countBySpecies(self, data_dict):
+        """_summary_
+            Zählt die Anzahl der Einträge pro Art und Zeit.
+        Args:
+            data_dict (dict): Ein Dictionary mit Schlüsseln als (Art, Zeit) und zugehörigen Werten.
+        Returns:
+            dict: Ein Dictionary, das die Anzahl pro Art und Zeit speichert.
+        """
+        species_count = {}
+        
+        for (species, time), value in data_dict.items():
+            if species not in species_count:
+                species_count[species] = {}
+            if time not in species_count[species]:
+                species_count[species][time] = 0
+            species_count[species][time] += value  # Anzahl addieren
+
+        # Konvertiere zu einer sortierten Liste von Zeit-Wert-Paaren
+        for species in species_count:
+            species_count[species] = sorted(species_count[species].items())
+
+        return species_count
+
+
+    def plotSpeciesCount(self, species_count, title, ylabel):
+        """_summary_
+            Erstellt einen Plot für die Anzahl der Arten.
+        Args:
+            species_count (dict): Ein Dictionary mit Arten als Schlüssel und Zeitpunkten als Werte.
+            title (str): Der Titel des Plots.
+            ylabel (str): Die Beschriftung der Y-Achse.
+        """
+        plt.figure(figsize=(12, 7))
+
+        # Iteriere über die Arten und plotte deren Zeitverlauf
+        for species, time_series in species_count.items():
+            times, counts = zip(*time_series)  # Extrahiere Zeiten und Werte
+            plt.plot(times, counts, label=species)
+
+        # Achsen und Titel
+        plt.title(title)
+        plt.xlabel('Time')
+        plt.xticks(ticks=times)
+        plt.ylabel(ylabel)
+        plt.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
+        plt.grid(True)
+        plt.show()
+
+
 
 
 

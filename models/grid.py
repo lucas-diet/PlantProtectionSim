@@ -23,6 +23,9 @@ class Grid():
         self.energyChanges_plants = {}
         self.sizeChanges_enemies = {}
 
+        self.plantTypeCounter = {}
+        self.clusterTypeCounter = {}
+
 
     def getGrid(self):
         return self.grid
