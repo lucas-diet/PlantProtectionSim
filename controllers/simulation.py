@@ -104,6 +104,16 @@ class Simulation():
         os.system('clear')
 
     
+    def getPlantEnergyData(self, timeStep):
+        for plant in self.grid.plants:
+            self.grid.energyChanges_plants[(plant, timeStep)] = plant.currEnergy
+
+
+    def getEnemyClusterSizeData(self, timeStep):
+        for ec in self.grid.enemies:
+            self.grid.sizeChanges_enemies[(ec, timeStep)] = ec.num
+
+    
     def run(self, maxSteps, plant, ec, maxGridEnergy, maxEnemyNum):
         """_summary_
             Führt die Hauptsimulationsschleife aus und aktualisiert den Zustand des Grids in jedem Schritt.
@@ -119,6 +129,8 @@ class Simulation():
         """
         
         self.displayInit()
+        self.getPlantEnergyData(0)
+        self.getEnemyClusterSizeData(0)
         count = 1
         
 
@@ -153,6 +165,8 @@ class Simulation():
             self.grid.displayEnemyNum()
             #self.grid.displayInteractionMatrix()
             self.grid.displayGrid()
+            self.getPlantEnergyData(count)
+            self.getEnemyClusterSizeData(count)
             count += 1
             #time.sleep(1)
 

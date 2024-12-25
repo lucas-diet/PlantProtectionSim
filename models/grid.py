@@ -20,6 +20,9 @@ class Grid():
         self.radiusFields = {}
         self.displaceComps = []
 
+        self.energyChanges_plants = {}
+        self.sizeChanges_enemies = {}
+
 
     def getGrid(self):
         return self.grid
