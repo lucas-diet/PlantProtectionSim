@@ -188,7 +188,7 @@ class Simulation():
             
             #self.clearConsole()
             print('\nSimulation-Step:', count)
-            self.grid.log.append(f'\n##### Simulation-Step:, {count} ######\n')
+            self.grid.log.append(f'\n##### Simulation-Step: {count} ######\n')
             self.runStep()
             self.grid.collectAndManageEnemies()
             self.grid.displayGridEnergy()
