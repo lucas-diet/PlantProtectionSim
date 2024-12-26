@@ -530,12 +530,12 @@ class Grid():
         """
         triggerEnemy, minClusterSize = trigger
         if ec.num < minClusterSize and ec.num > 0:
-            print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {signal.triggerCombination[0][1]}')
+            print(f'[DEBUG]: {ec.enemy.name}({signal.name}): {ec.num} < {minClusterSize} -> {signal.name} wird nicht ausgelöst')
             return
         if not plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal) and dist < 1:
             plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
             signal.signalCosts(plant)  # Reduziere Signal-Kosten
-            print(f'[DEBUG-Signal-{signal.name}]: {plant.name} ist alamiert durch {ec.enemy.name}')
+            print(f'[DEBUG]: {plant.name}({signal.name}): ist alamiert durch {ec.enemy.name}')
 
 
     def processSignalProduction(self, ec, plant, signal):
@@ -546,13 +546,13 @@ class Grid():
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
             if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
                 plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
-                print(f'[DEBUG-Signal-{signal.name}]: Produktionszähler nach Inkrementierung: {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
+                print(f'[DEBUG]: Produktionszähler {signal.name}: {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
             else:
                 # Wenn der Produktionszähler groß genug ist, produziere das Signal
                 plant.makeSignal(signal)
                 signal.activateSignal()
                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
-                print(f'[DEBUG]: {plant.name} besitzt das Signal {signal.name} durch {ec.enemy.name}')
+                print(f'[DEBUG]: {plant.name}({signal.name}) besitzt das Signal durch {ec.enemy.name}')
 
     
     def handleAfterEffectTime(self, ec, plant, signal):
@@ -571,13 +571,13 @@ class Grid():
             triggerEnemy, minClusterSize = trigger
             if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
-                print(f'[DEBUG-{signal.name}]: Reduziere Nachwirkzeit für {plant.name} {ec.enemy.name} auf {currAfterEffectTime}/{signal.afterEffectTime}')
+                print(f'[DEBUG]: Reduziere Nachwirkzeit für {plant.name}({signal.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
 
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
                 plant.setSignalPresence(signal, False)
-                print(f'[DEBUG-{signal.name}]: Nachwirkzeit abgelaufen. Signal entfernen für {plant.name}')
+                print(f'[DEBUG]: Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
 
                 # Zusätzliche Aktionen basierend auf dem Signaltyp
                 if signal.spreadType == 'symbiotic':
@@ -608,7 +608,7 @@ class Grid():
         triggerSignal, triggerEnemy, minClusterSize = trigger
 
         if ec.num < minClusterSize and ec.num > 0:
-            print(f'[DEBUG-Signal]: {ec.enemy.name} hat nicht die Mindestanzahl erreicht: {ec.num} < {minClusterSize}')
+            print(f'[DEBUG]: {ec.enemy.name}({toxin.name}): {ec.num} < {minClusterSize} --> {toxin.name} wird nicht ausgelöst')
             return
         if plant.isSignalPresent(signal) and not plant.isToxinAlarmed(toxin) and not plant.isToxinPresent(toxin) and dist < 1:
             plant.enemyToxinAlarm(toxin)
@@ -623,12 +623,11 @@ class Grid():
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Gift zu produzieren
             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
                 plant.incrementToxinProdCounter(ec, toxin)  # Erhöhe den Produktionszähler
-                print(f'[DEBUG-Gift-{toxin.name}]: Produktionszähler nach Inkrementierung: {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
-            else:
+                print(f'[DEBUG-Gift-]: Produktionszähler {toxin.name}: {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
                 # Wenn der Produktionszähler groß genug ist, produziere das Gift
                 plant.makeToxin(toxin)
                 toxin.toxinCosts(plant)  # Reduziere Gift-Kosten
-                print(f'[DEBUG]: {plant.name} ist jetzt giftig durch {ec.enemy.name}')
+                print(f'[DEBUG]: {plant.name}({toxin.name}) ist jetzt giftig durch {ec.enemy.name}')
                 
 
     def processSignalEffects(self, ec, plant):
@@ -653,12 +652,12 @@ class Grid():
                     # Verarbeite nicht-tödliche Toxine
                     if not toxin.deadly and plant.isToxinPresent(toxin) and ec.enemy == triggerEnemy and signal == triggerSignal and plant in toxin.plantTransmitter:
                         self.processNonDeadlyToxin(toxin, ec, plant, signal)
-                        print(f'[DEBUG-Toxin-{toxin.name}]: Nicht-tödliches Toxin verarbeitet für {ec.enemy.name}')
+                        print(f'[DEBUG]: Nicht-tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
 
                     # Verarbeite tödliche Toxine
                     elif toxin.deadly and plant.isToxinPresent(toxin) and plant in toxin.plantTransmitter:
                         self.processDeadlyToxin(toxin, ec, plant, signal)
-                        print(f'[DEBUG-Toxin-{toxin.name}]: Tödliches Toxin verarbeitet für {ec.enemy.name}')
+                        print(f'[DEBUG]: Tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
 
 
     def processNonDeadlyToxin(self, toxin, ec, plant, signal):
@@ -679,7 +678,7 @@ class Grid():
             triggerSignal, triggerEnemy, minClusterSize = trigger
             if triggerEnemy == ec.enemy:
                 toxin.empoisonEnemies(ec)
-                print(f'[DEBUG]: {ec.enemy.name} wurde durch das tödliche Toxin {toxin.name} vergiftet')
+                print(f'[DEBUG]: {ec.enemy.name} wurde {toxin.name} vergiftet')
             
 
     def resetToxically(self, ec, toxin, plant):
@@ -735,7 +734,7 @@ class Grid():
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
                 radius = plant.airSignalRange(signal)
-                print(f'[DEBUG]: Signalreichweite berechnet: {radius}')
+                print(f'[DEBUG]: Signalreichweite: {radius}')
                 self.radiusFields[(plant, signal)] = self.getFieldsInAirRadius(plant, radius)
 
                 print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.sendingSpeed}')
@@ -753,9 +752,6 @@ class Grid():
         keys_to_remove = [(p, s) for (p, s) in self.radiusFields.keys() if p == plant and s == signal]
         for key in keys_to_remove:
             del self.radiusFields[key]
-        #signal.radius = {k: v for k, v in signal.radius.items() if k[0] != plant}
-
-        print(f"[DEBUG]: Pflanze {plant.name} ist tot. Radien entfernt.")
         return  # Abbruch, da Pflanze tot ist
 
 
