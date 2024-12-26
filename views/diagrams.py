@@ -110,7 +110,7 @@ class Diagrams:
             title2 (str): Titel des zweiten Subplots.
         """
         aggregated_data = self.aggregateBySpecies(data_dict)
-        fig, axes = plt.subplots(1, 2, figsize=(14, 7))
+        fig, axes = plt.subplots(2, 1, figsize=(14, 7))
 
         total1 = {}
         total2 = {}

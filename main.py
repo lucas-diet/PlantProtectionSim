@@ -141,7 +141,7 @@ dia.dataPlotter(
     grid.plantData,
     measure1='energy',
     measure2='count',
-    title1='Total Energy by Plant Species Over Time',
+    title1='Energy by Plants Over Time',
     title2='Number of Plant Types Over Time'
 )
 
@@ -150,7 +150,7 @@ dia.dataPlotter(
     grid.EnemyData,
     measure1='size',
     measure2='count',
-    title1='Total Cluster Size by Enemy Species Over Time',
+    title1='Clustersize by Enemies Over Time',
     title2='Number of Enemy Types Over Time'
 )
 
