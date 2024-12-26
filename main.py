@@ -95,8 +95,8 @@ tox1 = Toxin(substance=s3,
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
              prodTime=4,
-             deadly=False,
-             eliminationStrength=1)
+             deadly=True,
+             eliminationStrength=3)
 
 tox2 = Toxin(substance=s4,
              plantTransmitter=[p3],
@@ -136,10 +136,26 @@ sim = Simulation(grid)
 sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 dia = Diagrams(grid)
-dia.plotPlantEnergy()
-dia.plotEnemyClusterSize()
-dia.plotSpeciesOverTime(data_dict=grid.plantTypeCounter, label_type='Plant', title='Number of Plant Species Over Time', ylabel='Count')
-dia.plotSpeciesOverTime(data_dict=grid.clusterTypeCounter, label_type='EnemyCluster', title='Number of Enemy Clusters Over Time', ylabel='Count')
+
+dia.dataPlotter(
+    grid.plantData,
+    measure1='energy',
+    measure2='count',
+    title1='Total Energy by Plant Species Over Time',
+    title2='Number of Plant Types Over Time'
+)
+
+
+dia.dataPlotter(
+    grid.EnemyData,
+    measure1='size',
+    measure2='count',
+    title1='Total Cluster Size by Enemy Species Over Time',
+    title2='Number of Enemy Types Over Time'
+)
+
+
+
 
 #gui = Gui()
 #gui.mainloop()
