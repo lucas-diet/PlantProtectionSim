@@ -6,6 +6,7 @@ class Simulation():
 
     def __init__(self, grid):
         self.grid = grid
+        self.simLength = 0
 
     
     def runStep(self):
@@ -184,5 +185,6 @@ class Simulation():
             self.getEnemyData(count)
             count += 1
             #time.sleep(1)
+        self.simLength = count - 1
 
             

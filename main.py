@@ -139,19 +139,21 @@ dia = Diagrams(grid)
 
 dia.dataPlotter(
     grid.plantData,
+    sim.simLength,
     measure1='energy',
     measure2='count',
-    title1='Energy by Plants Over Time',
-    title2='Number of Plant Types Over Time'
+    title1='Energy by Plant Type Over Time',
+    title2='Number by Plant Types Over Time'
 )
 
 
 dia.dataPlotter(
     grid.EnemyData,
+    sim.simLength,
     measure1='size',
     measure2='count',
-    title1='Clustersize by Enemies Over Time',
-    title2='Number of Enemy Types Over Time'
+    title1='Clustersize by Enemy Type Over Time',
+    title2='Number by Enemy Types Over Time'
 )
 
 

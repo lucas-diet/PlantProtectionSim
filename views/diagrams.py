@@ -97,12 +97,13 @@ class Diagrams:
         return aggregated_data
 
 
-    def dataPlotter(self, data_dict, measure1, measure2, title1, title2):
+    def dataPlotter(self, data_dict, simLength, measure1, measure2, title1, title2):
         """_summary_
             Plottet zwei verschiedene Messgrößen für mehrere Spezies in separaten Subplots,
                 einschließlich der Gesamtsumme für jede Messgröße.
         Args:
             data_dict (dict): Ein Dictionary mit (Spezies, Zeit) als Schlüssel.
+            simLength (int): Ist die Anzahl an Zeitschritten, die simuliert werden.
             measure1 (str): Die erste Messgröße, die geplottet wird ('energy' oder 'size').
             measure2 (str): Die zweite Messgröße, die geplottet wird ('count' für Pflanzenarten oder 'count' für Fressfeindarten).
             title1 (str): Titel des ersten Subplots.
@@ -113,62 +114,57 @@ class Diagrams:
 
         total1 = {}
         total2 = {}
-  
+
+        # Zeitpunkte von 0 bis Ende der Simulation
+        simArr = list(range(simLength + 1))
+
+        # Berechnung und Plotten von Measure1 gesamtenergie der Pflanzenarten bzw. Individuen der Feindarten.
         for species, measurements in aggregated_data.items():
             if measure1 in measurements:
                 time_series = measurements[measure1]
                 times, values = zip(*time_series)
+                
+                # Fehlende Werte in den Zeitreihen mit 0 auffüllen
+                filled_values = [values[times.index(time)] if time in times else 0 for time in simArr]
+                axes[0].plot(simArr, filled_values, label=species)
                 for time, value in time_series:
                     total1[time] = total1.get(time, 0) + value
-                axes[0].plot(times, values, label=species)
-        # Gesamtsumme der pflanzlichen Energie bzw. Anzahl Individuen der Fressfeinde
+
         if total1:
-            total_times, total_values = zip(*sorted(total1.items()))
-            axes[0].plot(total_times, total_values, label='Total', linestyle='--', color='black', linewidth=1)
+            # Auffüllen der Gesamtsumme für fehlende Zeitpunkte
+            total_values = [total1.get(time, 0) for time in simArr]
+            axes[0].plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
 
         axes[0].set_title(title1)
         axes[0].set_xlabel('Time')
+        axes[0].set_xticks(simArr)
         axes[0].set_ylabel(measure1.capitalize())
         axes[0].legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axes[0].grid(True)
 
+        # Berechnung und Plotten von Measure2 Gesamtanzahl einer Pflanzenart bzw. Clusteranzahl einer Feindart.
         for species, measurements in aggregated_data.items():
             if measure2 in measurements:
                 time_series = measurements[measure2]
                 times, values = zip(*time_series)
+                
+                # Fehlende Werte in den Zeitreihen mit 0 auffüllen
+                filled_values = [values[times.index(time)] if time in times else 0 for time in simArr]
+                axes[1].plot(simArr, filled_values, label=species)
                 for time, value in time_series:
                     total2[time] = total2.get(time, 0) + value
-                axes[1].plot(times, values, label=species)
-        # Gesamtsumme der verschiednen Pflanzenarten bzw. Fressfeindenarten
+
         if total2:
-            total_times, total_values = zip(*sorted(total2.items()))
-            axes[1].plot(total_times, total_values, label='Total', linestyle='--', color='black', linewidth=1)
+            # Auffüllen der Gesamtsumme für fehlende Zeitpunkte
+            total_values = [total2.get(time, 0) for time in simArr]
+            axes[1].plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
 
         axes[1].set_title(title2)
         axes[1].set_xlabel('Time')
+        axes[1].set_xticks(simArr)
         axes[1].set_ylabel(measure2.capitalize())
         axes[1].legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axes[1].grid(True)
 
         plt.tight_layout()
         plt.show()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
