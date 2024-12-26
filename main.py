@@ -156,7 +156,9 @@ dia.dataPlotter(
     title2='Number by Enemy Types Over Time'
 )
 
-
+# Beinhaltet die DEBUG-Prints, die bei bedarf ausgegen werden können.
+#sim.logSafer(grid.log)
+#sim.logLoader('log.pkl')
 
 
 #gui = Gui()

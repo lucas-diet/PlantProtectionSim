@@ -244,7 +244,8 @@ class EnemyCluster():
             return self.chooseRandomPlant(ePos)
         
         else:
-            print(f'[INfO]: keine Pflanze an Position {pPos} gefunden')
+            self.grid.log.append(f'keine Pflanze an Position {pPos} gefunden')
+            #print(f'[INfO]: keine Pflanze an Position {pPos} gefunden')
 
 
     def notifyPlantEaten(self, pPos):
@@ -253,7 +254,8 @@ class EnemyCluster():
             for enemyCluster in self.grid.enemies:
                 if enemyCluster.targetPlant == pPos:
                     enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
-                    print(f'[INFO]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
+                    self.grid.log.append(f'{enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
+                    #print(f'[INFO]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
              
 
     def reproduce(self):
@@ -288,7 +290,8 @@ class EnemyCluster():
                 np = self.findShortestPath(self.position, alternativePlant.position)
                 return np
             else:
-                print(f'[DEBUG]: {self.enemy.name} Keine alternative Pflanze gefunden!')
+                self.grid.log.append(f'{self.enemy.name} Keine alternative Pflanze gefunden!')
+                #print(f'[DEBUG]: {self.enemy.name} Keine alternative Pflanze gefunden!')
                 return []
         else:
             return None

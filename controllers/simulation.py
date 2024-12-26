@@ -1,6 +1,7 @@
 
 import os
 import time
+import pickle as pkl
 
 class Simulation():
 
@@ -133,6 +134,17 @@ class Simulation():
             
             self.grid.EnemyData[(ec.enemy.name, timeStep)]['size'] += ec.num
             self.grid.EnemyData[(ec.enemy.name, timeStep)]['count'] += 1
+
+    
+    def logSafer(self, logArr):
+        with open('log.pkl', 'wb') as file:
+            pkl.dump(logArr, file)
+
+    def logLoader(self, filename):
+        with open(filename, 'rb') as file:
+            log = pkl.load(file)
+        for itm in log:
+            print(itm)
   
 
     def run(self, maxSteps, plant, ec, maxGridEnergy, maxEnemyNum):
@@ -150,7 +162,7 @@ class Simulation():
         """
         self.displayInit()
         count = 1
-    
+        
         while True:
             if count - 1 == maxSteps:
                 print('maximum number of steps reached')
@@ -176,6 +188,7 @@ class Simulation():
             
             #self.clearConsole()
             print('\nSimulation-Step:', count)
+            self.grid.log.append(f'\n##### Simulation-Step:, {count} ######\n')
             self.runStep()
             self.grid.collectAndManageEnemies()
             self.grid.displayGridEnergy()
