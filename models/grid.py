@@ -488,7 +488,7 @@ class Grid():
         for toxin, ec, plant, signal in self.displaceComps:            
             # Neuer Pfad durch Giftwirkung
             newPath, targetPlant = toxin.displaceEnemies(ec, plant)
-            # Setze den neuen Pfad in `currentPath`
+            # Setze den neuen Pfad in 'currentPath'
             ec.currentPath = newPath
             ec.targetPlant = targetPlant
             while ec.currentPath:
