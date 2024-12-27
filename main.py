@@ -83,12 +83,12 @@ sig1 = Signal(substance=s1,
 sig2 = Signal(substance=s2,
               emit=[p1, p2, p3],
               receive=[p1, p2, p3],
-              triggerCombination=[[e2, 2], [e1, 2]],
+              triggerCombination=[[e2, 2]],
               prodTime=3, 
               spreadType='air',
               sendingSpeed=3,
               energyCosts=1,
-              afterEffectTime=2)
+              afterEffectTime=3)
 
 tox1 = Toxin(substance=s3, 
              plantTransmitter=[p1],
@@ -99,10 +99,10 @@ tox1 = Toxin(substance=s3,
              eliminationStrength=3)
 
 tox2 = Toxin(substance=s4,
-             plantTransmitter=[p3],
+             plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig2, e2, 2]],   
-             prodTime=2,
+             prodTime=3,
              deadly=False,
              eliminationStrength=1)
 
@@ -136,11 +136,8 @@ sim = Simulation(grid)
 sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 dia = Diagrams(grid)
-
-dia.dataPlotter(grid.plantData, sim.simLength, measure1='energy', measure2='count', title1='Energy by Plant Type Over Time', title2='Number by Plant Types Over Time')
-
-
-dia.dataPlotter(grid.EnemyData, sim.simLength, measure1='size', measure2='count', title1='Clustersize by Enemy Type Over Time', title2='Number by Enemy Types Over Time')
+#dia.dataPlotter(grid.plantData, sim.simLength, measure1='energy', measure2='count', title1='Energy by Plant Type Over Time', title2='Number by Plant Types Over Time')
+#dia.dataPlotter(grid.EnemyData, sim.simLength, measure1='size', measure2='count', title1='Clustersize by Enemy Type Over Time', title2='Number by Enemy Types Over Time')
 
 # Beinhaltet die DEBUG-Prints, die bei bedarf ausgegen werden können.
 #sim.logSafer(grid.log)
