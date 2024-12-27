@@ -488,7 +488,6 @@ class Grid():
         for toxin, ec, plant, signal in self.displaceComps:            
             # Neuer Pfad durch Giftwirkung
             newPath, targetPlant = toxin.displaceEnemies(ec, plant)
-
             # Setze den neuen Pfad in `currentPath`
             ec.currentPath = newPath
             ec.targetPlant = targetPlant
@@ -532,13 +531,13 @@ class Grid():
         """
         triggerEnemy, minClusterSize = trigger
         if ec.num < minClusterSize and ec.num > 0:
-            self.log.appen(f'{ec.enemy.name}({signal.name}): {ec.num} < {minClusterSize} -> {signal.name} wird nicht ausgelöst')
-            #print(f'[DEBUG]: {ec.enemy.name}({signal.name}): {ec.num} < {minClusterSize} -> {signal.name} wird nicht ausgelöst')
+            self.log.append(f'{ec.enemy.name}({signal.name}): {ec.num} < {minClusterSize} -> {signal.name} wird nicht ausgelöst')
+            print(f'[DEBUG]: {ec.enemy.name}({signal.name}): {ec.num} < {minClusterSize} -> {signal.name} wird nicht ausgelöst')
             return
         if not plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal) and dist < 1:
             plant.enemySignalAlarm(signal)  # Alarmiere die Pflanze
             signal.signalCosts(plant)  # Reduziere Signal-Kosten
-            #print(f'[DEBUG]: {plant.name}({signal.name}): ist alamiert durch {ec.enemy.name}')
+            print(f'[DEBUG]: {plant.name}({signal.name}): ist alamiert durch {ec.enemy.name}')
 
 
     def processSignalProduction(self, ec, plant, signal):
@@ -549,15 +548,15 @@ class Grid():
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
             if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
                 plant.incrementSignalProdCounter(ec, signal)  # Erhöhe den Produktionszähler
-                self.log.append(f'Produktionszähler {signal.name}: {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
-                #print(f'[DEBUG]: Produktionszähler {signal.name}: {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
+                self.log.append(f'Produktionszähler {plant.name}({signal.name}): {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
+                print(f'[DEBUG]: Produktionszähler {plant.name}({signal.name}): {plant.signalProdCounters[ec, signal]}/{signal.prodTime}')
             else:
                 # Wenn der Produktionszähler groß genug ist, produziere das Signal
                 plant.makeSignal(signal)
                 signal.activateSignal()
                 signal.signalCosts(plant)  # Reduziere Signal-Kosten
                 self.log.append(f'{plant.name}({signal.name}) besitzt das Signal durch {ec.enemy.name}')
-                #print(f'[DEBUG]: {plant.name}({signal.name}) besitzt das Signal durch {ec.enemy.name}')
+                print(f'[DEBUG]: {plant.name}({signal.name}) besitzt das Signal durch {ec.enemy.name}')
 
     
     def handleAfterEffectTime(self, ec, plant, signal):
@@ -577,13 +576,14 @@ class Grid():
             if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
                 self.log.append(f'Reduziere Nachwirkzeit für {plant.name}({signal.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
-                #print(f'[DEBUG]: Reduziere Nachwirkzeit für {plant.name}({signal.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
+                print(f'[DEBUG]: Reduziere Nachwirkzeit für {plant.name}({signal.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
 
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
                 plant.setSignalPresence(signal, False)
-                #print(f'[DEBUG]: Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
+                self.log.append(f'Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
+                print(f'[DEBUG]: Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
 
                 # Zusätzliche Aktionen basierend auf dem Signaltyp
                 if signal.spreadType == 'symbiotic':
@@ -615,7 +615,7 @@ class Grid():
 
         if ec.num < minClusterSize and ec.num > 0:
             self.log.append(f'{ec.enemy.name}({toxin.name}): {ec.num} < {minClusterSize} --> {toxin.name} wird nicht ausgelöst')
-            #print(f'[DEBUG]: {ec.enemy.name}({toxin.name}): {ec.num} < {minClusterSize} --> {toxin.name} wird nicht ausgelöst')
+            print(f'[DEBUG]: {ec.enemy.name}({toxin.name}): {ec.num} < {minClusterSize} --> {toxin.name} wird nicht ausgelöst')
             return
         if plant.isSignalPresent(signal) and not plant.isToxinAlarmed(toxin) and not plant.isToxinPresent(toxin) and dist < 1:
             plant.enemyToxinAlarm(toxin)
@@ -630,13 +630,13 @@ class Grid():
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Gift zu produzieren
             if plant.getToxinProdCounter(ec, toxin) < toxin.prodTime:
                 plant.incrementToxinProdCounter(ec, toxin)  # Erhöhe den Produktionszähler
-                self.log.append(f'Produktionszähler {toxin.name}: {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
-                #print(f'[DEBUG]: Produktionszähler {toxin.name}: {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
+                self.log.append(f'Produktionszähler {plant.name}({toxin.name}): {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
+                print(f'[DEBUG]: Produktionszähler {plant.name}({toxin.name}): {plant.toxinProdCounters[ec, toxin]}/{toxin.prodTime}')
                 # Wenn der Produktionszähler groß genug ist, produziere das Gift
                 plant.makeToxin(toxin)
                 toxin.toxinCosts(plant)  # Reduziere Gift-Kosten
                 self.log.append(f'{plant.name}({toxin.name}) ist jetzt giftig durch {ec.enemy.name}')
-                #print(f'[DEBUG]: {plant.name}({toxin.name}) ist jetzt giftig durch {ec.enemy.name}')
+                print(f'[DEBUG]: {plant.name}({toxin.name}) ist jetzt giftig durch {ec.enemy.name}')
                 
 
     def processSignalEffects(self, ec, plant):
@@ -662,12 +662,12 @@ class Grid():
                     if not toxin.deadly and plant.isToxinPresent(toxin) and ec.enemy == triggerEnemy and signal == triggerSignal and plant in toxin.plantTransmitter:
                         self.processNonDeadlyToxin(toxin, ec, plant, signal)
                         self.log.append(f'Nicht-tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
-                        #print(f'[DEBUG]: Nicht-tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
+                        print(f'[DEBUG]: Nicht-tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
 
                     # Verarbeite tödliche Toxine
                     elif toxin.deadly and plant.isToxinPresent(toxin) and plant in toxin.plantTransmitter:
                         self.processDeadlyToxin(toxin, ec, plant, signal)
-                        #print(f'[DEBUG]: Tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
+                        print(f'[DEBUG]: Tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
 
 
     def processNonDeadlyToxin(self, toxin, ec, plant, signal):
@@ -689,7 +689,7 @@ class Grid():
             if triggerEnemy == ec.enemy and triggerSignal == signal:
                 toxin.empoisonEnemies(ec)
                 self.log.append(f'{ec.enemy.name} wurde durch {toxin.name} vergiftet\n')
-                #print(f'[DEBUG]: {ec.enemy.name} wurde durch {toxin.name} vergiftet')
+                print(f'[DEBUG]: {ec.enemy.name} wurde durch {toxin.name} vergiftet')
             
 
     def resetToxically(self, ec, toxin, plant):
@@ -726,10 +726,10 @@ class Grid():
             if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                 if not rPlant.isSignalPresent(signal):
                     self.log.append(f'{sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}\n')
-                    #print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
+                    print(f'[DEBUG]: {sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}')
                 sPlant.incrementSignalSendCounter(ec, signal, rPlant)
                 self.log.append(f'Sendenstatus {signal.name} (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
-                #print(f'[DEBUG]: Sendenstatus {signal.name} (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+                print(f'[DEBUG]: Sendenstatus {signal.name} (Verbindung): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
             else:
                 sPlant.sendSignal(rPlant, signal)
                 # Um Rückkopplungen zu vermeiden wird der Counter erst zurückgesetzt wenn die empfangende Pflanze stirbt oder der Sender kein Signalstoff mehr hat.
@@ -737,10 +737,10 @@ class Grid():
                     sPlant.resetSignalSendCounter(ec, signal, rPlant)
                 if not rPlant.isSignalPresent(signal):
                     self.log.append(f'Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
-                    #print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
+                    print(f'[DEBUG]: Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
         else:
             self.log.append(f'{sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
-            #print(f'[DEBUG]: {sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
+            print(f'[DEBUG]: {sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
             pass 
 
 
@@ -750,10 +750,10 @@ class Grid():
                 # Berechnung der Signalreichweite
                 radius = plant.airSignalRange(signal)
                 self.log.append(f'Signalreichweite {signal.name}: {radius}')
-                #print(f'[DEBUG]: Signalreichweite {signal.name}: {radius}')
+                print(f'[DEBUG]: Signalreichweite {signal.name}: {radius}')
                 self.radiusFields[(plant, signal)] = self.getFieldsInAirRadius(plant, radius)
                 self.log.append(f'Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.sendingSpeed}')
-                #print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.sendingSpeed}')
+                print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.sendingSpeed}')
                 if plant.getSignalAirSpreadCounter(ec, signal) < signal.sendingSpeed - 1:
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   
@@ -799,11 +799,11 @@ class Grid():
                 if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                     sPlant.incrementSignalSendCounter(ec, signal, rPlant)
                     self.log.append(f'Sendenstatus (Luft): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
-                    #print(f'[DEBUG]: Sendenstatus (Luft): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
+                    print(f'[DEBUG]: Sendenstatus (Luft): {sPlant.name}{sPlant.position} -> {rPlant.name}{rPlant.position}: {sPlant.getSignalSendCounter(ec, signal, rPlant)}/{signal.sendingSpeed}')
                 else:
                     sPlant.sendSignal(rPlant, signal)
                     self.log.append(f'Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
-                    #print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')  
+                    print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')  
 
 
 

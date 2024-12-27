@@ -61,7 +61,7 @@ e1 = Enemy(name='e1', symbol='E1')
 e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
-ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,2), grid=grid, eatingSpeed=5, eatVictory=5)
+ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,2), grid=grid, eatingSpeed=1, eatVictory=1)
 ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,6), grid=grid, eatingSpeed=1, eatVictory=1)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
@@ -94,8 +94,8 @@ tox1 = Toxin(substance=s3,
              plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
-             prodTime=4,
-             deadly=True,
+             prodTime=2,
+             deadly=False,
              eliminationStrength=3)
 
 tox2 = Toxin(substance=s4,
@@ -117,7 +117,7 @@ grid.addEnemies(ec3)
 grid.addSubstance(sig1)
 grid.addSubstance(sig2)
 grid.addSubstance(tox1)
-#grid.addSubstance(tox2)
+grid.addSubstance(tox2)
     
 
 sc1 = SymbioticConnection(p1, p2)
@@ -136,7 +136,7 @@ sim = Simulation(grid)
 sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 dia = Diagrams(grid)
-
+'''
 dia.dataPlotter(
     grid.plantData,
     sim.simLength,
@@ -159,7 +159,7 @@ dia.dataPlotter(
 # Beinhaltet die DEBUG-Prints, die bei bedarf ausgegen werden können.
 #sim.logSafer(grid.log)
 #sim.logLoader('log.pkl')
-
+'''
 
 #gui = Gui()
 #gui.mainloop()
