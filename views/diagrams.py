@@ -7,8 +7,6 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
 import tkinter as tk
 
-import matplotlib.pyplot as plt
-
 class Diagrams:
     
     def __init__(self, grid):
@@ -58,7 +56,7 @@ class Diagrams:
                 aggregated_data[species][measure][time] += value
 
 
-    def fillMissingTimes(self, aggregated_data, all_times):
+    def fillMissingTimePoints(self, aggregated_data, all_times):
         """_summary_
             Füllt fehlende Zeitpunkte in den aggregierten Daten mit Null auf.
         Args:
@@ -100,16 +98,14 @@ class Diagrams:
         all_times = sorted(self.collectAllTimes(data_dict))
         aggregated_data = self.initializeAggregatedData(data_dict)
         self.populateAggregatedData(data_dict, aggregated_data)
-        self.fillMissingTimes(aggregated_data, all_times)
+        self.fillMissingTimePoints(aggregated_data, all_times)
         self.sortAggregatedData(aggregated_data)
         return aggregated_data
 
 
     def dataPlotter(self, root, data_dict, simLength, measure1, measure2, title1, title2):
-        """
-        Plottet zwei verschiedene Messgrößen für mehrere Spezies in separaten Subplots
-        in einem Tkinter-Fenster.
-
+        """_summary_
+            Hauptfunktion zum Erstellen des Tkinter-Fensters und der Subplots.
         Args:
             root (tk.Tk): Das Tkinter-Hauptfenster oder ein anderes Tkinter-Widget.
             data_dict (dict): Ein Dictionary mit (Spezies, Zeit) als Schlüssel.
@@ -123,62 +119,83 @@ class Diagrams:
         fig = Figure(figsize=(14, 7))
         axes = fig.subplots(2, 1)
 
-        total1 = {}
-        total2 = {}
-
         # Zeitpunkte von 0 bis Ende der Simulation
         simArr = list(range(simLength + 1))
 
-        # Measure1 plotten
-        for species, measurements in aggregated_data.items():
-            if measure1 in measurements:
-                time_series = measurements[measure1]
-                times, values = zip(*time_series)
-
-                # Fehlende Werte auffüllen
-                filled_values = [values[times.index(time)] if time in times else 0 for time in simArr]
-                axes[0].plot(simArr, filled_values, label=species)
-                for time, value in time_series:
-                    total1[time] = total1.get(time, 0) + value
-
-        if total1:
-            total_values = [total1.get(time, 0) for time in simArr]
-            axes[0].plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
-
-        axes[0].set_title(title1)
-        axes[0].set_xlabel('Time')
-        axes[0].set_xticks(simArr)
-        axes[0].set_ylabel(measure1.capitalize())
-        axes[0].legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
-        axes[0].grid(True)
-
-        # Measure2 plotten
-        for species, measurements in aggregated_data.items():
-            if measure2 in measurements:
-                time_series = measurements[measure2]
-                times, values = zip(*time_series)
-
-                # Fehlende Werte auffüllen
-                filled_values = [values[times.index(time)] if time in times else 0 for time in simArr]
-                axes[1].plot(simArr, filled_values, label=species)
-                for time, value in time_series:
-                    total2[time] = total2.get(time, 0) + value
-
-        if total2:
-            total_values = [total2.get(time, 0) for time in simArr]
-            axes[1].plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
-
-        axes[1].set_title(title2)
-        axes[1].set_xlabel('Time')
-        axes[1].set_xticks(simArr)
-        axes[1].set_ylabel(measure2.capitalize())
-        axes[1].legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
-        axes[1].grid(True)
+        # Erstellen der Subplots
+        self.create_subplot(axes[0], aggregated_data, simArr, measure1, title1, ylabel=measure1.capitalize())
+        self.create_subplot(axes[1], aggregated_data, simArr, measure2, title2, ylabel=measure2.capitalize())
 
         # Abstand zwischen den Subplots erhöhen
         fig.subplots_adjust(hspace=0.5)
 
-        # Speichern-Funktion
+        # Speicher-Funktion
+        self.add_save_button(root, fig)
+
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        # Canvas zeichnen
+        canvas.draw()
+
+
+    def create_subplot(self, axis, aggregated_data, simArr, measure, title, ylabel):
+        """_summary_
+            Erstellt einen Subplot für eine bestimmte Messgröße.
+        Args:
+            axis (matplotlib.axes.Axes): Die Achse, auf der geplottet wird.
+            aggregated_data (dict): Aggregierte Daten nach Spezies.
+            simArr (list): Liste der Zeitpunkte.
+            measure (str): Die zu plottende Messgröße.
+            title (str): Titel des Subplots.
+            ylabel (str): Beschriftung der y-Achse.
+        """
+        total = {}
+        for species, measurements in aggregated_data.items():
+            if measure in measurements:
+                time_series = measurements[measure]
+                times, values = zip(*time_series)
+
+                # Fehlende Werte auffüllen
+                filled_values = self.fillMissingValues(times, values, simArr)
+                axis.plot(simArr, filled_values, label=species)
+
+                # Totale berechnen
+                for time, value in time_series:
+                    total[time] = total.get(time, 0) + value
+
+        if total:
+            total_values = [total.get(time, 0) for time in simArr]
+            axis.plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
+
+        axis.set_title(title)
+        axis.set_xlabel('Time')
+        axis.set_xticks(simArr)
+        axis.set_ylabel(ylabel)
+        axis.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
+        axis.grid(True)
+
+
+    def fillMissingValues(self, times, values, simArr):
+        """_summary_
+            Füllt fehlende Werte in den Daten auf.
+        Args:
+            times (list): Liste der Zeitpunkte mit Daten.
+            values (list): Liste der Messwerte.
+            simArr (list): Vollständige Zeitpunkte.
+        Returns:
+            list: Liste der Messwerte mit aufgefüllten fehlenden Werten.
+        """
+        return [values[times.index(time)] if time in times else 0 for time in simArr]
+
+
+    def add_save_button(self, root, fig):
+        """_summary_
+            Fügt eine Schaltfläche zum Speichern des Plots hinzu.
+        Args:
+            root (tk.Tk): Das Tkinter-Hauptfenster.
+            fig (matplotlib.figure.Figure): Die Figur, die gespeichert werden soll.
+        """
         def save_plot():
             from tkinter.filedialog import asksaveasfilename
             file_path = asksaveasfilename(defaultextension='.png', 
@@ -190,17 +207,5 @@ class Diagrams:
                 fig.savefig(file_path)
                 print(f'Plot gespeichert unter: {file_path}')
 
-        # Speichern-Schaltfläche hinzufügen
         save_button = tk.Button(root, text='Save Plot', command=save_plot)
         save_button.pack(side=tk.BOTTOM, pady=10)
-
-
-        # Matplotlib-Canvas in Tkinter-Fenster einbinden
-        canvas = FigureCanvasTkAgg(fig, master=root)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-
-        # Canvas zeichnen
-        canvas.draw()
-
-    
