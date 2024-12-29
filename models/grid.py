@@ -19,6 +19,7 @@ class Grid():
         self.totalEnergy = 0
         self.radiusFields = {}
         self.displaceComps = []
+        self.afterDeathComps = []
 
         self.plantData = {}
         self.EnemyData = {}
@@ -397,6 +398,8 @@ class Grid():
             self.reduceClusterSize(ec)
         
         self.processNewPathAfterDisplace()
+        self.afterEffectTimeAfterDeath()
+            
 
 
     def canMove(self, ec):
@@ -497,6 +500,15 @@ class Grid():
                 self.updateEnemyClusterPos(ec, ec.position, newPos)  # Aktualisiere Position im Grid
         # Liste der Vertriebenen leeren
         self.displaceComps = []
+
+    
+    def afterEffectTimeAfterDeath(self):
+        """
+            Verarbeitet die Nachwirkeit von Signalen die durch gestorbene Fressfeinde ausgelöst wurden.
+        """
+        for toxin, ec, plant, signal in self.afterDeathComps:
+            self.handleAfterEffectTime(ec, plant, signal)
+        return
         
 
     def eatAndReproduce(self, ec, plant):
@@ -520,7 +532,7 @@ class Grid():
 
             # Nachwirkzeit verarbeiten
             key = (plant, signal)
-            if key not in processed_by_enemy:
+            if key not in processed_by_enemy and not ec.intoxicated:
                 self.handleAfterEffectTime(ec, plant, signal)
                 processed_by_enemy.add(key)
 
@@ -692,6 +704,9 @@ class Grid():
                 toxin.empoisonEnemies(ec)
                 self.log.append(f'{ec.enemy.name} wurde durch {toxin.name} vergiftet\n')
                 print(f'[DEBUG]: {ec.enemy.name} wurde durch {toxin.name} vergiftet')
+
+                ec.insertLastVisits(plant, signal)
+                self.afterDeathComps.append((toxin, ec, plant, signal))
             
 
     def resetToxically(self, ec, toxin, plant):
@@ -761,6 +776,7 @@ class Grid():
                 self.radiusFields[(plant, signal)] = self.getFieldsInAirRadius(plant, radius)
                 self.log.append(f'Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.sendingSpeed}')
                 print(f'[DEBUG]: Streustatus von {signal.name} für {plant.name} gegen {ec.enemy.name}: {plant.getSignalAirSpreadCounter(ec, signal) + 1}/{signal.sendingSpeed}')
+                
                 if plant.getSignalAirSpreadCounter(ec, signal) < signal.sendingSpeed - 1:
                     plant.incrementSignalRadius(ec, signal)
                     signal.signalCosts(plant)  # Reduziere die Signal-Kosten   

@@ -62,7 +62,7 @@ e2 = Enemy(name='e2', symbol='E2')
 e3 = Enemy(name='e3', symbol='E3')
 
 ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,2), grid=grid, eatingSpeed=1, eatVictory=1)
-ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,6), grid=grid, eatingSpeed=1, eatVictory=1)
+ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,2), grid=grid, eatingSpeed=1, eatVictory=1)
 ec3 = EnemyCluster(enemy=e3, num=1, speed=1, position=(0,4), grid=grid, eatingSpeed=10, eatVictory=10)
 
 s1 = Substance(name='s1', type='signal')
@@ -75,20 +75,20 @@ sig1 = Signal(substance=s1,
               receive=[p1, p2],
               triggerCombination=[[e1, 2]],
               prodTime=2,
-              spreadType='air',
+              spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=3)
+              afterEffectTime=5)
 
 sig2 = Signal(substance=s2,
               emit=[p1, p2, p3],
               receive=[p1, p2, p3],
-              triggerCombination=[[e2, 2]],
+              triggerCombination=[[e2, 2], [e1, 2]],
               prodTime=3, 
               spreadType='air',
               sendingSpeed=3,
               energyCosts=1,
-              afterEffectTime=3)
+              afterEffectTime=1)
 
 tox1 = Toxin(substance=s3, 
              plantTransmitter=[p1],

@@ -27,7 +27,7 @@ class Plant():
 
         self.signalProdCounters = {}
         self.signalSendingCounters = {}
-        self.afterEffectTime = 0
+        #self.afterEffectTime = 0
         self.afterEffectTimes = {}
 
         self.toxinAlarms = {}
