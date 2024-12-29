@@ -511,6 +511,10 @@ class Grid():
             Verarbeitet die Nachwirkeit von Signalen die durch gestorbene Fressfeinde ausgelöst wurden.
         """
         for toxin, ec, plant, signal in self.afterDeathComps:
+            for otherSignal in self.signals:
+                if plant.isSignalPresent(otherSignal):
+                    print(otherSignal.name)
+                    self.handleAfterEffectTime(ec, plant, otherSignal)
             self.handleAfterEffectTime(ec, plant, signal)
         return
         
