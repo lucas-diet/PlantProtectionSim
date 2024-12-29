@@ -78,7 +78,7 @@ sig1 = Signal(substance=s1,
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=5)
+              afterEffectTime=2)
 
 sig2 = Signal(substance=s2,
               emit=[p1, p2, p3],

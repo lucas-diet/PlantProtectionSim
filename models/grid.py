@@ -488,16 +488,19 @@ class Grid():
             Verarbeitet den neuen Weg nachdem ein Feindcluster durch ein nicht tötliches Gift vertieben wurde.
         """
         # Zustand: Vertreibung durch Gift
-        for toxin, ec, plant, signal in self.displaceComps:            
-            # Neuer Pfad durch Giftwirkung
-            newPath, targetPlant = toxin.displaceEnemies(ec, plant)
-            # Setze den neuen Pfad in 'currentPath'
-            ec.currentPath = newPath
-            ec.targetPlant = targetPlant
-            while ec.currentPath:
-                step = ec.currentPath.pop(0)  # Hole den nächsten Schritt
-                newPos = self.processEnemyMovement(ec, ec.position, [step])
-                self.updateEnemyClusterPos(ec, ec.position, newPos)  # Aktualisiere Position im Grid
+        for toxin, ec, plant, signal in self.displaceComps:
+            if not ec.currentPath:          
+                # Neuer Pfad durch Giftwirkung
+                newPath, targetPlant = toxin.displaceEnemies(ec, plant)
+                # Setze den neuen Pfad in 'currentPath'
+                ec.currentPath = newPath
+                ec.targetPlant = targetPlant
+                while ec.currentPath:
+                    step = ec.currentPath.pop(0)  # Hole den nächsten Schritt
+                    newPos = self.processEnemyMovement(ec, ec.position, [step])
+                    self.updateEnemyClusterPos(ec, ec.position, newPos)  # Aktualisiere Position im Grid
+            else:
+                pass
         # Liste der Vertriebenen leeren
         self.displaceComps = []
 
@@ -719,12 +722,10 @@ class Grid():
                 if preDist > 0:
                     plant.setToxinPresence(toxin, False)
                     plant.resetToxinProdCounter(ec, toxin)
-                    plant.setToxinAlarm(toxin, False)
         
         if toxin.deadly and plant.isToxinPresent(toxin) and toxin.eliminationStrength >= ec.num:
             plant.setToxinPresence(toxin, False)
             plant.resetToxinProdCounter(ec, toxin)
-            plant.setToxinAlarm(toxin, False) 
 
 
     def symCommunication(self, ec, plant, signal):
