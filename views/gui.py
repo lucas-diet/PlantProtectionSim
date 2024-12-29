@@ -65,6 +65,7 @@ class Gui:
 		
 		# Tab 1: Pflanzen
 		self.plants_tab = tk.Frame(self.sidebar_tabs)
+		self.plants_tab.pack(fill='both', expand=True)
 		self.sidebar_tabs.add(self.plants_tab, text='Plants')
 		
 		# Tab 2: Feinde
@@ -166,7 +167,7 @@ class Gui:
 		self.plants_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
 		
 		# Scrollbar an Canvas binden (nicht an Frame)
-		self.plants_setting_canvas.config(yscrollcommand=self.plants_scrollbar.set)
+		self.plants_setting_canvas.config(yscrollcommand=self.plants_scrollbar.set, highlightthickness=0)
 		
 		# Layout-Anpassung für den Canvas und Scrollbar
 		self.plants_tab.grid_rowconfigure(0, weight=1)
@@ -185,14 +186,6 @@ class Gui:
 			
 		for i in range(number_of_plants):
 			row = i * 5
-			
-			# Funktion, um nur einen Checkbutton aktiv zu lassen
-			def on_checkbutton_click(idx=i):
-				self.selectedPlayer.set(idx)
-				# Deaktiviert alle Checkbuttons außer dem gerade angeklickten
-				for j, btn in enumerate(self.players):
-					if j != idx:
-						btn.deselect()
 					
 			# Checkbutton für Pflanze
 			plant_checkbox = tk.Checkbutton(
@@ -293,7 +286,7 @@ class Gui:
 		self.enemies_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
 		
 		# Scrollbar an Canvas binden (nicht an Frame)
-		self.enemies_setting_canvas.config(yscrollcommand=self.enemies_scrollbar.set)
+		self.enemies_setting_canvas.config(yscrollcommand=self.enemies_scrollbar.set, highlightthickness=0)
 		
 		# Layout-Anpassung für den Canvas und Scrollbar
 		self.enemies_tab.grid_rowconfigure(0, weight=1)
@@ -305,14 +298,6 @@ class Gui:
 		offset = 16 # Offset, um die Feinde von den Pflanzen in der Variablen zu unterscheiden
 		for i in range(number_of_enemies):
 			row = i * 9
-			
-			# Funktion, um nur einen Checkbutton aktiv zu lassen
-			def on_checkbutton_click(idx=i):
-				self.selectedPlayer.set(idx)
-				# Deaktiviert alle Checkbuttons außer dem gerade angeklickten
-				for j, btn in enumerate(self.players):
-					if j != idx:
-						btn.deselect()
 						
 			# Checkbutton für Feind
 			enemy_checkbox = tk.Checkbutton(
@@ -399,7 +384,7 @@ class Gui:
 		self.substances_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
 		
 		# Scrollbar an Canvas binden (nicht an Frame)
-		self.substances_setting_canvas.config(yscrollcommand=self.substances_scrollbar.set)
+		self.substances_setting_canvas.config(yscrollcommand=self.substances_scrollbar.set, highlightthickness=0)
 		
 		# Layout-Anpassung für den Canvas und Scrollbar
 		self.substances_tab.grid_rowconfigure(0, weight=1)
