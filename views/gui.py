@@ -3,11 +3,14 @@ import tkinter as tk
 from tkinter import ttk
 
 
-class Gui:
-	def __init__(self):
+class Gui():
+	def __init__(self, grid, simulation, diagrams):
+		self.grid = grid
+		self.simulation = simulation
+		self.diagrams = diagrams
+
 		self.root = tk.Tk()
 		self.root.title('Simulator')
-		
 		self.PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
 		
 		self.windowSize()
@@ -111,7 +114,7 @@ class Gui:
 		tk.Button(self.top_frame, text='Simulate').grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Import').grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Export').grid(row=0, column=12, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Plot').grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Plot', command=self.openPlotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
 		
 	
 	def createSituation(self):
@@ -217,7 +220,7 @@ class Gui:
 			minEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
 			minEnergy_entry.grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
 			
-			repInter_label = tk.Label(self.plants_setting_frame, text='Reproduction:')
+			repInter_label = tk.Label(self.plants_setting_frame, text='Repro-Interval:')
 			repInter_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
 			repInter_entry = tk.Entry(self.plants_setting_frame, width=4)
 			repInter_entry.grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
@@ -685,3 +688,52 @@ class Gui:
 		# Erhöhe den Zähler für Feinde in dieser Zelle
 		self.enemy_positions[item_id] += 1
 		print(f'Feind platziert auf: {item_id}')
+
+	
+	def openPlotWindow(self):
+		"""
+		Öffnet ein neues Fenster, um die Plots anzuzeigen.
+		
+		Args:
+			data_dict (dict): Ein Dictionary mit den Daten.
+			simLength (int): Die Anzahl der Zeitschritte.
+			measure1 (str): Die erste Messgröße ('energy' oder 'size').
+			measure2 (str): Die zweite Messgröße ('count').
+			title1 (str): Titel des ersten Subplots.
+			title2 (str): Titel des zweiten Subplots.
+		"""
+		# Neues Tkinter-Fenster erstellen
+		self.plotWindow = tk.Tk()
+		self.plotWindow.title('Plot Window')
+
+		self.plot_tabs = ttk.Notebook(self.plotWindow)
+		
+		# Tab 1: Pflanzen
+		self.plants_plot_tab = tk.Frame(self.plotWindow)
+		self.plot_tabs.add(self.plants_plot_tab, text='Plants')
+		
+		# Tab 2: Feinde
+		self.enemies_plot_tab = tk.Frame(self.plotWindow)
+		self.plot_tabs.add(self.enemies_plot_tab, text='Enemies')
+		self.plot_tabs.pack(fill='both', expand=True)
+		
+		# Plot in das neue Fenster einbinden
+		self.diagrams.dataPlotter(
+			root=self.plants_plot_tab,
+			data_dict=self.grid.plantData,
+			simLength=self.simulation.simLength,
+			measure1='energy',
+			measure2='count',
+			title1='Energy by Plant Type Over Time',
+			title2='Number by Plant Types Over Time'
+		)
+		self.diagrams.dataPlotter(
+			root=self.enemies_plot_tab,
+			data_dict=self.grid.EnemyData,
+			simLength=self.simulation.simLength,
+			measure1='size',
+			measure2='count',
+			title1='Clustersize by Enemy Type Over Time',
+			title2='Number by Enemy Types Over Time'
+		)
+

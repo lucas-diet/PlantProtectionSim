@@ -3,6 +3,10 @@ import matplotlib
 matplotlib.use('TkAgg')  # Setze das Backend für matplot lib, bevor pyplot importiert wird
 print(matplotlib.get_backend())
 
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from matplotlib.figure import Figure
+import tkinter as tk
+
 import matplotlib.pyplot as plt
 
 class Diagrams:
@@ -101,20 +105,23 @@ class Diagrams:
         return aggregated_data
 
 
-    def dataPlotter(self, data_dict, simLength, measure1, measure2, title1, title2):
-        """_summary_
-            Plottet zwei verschiedene Messgrößen für mehrere Spezies in separaten Subplots,
-                einschließlich der Gesamtsumme für jede Messgröße.
+    def dataPlotter(self, root, data_dict, simLength, measure1, measure2, title1, title2):
+        """
+        Plottet zwei verschiedene Messgrößen für mehrere Spezies in separaten Subplots
+        in einem Tkinter-Fenster.
+
         Args:
+            root (tk.Tk): Das Tkinter-Hauptfenster oder ein anderes Tkinter-Widget.
             data_dict (dict): Ein Dictionary mit (Spezies, Zeit) als Schlüssel.
             simLength (int): Ist die Anzahl an Zeitschritten, die simuliert werden.
-            measure1 (str): Die erste Messgröße, die geplottet wird ('energy' oder 'size').
-            measure2 (str): Die zweite Messgröße, die geplottet wird ('count' für Pflanzenarten oder 'count' für Fressfeindarten).
+            measure1 (str): Die erste Messgröße ('energy' oder 'size').
+            measure2 (str): Die zweite Messgröße ('count').
             title1 (str): Titel des ersten Subplots.
             title2 (str): Titel des zweiten Subplots.
         """
         aggregated_data = self.aggregateBySpecies(data_dict)
-        fig, axes = plt.subplots(2, 1, figsize=(14, 7))
+        fig = Figure(figsize=(14, 7))
+        axes = fig.subplots(2, 1)
 
         total1 = {}
         total2 = {}
@@ -122,20 +129,19 @@ class Diagrams:
         # Zeitpunkte von 0 bis Ende der Simulation
         simArr = list(range(simLength + 1))
 
-        # Berechnung und Plotten von Measure1 gesamtenergie der Pflanzenarten bzw. Individuen der Feindarten.
+        # Measure1 plotten
         for species, measurements in aggregated_data.items():
             if measure1 in measurements:
                 time_series = measurements[measure1]
                 times, values = zip(*time_series)
-                
-                # Fehlende Werte in den Zeitreihen mit 0 auffüllen
+
+                # Fehlende Werte auffüllen
                 filled_values = [values[times.index(time)] if time in times else 0 for time in simArr]
                 axes[0].plot(simArr, filled_values, label=species)
                 for time, value in time_series:
                     total1[time] = total1.get(time, 0) + value
 
         if total1:
-            # Auffüllen der Gesamtsumme für fehlende Zeitpunkte
             total_values = [total1.get(time, 0) for time in simArr]
             axes[0].plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
 
@@ -146,20 +152,19 @@ class Diagrams:
         axes[0].legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axes[0].grid(True)
 
-        # Berechnung und Plotten von Measure2 Gesamtanzahl einer Pflanzenart bzw. Clusteranzahl einer Feindart.
+        # Measure2 plotten
         for species, measurements in aggregated_data.items():
             if measure2 in measurements:
                 time_series = measurements[measure2]
                 times, values = zip(*time_series)
-                
-                # Fehlende Werte in den Zeitreihen mit 0 auffüllen
+
+                # Fehlende Werte auffüllen
                 filled_values = [values[times.index(time)] if time in times else 0 for time in simArr]
                 axes[1].plot(simArr, filled_values, label=species)
                 for time, value in time_series:
                     total2[time] = total2.get(time, 0) + value
 
         if total2:
-            # Auffüllen der Gesamtsumme für fehlende Zeitpunkte
             total_values = [total2.get(time, 0) for time in simArr]
             axes[1].plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
 
@@ -170,5 +175,32 @@ class Diagrams:
         axes[1].legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axes[1].grid(True)
 
-        plt.tight_layout()
-        plt.show()
+        # Abstand zwischen den Subplots erhöhen
+        fig.subplots_adjust(hspace=0.5)
+
+        # Speichern-Funktion
+        def save_plot():
+            from tkinter.filedialog import asksaveasfilename
+            file_path = asksaveasfilename(defaultextension='.png', 
+                                            filetypes=[('PNG files', '*.png'),
+                                                    ('JPEG files', '*.jpg'),
+                                                    ('PDF files', '*.pdf'),
+                                                    ('All files', '*.*')])
+            if file_path:
+                fig.savefig(file_path)
+                print(f'Plot gespeichert unter: {file_path}')
+
+        # Speichern-Schaltfläche hinzufügen
+        save_button = tk.Button(root, text='Save Plot', command=save_plot)
+        save_button.pack(side=tk.BOTTOM, pady=10)
+
+
+        # Matplotlib-Canvas in Tkinter-Fenster einbinden
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+
+        # Canvas zeichnen
+        canvas.draw()
+
+    
