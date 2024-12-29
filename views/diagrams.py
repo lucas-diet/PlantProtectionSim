@@ -1,4 +1,8 @@
 
+import matplotlib
+matplotlib.use('TkAgg')  # Setze das Backend für matplot lib, bevor pyplot importiert wird
+print(matplotlib.get_backend())
+
 import matplotlib.pyplot as plt
 
 class Diagrams:

@@ -144,5 +144,5 @@ dia.dataPlotter(grid.EnemyData, sim.simLength, measure1='size', measure2='count'
 #sim.logLoader('log.pkl')
 ''''''
 
-#gui = Gui()
-#gui.mainloop()
+gui = Gui()
+gui.mainloop()

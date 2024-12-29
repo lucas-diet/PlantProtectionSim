@@ -1,333 +1,702 @@
 
 import tkinter as tk
-from tkinter import messagebox
-from tkinter import filedialog
+from tkinter import ttk
 
-from views.tooltip import Tooltip
 
 class Gui:
-
-    def __init__(self):
-        self.window = tk.Tk()
-        self.window.title('Initital Configuration')
-        
-        self.screen_width = self.window.winfo_screenwidth()
-        self.screen_height = self.window.winfo_screenheight()-200
-
-        window_width = 300
-        window_height = 300
-
-        center_x = int(self.screen_width / 2 - window_width / 2)
-        center_y = int(self.screen_height / 2 - window_height / 2)
-        
-        self.window.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-
-        self.createInitWindow()
-        
-        self.colorList_p = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
-        self.colorList_h = ['#FF0000', '#FF6347', '#FF4500', '#FF1493', '#DC143C', '#C8102E', '#B22222', '#8B0000', '#E9967A', '#F08080', '#F4A460', '#D70040', '#C71585', '#FF6F61', '#FF8C00']
-        self.colors = []
-
-        # Hold the ID of selected squares
-        self.selected_squares = []
-       
-    def createInitWindow(self):
-        numPlant_lab = tk.Label(text='number plants')
-        numherbi_lab = tk.Label(text='number herbivores')
-        numPlant_lab.place(x=10, y=10)
-        numherbi_lab.place(x=10, y=50)
-
-        # Validierungsfunktionen Teams
-        valiPlants_in = (self.window.register(self.inputValidation), '%P', '%W', 1, 16)
-        valiHerbi_in = (self.window.register(self.inputValidation), '%P', '%W', 0, 15)
-
-        self.numPlant_in = tk.Entry(width=10, validate='key', validatecommand=valiPlants_in)
-        self.numHerbi_in = tk.Entry( width=10, validate='key', validatecommand=valiHerbi_in)
-        self.numPlant_in.config(bg='white', fg='black')
-        self.numHerbi_in.config(bg='white', fg='black')
-        self.numPlant_in.place(x=130, y=10)
-        self.numHerbi_in.place(x=130, y=50)
-
-        girdSize_lab = tk.Label(text='grid size')
-        girdSize_lab.place(x=10, y=100)
-
-        # Validierungsfunktionen Grid
-        valiGrid_in = (self.window.register(self.inputValidation), '%P', '%W', 1, 80)
-
-        self.girdSize_in = tk.Entry(width=10, validate='key', validatecommand=valiGrid_in)
-        self.girdSize_in.config(bg='white', fg='black')
-        self.girdSize_in.place(x=130, y=100)
-
-        tip_lab1 = tk.Label(text='?', borderwidth=1, relief='solid')
-        tip_lab1.place(x=240, y=15)
-        Tooltip(tip_lab1, 'Enter the number of plants as a number of 1 to 16.')
-
-        tip_lab2 = tk.Label(text='?', borderwidth=1, relief='solid')
-        tip_lab2.place(x=240, y=55)
-        Tooltip(tip_lab2, 'Enter the number of herbivores as a number of 0 to 15.')
-
-        tip_lab3 = tk.Label(text='?', borderwidth=1, relief='solid')
-        tip_lab3.place(x=240, y=105)
-        Tooltip(tip_lab3, 'Enter the grid width as a number <= 80')
-
-        start_btn = tk.Button(text='start', command=self.openSimualtor)
-        start_btn.place(x=220, y=250)
-
-
-    def openSimualtor(self):
-        if self.numPlant_in.index('end') == 0:
-            messagebox.showwarning('Missing Input', 'Please enter a number')
-        
-        elif self.numHerbi_in.index('end') == 0:
-            messagebox.showwarning('Missing Input', 'Please enter a number')
-        
-        elif self.girdSize_in.index('end') == 0:
-            messagebox.showwarning('Missing Input', 'Please enter a number')
-        
-        else:
-            self.createSimWindow()
-            self.toolbarElements()
-            self.createTeams_labs('plants')
-            self.createTeams_labs('herbivors')
-
-    
-    def inputValidation(self, inp, widgetName, minVal, maxVal):
-        if inp == '':
-            return True
-        
-        if inp.isdigit() and len(inp) <= 2:
-            num = int(inp)
-            minVal = int(minVal)
-            maxVal = int(maxVal)
-
-            if minVal <= num <= maxVal:
-                return True
-            
-        widget = self.window.nametowidget(widgetName)
-        widget.bell()
-        messagebox.showwarning('Invalid Input', f'Please enter a number between {minVal} and {maxVal}.')
-        widget = self.window.nametowidget(widgetName)
-        self.window.after(0, lambda: widget.delete(0, tk.END))
-        return False
-    
-
-    def createSimWindow(self):
-        self.simWindow = tk.Tk()
-        self.selectedBtn = tk.IntVar(self.simWindow) # zum Zurücksetzen
-        self.simWindow.title('Simulator')
-        self.simWindow.geometry(f'{self.screen_width}x{self.screen_height}')
-
-        # Toolbar-Frame erstellen
-        self.toolbar = tk.Frame(self.simWindow)
-        self.toolbar.grid(row=0, column=0, columnspan=3, sticky='we')
-        self.simWindow.grid_rowconfigure(0, weight=0)
-
-        # Erstelle drei Rahmen (links, mitte, rechts)
-        self.leftFrame = tk.Frame(self.simWindow, bg='lightblue')
-        self.centerFrame = tk.Frame(self.simWindow)
-        self.rightFrame = tk.Frame(self.simWindow, bg='lightblue')
-
-        # Rahmen im Gitter anordnen (Zeile 1, da Zeile 0 für Toolbar reserviert ist)
-        self.leftFrame.grid(row=1, column=0, sticky='nswe')
-        self.centerFrame.grid(row=1, column=1, sticky='nswe')
-        self.rightFrame.grid(row=1, column=2, sticky='nswe')
-
-        # Spaltengewichte einstellen, um die Größe der Bereiche zu steuern
-        self.simWindow.grid_columnconfigure(0, weight=1)  # Linker Bereich
-        self.simWindow.grid_columnconfigure(1, weight=5)  # Mittlerer Bereich (größer)
-        self.simWindow.grid_columnconfigure(2, weight=0)  # Rechter Bereich
-
-        # Zeilengewicht einstellen, um die vertikale Dehnung zu ermöglichen
-        self.simWindow.grid_rowconfigure(0, weight=0)  # Toolbar, kein Dehnen
-        self.simWindow.grid_rowconfigure(1, weight=1)  # Hauptinhalt, dehnbar
-        self.simWindow.grid_rowconfigure(2, weight=0)  # Untere Leiste, kein Dehnen
-
-        self.bottonbar = tk.Frame(self.simWindow, height=15)
-        self.bottonbar.grid(row=2, column=0, columnspan=3, sticky='we')
-
-        self.createPlantsFrame()
-        self.createHerbivorFrame()
-        self.createBattlefield()
-        
-    def createTeams_labs(self, team):
-        checkBtnList = []
-        plants = int(self.numPlant_in.get())
-        herbivors = int(self.numHerbi_in.get())
-        
-        if not hasattr(self, 'selectedBtn'):
-            self.selectedBtn = tk.IntVar(self.simWindow)   
-        
-        if team == 'plants':
-            
-            for plantBtn in checkBtnList:
-                plantBtn.destroy()
-
-            checkBtnList.clear()
-
-            for i in range(plants):
-                newPlant = tk.Checkbutton(self.leftFrame, text=f'plant {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i, offvalue=0)
-                newPlant.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                checkBtnList.append(newPlant)
-                
-                newColor = tk.Label(self.leftFrame, text='   ', font=('Arial', 18), bg=self.colorList_p[i])
-                newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w') 
-        
-        elif team == 'herbivors':
-           
-            for herbivorBtn in checkBtnList:
-                herbivorBtn.destroy()
-
-            checkBtnList.clear()
-
-            for i in range(herbivors):
-                newHerbivor = tk.Checkbutton(self.rightFrame, text=f'herbivor {i+1}', font=('Arial', 18), variable=self.selectedBtn, onvalue=i+plants, offvalue=0)
-                newHerbivor.grid(row=i+1, column=0, padx=10, pady=10, sticky='w')
-                checkBtnList.append(newHerbivor)
-
-                newColor = tk.Label(self.rightFrame, text='   ', font=('Arial', 18), bg=self.colorList_h[i])
-                newColor.grid(row=i+1, column=1, padx=10, pady=10, sticky='w')
-
-
-    def createPlantsFrame(self):
-        plantHeader = tk.Frame(self.leftFrame)
-        plantHeader.grid(row=0, column=0, columnspan=2, sticky='nswe')
-
-        self.leftFrame.grid_rowconfigure(0, weight=0)  # plantHeader nicht dehnbar in der Höhe
-        self.leftFrame.grid_rowconfigure(1, weight=0)  # darunterliegende Zeile dehnbar
-        self.leftFrame.grid_columnconfigure(1, weight=1)  # gesamte Breite nutzen
-
-        plantsPara_lab = tk.Label(plantHeader, text='plants parameter', bg='blue', font=('Arial', 25))
-        plantsPara_lab.grid(row=2, column=0, sticky='nswe')
-
-        plantHeader.grid_rowconfigure(0, weight=1)
-        plantHeader.grid_columnconfigure(0, weight=1)
-
-
-    def createHerbivorFrame(self):
-        # Header im rechten Bereich erstellen
-        herbivoreHeader = tk.Frame(self.rightFrame)
-        herbivoreHeader.grid(row=0, column=0, columnspan=2, sticky='nswe')
-
-        self.rightFrame.grid_rowconfigure(0, weight=0)  
-        self.rightFrame.grid_rowconfigure(1, weight=0)  
-        self.rightFrame.grid_columnconfigure(1, weight=1)
-
-        # Text im Header zentrieren
-        herbivorePara_lab = tk.Label(herbivoreHeader, text='herbivores parameter', bg='purple', font=('Arial', 25))
-        herbivorePara_lab.grid(row=0, column=0, sticky='nsew')
-
-        # Konfiguration der Zeilen und Spalten im herbivoreHeader
-        herbivoreHeader.grid_rowconfigure(0, weight=1)
-        herbivoreHeader.grid_columnconfigure(0, weight=1)
-
-
-    def createBattlefield(self):
-        self.canvasContainer = tk.Frame(self.centerFrame)
-        self.canvasContainer.pack(fill='both', expand=True)
-
-        # Canvas für das Grid
-        self.canvas = tk.Canvas(self.canvasContainer, bg='white', bd=0, relief='solid')
-        self.canvas.pack(fill='both', expand=True)
-
-        width = int(self.girdSize_in.get())
-        height = int(self.girdSize_in.get())
-
-        # Bereinige die Canvas vor dem Zeichnen
-        self.canvas.delete('all')
-
-        # Größe des Canvas berechnen
-        self.canvas.update()  # Aktualisiere die Canvas-Größe
-        canvas_width = self.canvas.winfo_width()
-        canvas_height = self.canvas.winfo_height()-30
-
-        # Bestimme die Größe jedes Quadrats
-        if width > 0 and height > 0:
-            square_width = canvas_width / width
-            square_height = canvas_height / height
-
-            # Zeichne die Quadrate
-            self.squares = {}
-            for i in range(width):
-                for j in range(height):
-                    x1 = i * square_width
-                    y1 = j * square_height
-                    x2 = x1 + square_width
-                    y2 = y1 + square_height
-                    squareID = self.canvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=2)
-                    self.squares[squareID] = (x1, y1, x2, y2)
-
-            self.canvas.bind('<Button-1>', self.canvasColor)
-            self.canvas.bind('<Button-2>', self.canvasOption)
-            
-
-    def canvasColor(self, event):
-        itm = self.canvas.find_closest(event.x, event.y)[0]
-        plants = int(self.numPlant_in.get())
-        herbivor = int(self.numHerbi_in.get())
-
-        self.colors = []
-        self.colors = self.colorList_p[:plants] + self.colorList_h[:herbivor]
-        
-        # Debug-Ausgaben zur Überprüfung
-        print(f"Colors list length: {len(self.colors)}")
-        print(f"Selected value: {self.selectedBtn.get()}")
-
-        if itm in self.squares:
-            if itm in self.selected_squares:
-                self.canvas.itemconfig(itm, fill='white')
-                self.selected_squares.remove(itm)
-            else:
-                selectedValue = self.selectedBtn.get()
-                if 0 <= selectedValue < len(self.colors):
-                    self.canvas.itemconfig(itm, fill=self.colors[selectedValue])
-                    self.selected_squares.append(itm)
-                else:
-                    print(f"Index out of range: {selectedValue}")
-    
-
-    def canvasOption(self, event):
-        if event.x >= 0 and event.x <= self.canvas.winfo_width() and event.y >= 0 and event.y <= self.canvas.winfo_height():
-            clickedID = self.canvas.find_closest(event.x, event.y)[0]
-            if clickedID in self.squares:
-                self.showContextMenu(event, clickedID)
-
-
-    def showContextMenu(self, event, squareID):
-        menu = tk.Menu(self.canvas, tearoff=0)
-        menu.add_command(label="Option 1", command=lambda: self.optionSelected(squareID, "Option 1"))
-        menu.add_command(label="Option 2", command=lambda: self.optionSelected(squareID, "Option 2"))
-        menu.add_command(label="Option 3", command=lambda: self.optionSelected(squareID, "Option 3"))
-
-        menu.post(event.x_root, event.y_root)
-
-    def optionSelected(self, square_id, option):
-		# Hier kannst du die Aktion für jede Option definieren
-		# Verwende square_id, um herauszufinden, welches Quadrat ausgewählt wurde
-        x1, y1, x2, y2 = self.squares[square_id]
-        print(f'Option {option} ausgewählt für Quadrat ID {square_id} mit Koordinaten ({x1}, {y1}, {x2}, {y2})')
-
-    def toolbarElements(self):
-        fileBtn = tk.Button(self.toolbar, text='save file', width=10, command=self.saveFile)
-        fileBtn.grid(row=0, column=0, sticky='nswe')
-
-        plotBtn = tk.Button(self.toolbar, text='plots', width=10)
-        plotBtn.grid(row=0, column=1, sticky='nswe')
-
-        timeBtn = tk.Button(self.toolbar, text='time settings', width=10)
-        timeBtn.grid(row=0, column=2, sticky='nswe')
-
-        simBtn = tk.Button(self.toolbar, text='simulation', width=10)
-        simBtn.grid(row=0, column=3, sticky='nswe')
-
-    def saveFile(self):
-        filePath = filedialog.asksaveasfilename(title='select a location to save the file', defaultextension='.txt')
-
-        print(filePath)
-
-
-    def mainloop(self):
-        self.window.mainloop()
-
-#if __name__ == '__main__':
-#    gui = Gui()
-#    gui.mainloop()
+	def __init__(self):
+		self.root = tk.Tk()
+		self.root.title('Simulator')
+		
+		self.PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
+		
+		self.windowSize()
+		self.createAreas()
+		
+		self.selectedItem = tk.IntVar(value=-1)
+		self.players = []
+		
+	
+	def mainloop(self):
+		self.root.mainloop()
+	
+
+	def windowSize(self):
+		# Berechnen der Fenstergröße
+		window_width = self.root.winfo_screenwidth() - 200
+		window_height = self.root.winfo_screenheight() - 200
+		
+		# Berechnung der Position, um das Fenster zu zentrieren
+		center_x = int(self.root.winfo_screenwidth() / 2 - window_width / 2)
+		center_y = int(self.root.winfo_screenheight() / 2 - window_height / 2)
+		
+		# Setzen der Fenstergröße und Position
+		self.root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
+		
+		
+	def createAreas(self):
+		# Bereich oben
+		self.top_frame = tk.Frame(self.root)
+		self.top_frame.grid(row=0, column=0, columnspan=2, sticky='nsew')
+		self.topAreaWidgets()
+		
+		# Bereich links (Sidebar)
+		self.left_frame = tk.Frame(self.root, bg='lightgreen')
+		self.left_frame.grid(row=1, column=0, sticky='nsew')
+		
+		# Tabs in der Sidebar
+		self.createSidebarTabs()
+		
+		# Bereich rechts
+		self.right_frame = tk.Frame(self.root, padx=10, pady=10, bg='darkgray')
+		self.right_frame.grid(row=1, column=1, sticky='nsew')
+		
+		# Spalten und Zeilen skalierbar machen
+		self.root.grid_rowconfigure(0, weight=0)  # Oben
+		self.root.grid_rowconfigure(1, weight=6)  # Mitte
+		self.root.grid_columnconfigure(0, weight=2)  # Links
+		self.root.grid_columnconfigure(1, weight=9, uniform='equal')  # Rechts
+
+
+	def createSidebarTabs(self):
+		"""Erstellt Tabs für die Sidebar."""
+		# Notebook für Tabs
+		self.sidebar_tabs = ttk.Notebook(self.left_frame)
+		
+		# Tab 1: Pflanzen
+		self.plants_tab = tk.Frame(self.sidebar_tabs)
+		self.sidebar_tabs.add(self.plants_tab, text='Plants')
+		
+		# Tab 2: Feinde
+		self.enemies_tab = tk.Frame(self.sidebar_tabs)
+		self.sidebar_tabs.add(self.enemies_tab, text='Enemies')
+		
+		# Tab 3: Substanzen
+		self.substances_tab = tk.Frame(self.sidebar_tabs)
+		self.sidebar_tabs.add(self.substances_tab, text='Substances')
+		
+		# Packe das Notebook in die Sidebar
+		self.sidebar_tabs.pack(fill='both', expand=True)
+		
+		
+	def topAreaWidgets(self):
+		"""Erstellt die Widgets im oberen Bereich."""
+		# Gridgröße
+		tk.Label(self.top_frame, text='Grid-Size:').grid(row=0, column=0, padx=1, pady=1, sticky='w')
+		self.grid_size_entry = tk.Entry(self.top_frame, width=10)
+		self.grid_size_entry.grid(row=0, column=1, padx=1, pady=1, sticky='ew')
+		
+		# Pflanzen
+		tk.Label(self.top_frame, text='#Plants:').grid(row=0, column=2, padx=1, pady=1, sticky='w')
+		self.plants_entry = tk.Entry(self.top_frame, width=10)
+		self.plants_entry.grid(row=0, column=3, padx=1, pady=1, sticky='ew')
+		
+		# Fressfeinde
+		tk.Label(self.top_frame, text='#Enemies:').grid(row=0, column=4, padx=1, pady=1, sticky='w')
+		self.enemies_entry = tk.Entry(self.top_frame, width=10)
+		self.enemies_entry.grid(row=0, column=5, padx=1, pady=1, sticky='ew')
+		
+		# Substanzen
+		tk.Label(self.top_frame, text='#Substances:').grid(row=0, column=6, padx=1, pady=1, sticky='w')
+		self.substances_entry = tk.Entry(self.top_frame, width=10)
+		self.substances_entry.grid(row=0, column=7, padx=1, pady=1, sticky='ew')
+		
+		# Buttons
+		apply_button = tk.Button(self.top_frame, text='Apply', command=self.createSituation)
+		apply_button.grid(row=0, column=8, columnspan=1, pady=1)
+		
+		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
+		
+		tk.Button(self.top_frame, text='Simulate').grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Import').grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Export').grid(row=0, column=12, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Plot').grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
+		
+	
+	def createSituation(self):
+		self.createPlants_tab()
+		self.createEnemies_tab()
+		self.createSubstances_tab()
+		
+		self.createBattlefield()
+		
+	
+	def createPlants_tab(self):
+		try:
+			# Eingabe in eine Zahl umwandeln
+			number_of_plants = int(self.plants_entry.get())
+		except ValueError:
+			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			return
+		
+		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
+		if number_of_plants < 1 or number_of_plants > 16:
+			self.clear_plants_frame()  # Lösche bestehende Elemente
+			print('The number of plants must be between 1 and 16!')
+			return
+		
+		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
+		if hasattr(self, 'plants_setting_frame'):
+			self.clear_plants_frame()
+		else:
+			# Erstellen von Canvas, Frame und Scrollbar
+			self.create_canvas_and_frame_plants()
+		# Substanzen-Einstellungen erstellen
+		self.create_plants_settings(number_of_plants)
+		
+	
+	def clear_plants_frame(self):
+		"""Bereinigt alle Widgets im Frame der Substanzen"""
+		if hasattr(self, 'plants_setting_frame'):
+			for widget in self.plants_setting_frame.winfo_children():
+				widget.destroy()
+				
+	
+	def create_canvas_and_frame_plants(self):
+		# Canvas erstellen und konfigurieren
+		self.plants_setting_canvas = tk.Canvas(self.plants_tab, width=0)
+		self.plants_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
+		
+		# Frame erstellen und im Canvas einfügen
+		self.plants_setting_frame = tk.Frame(self.plants_setting_canvas)
+		self.plants_setting_canvas.create_window((0, 0), window=self.plants_setting_frame, anchor='nw')
+		
+		# Scrollbar erstellen und mit dem Canvas verbinden
+		self.plants_scrollbar = tk.Scrollbar(self.plants_tab, orient='vertical', command=self.plants_setting_canvas.yview)
+		self.plants_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
+		
+		# Scrollbar an Canvas binden (nicht an Frame)
+		self.plants_setting_canvas.config(yscrollcommand=self.plants_scrollbar.set)
+		
+		# Layout-Anpassung für den Canvas und Scrollbar
+		self.plants_tab.grid_rowconfigure(0, weight=1)
+		self.plants_tab.grid_columnconfigure(0, weight=1)
+				
+	
+	def create_plants_settings(self, number_of_plants):
+		"""Erstellt die Einstellungen für Pflanzen."""
+		
+		# Label für Abstand
+		tk.Label(self.plants_setting_frame, text='', width=25).grid(row=0, column=4, padx=1, pady=1, sticky='w')
+		
+		# Gemeinsame Variable für alle Checkbuttons
+		if not hasattr(self, 'selectedPlayer'):
+			self.selectedPlayer = tk.IntVar(value=-1)  # -1 bedeutet: Kein Button ausgewählt
+			
+		for i in range(number_of_plants):
+			row = i * 5
+			
+			# Funktion, um nur einen Checkbutton aktiv zu lassen
+			def on_checkbutton_click(idx=i):
+				self.selectedPlayer.set(idx)
+				# Deaktiviert alle Checkbuttons außer dem gerade angeklickten
+				for j, btn in enumerate(self.players):
+					if j != idx:
+						btn.deselect()
+					
+			# Checkbutton für Pflanze
+			plant_checkbox = tk.Checkbutton(
+				self.plants_setting_frame,
+				variable=self.selectedItem,  # Gemeinsame Variable
+				onvalue=i,  # Wert, wenn dieser Checkbutton ausgewählt wird
+				offvalue=-1,  # Wert, wenn kein Checkbutton ausgewählt ist
+				text=f'Plant {i+1}:'
+			)
+			plant_checkbox.grid(row=row, column=0, sticky='w', padx=2, pady=2)
+			
+			# Farbe der Pflanze
+			plant_color_label = tk.Label(self.plants_setting_frame, width=2, bg=self.PLANT_COLORS[i])
+			plant_color_label.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
+			
+			# Energie-Label und Eingabefelder
+			initEnergy_label = tk.Label(self.plants_setting_frame, text='Init-Energy:')
+			initEnergy_label.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
+			initEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
+			initEnergy_entry.grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
+			
+			growEnergy_label = tk.Label(self.plants_setting_frame, text='Growth-Rate:')
+			growEnergy_label.grid(row=row+1, column=2, sticky='w', padx=2, pady=2)
+			growEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
+			growEnergy_entry.grid(row=row+1, column=3, sticky='ew', padx=2, pady=2)
+			
+			minEnergy_label = tk.Label(self.plants_setting_frame, text='Min-Energy:')
+			minEnergy_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
+			minEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
+			minEnergy_entry.grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
+			
+			repInter_label = tk.Label(self.plants_setting_frame, text='Reproduction:')
+			repInter_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
+			repInter_entry = tk.Entry(self.plants_setting_frame, width=4)
+			repInter_entry.grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+			
+			minDist_label = tk.Label(self.plants_setting_frame, text='Min-Distance:')
+			minDist_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
+			minDist_entry = tk.Entry(self.plants_setting_frame, width=4)
+			minDist_entry.grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
+			
+			maxDist_label = tk.Label(self.plants_setting_frame, text='Max-Distance:')
+			maxDist_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
+			maxDist_entry = tk.Entry(self.plants_setting_frame, width=4)
+			maxDist_entry.grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
+			
+			# Platzhalter für Abstand
+			space_label = tk.Label(self.plants_setting_frame, width=4)
+			space_label.grid(row=row+4, column=0, padx=2, pady=2, sticky='w')
+			
+		# Scrollregion aktualisieren
+		self.plants_setting_frame.update_idletasks()
+		self.plants_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.plants_setting_canvas))
+		
+		
+	def createEnemies_tab(self):
+		try:
+			# Eingabe in eine Zahl umwandeln
+			number_of_enemies = int(self.enemies_entry.get())
+		except ValueError:
+			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			return
+		
+		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
+		if number_of_enemies < 0 or number_of_enemies > 15:
+			self.clear_enemies_frame()  # Lösche bestehende Elemente
+			print('The number of enemies must be between 1 and 16!')
+			return
+		
+		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
+		if hasattr(self, 'enemies_setting_frame'):
+			self.clear_enemies_frame()
+		else:
+			# Erstellen von Canvas, Frame und Scrollbar
+			self.create_canvas_and_frame_enemies()
+		# Substanzen-Einstellungen erstellen
+		self.create_enemies_settings(number_of_enemies)
+		
+		
+	def clear_enemies_frame(self):
+		"""Bereinigt alle Widgets im Frame der Substanzen"""
+		if hasattr(self, 'enemies_setting_frame'):
+			for widget in self.enemies_setting_frame.winfo_children():
+				widget.destroy()
+				
+				
+	def create_canvas_and_frame_enemies(self):
+		# Canvas erstellen und konfigurieren
+		self.enemies_setting_canvas = tk.Canvas(self.enemies_tab, width=0)
+		self.enemies_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
+		
+		# Frame erstellen und im Canvas einfügen
+		self.enemies_setting_frame = tk.Frame(self.enemies_setting_canvas)
+		self.enemies_setting_canvas.create_window((0, 0), window=self.enemies_setting_frame, anchor='nw')
+		
+		# Scrollbar erstellen und mit dem Canvas verbinden
+		self.enemies_scrollbar = tk.Scrollbar(self.enemies_tab, orient='vertical', command=self.enemies_setting_canvas.yview)
+		self.enemies_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
+		
+		# Scrollbar an Canvas binden (nicht an Frame)
+		self.enemies_setting_canvas.config(yscrollcommand=self.enemies_scrollbar.set)
+		
+		# Layout-Anpassung für den Canvas und Scrollbar
+		self.enemies_tab.grid_rowconfigure(0, weight=1)
+		self.enemies_tab.grid_columnconfigure(0, weight=1)
+		
+	
+	def create_enemies_settings(self, number_of_enemies):
+		tk.Label(self.enemies_setting_frame, text='', width=25).grid(row=0, column=4, padx=1, pady=1, sticky='w')
+		offset = 16 # Offset, um die Feinde von den Pflanzen in der Variablen zu unterscheiden
+		for i in range(number_of_enemies):
+			row = i * 9
+			
+			# Funktion, um nur einen Checkbutton aktiv zu lassen
+			def on_checkbutton_click(idx=i):
+				self.selectedPlayer.set(idx)
+				# Deaktiviert alle Checkbuttons außer dem gerade angeklickten
+				for j, btn in enumerate(self.players):
+					if j != idx:
+						btn.deselect()
+						
+			# Checkbutton für Feind
+			enemy_checkbox = tk.Checkbutton(
+				self.enemies_setting_frame,
+				variable=self.selectedItem,  # Gemeinsame Variable
+				onvalue=offset + i,  # Ein eindeutiger Wert für Feinde (Pflanzen sind 0-n, Feinde sind 100+)
+				offvalue=-1,  # Wert, wenn kein Checkbutton ausgewählt ist
+				text=f'Enemy-Cluster {i+1}:'
+			)
+			#enemy_checkbox = tk.Checkbutton(self.enemies_setting_frame, text=f'Enemy {i+1}:')
+			enemy_checkbox.grid(row=row, column=0, sticky='w', padx=2, pady=2)
+			
+			clusterNum_label = tk.Label(self.enemies_setting_frame, text='Cluster-Size:')
+			clusterNum_label.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
+			clusterNum_entry = tk.Entry(self.enemies_setting_frame, width=4)
+			clusterNum_entry.grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
+			
+			speed_label = tk.Label(self.enemies_setting_frame, text='Speed:')
+			speed_label.grid(row=row+1, column=2, sticky='w', padx=2, pady=2)
+			speed_entry = tk.Entry(self.enemies_setting_frame, width=4)
+			speed_entry.grid(row=row+1, column=3, sticky='ew', padx=2, pady=2)
+			
+			eatingSpeed_label = tk.Label(self.enemies_setting_frame, text='Eat-Speed:')
+			eatingSpeed_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
+			eatingSpeed_entry = tk.Entry(self.enemies_setting_frame, width=4)
+			eatingSpeed_entry.grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
+			
+			eatingVic_label = tk.Label(self.enemies_setting_frame, text='Eat-Victory:')
+			eatingVic_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
+			eatingVic_entry = tk.Entry(self.enemies_setting_frame, width=4)
+			eatingVic_entry.grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+			
+			space_label = tk.Label(self.enemies_setting_frame, width=4)
+			space_label.grid(row=row+3, column=0, padx=2, pady=2, sticky='w')
+			
+
+		self.enemies_setting_frame.update_idletasks()
+		self.enemies_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.enemies_setting_canvas))
+		
+	
+	def createSubstances_tab(self):
+		try:
+			# Eingabe in eine Zahl umwandeln
+			number_of_substances = int(self.substances_entry.get())
+		except ValueError:
+			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			return
+		
+		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
+		if number_of_substances < 0 or number_of_substances > 15:
+			self.clear_substances_frame()  # Lösche bestehende Elemente
+			print('The number of substances must be between 0 and 15!')
+			return
+		
+		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
+		if hasattr(self, 'substances_setting_frame'):
+			self.clear_substances_frame()
+		else:
+			# Erstellen von Canvas, Frame und Scrollbar
+			self.create_canvas_and_frame_substances()
+			
+		# Substanzen-Einstellungen erstellen
+		self.create_substances_settings(number_of_substances)
+				
+		
+	def clear_substances_frame(self):
+		"""Bereinigt alle Widgets im Frame der Substanzen"""
+		if hasattr(self, 'substances_setting_frame'):
+			for widget in self.substances_setting_frame.winfo_children():
+				widget.destroy()
+		
+	
+	def create_canvas_and_frame_substances(self):
+		# Canvas erstellen und konfigurieren
+		self.substances_setting_canvas = tk.Canvas(self.substances_tab, width=0)
+		self.substances_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
+		
+		# Frame erstellen und im Canvas einfügen
+		self.substances_setting_frame = tk.Frame(self.substances_setting_canvas)
+		self.substances_setting_canvas.create_window((0, 0), window=self.substances_setting_frame, anchor='nw')
+		
+		# Scrollbar erstellen und mit dem Canvas verbinden
+		self.substances_scrollbar = tk.Scrollbar(self.substances_tab, orient='vertical', command=self.substances_setting_canvas.yview)
+		self.substances_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
+		
+		# Scrollbar an Canvas binden (nicht an Frame)
+		self.substances_setting_canvas.config(yscrollcommand=self.substances_scrollbar.set)
+		
+		# Layout-Anpassung für den Canvas und Scrollbar
+		self.substances_tab.grid_rowconfigure(0, weight=1)
+		self.substances_tab.grid_columnconfigure(0, weight=1)
+	
+	
+	def create_substances_settings(self, number_of_substances):
+		tk.Label(self.substances_setting_frame, text='', width=15).grid(row=0, column=5, padx=1, pady=1, sticky='w')
+		
+		for i in range(number_of_substances):
+			row = i * 10 
+			
+			# Oberste Zeile: Checkbox und Dropdown
+			substance_checkbox = tk.Checkbutton(self.substances_setting_frame, text=f'Substance {i+1}:')
+			substance_checkbox.grid(row=row, column=0, sticky='w', padx=2, pady=2)
+
+			substance_options = ['Signal', 'Toxin']  # Dropdown-Optionen
+			substance_var = tk.StringVar()
+			substance_var.set(substance_options[0])
+			substance_menu = tk.OptionMenu(self.substances_setting_frame, substance_var, *substance_options)
+			substance_menu.grid(row=row, column=1, padx=2, pady=2, sticky='w')
+			substance_menu.config(fg='black', width=5)
+			
+			toxin_effect_checkbox = tk.Checkbutton(self.substances_setting_frame, text='Deadly Toxin')
+			toxin_effect_checkbox.grid(row=row, column=2, padx=2, pady=2, sticky='w')
+			toxin_effect_checkbox.config(state='disable')
+			
+			# Darunter: Spread-Type Label und Dropdown
+			spreadType_label = tk.Label(self.substances_setting_frame, text='Spread:')
+			spreadType_label.grid(row=row+1, column=0, padx=2, pady=2, sticky='w')
+
+			substance_spreadtype_options = ['Symbiotic', 'Air']  # Dropdown-Optionen
+			substance_spreadtype_var = tk.StringVar()
+			substance_spreadtype_var.set(substance_spreadtype_options[0])
+			substance_spreadtype_menu = tk.OptionMenu(self.substances_setting_frame, substance_spreadtype_var, *substance_spreadtype_options)
+			substance_spreadtype_menu.grid(row=row+1, column=1, padx=2, pady=2, sticky='w')
+			substance_spreadtype_menu.config(fg='black', width=5)
+			
+			# Eingabefeld für den Namen der Substanz (über mehrere Zellen)
+			name_label = tk.Label(self.substances_setting_frame, text='Name:')
+			name_label.grid(row=row+2, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			name_entry = tk.Entry(self.substances_setting_frame)
+			name_entry.grid(row=row+2, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+			
+			# Eingabefeld für den Produzenten der Substanz (über mehrere Zellen)
+			emit_label = tk.Label(self.substances_setting_frame, text='Producer:')
+			emit_label.grid(row=row+3, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			emit_entry = tk.Entry(self.substances_setting_frame)
+			emit_entry.grid(row=row+3, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+			
+			# Eingabefeld für den Empfänger der Substanz (über mehrere Zellen)
+			receive_label = tk.Label(self.substances_setting_frame, text='Receiver:')
+			receive_label.grid(row=row+4, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			receive_entry = tk.Entry(self.substances_setting_frame)
+			receive_entry.grid(row=row+4, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+			receive_checkbox_var = tk.IntVar()
+			
+			# Eingabefeld für den Trigger der Substanz (über mehrere Zellen)
+			trigger_label = tk.Label(self.substances_setting_frame, text='Trigger:')
+			trigger_label.grid(row=row+5, column=0, columnspan=1, padx=2, pady=1, sticky='w')
+			trigger_entry = tk.Entry(self.substances_setting_frame)
+			trigger_entry.grid(row=row+5, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+			
+			# Eingabefeld für den Produktionszeit der Substanz
+			prodTime_label = tk.Label(self.substances_setting_frame, text='Prod-Time:')
+			prodTime_label.grid(row=row+6, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			prodTime_entry = tk.Entry(self.substances_setting_frame, width=4)
+			prodTime_entry.grid(row=row+6, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+			
+			# Eingabefeld für die Sendegeschwindigkeit (Send-Speed)
+			sendSpeed_label = tk.Label(self.substances_setting_frame, text='Send-Speed:')
+			sendSpeed_label.grid(row=row+6, column=2, columnspan=1, padx=2, pady=2, sticky='w')
+			sendSpeed_entry = tk.Entry(self.substances_setting_frame, width=4)
+			sendSpeed_entry.grid(row=row+6, column=3, columnspan=1, padx=2, pady=2, sticky='w')
+			
+			# Eingabefeld für die Energiekosten (Energy-Costs)
+			eCosts_label = tk.Label(self.substances_setting_frame, text='Energy-Costs:')
+			eCosts_label.grid(row=row+7, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			eCosts_entry = tk.Entry(self.substances_setting_frame, width=4)
+			eCosts_entry.grid(row=row+7, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+			
+			# Eingabefeld für die Nachwirkzeit (AftereffectTime)
+			aft_label = tk.Label(self.substances_setting_frame, text='AfterEffectTime:')
+			aft_label.grid(row=row+7, column=2, columnspan=1, padx=2, pady=2, sticky='w')
+			aft_entry = tk.Entry(self.substances_setting_frame, width=4)
+			aft_entry.grid(row=row+7, column=3, columnspan=1, padx=2, pady=2, sticky='w')
+			
+			space_label = tk.Label(self.substances_setting_frame, width=4)
+			space_label.grid(row=row+8, column=0, padx=2, pady=2, sticky='w')
+			
+			# Ereignis an Substanzmenü binden, um den ausgewählten Wert zu überprüfen
+			substance_var.trace_add('write', lambda *args, substance_var=substance_var, receive_entry=receive_entry, aft_entry=aft_entry, substance_spreadtype_menu=substance_spreadtype_menu, toxin_effect_checkbox=toxin_effect_checkbox, sendSpeed_entry=sendSpeed_entry: self.substanceType_change(substance_var, receive_entry, aft_entry, substance_spreadtype_menu, toxin_effect_checkbox, sendSpeed_entry))
+			
+		self.substances_setting_frame.update_idletasks()
+		# Scrollregion aktualisieren, wenn das Frame konfiguriert wird
+		self.substances_setting_frame.bind('<Configure>',lambda e: self.update_scrollregion(self.substances_setting_canvas))
+	
+	
+	def substanceType_change(self, substance_var, receive_entry, aft_entry, substance_spreadtype_menu, toxin_effect_checkbox, sendSpeed_entry):
+		# Disable or enable fields based on the substance type
+		if substance_var.get() == 'Toxin':
+			receive_entry.config(state='disabled')
+			aft_entry.config(state='disabled')
+			substance_spreadtype_menu.config(state='disabled')
+			sendSpeed_entry.config(state='disable')
+			toxin_effect_checkbox.config(state='normal')
+		else:
+			receive_entry.config(state='normal')
+			aft_entry.config(state='normal')
+			substance_spreadtype_menu.config(state='normal')
+			sendSpeed_entry.config(state='normal')
+			toxin_effect_checkbox.config(state='disable')
+	
+	
+	def update_scrollregion(self, canvas, event=None):
+		"""Aktualisiert die Scrollregion des Canvas basierend auf dem gesamten Inhalt."""
+		
+		# Berechne die Bounding-Box des Canvas-Inhalts
+		bbox = canvas.bbox('all')
+		if bbox:
+			# Bounding-Box-Werte extrahieren
+			x1, y1, x2, y2 = bbox
+			y1 += 4  # Etwas Platz oben entfernen
+			y2 -= 4  # Etwas Platz unten entfernen
+			# Konfiguriere die Scrollregion des Canvas
+			canvas.config(scrollregion=(x1, y1, x2, y2))
+	
+
+	def createBattlefield(self):
+		try:
+			# Eingabe in eine Zahl umwandeln
+			gridSize = int(self.grid_size_entry.get())
+		except ValueError:
+			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			print('Invalid input: Please enter a number.')
+			return
+		
+		# Überprüfen, ob die Zahl zwischen 1 und 80 liegt
+		if gridSize < 1 or gridSize > 80:
+			print('The number of fields must be between 1 and 80!')
+			return
+		
+		# Bereinigen bestehender Widgets und Frames
+		self.clear_grid_frame()
+		
+		# Neues Canvas und Grid erstellen
+		self.create_canvas_and_frame_grid()
+			
+	
+	def clear_grid_frame(self):
+		if hasattr(self, 'grid_frame'):
+			# Zerstöre alle Kinder-Widgets im Frame
+			for widget in self.grid_frame.winfo_children():
+				widget.destroy()
+			# Lösche den Frame selbst
+			self.grid_frame.destroy()
+			del self.grid_frame  # Entferne die Referenz auf das Attribut
+		
+	
+	def create_canvas_and_frame_grid(self):
+		self.grid_frame = tk.Frame(self.right_frame, bg='white')
+		self.grid_frame.pack(fill='both', expand=True)
+		
+		# Canvas für das Grid
+		self.gridCanvas = tk.Canvas(self.grid_frame, bg='white', bd=0, relief='solid')
+		self.gridCanvas.pack(fill='both', expand=True)
+		
+		#self.root.resizable(False, False)  # Deaktiviert Resize sowohl horizontal als auch vertikal
+		
+		# Registriere den Event-Handler für Mausklicks
+		self.gridCanvas.bind('<Button-1>', self.onGridClick_player)
+		#self.gridCanvas.bind("<Button-2>", self.onGridClick_enemies)
+		
+		# Hole die Grid-Größe aus dem Eingabefeld
+		try:
+			width = int(self.grid_size_entry.get())
+			height = int(self.grid_size_entry.get())
+		except ValueError:
+			# Fallback bei ungültiger Eingabe
+			width, height = 10, 10
+			
+		# Bereinige die Canvas vor dem Zeichnen
+		self.gridCanvas.delete('all')
+		
+		# Aktualisiere die Canvas-Größe
+		self.gridCanvas.update()
+		canvas_width = self.gridCanvas.winfo_width()
+		canvas_height = self.gridCanvas.winfo_height()
+		
+		
+		self.calculateSquareSize(width, height, canvas_width, canvas_height)
+		
+	
+	def calculateSquareSize(self, width, height, canvas_width, canvas_height):
+		# Berechne die maximale Quadratgröße, aber behalte die Höhe unverändert
+		if width > 0 and height > 0:
+			square_height = canvas_height / height  # Höhe bleibt unverändert
+			square_width = canvas_width / width    # Breite passt sich der Canvas-Breite an
+			
+			# Verwende die Höhe für die Quadratgröße, damit die Quadrate nicht zu hoch werden
+			square_size = square_height
+			
+			# Berechne die tatsächliche Breite und Höhe des Grids
+			grid_width = square_width * width
+			grid_height = square_size * height
+			
+			# Zentriere das Grid, indem du Offsets berechnest
+			x_offset = (canvas_width - grid_width) / 2
+			y_offset = (canvas_height - grid_height) / 2
+			
+			self.drawGrid(width, height, x_offset, y_offset, square_width, square_size)
+	
+	def drawGrid(self, width, height, x_offset, y_offset, square_width, square_size):
+		# Zeichne die Quadrate
+		self.squares = {}
+		for i in range(width):
+			for j in range(height):
+				x1 = x_offset + i * square_width
+				y1 = y_offset + j * square_size
+				x2 = x1 + square_width
+				y2 = y1 + square_size
+				squareID = self.gridCanvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=1)
+				self.squares[squareID] = (x1, y1, x2, y2)
+				
+				
+	def onGridClick_player(self, event):
+		# Ermittle die angeklickte Zelle
+		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
+		if clicked_item:
+			item_id = clicked_item[0]
+			
+			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
+			selected_index = self.selectedItem.get()
+			
+			if selected_index == -1:
+				# Keine Auswahl getroffen
+				return
+			
+			# Überprüfen, ob eine Pflanze oder ein Feind ausgewählt wurde
+			if selected_index < 16:  # Pflanzen haben Werte von 0 bis 15
+				self.place_plant_on_grid(item_id, selected_index)
+			else:  # Feinde haben Werte ab 16
+				self.place_enemy_on_grid(item_id, selected_index)
+	
+	
+	def place_plant_on_grid(self, item_id, selected_index):
+		"""
+		Platziert eine Pflanze auf dem Grid.
+		"""
+		# Entferne eventuell bereits vorhandene Pflanze (wenn die Zelle bereits eine Pflanze enthält)
+		if self.gridCanvas.itemcget(item_id, 'fill'):  # Prüfen, ob die Zelle bereits eine Farbe hat
+			self.gridCanvas.itemconfig(item_id, fill='')  # Entferne Farbe
+		
+		# Hole den Grünton der ausgewählten Pflanze
+		plant_color = self.PLANT_COLORS[selected_index]
+		
+		# Färbe die angeklickte Zelle
+		self.gridCanvas.itemconfig(item_id, fill=plant_color)
+		
+		print(f'Pflanze platziert auf: {item_id}')
+		
+	
+	def place_enemy_on_grid(self, item_id, selected_index):
+		"""
+		Platziert einen Feind auf dem Grid.
+		"""
+		# Berechne den Feindindex für den Feindnamen
+		enemy_name = f'E{selected_index - 15}'  # Feindname anhand des Index
+		
+		# Zellenposition ermitteln
+		bbox = self.gridCanvas.bbox(item_id)
+		cell_width = bbox[2] - bbox[0]  # Berechne die Breite der Zelle
+		cell_height = bbox[3] - bbox[1]  # Berechne die Höhe der Zelle
+		
+		# Berechne den Mittelpunkt der Zelle
+		x_pos = bbox[0] + cell_width / 2  # X-Mittelpunkt
+		y_pos = bbox[1] + cell_height / 2  # Y-Mittelpunkt
+		
+		# Wenn bereits Feinde auf dem Feld sind, müssen wir die Y-Position für den neuen Feind erhöhen
+		if not hasattr(self, 'enemy_positions'):
+			self.enemy_positions = {}  # Speichert die Feindpositionen pro Zelle
+		if item_id not in self.enemy_positions:
+			self.enemy_positions[item_id] = 0  # Zähler für Feinde in dieser Zelle
+			
+		# Feindnummer basierend auf der Anzahl der Feinde, die bereits auf dieser Zelle sind
+		current_enemy_count = self.enemy_positions[item_id]
+		y_pos += current_enemy_count * 15  # Verschiebe die Y-Position für jedes zusätzliche Feind-Element
+		
+		# Erstelle den Text für den Feind
+		self.gridCanvas.create_text(
+			x_pos, 
+			y_pos,
+			text=enemy_name,
+			font=('Arial', 8),  # Schriftart und -größe
+			fill='red'
+		)
+		
+		# Erhöhe den Zähler für Feinde in dieser Zelle
+		self.enemy_positions[item_id] += 1
+		print(f'Feind platziert auf: {item_id}')
