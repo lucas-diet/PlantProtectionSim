@@ -94,7 +94,7 @@ tox1 = Toxin(substance=s3,
              plantTransmitter=[p1],
              energyCosts=1,
              triggerCombination=[[sig1, e1, 2]],   
-             prodTime=2,
+             prodTime=5,
              deadly=True,
              eliminationStrength=3)
 

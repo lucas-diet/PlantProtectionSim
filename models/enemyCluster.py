@@ -254,8 +254,8 @@ class EnemyCluster():
             for enemyCluster in self.grid.enemies:
                 if enemyCluster.targetPlant == pPos:
                     enemyCluster.targetPlant = None  # Zurücksetzen des Ziels bei anderen Feinden
-                    self.grid.log.append(f'{enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
-                    print(f'[DEBUG]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einem neuen')
+                    self.grid.log.append(f'{enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einer neuen Pflanze')
+                    print(f'[DEBUG]: {enemyCluster.enemy.name} hat sein Ziel verloren und schaut nach einer neuen Pflanze')
              
 
     def reproduce(self):

@@ -513,8 +513,9 @@ class Grid():
             for otherSignal in self.signals:
                 if plant.isSignalPresent(otherSignal):
                     self.handleAfterEffectTime(ec, plant, otherSignal)
-            self.handleAfterEffectTime(ec, plant, signal)
-        return
+                else:
+                    self.handleAfterEffectTime(ec, plant, signal)
+            return
         
 
     def eatAndReproduce(self, ec, plant):
