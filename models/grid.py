@@ -495,12 +495,13 @@ class Grid():
                 # Setze den neuen Pfad in 'currentPath'
                 ec.currentPath = newPath
                 ec.targetPlant = targetPlant
+                print(newPath)
                 while ec.currentPath:
                     step = ec.currentPath.pop(0)  # Hole den nächsten Schritt
                     newPos = self.processEnemyMovement(ec, ec.position, [step])
                     self.updateEnemyClusterPos(ec, ec.position, newPos)  # Aktualisiere Position im Grid
             else:
-                pass
+                continue
         # Liste der Vertriebenen leeren
         self.displaceComps = []
 
