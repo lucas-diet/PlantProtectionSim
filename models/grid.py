@@ -495,7 +495,6 @@ class Grid():
                 # Setze den neuen Pfad in 'currentPath'
                 ec.currentPath = newPath
                 ec.targetPlant = targetPlant
-                print(newPath)
                 while ec.currentPath:
                     step = ec.currentPath.pop(0)  # Hole den nächsten Schritt
                     newPos = self.processEnemyMovement(ec, ec.position, [step])
@@ -513,7 +512,6 @@ class Grid():
         for toxin, ec, plant, signal in self.afterDeathComps:
             for otherSignal in self.signals:
                 if plant.isSignalPresent(otherSignal):
-                    print(otherSignal.name)
                     self.handleAfterEffectTime(ec, plant, otherSignal)
             self.handleAfterEffectTime(ec, plant, signal)
         return
