@@ -54,6 +54,7 @@ class Gui():
 		self.right_frame = tk.Frame(self.root, padx=10, pady=10, bg='darkgray')
 		self.right_frame.grid(row=1, column=1, sticky='nsew')
 		
+		
 		# Spalten und Zeilen skalierbar machen
 		self.root.grid_rowconfigure(0, weight=0)  # Oben
 		self.root.grid_rowconfigure(1, weight=6)  # Mitte
@@ -549,11 +550,13 @@ class Gui():
 	
 	def create_canvas_and_frame_grid(self):
 		self.grid_frame = tk.Frame(self.right_frame, bg='white')
-		self.grid_frame.pack(fill='both', expand=True)
+		self.grid_frame.pack_propagate(False)  # Verhindert, dass der Frame seine Größe an Inhalte anpasst
+		self.grid_frame.pack(fill='both', expand=True)  # Kein expand, um Vergrößerung zu vermeiden
 		
 		# Canvas für das Grid
 		self.gridCanvas = tk.Canvas(self.grid_frame, bg='white', bd=0, relief='solid')
 		self.gridCanvas.pack(fill='both', expand=True)
+		
 		
 		#self.root.resizable(False, False)  # Deaktiviert Resize sowohl horizontal als auch vertikal
 		
@@ -576,7 +579,6 @@ class Gui():
 		self.gridCanvas.update()
 		canvas_width = self.gridCanvas.winfo_width()
 		canvas_height = self.gridCanvas.winfo_height()
-		
 		
 		self.calculateSquareSize(width, height, canvas_width, canvas_height)
 		
