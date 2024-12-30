@@ -103,53 +103,25 @@ class Diagrams:
         return aggregated_data
 
 
-    def dataPlotter(self, root, data_dict, simLength, measure1, measure2, title1, title2):
+    def dataPlotter(self, root, data_dict, simLength, measure, title, ylabel):
         """_summary_
-            Hauptfunktion zum Erstellen des Tkinter-Fensters und der Subplots.
+            Erstellt einen einzelnen Plot in einem spezifischen Tkinter-Widget.
         Args:
-            root (tk.Tk): Das Tkinter-Hauptfenster oder ein anderes Tkinter-Widget.
-            data_dict (dict): Ein Dictionary mit (Spezies, Zeit) als Schlüssel.
-            simLength (int): Ist die Anzahl an Zeitschritten, die simuliert werden.
-            measure1 (str): Die erste Messgröße ('energy' oder 'size').
-            measure2 (str): Die zweite Messgröße ('count').
-            title1 (str): Titel des ersten Subplots.
-            title2 (str): Titel des zweiten Subplots.
-        """
-        aggregated_data = self.aggregateBySpecies(data_dict)
-        fig = Figure(figsize=(14, 7))
-        axes = fig.subplots(2, 1)
-
-        # Zeitpunkte von 0 bis Ende der Simulation
-        simArr = list(range(simLength + 1))
-
-        # Erstellen der Subplots
-        self.create_subplot(axes[0], aggregated_data, simArr, measure1, title1, ylabel=measure1.capitalize())
-        self.create_subplot(axes[1], aggregated_data, simArr, measure2, title2, ylabel=measure2.capitalize())
-
-        # Abstand zwischen den Subplots erhöhen
-        fig.subplots_adjust(hspace=0.5)
-
-        # Speicher-Funktion
-        self.add_save_button(root, fig)
-
-        canvas = FigureCanvasTkAgg(fig, master=root)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        # Canvas zeichnen
-        canvas.draw()
-
-
-    def create_subplot(self, axis, aggregated_data, simArr, measure, title, ylabel):
-        """_summary_
-            Erstellt einen Subplot für eine bestimmte Messgröße.
-        Args:
-            axis (matplotlib.axes.Axes): Die Achse, auf der geplottet wird.
-            aggregated_data (dict): Aggregierte Daten nach Spezies.
-            simArr (list): Liste der Zeitpunkte.
+            root (tk.Widget): Das Tkinter-Widget, in dem der Plot angezeigt wird.
+            data_dict (dict): Ein Dictionary mit den Daten.
+            simLength (int): Die Anzahl der Zeitschritte.
             measure (str): Die zu plottende Messgröße.
-            title (str): Titel des Subplots.
+            title (str): Titel des Plots.
             ylabel (str): Beschriftung der y-Achse.
         """
+        aggregated_data = self.aggregateBySpecies(data_dict)
+        simArr = list(range(simLength + 1))
+
+        # Matplotlib-Figure erstellen
+        fig = Figure(figsize=(11, 5))
+        axis = fig.add_subplot(111)
+
+        # Plot erstellen
         total = {}
         for species, measurements in aggregated_data.items():
             if measure in measurements:
@@ -168,12 +140,22 @@ class Diagrams:
             total_values = [total.get(time, 0) for time in simArr]
             axis.plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
 
+        # Achsen und Titel setzen
         axis.set_title(title)
         axis.set_xlabel('Time')
         axis.set_xticks(simArr)
         axis.set_ylabel(ylabel)
         axis.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axis.grid(True)
+
+        # Plot in das übergebene Widget einfügen
+        canvas = FigureCanvasTkAgg(fig, master=root)
+        canvas_widget = canvas.get_tk_widget()
+        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+        canvas.draw()
+
+        # Speicherbutton hinzufügen
+        self.save_plot(fig, root)
 
 
     def fillMissingValues(self, times, values, simArr):
@@ -189,17 +171,17 @@ class Diagrams:
         return [values[times.index(time)] if time in times else 0 for time in simArr]
 
 
-    def add_save_button(self, root, fig):
+    def save_plot(self, fig, root):
         """_summary_
             Fügt eine Schaltfläche zum Speichern des Plots hinzu.
         Args:
-            root (tk.Tk): Das Tkinter-Hauptfenster.
             fig (matplotlib.figure.Figure): Die Figur, die gespeichert werden soll.
+            root (tk.Tk): Das Tkinter-Hauptfenster.
         """
-        def save_plot():
+        def save_action():
             from tkinter.filedialog import asksaveasfilename
-            file_path = asksaveasfilename(defaultextension='.png', 
-                                            filetypes=[('PNG files', '*.png'),
+            file_path = asksaveasfilename(defaultextension='.png',
+                                        filetypes=[('PNG files', '*.png'),
                                                     ('JPEG files', '*.jpg'),
                                                     ('PDF files', '*.pdf'),
                                                     ('All files', '*.*')])
@@ -207,5 +189,8 @@ class Diagrams:
                 fig.savefig(file_path)
                 print(f'Plot gespeichert unter: {file_path}')
 
-        save_button = tk.Button(root, text='Save Plot', command=save_plot)
+        save_button = tk.Button(root, text='Save Plot', command=save_action)
         save_button.pack(side=tk.BOTTOM, pady=10)
+
+
+        

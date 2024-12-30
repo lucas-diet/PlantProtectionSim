@@ -648,7 +648,6 @@ class Gui():
 		
 		# Färbe die angeklickte Zelle
 		self.gridCanvas.itemconfig(item_id, fill=plant_color)
-		
 		print(f'Pflanze platziert auf: {item_id}')
 		
 	
@@ -693,49 +692,63 @@ class Gui():
 
 	
 	def openPlotWindow(self):
-		"""
-		Öffnet ein neues Fenster, um die Plots anzuzeigen.
-		
-		Args:
-			data_dict (dict): Ein Dictionary mit den Daten.
-			simLength (int): Die Anzahl der Zeitschritte.
-			measure1 (str): Die erste Messgröße ('energy' oder 'size').
-			measure2 (str): Die zweite Messgröße ('count').
-			title1 (str): Titel des ersten Subplots.
-			title2 (str): Titel des zweiten Subplots.
+		"""_summary_
+			Öffnet ein neues Fenster mit Tabs, in denen die Plots angezeigt werden.
 		"""
 		# Neues Tkinter-Fenster erstellen
 		self.plotWindow = tk.Tk()
-		self.plotWindow.title('Plot Window')
+		self.plotWindow.title('Plots')
 
+		# Notebook (Tabs) erstellen
 		self.plot_tabs = ttk.Notebook(self.plotWindow)
-		
-		# Tab 1: Pflanzen
-		self.plants_plot_tab = tk.Frame(self.plotWindow)
-		self.plot_tabs.add(self.plants_plot_tab, text='Plants')
-		
-		# Tab 2: Feinde
-		self.enemies_plot_tab = tk.Frame(self.plotWindow)
-		self.plot_tabs.add(self.enemies_plot_tab, text='Enemies')
-		self.plot_tabs.pack(fill='both', expand=True)
-		
-		# Plot in das neue Fenster einbinden
+
+		# Tab 1: Pflanzen - Energy
+		self.plants_energy_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.plants_energy_plot_tab, text='Plants-Energy')
 		self.diagrams.dataPlotter(
-			root=self.plants_plot_tab,
+			root=self.plants_energy_plot_tab,
 			data_dict=self.grid.plantData,
 			simLength=self.simulation.simLength,
-			measure1='energy',
-			measure2='count',
-			title1='Energy by Plant Type Over Time',
-			title2='Number by Plant Types Over Time'
-		)
-		self.diagrams.dataPlotter(
-			root=self.enemies_plot_tab,
-			data_dict=self.grid.EnemyData,
-			simLength=self.simulation.simLength,
-			measure1='size',
-			measure2='count',
-			title1='Clustersize by Enemy Type Over Time',
-			title2='Number by Enemy Types Over Time'
+			measure='energy',
+			title='Energy by Plant Type Over Time',
+			ylabel='Energy'
 		)
 
+		# Tab 2: Pflanzen - Count
+		self.plants_count_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.plants_count_plot_tab, text='Plants-Count')
+		self.diagrams.dataPlotter(
+			root=self.plants_count_plot_tab,
+			data_dict=self.grid.plantData,
+			simLength=self.simulation.simLength,
+			measure='count',
+			title='Number by Plant Types Over Time',
+			ylabel='Count'
+		)
+
+		# Tab 3: Feinde - Size
+		self.enemies_size_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.enemies_size_plot_tab, text='Enemies-Size')
+		self.diagrams.dataPlotter(
+			root=self.enemies_size_plot_tab,
+			data_dict=self.grid.EnemyData,
+			simLength=self.simulation.simLength,
+			measure='size',
+			title='Clustersize by Enemy Type Over Time',
+			ylabel='Cluster Size'
+		)
+
+		# Tab 4: Feinde - Count
+		self.enemies_count_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.enemies_count_plot_tab, text='Enemies-Count')
+		self.diagrams.dataPlotter(
+			root=self.enemies_count_plot_tab,
+			data_dict=self.grid.EnemyData,
+			simLength=self.simulation.simLength,
+			measure='count',
+			title='Number by Enemy Types Over Time',
+			ylabel='Count'
+		)
+
+		# Tabs anzeigen
+		self.plot_tabs.pack(fill='both', expand=True)
