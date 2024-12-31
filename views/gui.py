@@ -263,8 +263,8 @@ class Gui():
 			# Eingabe in eine Zahl umwandeln
 			number_of_enemies = int(self.enemies_entry.get())
 		except ValueError:
-			messagebox.showerror('Invalid input', 'Please enter a valid number')
 			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
 			return
 		
 		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
@@ -553,7 +553,6 @@ class Gui():
 			return
 		else:
 			self.grid = Grid(gridSize, gridSize)
-			print(gridSize)
 		
 		self.clear_grid_frame()
 		self.create_canvas_and_frame_grid(gridSize, gridSize)
@@ -589,8 +588,6 @@ class Gui():
 		canvas_width = self.gridCanvas.winfo_width()
 		canvas_height = self.gridCanvas.winfo_height()
 
-		#print(canvas_height, canvas_width)
-
 		# Weitere Logik, um das Grid zu zeichnen
 		self.calculateSquareSize(width, height, canvas_width, canvas_height)
 
@@ -608,8 +605,7 @@ class Gui():
 			# Zentriere das Grid, indem du Offsets berechnest
 			x_offset = (canvas_width - grid_width) / 2
 			y_offset = (canvas_height - grid_height) / 2
-		
-		#print(square_height, square_width, x_offset, y_offset)
+
 		self.drawGrid(width, height, x_offset, y_offset, square_width, square_height)
 
 
@@ -660,6 +656,7 @@ class Gui():
 	def place_plant_on_grid(self, coords, selected_index):
 		"""
 		Platziert eine Pflanze auf dem Grid an den gegebenen Koordinaten (x, y).
+		Zeigt die Energie der Pflanze oben innerhalb der Zelle an.
 		"""
 		square_id = self.squares.get(coords)
 		
@@ -673,27 +670,22 @@ class Gui():
 
 			except ValueError:
 				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
-				self.errer_plants.config(text='Fehler: Alle Eingabewerte müssen gültige Zahlen sein!', fg='red')
-				print('Fehler: Alle Eingabewerte müssen gültige Zahlen sein!')
+				self.errer_plants.config(text='Error: All input values ​​must be valid numbers!', fg='red')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
 			# Überprüfe, ob alle Eingabewerte nicht leer sind (außer repro_interval)
 			if not all([init_energy, growth_rate, min_energy, min_dist, max_dist]):
-				self.errer_plants.config(text='Fehler: Alle Felder müssen ausgefüllt sein!', fg='red')
-				print('Fehler: Alle Felder müssen ausgefüllt sein!')
-				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
-
-			# Wenn repro_interval negativ ist, gib eine Fehlermeldung aus
-			if repro_interval < 0:
-				self.errer_plants.config(text='Fehler: Reproduktionsintervall darf nicht negativ sein!', fg='red')
-				print('Fehler: Reproduktionsintervall darf nicht negativ sein!')
+				self.errer_plants.config(text='Error: All fields must be filled in!', fg='red')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
 			# Färbe die angeklickte Zelle
 			plant_color = self.PLANT_COLORS[selected_index]
 			self.gridCanvas.itemconfig(square_id, fill=plant_color)
+			
 			# Erzeuge und füge Pflanze hinzu
-			self.create_add_plant(selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color)
+			plant = self.create_add_plant(selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color)
+
+			self.plant_lifeline(plant, square_id)
 
 
 	def get_plant_input(self, plant_entries):
@@ -712,6 +704,24 @@ class Gui():
 		max_dist = float(plant_entries['maxDist'].get())
 
 		return init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist
+	
+
+	def plant_lifeline(self, plant, square_id):
+		# Berechne die Position der Zelle für die Energieanzeige
+		bbox = self.gridCanvas.bbox(square_id)  # Hole die Bounding Box der Zelle
+		if bbox:
+			# Berechne die Mitte der Zelle
+			x_pos = (bbox[0] + bbox[2]) / 2  # X-Mittelpunkt
+			y_pos = bbox[1] + 10  # Y-Position leicht innerhalb der Zelle, oben
+				
+			# Zeige die Energie oben innerhalb der Zelle an
+			self.gridCanvas.create_text(
+				x_pos, 
+				y_pos,
+				text=str(int((plant.currEnergy / plant.initEnergy) * 100))+'%',  # Zeigt die Energie der Pflanze an
+				font=('Arial', 10),  # Schriftart und -größe
+				fill='black'  # Textfarbe
+			)
 
 
 	def create_add_plant(self, selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color):
@@ -733,6 +743,7 @@ class Gui():
 		# Pflanze zur Grid hinzufügen
 		self.grid.addPlant(plant)
 		print(self.grid.plants)
+		return plant
 
 
 	def place_enemy_on_grid(self, coords, selected_index):
@@ -781,12 +792,11 @@ class Gui():
 			clusterSize, speed, eatSpeed, eatVictory = self.getEnemyinput(enemy_entries)
 		except ValueError as e:
 			print(f'Fehler beim Abrufen der Eingabewerte: {e}')
-			self.errer_enemies.config(text='Fehler: Alle Eingabewerte müssen gültige Zahlen sein!', fg='red')
+			self.errer_enemies.config(text='Error: All input values ​​must be valid numbers!', fg='red')
 			return None  # Ungültige Eingabewerte
 
 		if not all([clusterSize, speed, eatSpeed, eatVictory]):
-			self.errer_enemies.config(text='Fehler: Alle Felder müssen ausgefüllt sein!', fg='red')
-			print('Fehler: Alle Felder müssen ausgefüllt sein!')
+			self.errer_enemies.config(text='Error: All fields must be filled in!', fg='red')
 			return None  # Fehlende Eingabewerte
 
 		return clusterSize, speed, eatSpeed, eatVictory
@@ -860,34 +870,55 @@ class Gui():
 		print(self.grid.enemies)
 
 
-
 	def getEnemyinput(self, enemy_entries):
 		"""
 		Holt die Eingabewerte für den Feind aus den entsprechenden Entry-Widgets.
 		"""
-		try:
-			clusterSize = float(enemy_entries['clusterSize'].get())
-		except ValueError:
-			raise ValueError('Cluster-Size ist leer oder ungültig.')
-
-		try:
-			speed = float(enemy_entries['speed'].get())
-		except ValueError:
-			raise ValueError('Speed ist leer oder ungültig.')
-
-		try:
-			eatSpeed = float(enemy_entries['eatSpeed'].get())
-		except ValueError:
-			raise ValueError('Eat-Speed ist leer oder ungültig.')
-
-		try:
-			eatVictory = float(enemy_entries['eatVictory'].get())
-		except ValueError:
-			raise ValueError('Eat-Victory ist leer oder ungültig.')
-
+		clusterSize = float(enemy_entries['clusterSize'].get())
+		speed = float(enemy_entries['speed'].get())
+		eatSpeed = float(enemy_entries['eatSpeed'].get())
+		eatVictory = float(enemy_entries['eatVictory'].get())
+		
 		return clusterSize, speed, eatSpeed, eatVictory
 
 	
+	def draw_connection_line(self, coords1, coords2):
+		"""
+		Zeichnet eine Linie zwischen zwei benachbarten Zellen, um ihre Verbindung darzustellen.
+		"""
+		# Hole die Bounding Boxes der beiden Zellen
+		bbox1 = self.gridCanvas.bbox(self.squares[coords1])
+		bbox2 = self.gridCanvas.bbox(self.squares[coords2])
+
+		if bbox1 and bbox2:
+			# Berechne den Mittelpunkt beider Zellen
+			x1_pos = (bbox1[0] + bbox1[2]) / 2
+			y1_pos = (bbox1[1] + bbox1[3]) / 2
+			x2_pos = (bbox2[0] + bbox2[2]) / 2
+			y2_pos = (bbox2[1] + bbox2[3]) / 2
+
+			# Zeichne die Linie zwischen den beiden Mittelpunkten
+			self.gridCanvas.create_line(x1_pos, y1_pos, x2_pos, y2_pos, fill="blue", width=2)
+			print(f"Verbindung zwischen {coords1} und {coords2} hergestellt.")
+
+
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	def openPlotWindow(self):
 		"""_summary_
 			Öffnet ein neues Fenster mit Tabs, in denen die Plots angezeigt werden.
