@@ -5,14 +5,13 @@ import numpy as np
 
 class Plant():
 
-    def __init__(self, name, initEnergy, growthRateEnegry, minEnegrgy, reproductionIntervall, offspingEnergy, minDist, maxDist, position, grid, color):
+    def __init__(self, name, initEnergy, growthRateEnergy, minEnergy, reproductionIntervall, minDist, maxDist, position, grid, color):
         self.name = name
         self.initEnergy = initEnergy
         self.currEnergy = initEnergy
-        self.growthRateEnegry = growthRateEnegry
-        self.minEnergy = minEnegrgy
+        self.growthRateEnergy = growthRateEnergy
+        self.minEnergy = minEnergy
         self.reproductionIntervall = reproductionIntervall
-        self.offspringEnergy = offspingEnergy
         self.minDist = minDist
         self.maxDist = maxDist
         self.position = position
@@ -42,7 +41,7 @@ class Plant():
             Der Wachstumsfaktor gibt an, um wie viel Prozent die Energie jedes Mal zunimmt. 
             Die Methode fügt zudem 1 zum Alter des Objekts hinzu.
         """
-        self.currEnergy += self.initEnergy * (self.growthRateEnegry / 100)
+        self.currEnergy += self.initEnergy * (self.growthRateEnergy / 100)
         self.age += 1
 
 
@@ -74,10 +73,9 @@ class Plant():
                     offspringEnergy = float(energyInput) if energyInput else 100            # default ist 100 Einheiten
                     offspring = Plant(name=self.name, 
                                       initEnergy=self.offspringEnergy, 
-                                      growthRateEnegry=self.growthRateEnegry, 
-                                      minEnegrgy=self.minEnergy, 
-                                      reproductionIntervall=self.reproductionIntervall, 
-                                      offspingEnergy=offspringEnergy,
+                                      growthRateEnergy=self.growthRateEnergy, 
+                                      minEnergy=self.minEnergy, 
+                                      reproductionIntervall=self.reproductionIntervall,
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 

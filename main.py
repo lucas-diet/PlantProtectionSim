@@ -23,10 +23,9 @@ PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F'
 
 p1 = Plant(name='p1', 
            initEnergy=100, 
-           growthRateEnegry=1, 
-           minEnegrgy=50, 
+           growthRateEnergy=1, 
+           minEnergy=50, 
            reproductionIntervall=0, 
-           offspingEnergy=60, 
            minDist=1, 
            maxDist=2,
            position=(5, 2), 
@@ -35,10 +34,9 @@ p1 = Plant(name='p1',
     
 p2 = Plant(name='p2', 
            initEnergy=100,
-           growthRateEnegry=2,
-           minEnegrgy=50, 
+           growthRateEnergy=2,
+           minEnergy=50, 
            reproductionIntervall=0, 
-           offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
            position=(5, 5), 
@@ -47,10 +45,9 @@ p2 = Plant(name='p2',
 
 p3 = Plant(name='p3', 
            initEnergy=100,
-           growthRateEnegry=1,
-           minEnegrgy=50, 
+           growthRateEnergy=1,
+           minEnergy=50, 
            reproductionIntervall=0, 
-           offspingEnergy=60, 
            minDist=1,
            maxDist=2, 
            position=(5, 6), 
@@ -143,5 +140,5 @@ dia = Diagrams(grid)
 #sim.logSafer(grid.log)
 #sim.logLoader('log.pkl')
 
-gui = Gui(grid, sim, dia)
+gui = Gui(sim, dia)
 gui.mainloop()

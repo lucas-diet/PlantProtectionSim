@@ -2,10 +2,13 @@
 import tkinter as tk
 from tkinter import ttk
 
+from models.grid import Grid
+from models.plant import Plant
+
 
 class Gui():
-	def __init__(self, grid, simulation, diagrams):
-		self.grid = grid
+	def __init__(self, simulation, diagrams):
+		self.grid = None
 		self.simulation = simulation
 		self.diagrams = diagrams
 
@@ -51,7 +54,7 @@ class Gui():
 		self.createSidebarTabs()
 		
 		# Bereich rechts
-		self.right_frame = tk.Frame(self.root, padx=10, pady=10, bg='darkgray')
+		self.right_frame = tk.Frame(self.root, padx=5, pady=5)
 		self.right_frame.grid(row=1, column=1, sticky='nsew')
 		
 		
@@ -187,7 +190,10 @@ class Gui():
 		# Gemeinsame Variable für alle Checkbuttons
 		if not hasattr(self, 'selectedPlayer'):
 			self.selectedPlayer = tk.IntVar(value=-1)  # -1 bedeutet: Kein Button ausgewählt
-			
+		
+		# Dictionaries für Eingabefelder für jede Pflanze
+		self.plant_entries = {}  # Hier speichern wir die Eingabefelder für jede Pflanze
+		
 		for i in range(number_of_plants):
 			row = i * 5
 					
@@ -208,42 +214,43 @@ class Gui():
 			# Energie-Label und Eingabefelder
 			initEnergy_label = tk.Label(self.plants_setting_frame, text='Init-Energy:')
 			initEnergy_label.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
-			initEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
-			initEnergy_entry.grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i] = {}  # Erstelle einen Dictionary für die Eingabewerte dieser Pflanze
+			self.plant_entries[i]['initEnergy'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['initEnergy'].grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
 			
 			growEnergy_label = tk.Label(self.plants_setting_frame, text='Growth-Rate:')
 			growEnergy_label.grid(row=row+1, column=2, sticky='w', padx=2, pady=2)
-			growEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
-			growEnergy_entry.grid(row=row+1, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['growthRate'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['growthRate'].grid(row=row+1, column=3, sticky='ew', padx=2, pady=2)
 			
 			minEnergy_label = tk.Label(self.plants_setting_frame, text='Min-Energy:')
 			minEnergy_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
-			minEnergy_entry = tk.Entry(self.plants_setting_frame, width=4)
-			minEnergy_entry.grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['minEnergy'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['minEnergy'].grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
 			
 			repInter_label = tk.Label(self.plants_setting_frame, text='Repro-Interval:')
 			repInter_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
-			repInter_entry = tk.Entry(self.plants_setting_frame, width=4)
-			repInter_entry.grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['reproInterval'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['reproInterval'].grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
 			
 			minDist_label = tk.Label(self.plants_setting_frame, text='Min-Distance:')
 			minDist_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
-			minDist_entry = tk.Entry(self.plants_setting_frame, width=4)
-			minDist_entry.grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['minDist'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['minDist'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
 			
 			maxDist_label = tk.Label(self.plants_setting_frame, text='Max-Distance:')
 			maxDist_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
-			maxDist_entry = tk.Entry(self.plants_setting_frame, width=4)
-			maxDist_entry.grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['maxDist'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['maxDist'].grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
 			
 			# Platzhalter für Abstand
 			space_label = tk.Label(self.plants_setting_frame, width=4)
 			space_label.grid(row=row+4, column=0, padx=2, pady=2, sticky='w')
-			
+		
 		# Scrollregion aktualisieren
 		self.plants_setting_frame.update_idletasks()
 		self.plants_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.plants_setting_canvas))
-		
+
 		
 	def createEnemies_tab(self):
 		try:
@@ -518,6 +525,196 @@ class Gui():
 	
 
 	def createBattlefield(self):
+		
+		gridSize = int(self.grid_size_entry.get())
+		if gridSize < 1 or gridSize > 80:
+			print('The number of fields must be between 1 and 80!')
+			return
+		else:
+			self.grid = Grid(gridSize, gridSize)
+			print(gridSize)
+		
+		self.clear_grid_frame()
+		self.create_canvas_and_frame_grid(gridSize, gridSize)
+
+
+	def clear_grid_frame(self):
+		if hasattr(self, 'grid_frame'):
+			# Zerstöre alle Kinder-Widgets im Frame
+			for widget in self.grid_frame.winfo_children():
+				widget.destroy()
+			# Lösche den Frame selbst
+			self.grid_frame.destroy()
+			del self.grid_frame  # Entferne die Referenz auf das Attribut
+
+
+	def create_canvas_and_frame_grid(self, width, height):
+		self.grid_frame = tk.Frame(self.right_frame, bg='white')
+		self.grid_frame.pack_propagate(False)  # Verhindert, dass der Frame seine Größe an Inhalte anpasst
+		self.grid_frame.pack(fill='both', expand=True)
+
+		# Canvas für das Grid
+		self.gridCanvas = tk.Canvas(self.grid_frame, bg='white', bd=0, relief='solid')
+		self.gridCanvas.pack(fill='both', expand=True)
+
+		# Registriere den Event-Handler für Mausklicks
+		self.gridCanvas.bind('<Button-1>', self.onGridClick_player)
+
+		# Bereinige die Canvas vor dem Zeichnen
+		self.gridCanvas.delete('all')
+
+		# Aktualisiere die Canvas-Größe
+		self.gridCanvas.update()
+		canvas_width = self.gridCanvas.winfo_width()
+		canvas_height = self.gridCanvas.winfo_height()
+
+		#print(canvas_height, canvas_width)
+
+		# Weitere Logik, um das Grid zu zeichnen
+		self.calculateSquareSize(width, height, canvas_width, canvas_height)
+
+
+	def calculateSquareSize(self, width, height, canvas_width, canvas_height):
+		# Berechne die maximale Quadratgröße, aber behalte die Höhe unverändert
+		if width > 0 and height > 0:
+			square_height = int(canvas_height / height)  # Höhe bleibt unverändert
+			square_width = int(canvas_width / width)    # Breite passt sich der Canvas-Breite an
+			
+			# Berechne die tatsächliche Breite und Höhe des Grids
+			grid_width = square_width * width
+			grid_height = square_height * height
+			
+			# Zentriere das Grid, indem du Offsets berechnest
+			x_offset = (canvas_width - grid_width) / 2
+			y_offset = (canvas_height - grid_height) / 2
+		
+		#print(square_height, square_width, x_offset, y_offset)
+		self.drawGrid(width, height, x_offset, y_offset, square_width, square_height)
+
+
+	def drawGrid(self, width, height, x_offset, y_offset, square_width, square_height):
+		# Zeichne die Quadrate
+		self.squares = {}
+		for i in range(width):
+			for j in range(height):
+				x1 = x_offset + i * square_width
+				y1 = y_offset + j * square_height
+				x2 = x1 + square_width
+				y2 = y1 + square_height 
+				squareID = self.gridCanvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=1)
+				self.squares[(i,j)] = squareID
+
+
+	def onGridClick_player(self, event):
+		# Ermittle die angeklickte Zelle
+		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
+		if clicked_item:
+			item_id = clicked_item[0]
+
+			# Finde die (x, y)-Koordinaten der angeklickten Zelle
+			clicked_coords = None
+			for coords, id in self.squares.items():
+				if id == item_id:
+					clicked_coords = coords
+					break
+
+			if clicked_coords is None:
+				print(f'Zelle mit ID {item_id} nicht gefunden.')
+				return
+
+			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
+			selected_index = self.selectedItem.get()
+			if selected_index == -1:
+				# Keine Auswahl getroffen
+				return
+
+			# Überprüfen, ob eine Pflanze oder ein Feind ausgewählt wurde
+			if selected_index < 16:  # Pflanzen haben Werte von 0 bis 15
+				self.place_plant_on_grid(clicked_coords, selected_index)
+			else:  # Feinde haben Werte ab 16
+				pass
+				#self.place_enemy_on_grid(clicked_coords, selected_index)
+
+
+	def place_plant_on_grid(self, coords, selected_index):
+		"""
+		Platziert eine Pflanze auf dem Grid an den gegebenen Koordinaten (x, y).
+		"""
+		square_id = self.squares.get(coords)
+		
+		if square_id:
+			# Hole die Eingabewerte für die Pflanze
+			plant_entries = self.plant_entries[selected_index]
+			
+			# Überprüfe, ob alle Eingabewerte gültig sind (nicht leer und im richtigen Format)
+			try:
+				init_energy = float(plant_entries['initEnergy'].get())
+				growth_rate = float(plant_entries['growthRate'].get())
+				min_energy = float(plant_entries['minEnergy'].get())
+				repro_interval = int(plant_entries['reproInterval'].get())
+				min_dist = float(plant_entries['minDist'].get())
+				max_dist = float(plant_entries['maxDist'].get())
+			except ValueError:
+				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
+				print("Fehler: Alle Eingabewerte müssen gültige Zahlen sein!")
+				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
+
+			# Überprüfe, ob alle Eingabewerte nicht leer sind
+			if not all([init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist]):
+				print("Fehler: Alle Felder müssen ausgefüllt sein!")
+				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
+
+			# Pflanze instanziieren
+			plant_color = self.PLANT_COLORS[selected_index]
+			plant = Plant(
+				name=f'p{selected_index + 1}',
+				initEnergy=init_energy,
+				growthRateEnergy=growth_rate,  # Achte auf den richtigen Namen
+				minEnergy=min_energy,
+				reproductionIntervall=repro_interval,
+				minDist=min_dist,
+				maxDist=max_dist,
+				position=coords,
+				grid=self.grid,
+				color=plant_color
+			)
+			
+			# Pflanze zur Grid hinzufügen
+			self.grid.addPlant(plant)
+
+			# Färbe die angeklickte Zelle
+			self.gridCanvas.itemconfig(square_id, fill=plant_color)
+
+			# Ausgabe der Pflanze
+			print(f'Name: {plant.name}')
+			print(f'Initialenergie: {plant.initEnergy}')
+			print(f'Wachstumsrate Energie: {plant.growthRateEnergy}')
+			print(f'Minimalenergie: {plant.minEnergy}')
+			print(f'Vermehrungsintervall: {plant.reproductionIntervall}')
+			print(f'Minimale Distanz: {plant.minDist}')
+			print(f'Maximale Distanz: {plant.maxDist}')
+			print(f'Position: {plant.position}')
+			print(f'Farbe: {plant.color}')
+			print(self.grid.plants)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	'''
+	def createBattlefield(self):
 		try:
 			# Eingabe in eine Zahl umwandeln
 			gridSize = int(self.grid_size_entry.get())
@@ -689,7 +886,7 @@ class Gui():
 		# Erhöhe den Zähler für Feinde in dieser Zelle
 		self.enemy_positions[item_id] += 1
 		print(f'Feind platziert auf: {item_id}')
-
+	'''
 	
 	def openPlotWindow(self):
 		"""_summary_
