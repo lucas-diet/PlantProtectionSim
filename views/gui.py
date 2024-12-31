@@ -4,6 +4,7 @@ from tkinter import ttk
 
 from models.grid import Grid
 from models.plant import Plant
+from models.enemyCluster import Enemy, EnemyCluster
 
 
 class Gui():
@@ -110,7 +111,7 @@ class Gui():
 		self.substances_entry.grid(row=0, column=7, padx=1, pady=1, sticky='ew')
 		
 		# Buttons
-		apply_button = tk.Button(self.top_frame, text='Apply', command=self.createSituation)
+		apply_button = tk.Button(self.top_frame, text='Apply', command=self.create_situation)
 		apply_button.grid(row=0, column=8, columnspan=1, pady=1)
 		
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
@@ -121,7 +122,7 @@ class Gui():
 		tk.Button(self.top_frame, text='Plot', command=self.openPlotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
 		
 	
-	def createSituation(self):
+	def create_situation(self):
 		self.createPlants_tab()
 		self.createEnemies_tab()
 		self.createSubstances_tab()
@@ -193,10 +194,13 @@ class Gui():
 		
 		# Dictionaries für Eingabefelder für jede Pflanze
 		self.plant_entries = {}  # Hier speichern wir die Eingabefelder für jede Pflanze
-		
+		#Fehlermeldung wenn Eingabe nicht korrekt ist
+		self.errer_plants = tk.Label(self.plants_setting_frame, text='')
+		self.errer_plants.grid(row=0, column=0, columnspan=5, sticky='ew', padx=2, pady=2)
+				
 		for i in range(number_of_plants):
-			row = i * 5
-					
+			row = i * 6
+		
 			# Checkbutton für Pflanze
 			plant_checkbox = tk.Checkbutton(
 				self.plants_setting_frame,
@@ -205,47 +209,47 @@ class Gui():
 				offvalue=-1,  # Wert, wenn kein Checkbutton ausgewählt ist
 				text=f'Plant {i+1}:'
 			)
-			plant_checkbox.grid(row=row, column=0, sticky='w', padx=2, pady=2)
+			plant_checkbox.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
 			
 			# Farbe der Pflanze
 			plant_color_label = tk.Label(self.plants_setting_frame, width=2, bg=self.PLANT_COLORS[i])
-			plant_color_label.grid(row=row, column=1, sticky='ew', padx=2, pady=2)
+			plant_color_label.grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
 			
 			# Energie-Label und Eingabefelder
 			initEnergy_label = tk.Label(self.plants_setting_frame, text='Init-Energy:')
-			initEnergy_label.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
+			initEnergy_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i] = {}  # Erstelle einen Dictionary für die Eingabewerte dieser Pflanze
 			self.plant_entries[i]['initEnergy'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['initEnergy'].grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['initEnergy'].grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
 			
 			growEnergy_label = tk.Label(self.plants_setting_frame, text='Growth-Rate:')
-			growEnergy_label.grid(row=row+1, column=2, sticky='w', padx=2, pady=2)
+			growEnergy_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['growthRate'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['growthRate'].grid(row=row+1, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['growthRate'].grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
 			
 			minEnergy_label = tk.Label(self.plants_setting_frame, text='Min-Energy:')
-			minEnergy_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
+			minEnergy_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['minEnergy'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['minEnergy'].grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['minEnergy'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
 			
 			repInter_label = tk.Label(self.plants_setting_frame, text='Repro-Interval:')
-			repInter_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
+			repInter_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['reproInterval'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['reproInterval'].grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['reproInterval'].grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
 			
 			minDist_label = tk.Label(self.plants_setting_frame, text='Min-Distance:')
-			minDist_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
+			minDist_label.grid(row=row+4, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['minDist'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['minDist'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['minDist'].grid(row=row+4, column=1, sticky='ew', padx=2, pady=2)
 			
 			maxDist_label = tk.Label(self.plants_setting_frame, text='Max-Distance:')
-			maxDist_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
+			maxDist_label.grid(row=row+4, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['maxDist'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['maxDist'].grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['maxDist'].grid(row=row+4, column=3, sticky='ew', padx=2, pady=2)
 			
 			# Platzhalter für Abstand
 			space_label = tk.Label(self.plants_setting_frame, width=4)
-			space_label.grid(row=row+4, column=0, padx=2, pady=2, sticky='w')
+			space_label.grid(row=row+5, column=0, padx=2, pady=2, sticky='w')
 		
 		# Scrollregion aktualisieren
 		self.plants_setting_frame.update_idletasks()
@@ -306,48 +310,58 @@ class Gui():
 	
 	def create_enemies_settings(self, number_of_enemies):
 		tk.Label(self.enemies_setting_frame, text='', width=25).grid(row=0, column=4, padx=1, pady=1, sticky='w')
-		offset = 16 # Offset, um die Feinde von den Pflanzen in der Variablen zu unterscheiden
+		offset = 16  # Offset, um die Feinde von den Pflanzen in der Variablen zu unterscheiden
+		
+		self.enemy_entries = {}
+		self.errer_enemies = tk.Label(self.enemies_setting_frame, text='')
+		self.errer_enemies.grid(row=0, column=0, columnspan=5, sticky='ew', padx=2, pady=2)
+
+		# Mapping für die Indizes erstellen
+		self.enemy_index_mapping = {}
+
 		for i in range(number_of_enemies):
-			row = i * 9
-						
+			row = i * 10
+			
+			# Mapping hinzufügen
+			self.enemy_index_mapping[offset + i] = i
+			
 			# Checkbutton für Feind
 			enemy_checkbox = tk.Checkbutton(
 				self.enemies_setting_frame,
 				variable=self.selectedItem,  # Gemeinsame Variable
-				onvalue=offset + i,  # Ein eindeutiger Wert für Feinde (Pflanzen sind 0-n, Feinde sind 100+)
+				onvalue=offset + i,  # Ein eindeutiger Wert für Feinde
 				offvalue=-1,  # Wert, wenn kein Checkbutton ausgewählt ist
-				text=f'Enemy-Cluster {i+1}:'
+				text=f'Enemy {i+1}:'
 			)
-			#enemy_checkbox = tk.Checkbutton(self.enemies_setting_frame, text=f'Enemy {i+1}:')
-			enemy_checkbox.grid(row=row, column=0, sticky='w', padx=2, pady=2)
-			
+			enemy_checkbox.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
+			self.enemy_entries[i] = {}
+
 			clusterNum_label = tk.Label(self.enemies_setting_frame, text='Cluster-Size:')
-			clusterNum_label.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
-			clusterNum_entry = tk.Entry(self.enemies_setting_frame, width=4)
-			clusterNum_entry.grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
+			clusterNum_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
+			self.enemy_entries[i]['clusterSize'] = tk.Entry(self.enemies_setting_frame, width=4)
+			self.enemy_entries[i]['clusterSize'].grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
 			
 			speed_label = tk.Label(self.enemies_setting_frame, text='Speed:')
-			speed_label.grid(row=row+1, column=2, sticky='w', padx=2, pady=2)
-			speed_entry = tk.Entry(self.enemies_setting_frame, width=4)
-			speed_entry.grid(row=row+1, column=3, sticky='ew', padx=2, pady=2)
+			speed_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
+			self.enemy_entries[i]['speed'] = tk.Entry(self.enemies_setting_frame, width=4)
+			self.enemy_entries[i]['speed'].grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
 			
 			eatingSpeed_label = tk.Label(self.enemies_setting_frame, text='Eat-Speed:')
-			eatingSpeed_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
-			eatingSpeed_entry = tk.Entry(self.enemies_setting_frame, width=4)
-			eatingSpeed_entry.grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
+			eatingSpeed_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
+			self.enemy_entries[i]['eatSpeed'] = tk.Entry(self.enemies_setting_frame, width=4)
+			self.enemy_entries[i]['eatSpeed'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
 			
 			eatingVic_label = tk.Label(self.enemies_setting_frame, text='Eat-Victory:')
-			eatingVic_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
-			eatingVic_entry = tk.Entry(self.enemies_setting_frame, width=4)
-			eatingVic_entry.grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+			eatingVic_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
+			self.enemy_entries[i]['eatVictory'] = tk.Entry(self.enemies_setting_frame, width=4)
+			self.enemy_entries[i]['eatVictory'].grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
 			
 			space_label = tk.Label(self.enemies_setting_frame, width=4)
-			space_label.grid(row=row+3, column=0, padx=2, pady=2, sticky='w')
+			space_label.grid(row=row+4, column=0, padx=2, pady=2, sticky='w')
 			
-
 		self.enemies_setting_frame.update_idletasks()
 		self.enemies_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.enemies_setting_canvas))
-		
+
 	
 	def createSubstances_tab(self):
 		try:
@@ -633,7 +647,7 @@ class Gui():
 				self.place_plant_on_grid(clicked_coords, selected_index)
 			else:  # Feinde haben Werte ab 16
 				pass
-				#self.place_enemy_on_grid(clicked_coords, selected_index)
+				self.place_enemy_on_grid(clicked_coords, selected_index)
 
 
 	def place_plant_on_grid(self, coords, selected_index):
@@ -648,245 +662,224 @@ class Gui():
 			
 			# Überprüfe, ob alle Eingabewerte gültig sind (nicht leer und im richtigen Format)
 			try:
-				init_energy = float(plant_entries['initEnergy'].get())
-				growth_rate = float(plant_entries['growthRate'].get())
-				min_energy = float(plant_entries['minEnergy'].get())
-				repro_interval = int(plant_entries['reproInterval'].get())
-				min_dist = float(plant_entries['minDist'].get())
-				max_dist = float(plant_entries['maxDist'].get())
+				init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist = self.get_plant_input(plant_entries)
+
 			except ValueError:
 				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
-				print("Fehler: Alle Eingabewerte müssen gültige Zahlen sein!")
+				self.errer_plants.config(text='Fehler: Alle Eingabewerte müssen gültige Zahlen sein!', fg='red')
+				print('Fehler: Alle Eingabewerte müssen gültige Zahlen sein!')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
-			# Überprüfe, ob alle Eingabewerte nicht leer sind
-			if not all([init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist]):
-				print("Fehler: Alle Felder müssen ausgefüllt sein!")
+			# Überprüfe, ob alle Eingabewerte nicht leer sind (außer repro_interval)
+			if not all([init_energy, growth_rate, min_energy, min_dist, max_dist]):
+				self.errer_plants.config(text='Fehler: Alle Felder müssen ausgefüllt sein!', fg='red')
+				print('Fehler: Alle Felder müssen ausgefüllt sein!')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
-			# Pflanze instanziieren
+			# Wenn repro_interval negativ ist, gib eine Fehlermeldung aus
+			if repro_interval < 0:
+				self.errer_plants.config(text='Fehler: Reproduktionsintervall darf nicht negativ sein!', fg='red')
+				print('Fehler: Reproduktionsintervall darf nicht negativ sein!')
+				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
+
+			# Färbe die angeklickte Zelle
 			plant_color = self.PLANT_COLORS[selected_index]
-			plant = Plant(
+			self.gridCanvas.itemconfig(square_id, fill=plant_color)
+			# Erzeuge und füge Pflanze hinzu
+			self.create_add_plant(selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color)
+
+
+	def get_plant_input(self, plant_entries):
+		init_energy = float(plant_entries['initEnergy'].get())
+		growth_rate = float(plant_entries['growthRate'].get())
+		min_energy = float(plant_entries['minEnergy'].get())
+				
+		# Überprüfe, ob repro_interval leer ist, falls ja, setze auf 0
+		repro_interval_str = plant_entries['reproInterval'].get()
+		if repro_interval_str == '':
+			repro_interval = 0  # Setze auf 0, wenn leer
+		else:
+			repro_interval = float(repro_interval_str)
+				
+		min_dist = float(plant_entries['minDist'].get())
+		max_dist = float(plant_entries['maxDist'].get())
+
+		return init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist
+
+
+	def create_add_plant(self, selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color):
+		# Pflanze instanziieren
+		plant = Plant(
 				name=f'p{selected_index + 1}',
 				initEnergy=init_energy,
-				growthRateEnergy=growth_rate,  # Achte auf den richtigen Namen
+				growthRateEnergy=growth_rate,
 				minEnergy=min_energy,
 				reproductionIntervall=repro_interval,
 				minDist=min_dist,
 				maxDist=max_dist,
 				position=coords,
 				grid=self.grid,
-				color=plant_color
-			)
+				color=plant_color)
+
+		self.errer_plants.config(text='')  # Fehlerbehandlung zurücksetzen
 			
-			# Pflanze zur Grid hinzufügen
-			self.grid.addPlant(plant)
-
-			# Färbe die angeklickte Zelle
-			self.gridCanvas.itemconfig(square_id, fill=plant_color)
-
-			# Ausgabe der Pflanze
-			print(f'Name: {plant.name}')
-			print(f'Initialenergie: {plant.initEnergy}')
-			print(f'Wachstumsrate Energie: {plant.growthRateEnergy}')
-			print(f'Minimalenergie: {plant.minEnergy}')
-			print(f'Vermehrungsintervall: {plant.reproductionIntervall}')
-			print(f'Minimale Distanz: {plant.minDist}')
-			print(f'Maximale Distanz: {plant.maxDist}')
-			print(f'Position: {plant.position}')
-			print(f'Farbe: {plant.color}')
-			print(self.grid.plants)
+		# Pflanze zur Grid hinzufügen
+		self.grid.addPlant(plant)
+		print(self.grid.plants)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	'''
-	def createBattlefield(self):
-		try:
-			# Eingabe in eine Zahl umwandeln
-			gridSize = int(self.grid_size_entry.get())
-		except ValueError:
-			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
-			print('Invalid input: Please enter a number.')
+	def place_enemy_on_grid(self, coords, selected_index):
+		"""
+		Platziert einen Feind auf dem Grid an den gegebenen Koordinaten (x, y).
+		"""
+		if not self.validate_enemy_selection(selected_index):
 			return
-		
-		# Überprüfen, ob die Zahl zwischen 1 und 80 liegt
-		if gridSize < 1 or gridSize > 80:
-			print('The number of fields must be between 1 and 80!')
-			return
-		
-		# Bereinigen bestehender Widgets und Frames
-		self.clear_grid_frame()
-		
-		# Neues Canvas und Grid erstellen
-		self.create_canvas_and_frame_grid()
-			
-	
-	def clear_grid_frame(self):
-		if hasattr(self, 'grid_frame'):
-			# Zerstöre alle Kinder-Widgets im Frame
-			for widget in self.grid_frame.winfo_children():
-				widget.destroy()
-			# Lösche den Frame selbst
-			self.grid_frame.destroy()
-			del self.grid_frame  # Entferne die Referenz auf das Attribut
-		
-	
-	def create_canvas_and_frame_grid(self):
-		self.grid_frame = tk.Frame(self.right_frame, bg='white')
-		self.grid_frame.pack_propagate(False)  # Verhindert, dass der Frame seine Größe an Inhalte anpasst
-		self.grid_frame.pack(fill='both', expand=True)  # Kein expand, um Vergrößerung zu vermeiden
-		
-		# Canvas für das Grid
-		self.gridCanvas = tk.Canvas(self.grid_frame, bg='white', bd=0, relief='solid')
-		self.gridCanvas.pack(fill='both', expand=True)
-		
-		
-		#self.root.resizable(False, False)  # Deaktiviert Resize sowohl horizontal als auch vertikal
-		
-		# Registriere den Event-Handler für Mausklicks
-		self.gridCanvas.bind('<Button-1>', self.onGridClick_player)
-		#self.gridCanvas.bind("<Button-2>", self.onGridClick_enemies)
-		
-		# Hole die Grid-Größe aus dem Eingabefeld
+
+		# Übersetze den Index
+		actual_index = self.enemy_index_mapping[selected_index]
+		enemy_entries = self.enemy_entries[actual_index]
+
+		# Hole die Eingabewerte
+		enemy_data = self.get_and_validate_enemy_data(enemy_entries)
+		if not enemy_data:
+			return  # Abbrechen, wenn die Eingabewerte ungültig sind
+		clusterSize, speed, eatSpeed, eatVictory = enemy_data
+
+		# Berechne die Zellenkoordinaten
+		position_data = self.calculate_cell_position(coords)
+		if not position_data:
+			return  # Abbrechen, wenn die Zelle nicht existiert
+		x_pos, y_pos = position_data
+
+		# Platzierung und Darstellung des Feinds
+		self.place_enemy_marker(coords, x_pos, y_pos, selected_index, clusterSize)
+		self.create_add_cluster(actual_index, coords, clusterSize, speed, eatSpeed, eatVictory)
+
+
+	def validate_enemy_selection(self, selected_index):
+		"""
+		Überprüft, ob der ausgewählte Index gültig ist.
+		"""
+		if selected_index not in self.enemy_index_mapping:
+			print(f'Fehler: Kein Feind mit Index {selected_index} gefunden.')
+			return False
+		return True
+
+
+	def get_and_validate_enemy_data(self, enemy_entries):
+		"""
+		Ruft die Eingabewerte für einen Feind ab und validiert sie.
+		"""
 		try:
-			width = int(self.grid_size_entry.get())
-			height = int(self.grid_size_entry.get())
-		except ValueError:
-			# Fallback bei ungültiger Eingabe
-			width, height = 10, 10
-			
-		# Bereinige die Canvas vor dem Zeichnen
-		self.gridCanvas.delete('all')
-		
-		# Aktualisiere die Canvas-Größe
-		self.gridCanvas.update()
-		canvas_width = self.gridCanvas.winfo_width()
-		canvas_height = self.gridCanvas.winfo_height()
-		
-		self.calculateSquareSize(width, height, canvas_width, canvas_height)
-		
-	
-	def calculateSquareSize(self, width, height, canvas_width, canvas_height):
-		# Berechne die maximale Quadratgröße, aber behalte die Höhe unverändert
-		if width > 0 and height > 0:
-			square_height = canvas_height / height  # Höhe bleibt unverändert
-			square_width = canvas_width / width    # Breite passt sich der Canvas-Breite an
-			
-			# Verwende die Höhe für die Quadratgröße, damit die Quadrate nicht zu hoch werden
-			square_size = square_height
-			
-			# Berechne die tatsächliche Breite und Höhe des Grids
-			grid_width = square_width * width
-			grid_height = square_size * height
-			
-			# Zentriere das Grid, indem du Offsets berechnest
-			x_offset = (canvas_width - grid_width) / 2
-			y_offset = (canvas_height - grid_height) / 2
-			
-			self.drawGrid(width, height, x_offset, y_offset, square_width, square_size)
-	
-	def drawGrid(self, width, height, x_offset, y_offset, square_width, square_size):
-		# Zeichne die Quadrate
-		self.squares = {}
-		for i in range(width):
-			for j in range(height):
-				x1 = x_offset + i * square_width
-				y1 = y_offset + j * square_size
-				x2 = x1 + square_width
-				y2 = y1 + square_size
-				squareID = self.gridCanvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=1)
-				self.squares[squareID] = (x1, y1, x2, y2)
-				
-				
-	def onGridClick_player(self, event):
-		# Ermittle die angeklickte Zelle
-		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
-		if clicked_item:
-			item_id = clicked_item[0]
-			
-			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
-			selected_index = self.selectedItem.get()
-			
-			if selected_index == -1:
-				# Keine Auswahl getroffen
-				return
-			
-			# Überprüfen, ob eine Pflanze oder ein Feind ausgewählt wurde
-			if selected_index < 16:  # Pflanzen haben Werte von 0 bis 15
-				self.place_plant_on_grid(item_id, selected_index)
-			else:  # Feinde haben Werte ab 16
-				self.place_enemy_on_grid(item_id, selected_index)
-	
-	
-	def place_plant_on_grid(self, item_id, selected_index):
+			clusterSize, speed, eatSpeed, eatVictory = self.getEnemyinput(enemy_entries)
+		except ValueError as e:
+			print(f'Fehler beim Abrufen der Eingabewerte: {e}')
+			self.errer_enemies.config(text='Fehler: Alle Eingabewerte müssen gültige Zahlen sein!', fg='red')
+			return None  # Ungültige Eingabewerte
+
+		if not all([clusterSize, speed, eatSpeed, eatVictory]):
+			self.errer_enemies.config(text='Fehler: Alle Felder müssen ausgefüllt sein!', fg='red')
+			print('Fehler: Alle Felder müssen ausgefüllt sein!')
+			return None  # Fehlende Eingabewerte
+
+		return clusterSize, speed, eatSpeed, eatVictory
+
+
+	def calculate_cell_position(self, coords):
 		"""
-		Platziert eine Pflanze auf dem Grid.
+		Berechnet die Position der Zelle basierend auf den Koordinaten.
 		"""
-		# Entferne eventuell bereits vorhandene Pflanze (wenn die Zelle bereits eine Pflanze enthält)
-		if self.gridCanvas.itemcget(item_id, 'fill'):  # Prüfen, ob die Zelle bereits eine Farbe hat
-			self.gridCanvas.itemconfig(item_id, fill='')  # Entferne Farbe
-		
-		# Hole den Grünton der ausgewählten Pflanze
-		plant_color = self.PLANT_COLORS[selected_index]
-		
-		# Färbe die angeklickte Zelle
-		self.gridCanvas.itemconfig(item_id, fill=plant_color)
-		print(f'Pflanze platziert auf: {item_id}')
-		
-	
-	def place_enemy_on_grid(self, item_id, selected_index):
-		"""
-		Platziert einen Feind auf dem Grid.
-		"""
-		# Berechne den Feindindex für den Feindnamen
-		enemy_name = f'E{selected_index - 15}'  # Feindname anhand des Index
-		
-		# Zellenposition ermitteln
-		bbox = self.gridCanvas.bbox(item_id)
-		cell_width = bbox[2] - bbox[0]  # Berechne die Breite der Zelle
-		cell_height = bbox[3] - bbox[1]  # Berechne die Höhe der Zelle
-		
-		# Berechne den Mittelpunkt der Zelle
-		x_pos = bbox[0] + cell_width / 2  # X-Mittelpunkt
-		y_pos = bbox[1] + cell_height / 2  # Y-Mittelpunkt
-		
-		# Wenn bereits Feinde auf dem Feld sind, müssen wir die Y-Position für den neuen Feind erhöhen
+		square_id = self.squares.get(coords)  # Erhalte die Zellen-ID von den Koordinaten
+		if square_id is None:
+			print(f'Fehler: Keine Zelle mit den Koordinaten {coords} gefunden.')
+			return None  # Zelle nicht gefunden
+
+		bbox = self.gridCanvas.bbox(square_id)
+		if bbox is None:
+			print(f'Fehler: Keine Bounding Box für die Zelle mit item_id {square_id} gefunden.')
+			return None  # Bounding Box nicht gefunden
+
+		cell_width = bbox[2] - bbox[0]
+		cell_height = bbox[3] - bbox[1]
+		x_pos = bbox[0] + cell_width / 2
+		y_pos = bbox[1] + cell_height / 2
+
 		if not hasattr(self, 'enemy_positions'):
-			self.enemy_positions = {}  # Speichert die Feindpositionen pro Zelle
-		if item_id not in self.enemy_positions:
-			self.enemy_positions[item_id] = 0  # Zähler für Feinde in dieser Zelle
-			
-		# Feindnummer basierend auf der Anzahl der Feinde, die bereits auf dieser Zelle sind
-		current_enemy_count = self.enemy_positions[item_id]
-		y_pos += current_enemy_count * 15  # Verschiebe die Y-Position für jedes zusätzliche Feind-Element
-		
-		# Erstelle den Text für den Feind
+			self.enemy_positions = {}
+
+		if coords not in self.enemy_positions:
+			self.enemy_positions[coords] = 0
+
+		current_enemy_count = self.enemy_positions[coords]
+		y_pos += current_enemy_count * 15  # Verschiebe die Y-Position für mehrere Feinde in derselben Zelle
+
+		return x_pos, y_pos
+
+
+	def place_enemy_marker(self, coords, x_pos, y_pos, selected_index, clusterSize):
+		"""
+		Platziert einen Marker für den Feind auf dem Canvas.
+		"""
+		enemy_name = f'e{selected_index - 15} - #{int(clusterSize)}'  # Feindname
+		self.cluster_sign(x_pos, y_pos, enemy_name)
+		self.enemy_positions[coords] += 1
+		print(f'Feind {enemy_name} platziert auf: {coords}')
+
+
+	def cluster_sign(self,x_pos, y_pos, eName):
+		# Zeichne den Feind auf dem Canvas
 		self.gridCanvas.create_text(
-			x_pos, 
+			x_pos,
 			y_pos,
-			text=enemy_name,
-			font=('Arial', 8),  # Schriftart und -größe
+			text=eName,
+			font=('Arial', 8),
 			fill='red'
 		)
+	
+
+	def create_add_cluster(self, actual_index, coords, clusterSize, speed, eatSpeed, eatVictory):
+		self.errer_enemies.config(text='')
+		e = Enemy(name=f'e{actual_index}', symbol=f'E{actual_index}')
+
+		ec = EnemyCluster(enemy=e,
+					num=clusterSize,
+					speed=speed,
+					position=coords,
+					grid=self.grid,
+					eatingSpeed=eatSpeed,
+					eatVictory=eatVictory)
 		
-		# Erhöhe den Zähler für Feinde in dieser Zelle
-		self.enemy_positions[item_id] += 1
-		print(f'Feind platziert auf: {item_id}')
-	'''
+		self.grid.addEnemies(ec)
+		print(self.grid.enemies)
+
+
+
+	def getEnemyinput(self, enemy_entries):
+		"""
+		Holt die Eingabewerte für den Feind aus den entsprechenden Entry-Widgets.
+		"""
+		try:
+			clusterSize = float(enemy_entries['clusterSize'].get())
+		except ValueError:
+			raise ValueError('Cluster-Size ist leer oder ungültig.')
+
+		try:
+			speed = float(enemy_entries['speed'].get())
+		except ValueError:
+			raise ValueError('Speed ist leer oder ungültig.')
+
+		try:
+			eatSpeed = float(enemy_entries['eatSpeed'].get())
+		except ValueError:
+			raise ValueError('Eat-Speed ist leer oder ungültig.')
+
+		try:
+			eatVictory = float(enemy_entries['eatVictory'].get())
+		except ValueError:
+			raise ValueError('Eat-Victory ist leer oder ungültig.')
+
+		return clusterSize, speed, eatSpeed, eatVictory
+
 	
 	def openPlotWindow(self):
 		"""_summary_
