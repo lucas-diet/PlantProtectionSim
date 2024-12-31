@@ -7,8 +7,8 @@ from models.plant import Plant
 
 
 class Gui():
-	def __init__(self, simulation, diagrams):
-		self.grid = None
+	def __init__(self, grid, simulation, diagrams):
+		self.grid = grid
 		self.simulation = simulation
 		self.diagrams = diagrams
 
