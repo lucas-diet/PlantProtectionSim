@@ -1,6 +1,7 @@
 
 import tkinter as tk
 from tkinter import ttk
+from tkinter import messagebox
 
 from models.grid import Grid
 from models.plant import Plant
@@ -135,13 +136,14 @@ class Gui():
 			# Eingabe in eine Zahl umwandeln
 			number_of_plants = int(self.plants_entry.get())
 		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
 			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
 			return
 		
-		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
+		# Überprüfen, ob die Zahl zwischen 0 und 16 liegt
 		if number_of_plants < 1 or number_of_plants > 16:
 			self.clear_plants_frame()  # Lösche bestehende Elemente
-			print('The number of plants must be between 1 and 16!')
+			messagebox.showwarning('Invalid number', 'The number of plants must be between 1 and 16!')
 			return
 		
 		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
@@ -261,13 +263,14 @@ class Gui():
 			# Eingabe in eine Zahl umwandeln
 			number_of_enemies = int(self.enemies_entry.get())
 		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
 			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
 			return
 		
 		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
 		if number_of_enemies < 0 or number_of_enemies > 15:
 			self.clear_enemies_frame()  # Lösche bestehende Elemente
-			print('The number of enemies must be between 1 and 16!')
+			messagebox.showwarning('Invalid number', 'The number of enemies must be between 0 and 15!')
 			return
 		
 		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
@@ -369,12 +372,13 @@ class Gui():
 			number_of_substances = int(self.substances_entry.get())
 		except ValueError:
 			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
 			return
 		
 		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
 		if number_of_substances < 0 or number_of_substances > 15:
 			self.clear_substances_frame()  # Lösche bestehende Elemente
-			print('The number of substances must be between 0 and 15!')
+			messagebox.showwarning('Invalid number', 'The number of substances must be between 0 and 15!')
 			return
 		
 		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
@@ -539,10 +543,13 @@ class Gui():
 	
 
 	def createBattlefield(self):
-		
-		gridSize = int(self.grid_size_entry.get())
+		try:
+			gridSize = int(self.grid_size_entry.get())
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
+
 		if gridSize < 1 or gridSize > 80:
-			print('The number of fields must be between 1 and 80!')
+			messagebox.showwarning('Invalid number', 'The number of gridsize must be between 1 and 80!')
 			return
 		else:
 			self.grid = Grid(gridSize, gridSize)
