@@ -26,7 +26,6 @@ class Plant():
 
         self.signalProdCounters = {}
         self.signalSendingCounters = {}
-        #self.afterEffectTime = 0
         self.afterEffectTimes = {}
 
         self.toxinAlarms = {}
@@ -72,7 +71,7 @@ class Plant():
                     energyInput = input('Init-Energy of offspring:')                        # Input() famit Energie für jedes Nachkommen individuell ist
                     offspringEnergy = float(energyInput) if energyInput else 100            # default ist 100 Einheiten
                     offspring = Plant(name=self.name, 
-                                      initEnergy=self.offspringEnergy, 
+                                      initEnergy=offspringEnergy, 
                                       growthRateEnergy=self.growthRateEnergy, 
                                       minEnergy=self.minEnergy, 
                                       reproductionIntervall=self.reproductionIntervall,
