@@ -116,12 +116,14 @@ class Gui():
 		apply_button.grid(row=0, column=8, columnspan=1, pady=1)
 		
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
+
+
 		
-		tk.Button(self.top_frame, text='Simulate').grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Play').grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Import').grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Export').grid(row=0, column=12, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Plot', command=self.openPlotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
-		
+		tk.Button(self.top_frame, text='Breakups').grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
 	
 	def create_situation(self):
 		self.createPlants_tab()
@@ -712,7 +714,7 @@ class Gui():
 		if bbox:
 			# Berechne die Mitte der Zelle
 			x_pos = (bbox[0] + bbox[2]) / 2  # X-Mittelpunkt
-			y_pos = bbox[1] + 10  # Y-Position leicht innerhalb der Zelle, oben
+			y_pos = bbox[1] + 5  # Y-Position leicht innerhalb der Zelle, oben
 				
 			# Zeige die Energie oben innerhalb der Zelle an
 			self.gridCanvas.create_text(
@@ -789,7 +791,7 @@ class Gui():
 		Ruft die Eingabewerte für einen Feind ab und validiert sie.
 		"""
 		try:
-			clusterSize, speed, eatSpeed, eatVictory = self.getEnemyinput(enemy_entries)
+			clusterSize, speed, eatSpeed, eatVictory = self.get_enemy_input(enemy_entries)
 		except ValueError as e:
 			print(f'Fehler beim Abrufen der Eingabewerte: {e}')
 			self.errer_enemies.config(text='Error: All input values ​​must be valid numbers!', fg='red')
@@ -843,7 +845,7 @@ class Gui():
 		print(f'Feind {enemy_name} platziert auf: {coords}')
 
 
-	def cluster_sign(self,x_pos, y_pos, eName):
+	def cluster_sign(self, x_pos, y_pos, eName):
 		# Zeichne den Feind auf dem Canvas
 		self.gridCanvas.create_text(
 			x_pos,
@@ -870,7 +872,8 @@ class Gui():
 		print(self.grid.enemies)
 
 
-	def getEnemyinput(self, enemy_entries):
+
+	def get_enemy_input(self, enemy_entries):
 		"""
 		Holt die Eingabewerte für den Feind aus den entsprechenden Entry-Widgets.
 		"""
@@ -881,25 +884,6 @@ class Gui():
 		
 		return clusterSize, speed, eatSpeed, eatVictory
 
-	
-	def draw_connection_line(self, coords1, coords2):
-		"""
-		Zeichnet eine Linie zwischen zwei benachbarten Zellen, um ihre Verbindung darzustellen.
-		"""
-		# Hole die Bounding Boxes der beiden Zellen
-		bbox1 = self.gridCanvas.bbox(self.squares[coords1])
-		bbox2 = self.gridCanvas.bbox(self.squares[coords2])
-
-		if bbox1 and bbox2:
-			# Berechne den Mittelpunkt beider Zellen
-			x1_pos = (bbox1[0] + bbox1[2]) / 2
-			y1_pos = (bbox1[1] + bbox1[3]) / 2
-			x2_pos = (bbox2[0] + bbox2[2]) / 2
-			y2_pos = (bbox2[1] + bbox2[3]) / 2
-
-			# Zeichne die Linie zwischen den beiden Mittelpunkten
-			self.gridCanvas.create_line(x1_pos, y1_pos, x2_pos, y2_pos, fill="blue", width=2)
-			print(f"Verbindung zwischen {coords1} und {coords2} hergestellt.")
 
 
 
