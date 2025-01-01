@@ -869,6 +869,7 @@ class Gui():
 					eatVictory=eatVictory)
 		
 		self.grid.addEnemies(ec)
+		self.add_enemy_to_position(coords, ec)
 		print(self.grid.enemies)
 
 
