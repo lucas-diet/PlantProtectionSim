@@ -23,7 +23,7 @@ class Gui():
 		
 		self.selectedItem = tk.IntVar(value=-1)
 		self.players = []
-		self.enemiesAtPos = {}
+		self.enemies_at_positions = {}
 		
 	
 	def mainloop(self):
@@ -886,23 +886,99 @@ class Gui():
 		"""
 		Platziert einen Marker für den Feind auf dem Canvas.
 		"""
-		enemy_name = f'e{selected_index - 15} - #{int(clusterSize)}'  # Feindname
-		self.cluster_sign(x_pos, y_pos, enemy_name)
-		self.enemy_positions[coords] += 1
-		print(f'Feind {enemy_name} platziert auf: {coords}')
+		enemy_name = f'e{selected_index - 15}'  # Feindname
+		circle_id = self.cluster_sign(x_pos, y_pos, enemy_name)
+
+		# Feindinformationen speichern
+		enemy_data = {'name': enemy_name, 'clusterSize': clusterSize}
+		
+		# Überprüfen, ob es für diese Position bereits eine Liste gibt
+		if coords not in self.enemies_at_positions:
+			self.enemies_at_positions[coords] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
+		
+		# Füge die Feindinformationen hinzu
+		self.enemies_at_positions[coords].append(enemy_data)
+
+		# Tooltip-Logik hinzufügen
+		self.add_tooltip(circle_id, coords)
+
+		print(f'Feind {enemy_name} mit Clustergröße {clusterSize} platziert auf: {coords}')
 
 
 	def cluster_sign(self, x_pos, y_pos, eName):
 		"""
-		Zeichnet den Feind auf dem Canvas und gibt die Text-ID zurück.
+		Zeichnet den Feind als kleinen Kreis auf dem Canvas und gibt die Text-ID zurück.
 		"""
-		return self.gridCanvas.create_text(
-			x_pos,
-			y_pos,
-			text=eName,
-			font=('Arial', 8),
-			fill='red'
-		)
+		# Größe des Kreises
+		circle_radius = 3
+		# Berechne die Koordinaten für den Kreis (Bounding Box: (left, top, right, bottom))
+		left = x_pos - circle_radius
+		top = y_pos - circle_radius
+		right = x_pos + circle_radius
+		bottom = y_pos + circle_radius
+
+		# Zeichne den Kreis
+		circle_id = self.gridCanvas.create_oval(left, top, right, bottom, fill='red', outline='black')
+
+		# Rückgabe der IDs für Kreis und Text
+		return circle_id
+
+
+	def add_tooltip(self, circle_id, coords):
+		"""
+		Fügt Tooltip-Logik für einen Canvas-Text hinzu.
+		"""
+		# Funktion zum Anzeigen des Tooltips
+		def show_tooltip(event):
+			x, y = event.x, event.y
+			tooltip_text = []
+
+			# Sammle Informationen zu allen Feinden an dieser Position
+			enemies_at_pos = self.enemies_at_positions.get(coords, [])
+			for enemy in enemies_at_pos:
+				tooltip_text.append(f'{enemy["name"]}: Size {int(enemy["clusterSize"])}')
+
+			# Verarbeite die Tooltip-Texte zu einer mehrzeiligen Darstellung
+			tooltip_full_text = '\n'.join(tooltip_text)
+
+			# Erstelle den Tooltip-Text
+			tooltip_text_id = self.gridCanvas.create_text(
+				x + 10, y - 10,  # Text leicht versetzt von der Maus
+				text=tooltip_full_text,
+				font=('Arial', 15),
+				fill='black',
+				anchor='nw'  # Text oben links ausrichten
+			)
+
+			# Berechne die Bounding Box für den Tooltip-Text
+			bbox = self.gridCanvas.bbox(tooltip_text_id)
+
+			# Erstelle ein Rechteck als Hintergrund
+			if bbox:
+				rect_id = self.gridCanvas.create_rectangle(
+					bbox[0] - 5, bbox[1] - 2,  # Leichtes Padding um den Text
+					bbox[2] + 5, bbox[3] + 2,
+					fill='white',  # Hintergrundfarbe
+					outline='black',  # Rahmenfarbe
+					width=1  # Rahmenbreite
+				)
+				# Setze das Rechteck hinter den Text
+				self.gridCanvas.tag_lower(rect_id, tooltip_text_id)
+
+			# Speichere die IDs für späteres Entfernen
+			self.tooltip_ids = (rect_id, tooltip_text_id)
+
+		# Funktion zum Verstecken des Tooltips
+		def hide_tooltip(event):
+			if hasattr(self, 'tooltip_ids'):
+				for item_id in self.tooltip_ids:
+					self.gridCanvas.delete(item_id)
+				del self.tooltip_ids
+
+		# Binde die Maus-Events an das Text-Item
+		self.gridCanvas.tag_bind(circle_id, '<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus das Text-Item betritt
+		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Text-Item verlässt
+
 
 		
 	def create_add_cluster(self, actual_index, coords, clusterSize, speed, eatSpeed, eatVictory):
@@ -918,7 +994,6 @@ class Gui():
 					eatVictory=eatVictory)
 		
 		self.grid.addEnemies(ec)
-		self.add_enemy_to_position(coords, ec)
 		print(self.grid.enemies)
 	
 
