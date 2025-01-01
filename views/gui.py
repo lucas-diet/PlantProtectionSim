@@ -23,6 +23,7 @@ class Gui():
 		
 		self.selectedItem = tk.IntVar(value=-1)
 		self.players = []
+		self.enemiesAtPos = {}
 		
 	
 	def mainloop(self):
@@ -199,8 +200,8 @@ class Gui():
 		# Dictionaries für Eingabefelder für jede Pflanze
 		self.plant_entries = {}  # Hier speichern wir die Eingabefelder für jede Pflanze
 		#Fehlermeldung wenn Eingabe nicht korrekt ist
-		self.errer_plants = tk.Label(self.plants_setting_frame, text='')
-		self.errer_plants.grid(row=0, column=0, columnspan=5, sticky='ew', padx=2, pady=2)
+		self.error_plants = tk.Label(self.plants_setting_frame, text='')
+		self.error_plants.grid(row=0, column=0, columnspan=5, sticky='w', padx=2, pady=2)
 				
 		for i in range(number_of_plants):
 			row = i * 6
@@ -318,8 +319,8 @@ class Gui():
 		offset = 16  # Offset, um die Feinde von den Pflanzen in der Variablen zu unterscheiden
 		
 		self.enemy_entries = {}
-		self.errer_enemies = tk.Label(self.enemies_setting_frame, text='')
-		self.errer_enemies.grid(row=0, column=0, columnspan=5, sticky='ew', padx=2, pady=2)
+		self.error_enemies = tk.Label(self.enemies_setting_frame, text='')
+		self.error_enemies.grid(row=0, column=0, columnspan=5, sticky='w', padx=2, pady=2)
 
 		# Mapping für die Indizes erstellen
 		self.enemy_index_mapping = {}
@@ -672,12 +673,12 @@ class Gui():
 
 			except ValueError:
 				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
-				self.errer_plants.config(text='Error: All input values ​​must be valid numbers!', fg='red')
+				self.error_plants.config(text='Error: All input values ​​must be valid numbers!', fg='red')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
 			# Überprüfe, ob alle Eingabewerte nicht leer sind (außer repro_interval)
 			if not all([init_energy, growth_rate, min_energy, min_dist, max_dist]):
-				self.errer_plants.config(text='Error: All fields must be filled in!', fg='red')
+				self.error_plants.config(text='Error: All fields must be filled in!', fg='red')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
 			# Färbe die angeklickte Zelle
@@ -704,29 +705,73 @@ class Gui():
 				
 		min_dist = float(plant_entries['minDist'].get())
 		max_dist = float(plant_entries['maxDist'].get())
+		if max_dist < min_dist:
+			max_dist = min_dist + 1
+		else:
+			pass
 
 		return init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist
 	
 
 	def plant_lifeline(self, plant, square_id):
-		# Berechne die Position der Zelle für die Energieanzeige
-		bbox = self.gridCanvas.bbox(square_id)  # Hole die Bounding Box der Zelle
-		if bbox:
-			# Berechne die Mitte der Zelle
-			x_pos = (bbox[0] + bbox[2]) / 2  # X-Mittelpunkt
-			y_pos = bbox[1] + 5  # Y-Position leicht innerhalb der Zelle, oben
-				
-			# Zeige die Energie oben innerhalb der Zelle an
-			self.gridCanvas.create_text(
-				x_pos, 
-				y_pos,
-				text=str(int((plant.currEnergy / plant.initEnergy) * 100))+'%',  # Zeigt die Energie der Pflanze an
-				font=('Arial', 10),  # Schriftart und -größe
-				fill='black'  # Textfarbe
+		"""
+		Zeigt die Energie der Pflanze als Tooltip an, wenn die Maus über die Zelle bewegt wird.
+		"""
+		# Berechne die Energie der Pflanze
+		energy_percentage = int((plant.currEnergy / plant.initEnergy) * 100)
+
+		# Funktion zum Anzeigen des Tooltips
+		def show_tooltip(event):
+			# Berechne die Position der Maus
+			x, y = event.x, event.y
+			
+			# Berechne die Textgröße und die Bounding Box
+			tooltip_text = f'Name: {plant.name}\nEnergy: {energy_percentage}%\nPosition: {plant.position}'
+			text_id = self.gridCanvas.create_text(
+				x + 10, y - 10,  # Text leicht versetzt von der Maus
+				text=tooltip_text,
+				font=('Arial', 15),
+				fill='black',
+				anchor='nw'  # Text oben links ausrichten
 			)
+			bbox = self.gridCanvas.bbox(text_id)  # Bounding Box des Textes
+
+			# Zeichne ein Rechteck als Hintergrund
+			if bbox:
+				rect_id = self.gridCanvas.create_rectangle(
+					bbox[0] - 5, bbox[1] - 2,  # Leichtes Padding um den Text
+					bbox[2] + 5, bbox[3] + 2,
+					fill='white',  # Hintergrundfarbe
+					outline='black',  # Rahmenfarbe
+					width=1  # Rahmenbreite
+				)
+				# Das Rechteck hinter den Text verschieben
+				self.gridCanvas.tag_lower(rect_id, text_id)
+
+			# Speichern der IDs für späteres Entfernen
+			self.tooltip_ids = (rect_id, text_id)
+
+		# Funktion zum Verstecken des Tooltips
+		def hide_tooltip(event):
+			if hasattr(self, 'tooltip_ids'):
+				for item_id in self.tooltip_ids:
+					self.gridCanvas.delete(item_id)
+				del self.tooltip_ids
+
+		# Binde die Maus-Events an das Zellen-Item
+		self.gridCanvas.tag_bind(square_id, '<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus die Zelle betritt
+		self.gridCanvas.tag_bind(square_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus die Zelle verlässt
 
 
 	def create_add_plant(self, selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color):
+		# Überprüfen, ob auf den Koordinaten bereits eine Pflanze existiert
+		existing_plant = self.grid.getPlantAt(coords)
+		
+		if existing_plant:
+			# Wenn eine Pflanze vorhanden ist, entfernen wir sie
+			self.grid.removePlant(existing_plant)  # Entferne die alte Pflanze
+			print(f'Pflanze auf {coords} entfernt und durch neue ersetzt.')
+
 		# Pflanze instanziieren
 		plant = Plant(
 				name=f'p{selected_index + 1}',
@@ -740,10 +785,12 @@ class Gui():
 				grid=self.grid,
 				color=plant_color)
 
-		self.errer_plants.config(text='')  # Fehlerbehandlung zurücksetzen
-			
+		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
 		# Pflanze zur Grid hinzufügen
-		self.grid.addPlant(plant)
+		if plant not in self.grid.plants:
+			self.grid.addPlant(plant)
+		else:
+			pass
 		print(self.grid.plants)
 		return plant
 
@@ -794,11 +841,11 @@ class Gui():
 			clusterSize, speed, eatSpeed, eatVictory = self.get_enemy_input(enemy_entries)
 		except ValueError as e:
 			print(f'Fehler beim Abrufen der Eingabewerte: {e}')
-			self.errer_enemies.config(text='Error: All input values ​​must be valid numbers!', fg='red')
+			self.error_enemies.config(text='Error: All input values ​​must be valid numbers!', fg='red')
 			return None  # Ungültige Eingabewerte
 
 		if not all([clusterSize, speed, eatSpeed, eatVictory]):
-			self.errer_enemies.config(text='Error: All fields must be filled in!', fg='red')
+			self.error_enemies.config(text='Error: All fields must be filled in!', fg='red')
 			return None  # Fehlende Eingabewerte
 
 		return clusterSize, speed, eatSpeed, eatVictory
@@ -806,7 +853,7 @@ class Gui():
 
 	def calculate_cell_position(self, coords):
 		"""
-		Berechnet die Position der Zelle basierend auf den Koordinaten.
+		Berechnet die Position der Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
 		"""
 		square_id = self.squares.get(coords)  # Erhalte die Zellen-ID von den Koordinaten
 		if square_id is None:
@@ -846,18 +893,20 @@ class Gui():
 
 
 	def cluster_sign(self, x_pos, y_pos, eName):
-		# Zeichne den Feind auf dem Canvas
-		self.gridCanvas.create_text(
+		"""
+		Zeichnet den Feind auf dem Canvas und gibt die Text-ID zurück.
+		"""
+		return self.gridCanvas.create_text(
 			x_pos,
 			y_pos,
 			text=eName,
 			font=('Arial', 8),
 			fill='red'
 		)
-	
 
+		
 	def create_add_cluster(self, actual_index, coords, clusterSize, speed, eatSpeed, eatVictory):
-		self.errer_enemies.config(text='')
+		self.error_enemies.config(text='')
 		e = Enemy(name=f'e{actual_index}', symbol=f'E{actual_index}')
 
 		ec = EnemyCluster(enemy=e,
@@ -871,7 +920,7 @@ class Gui():
 		self.grid.addEnemies(ec)
 		self.add_enemy_to_position(coords, ec)
 		print(self.grid.enemies)
-
+	
 
 
 	def get_enemy_input(self, enemy_entries):

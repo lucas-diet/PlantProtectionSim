@@ -24,6 +24,8 @@ class Grid():
         self.plantData = {}
         self.EnemyData = {}
 
+        self.plantAtPos = {}
+
         self.log = []
 
 
@@ -33,6 +35,7 @@ class Grid():
     
     def addPlant(self, plant):
         x,y = plant.position
+        self.plantAtPos[plant.position] = plant
         self.plants.append(plant)
         _, ecs = self.grid[x][y]
         self.grid[x][y] = (plant, ecs)
@@ -42,7 +45,10 @@ class Grid():
         x,y = plant.position
         if plant in self.plants:
             self.plants.remove(plant)
-        
+
+        if plant.position in self.plants:
+            del self.plantAtPos[plant.position]
+
         _, ecs = self.grid[x][y]
         self.grid[x][y] = (None, ecs)
 
@@ -52,6 +58,9 @@ class Grid():
         if self.grid[x][y][0] is None:
             return False
         return True
+    
+    def getPlantAt(self, position):
+        return self.plantAtPos.get(position)
     
 
     def isWithinBounds(self, x, y):
