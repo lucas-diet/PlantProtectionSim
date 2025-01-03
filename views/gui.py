@@ -2,6 +2,7 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
+import re
 
 from models.grid import Grid
 from models.plant import Plant
@@ -113,19 +114,21 @@ class Gui():
 		self.substances_entry.grid(row=0, column=7, padx=1, pady=1, sticky='ew')
 		
 		# Buttons
-		apply_button = tk.Button(self.top_frame, text='Apply', command=self.create_situation)
-		apply_button.grid(row=0, column=8, columnspan=1, pady=1)
+		tk.Button(self.top_frame, text='Apply', command=self.create_situation).grid(row=0, column=8, columnspan=1, pady=1)
 		
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
-
-
 		
-		tk.Button(self.top_frame, text='Play').grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Import').grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Export').grid(row=0, column=12, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Breakups', command=self.openBreakupsWindow).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Play').grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
+
+		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=12, padx=1, pady=1, sticky='ew')
+
 		tk.Button(self.top_frame, text='Plot', command=self.openPlotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Breakups').grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
-	
+
+		tk.Button(self.top_frame, text='Import').grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Export').grid(row=0, column=15, columnspan=1, pady=1, sticky='ew')
+		
+
 	def create_situation(self):
 		self.createPlants_tab()
 		self.createEnemies_tab()
@@ -550,6 +553,7 @@ class Gui():
 			gridSize = int(self.grid_size_entry.get())
 		except ValueError:
 			messagebox.showerror('Invalid input', 'Please enter a valid number')
+			return
 
 		if gridSize < 1 or gridSize > 80:
 			messagebox.showwarning('Invalid number', 'The number of gridsize must be between 1 and 80!')
@@ -910,7 +914,7 @@ class Gui():
 		Zeichnet den Feind als kleinen Kreis auf dem Canvas und gibt die Text-ID zurück.
 		"""
 		# Größe des Kreises
-		circle_radius = 3
+		circle_radius = 2.5
 		# Berechne die Koordinaten für den Kreis (Bounding Box: (left, top, right, bottom))
 		left = x_pos - circle_radius
 		top = y_pos - circle_radius
@@ -980,7 +984,6 @@ class Gui():
 		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Text-Item verlässt
 
 
-		
 	def create_add_cluster(self, actual_index, coords, clusterSize, speed, eatSpeed, eatVictory):
 		self.error_enemies.config(text='')
 		e = Enemy(name=f'e{actual_index}', symbol=f'E{actual_index}')
@@ -997,7 +1000,6 @@ class Gui():
 		print(self.grid.enemies)
 	
 
-
 	def get_enemy_input(self, enemy_entries):
 		"""
 		Holt die Eingabewerte für den Feind aus den entsprechenden Entry-Widgets.
@@ -1010,18 +1012,86 @@ class Gui():
 		return clusterSize, speed, eatSpeed, eatVictory
 
 
+	def openBreakupsWindow(self):
+		if hasattr(self, 'breakupWindow') and self.breakupWindow.winfo_exists():
+			self.breakupWindow.deiconify()  # Fenster wieder anzeigen, falls es schon existiert
+			return
+		
+		
+		self.breakupWindow = tk.Toplevel()
+		self.breakupWindow.title('Breakups')
+		x = int(self.breakupWindow.winfo_screenwidth() / 2 - 400 / 2)
+		y = int(self.breakupWindow.winfo_screenheight() / 2 - 200 / 2)
+		# Setzen der Fenstergröße und Position
+		self.breakupWindow.geometry(f'300x200+{x}+{y}')
+
+		self.breakupWindow.grid_columnconfigure(0, weight=0)  # Kein Platz für Spalte 0
+		self.breakupWindow.grid_columnconfigure(1, weight=1)  # Platz für Labels
+
+		tk.Label(self.breakupWindow, text='Maximum Sim-Steps:').grid(row=1, column=1, padx=2, pady=2, sticky='w')
+		self.maxStepsBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.maxStepsBreakup_entry.grid(row=1, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Death of plant:').grid(row=2, column=1, padx=2, pady=2, sticky='w')
+		self.plantBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.plantBreakup_entry.grid(row=2, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Death of enemy:').grid(row=3, column=1, padx=2, pady=2, sticky='w')
+		self.enemyBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.enemyBreakup_entry.grid(row=3, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Maximum plant energy:').grid(row=4, column=1, padx=2, pady=2, sticky='w')
+		self.maxEnergyBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.maxEnergyBreakup_entry.grid(row=4, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Maximum number of enemies:').grid(row=5, column=1, padx=2, pady=2, sticky='w')
+		self.maxEnemiesBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.maxEnemiesBreakup_entry.grid(row=5, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Button(self.breakupWindow, text='Apply', command=self.set_breakups).grid(row=6, column=2, padx=2, pady=2, sticky='e')
 
 
-	
+	def set_breakups(self):
+		try:
+			maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum Sim-Steps')
+			return
+		
+		plant_death = self.plantBreakup_entry.get()
+		# Überprüfen, ob plant_death die Form 'p' gefolgt von 1 bis 16 hat
+		if plant_death:
+			if not re.fullmatch(r'p(1[0-6]|[1-9])', plant_death):
+				messagebox.showerror('Invalid input', 'Please enter a valid format for plant death (e.g., p1 to p16)')
+				return
+		else:
+			plant_death = None
+		
+		enemy_death = self.enemyBreakup_entry.get()
+		# Überprüfen, ob enemy_death die Form 'e' gefolgt von 1 bis 15 hat
+		if enemy_death:
+			if not re.fullmatch(r'e(1[0-5]|[1-9])', enemy_death):
+				messagebox.showerror('Invalid input', 'Please enter a valid format for enemy death (e.g., e1 to e15)')
+				return
+		else:
+			enemy_death = None
 
-
-
-
-
-
-
-
-
+		try:
+			max_plant_energy = int(self.maxEnergyBreakup_entry.get()) if self.maxEnergyBreakup_entry.get() else None
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum energy')
+			return
+		
+		try:
+			max_enemies_num = int(self.maxEnemiesBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum enemies number')
+			return
+		
+		# Fenster verstecken
+		self.breakupWindow.withdraw()
+		print(maxSteps, plant_death, enemy_death, max_plant_energy, max_enemies_num)
+		return maxSteps, plant_death, enemy_death, max_plant_energy, max_enemies_num
 
 
 
@@ -1032,9 +1102,25 @@ class Gui():
 		"""_summary_
 			Öffnet ein neues Fenster mit Tabs, in denen die Plots angezeigt werden.
 		"""
+		# Überprüfen, ob das Fenster bereits existiert und sichtbar ist
+		if hasattr(self, 'plotWindow') and self.plotWindow.winfo_exists():
+			self.plotWindow.lift()  # Bringt das vorhandene Fenster in den Vordergrund
+			return
+		
 		# Neues Tkinter-Fenster erstellen
-		self.plotWindow = tk.Tk()
+		self.plotWindow = tk.Toplevel()
 		self.plotWindow.title('Plots')
+
+		# Fenster zentrieren
+		window_width = 1000  # Beispielbreite
+		window_height = 650  # Beispielhöhe
+		screen_width = self.plotWindow.winfo_screenwidth()
+		screen_height = self.plotWindow.winfo_screenheight()
+		x = int((screen_width / 2) - (window_width / 2))
+		y = int((screen_height / 2) - (window_height / 2))
+
+		# Größe und Position des Fensters festlegen
+		self.plotWindow.geometry(f'{window_width}x{window_height}+{x}+{y}')
 
 		# Notebook (Tabs) erstellen
 		self.plot_tabs = ttk.Notebook(self.plotWindow)
