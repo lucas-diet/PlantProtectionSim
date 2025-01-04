@@ -12,30 +12,25 @@ from controllers.simulation import Simulation
 
 
 class Gui():
+
 	def __init__(self, grid, simulation, diagrams):
 		self.grid = grid
 		self.simulation = simulation
 		self.diagrams = diagrams
 
-		self.root = tk.Tk()
-		self.root.title('Simulator')
+		self.initSimulationWindow()
+		self.set_breakupsAuto()
+
 		self.PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400', '#7CFC00', '#00FF7F', '#2E8B57', '#3CB371', '#20B2AA', '#48D1CC', '#00FA9A', '#66CDAA', '#8FBC8F', '#98FB98', '#9ACD32', '#6B8E23']
-		
-		self.windowSize()
-		self.createAreas()
-		
 		self.selectedItem = tk.IntVar(value=-1)
+		
 		self.players = []
 		self.enemies_at_positions = {}
 
-		self.set_breakups_auto()
-		
-	
-	def mainloop(self):
-		self.root.mainloop()
-	
 
-	def windowSize(self):
+	def initSimulationWindow(self):
+		self.root = tk.Tk()
+		self.root.title('Simulator')
 		# Berechnen der Fenstergröße
 		window_width = self.root.winfo_screenwidth() - 200
 		window_height = self.root.winfo_screenheight() - 200
@@ -46,9 +41,15 @@ class Gui():
 		
 		# Setzen der Fenstergröße und Position
 		self.root.geometry(f'{window_width}x{window_height}+{center_x}+{center_y}')
-		
-		
-	def createAreas(self):
+
+		self.createWindowAreas()
+
+
+	def mainloop(self):
+		self.root.mainloop()
+
+
+	def createWindowAreas(self):
 		# Bereich oben
 		self.top_frame = tk.Frame(self.root)
 		self.top_frame.grid(row=0, column=0, columnspan=2, sticky='nsew')
@@ -59,7 +60,7 @@ class Gui():
 		self.left_frame.grid(row=1, column=0, sticky='nsew')
 		
 		# Tabs in der Sidebar
-		self.createSidebarTabs()
+		self.sidebarTabs()
 		
 		# Bereich rechts
 		self.right_frame = tk.Frame(self.root, padx=5, pady=5)
@@ -71,30 +72,8 @@ class Gui():
 		self.root.grid_rowconfigure(1, weight=6)  # Mitte
 		self.root.grid_columnconfigure(0, weight=2)  # Links
 		self.root.grid_columnconfigure(1, weight=9, uniform='equal')  # Rechts
-
-
-	def createSidebarTabs(self):
-		"""Erstellt Tabs für die Sidebar."""
-		# Notebook für Tabs
-		self.sidebar_tabs = ttk.Notebook(self.left_frame)
-		
-		# Tab 1: Pflanzen
-		self.plants_tab = tk.Frame(self.sidebar_tabs)
-		self.plants_tab.pack(fill='both', expand=True)
-		self.sidebar_tabs.add(self.plants_tab, text='Plants')
-		
-		# Tab 2: Feinde
-		self.enemies_tab = tk.Frame(self.sidebar_tabs)
-		self.sidebar_tabs.add(self.enemies_tab, text='Enemies')
-		
-		# Tab 3: Substanzen
-		self.substances_tab = tk.Frame(self.sidebar_tabs)
-		self.sidebar_tabs.add(self.substances_tab, text='Substances')
-		
-		# Packe das Notebook in die Sidebar
-		self.sidebar_tabs.pack(fill='both', expand=True)
-		
-		
+	
+	
 	def topAreaWidgets(self):
 		"""Erstellt die Widgets im oberen Bereich."""
 		# Gridgröße
@@ -118,30 +97,52 @@ class Gui():
 		self.substances_entry.grid(row=0, column=7, padx=1, pady=1, sticky='ew')
 		
 		# Buttons
-		tk.Button(self.top_frame, text='Apply', command=self.create_situation).grid(row=0, column=8, columnspan=1, pady=1)
+		tk.Button(self.top_frame, text='Apply', command=self.createSituation).grid(row=0, column=8, columnspan=1, pady=1)
 		
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
 		
-		tk.Button(self.top_frame, text='Breakups', command=self.openBreakupsWindow).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow ).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
 
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=12, padx=1, pady=1, sticky='ew')
 
-		tk.Button(self.top_frame, text='Plot', command=self.openPlotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Plot', command=self.open_plotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
 
 		tk.Button(self.top_frame, text='Import').grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Export').grid(row=0, column=15, columnspan=1, pady=1, sticky='ew')
-		
 
-	def create_situation(self):
-		self.createPlants_tab()
-		self.createEnemies_tab()
-		self.createSubstances_tab()
+
+	def createSituation(self):
+		self.input_plantsTab()
+		self.input_enemiesTab()
+		self.input_substancesTab()
 		
-		self.createBattlefield()
-		
+		self.input_gridSize()
 	
-	def createPlants_tab(self):
+
+	def sidebarTabs(self):
+		"""Erstellt Tabs für die Sidebar."""
+		# Notebook für Tabs
+		self.sidebar_tabs = ttk.Notebook(self.left_frame)
+		
+		# Tab 1: Pflanzen
+		self.plants_tab = tk.Frame(self.sidebar_tabs)
+		self.plants_tab.pack(fill='both', expand=True)
+		self.sidebar_tabs.add(self.plants_tab, text='Plants')
+		
+		# Tab 2: Feinde
+		self.enemies_tab = tk.Frame(self.sidebar_tabs)
+		self.sidebar_tabs.add(self.enemies_tab, text='Enemies')
+		
+		# Tab 3: Substanzen
+		self.substances_tab = tk.Frame(self.sidebar_tabs)
+		self.sidebar_tabs.add(self.substances_tab, text='Substances')
+		
+		# Packe das Notebook in die Sidebar
+		self.sidebar_tabs.pack(fill='both', expand=True)
+
+	
+	def input_plantsTab(self):
 		try:
 			# Eingabe in eine Zahl umwandeln
 			number_of_plants = int(self.plants_entry.get())
@@ -152,28 +153,120 @@ class Gui():
 		
 		# Überprüfen, ob die Zahl zwischen 0 und 16 liegt
 		if number_of_plants < 1 or number_of_plants > 16:
-			self.clear_plants_frame()  # Lösche bestehende Elemente
+			self.clear_plantsFrame()  # Lösche bestehende Elemente
 			messagebox.showwarning('Invalid number', 'The number of plants must be between 1 and 16!')
 			return
 		
 		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
 		if hasattr(self, 'plants_setting_frame'):
-			self.clear_plants_frame()
+			self.clear_plantsFrame()
 		else:
 			# Erstellen von Canvas, Frame und Scrollbar
-			self.create_canvas_and_frame_plants()
+			self.plantsCanvasFrame()
 		# Substanzen-Einstellungen erstellen
-		self.create_plants_settings(number_of_plants)
-		
+		self.create_plantsSettings(number_of_plants)
 	
-	def clear_plants_frame(self):
+
+	def input_enemiesTab(self):
+		try:
+			# Eingabe in eine Zahl umwandeln
+			number_of_enemies = int(self.enemies_entry.get())
+		except ValueError:
+			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
+			return
+		
+		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
+		if number_of_enemies < 0 or number_of_enemies > 15:
+			self.clear_enemiesFrame()  # Lösche bestehende Elemente
+			messagebox.showwarning('Invalid number', 'The number of enemies must be between 0 and 15!')
+			return
+		
+		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
+		if hasattr(self, 'enemies_setting_frame'):
+			self.clear_enemiesFrame()
+		else:
+			# Erstellen von Canvas, Frame und Scrollbar
+			self.enemiesCanvasFrame()
+		# Substanzen-Einstellungen erstellen
+		self.create_enemiesSettings(number_of_enemies)
+
+	
+	def input_substancesTab(self):
+		try:
+			# Eingabe in eine Zahl umwandeln
+			number_of_substances = int(self.substances_entry.get())
+		except ValueError:
+			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
+			return
+		
+		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
+		if number_of_substances < 0 or number_of_substances > 15:
+			self.clear_substancesFrame()  # Lösche bestehende Elemente
+			messagebox.showwarning('Invalid number', 'The number of substances must be between 0 and 15!')
+			return
+		
+		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
+		if hasattr(self, 'substances_setting_frame'):
+			self.clear_substancesFrame()
+		else:
+			# Erstellen von Canvas, Frame und Scrollbar
+			self.substancesCanvasFrame()
+			
+		# Substanzen-Einstellungen erstellen
+		self.create_substancesSettings(number_of_substances)
+
+
+	def input_gridSize(self):
+		try:
+			gridSize = int(self.grid_size_entry.get())
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number')
+			return
+
+		if gridSize < 1 or gridSize > 80:
+			messagebox.showwarning('Invalid number', 'The number of gridsize must be between 1 and 80!')
+			return
+		else:
+			self.grid = Grid(gridSize, gridSize)
+		
+		self.clear_gridFrame()
+		self.create_gridFrame(gridSize, gridSize)
+
+	
+	def clear_plantsFrame(self):
 		"""Bereinigt alle Widgets im Frame der Substanzen"""
 		if hasattr(self, 'plants_setting_frame'):
 			for widget in self.plants_setting_frame.winfo_children():
 				widget.destroy()
-				
 	
-	def create_canvas_and_frame_plants(self):
+
+	def clear_enemiesFrame(self):
+		"""Bereinigt alle Widgets im Frame der Substanzen"""
+		if hasattr(self, 'enemies_setting_frame'):
+			for widget in self.enemies_setting_frame.winfo_children():
+				widget.destroy()
+
+
+	def clear_substancesFrame(self):
+		"""Bereinigt alle Widgets im Frame der Substanzen"""
+		if hasattr(self, 'substances_setting_frame'):
+			for widget in self.substances_setting_frame.winfo_children():
+				widget.destroy()
+
+
+	def clear_gridFrame(self):
+		if hasattr(self, 'grid_frame'):
+			# Zerstöre alle Kinder-Widgets im Frame
+			for widget in self.grid_frame.winfo_children():
+				widget.destroy()
+			# Lösche den Frame selbst
+			self.grid_frame.destroy()
+			del self.grid_frame  # Entferne die Referenz auf das Attribut
+
+
+	def plantsCanvasFrame(self):
 		# Canvas erstellen und konfigurieren
 		self.plants_setting_canvas = tk.Canvas(self.plants_tab, width=0)
 		self.plants_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=1, pady=1)
@@ -192,9 +285,51 @@ class Gui():
 		# Layout-Anpassung für den Canvas und Scrollbar
 		self.plants_tab.grid_rowconfigure(0, weight=1)
 		self.plants_tab.grid_columnconfigure(0, weight=1)
-				
+
 	
-	def create_plants_settings(self, number_of_plants):
+	def enemiesCanvasFrame(self):
+		# Canvas erstellen und konfigurieren
+		self.enemies_setting_canvas = tk.Canvas(self.enemies_tab, width=0)
+		self.enemies_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
+		
+		# Frame erstellen und im Canvas einfügen
+		self.enemies_setting_frame = tk.Frame(self.enemies_setting_canvas)
+		self.enemies_setting_canvas.create_window((0, 0), window=self.enemies_setting_frame, anchor='nw')
+		
+		# Scrollbar erstellen und mit dem Canvas verbinden
+		self.enemies_scrollbar = tk.Scrollbar(self.enemies_tab, orient='vertical', command=self.enemies_setting_canvas.yview)
+		self.enemies_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
+		
+		# Scrollbar an Canvas binden (nicht an Frame)
+		self.enemies_setting_canvas.config(yscrollcommand=self.enemies_scrollbar.set, highlightthickness=0)
+		
+		# Layout-Anpassung für den Canvas und Scrollbar
+		self.enemies_tab.grid_rowconfigure(0, weight=1)
+		self.enemies_tab.grid_columnconfigure(0, weight=1)
+
+
+	def substancesCanvasFrame(self):
+		# Canvas erstellen und konfigurieren
+		self.substances_setting_canvas = tk.Canvas(self.substances_tab, width=0)
+		self.substances_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
+		
+		# Frame erstellen und im Canvas einfügen
+		self.substances_setting_frame = tk.Frame(self.substances_setting_canvas)
+		self.substances_setting_canvas.create_window((0, 0), window=self.substances_setting_frame, anchor='nw')
+		
+		# Scrollbar erstellen und mit dem Canvas verbinden
+		self.substances_scrollbar = tk.Scrollbar(self.substances_tab, orient='vertical', command=self.substances_setting_canvas.yview)
+		self.substances_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
+		
+		# Scrollbar an Canvas binden (nicht an Frame)
+		self.substances_setting_canvas.config(yscrollcommand=self.substances_scrollbar.set, highlightthickness=0)
+		
+		# Layout-Anpassung für den Canvas und Scrollbar
+		self.substances_tab.grid_rowconfigure(0, weight=1)
+		self.substances_tab.grid_columnconfigure(0, weight=1)
+	
+
+	def create_plantsSettings(self, number_of_plants):
 		"""Erstellt die Einstellungen für Pflanzen."""
 		
 		# Label für Abstand
@@ -266,62 +401,9 @@ class Gui():
 		# Scrollregion aktualisieren
 		self.plants_setting_frame.update_idletasks()
 		self.plants_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.plants_setting_canvas))
-
-		
-	def createEnemies_tab(self):
-		try:
-			# Eingabe in eine Zahl umwandeln
-			number_of_enemies = int(self.enemies_entry.get())
-		except ValueError:
-			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
-			messagebox.showerror('Invalid input', 'Please enter a valid number')
-			return
-		
-		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
-		if number_of_enemies < 0 or number_of_enemies > 15:
-			self.clear_enemies_frame()  # Lösche bestehende Elemente
-			messagebox.showwarning('Invalid number', 'The number of enemies must be between 0 and 15!')
-			return
-		
-		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
-		if hasattr(self, 'enemies_setting_frame'):
-			self.clear_enemies_frame()
-		else:
-			# Erstellen von Canvas, Frame und Scrollbar
-			self.create_canvas_and_frame_enemies()
-		# Substanzen-Einstellungen erstellen
-		self.create_enemies_settings(number_of_enemies)
-		
-		
-	def clear_enemies_frame(self):
-		"""Bereinigt alle Widgets im Frame der Substanzen"""
-		if hasattr(self, 'enemies_setting_frame'):
-			for widget in self.enemies_setting_frame.winfo_children():
-				widget.destroy()
 				
-				
-	def create_canvas_and_frame_enemies(self):
-		# Canvas erstellen und konfigurieren
-		self.enemies_setting_canvas = tk.Canvas(self.enemies_tab, width=0)
-		self.enemies_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
-		
-		# Frame erstellen und im Canvas einfügen
-		self.enemies_setting_frame = tk.Frame(self.enemies_setting_canvas)
-		self.enemies_setting_canvas.create_window((0, 0), window=self.enemies_setting_frame, anchor='nw')
-		
-		# Scrollbar erstellen und mit dem Canvas verbinden
-		self.enemies_scrollbar = tk.Scrollbar(self.enemies_tab, orient='vertical', command=self.enemies_setting_canvas.yview)
-		self.enemies_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
-		
-		# Scrollbar an Canvas binden (nicht an Frame)
-		self.enemies_setting_canvas.config(yscrollcommand=self.enemies_scrollbar.set, highlightthickness=0)
-		
-		# Layout-Anpassung für den Canvas und Scrollbar
-		self.enemies_tab.grid_rowconfigure(0, weight=1)
-		self.enemies_tab.grid_columnconfigure(0, weight=1)
-		
 	
-	def create_enemies_settings(self, number_of_enemies):
+	def create_enemiesSettings(self, number_of_enemies):
 		tk.Label(self.enemies_setting_frame, text='', width=25).grid(row=0, column=4, padx=1, pady=1, sticky='w')
 		offset = 16  # Offset, um die Feinde von den Pflanzen in der Variablen zu unterscheiden
 		
@@ -375,62 +457,8 @@ class Gui():
 		self.enemies_setting_frame.update_idletasks()
 		self.enemies_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.enemies_setting_canvas))
 
-	
-	def createSubstances_tab(self):
-		try:
-			# Eingabe in eine Zahl umwandeln
-			number_of_substances = int(self.substances_entry.get())
-		except ValueError:
-			# Fehlerbehandlung, falls die Eingabe keine gültige Zahl ist
-			messagebox.showerror('Invalid input', 'Please enter a valid number')
-			return
-		
-		# Überprüfen, ob die Zahl zwischen 0 und 15 liegt
-		if number_of_substances < 0 or number_of_substances > 15:
-			self.clear_substances_frame()  # Lösche bestehende Elemente
-			messagebox.showwarning('Invalid number', 'The number of substances must be between 0 and 15!')
-			return
-		
-		# Bereinigen bestehender Widgets, falls die Frame bereits existiert
-		if hasattr(self, 'substances_setting_frame'):
-			self.clear_substances_frame()
-		else:
-			# Erstellen von Canvas, Frame und Scrollbar
-			self.create_canvas_and_frame_substances()
-			
-		# Substanzen-Einstellungen erstellen
-		self.create_substances_settings(number_of_substances)
-				
-		
-	def clear_substances_frame(self):
-		"""Bereinigt alle Widgets im Frame der Substanzen"""
-		if hasattr(self, 'substances_setting_frame'):
-			for widget in self.substances_setting_frame.winfo_children():
-				widget.destroy()
-		
-	
-	def create_canvas_and_frame_substances(self):
-		# Canvas erstellen und konfigurieren
-		self.substances_setting_canvas = tk.Canvas(self.substances_tab, width=0)
-		self.substances_setting_canvas.grid(row=0, column=0, sticky='nsew', padx=2, pady=2)
-		
-		# Frame erstellen und im Canvas einfügen
-		self.substances_setting_frame = tk.Frame(self.substances_setting_canvas)
-		self.substances_setting_canvas.create_window((0, 0), window=self.substances_setting_frame, anchor='nw')
-		
-		# Scrollbar erstellen und mit dem Canvas verbinden
-		self.substances_scrollbar = tk.Scrollbar(self.substances_tab, orient='vertical', command=self.substances_setting_canvas.yview)
-		self.substances_scrollbar.grid(row=0, column=1, sticky='ns', pady=0)
-		
-		# Scrollbar an Canvas binden (nicht an Frame)
-		self.substances_setting_canvas.config(yscrollcommand=self.substances_scrollbar.set, highlightthickness=0)
-		
-		# Layout-Anpassung für den Canvas und Scrollbar
-		self.substances_tab.grid_rowconfigure(0, weight=1)
-		self.substances_tab.grid_columnconfigure(0, weight=1)
-	
-	
-	def create_substances_settings(self, number_of_substances):
+
+	def create_substancesSettings(self, number_of_substances):
 		tk.Label(self.substances_setting_frame, text='', width=15).grid(row=0, column=5, padx=1, pady=1, sticky='w')
 		
 		for i in range(number_of_substances):
@@ -513,31 +541,49 @@ class Gui():
 			
 			space_label = tk.Label(self.substances_setting_frame, width=4)
 			space_label.grid(row=row+8, column=0, padx=2, pady=2, sticky='w')
-			
+
+			# Instanzvariablen für die Felder speichern
+			setattr(self, f'substance_var_{i}', substance_var)
+			setattr(self, f'substance_menu_{i}', substance_menu)
+			setattr(self, f'toxin_effect_checkbox_{i}', toxin_effect_checkbox)
+			setattr(self, f'substance_spreadtype_menu_{i}', substance_spreadtype_menu)
+			setattr(self, f'aft_entry_{i}', aft_entry)
+			setattr(self, f'receive_entry_{i}', receive_entry)
+			setattr(self, f'sendSpeed_entry_{i}', sendSpeed_entry)
+
 			# Ereignis an Substanzmenü binden, um den ausgewählten Wert zu überprüfen
-			substance_var.trace_add('write', lambda *args, substance_var=substance_var, receive_entry=receive_entry, aft_entry=aft_entry, substance_spreadtype_menu=substance_spreadtype_menu, toxin_effect_checkbox=toxin_effect_checkbox, sendSpeed_entry=sendSpeed_entry: self.substanceType_change(substance_var, receive_entry, aft_entry, substance_spreadtype_menu, toxin_effect_checkbox, sendSpeed_entry))
+			substance_var.trace_add('write', lambda *args, i=i: self.change_SubstanceType(i))
+				
 			
 		self.substances_setting_frame.update_idletasks()
 		# Scrollregion aktualisieren, wenn das Frame konfiguriert wird
 		self.substances_setting_frame.bind('<Configure>',lambda e: self.update_scrollregion(self.substances_setting_canvas))
-	
-	
-	def substanceType_change(self, substance_var, receive_entry, aft_entry, substance_spreadtype_menu, toxin_effect_checkbox, sendSpeed_entry):
+
+
+	def change_SubstanceType(self, index):
+		# Zugriff auf Instanzvariablen basierend auf dem Index
+		substance_var = getattr(self, f'substance_var_{index}')
+		substance_spreadtype_menu = getattr(self, f'substance_spreadtype_menu_{index}')
+		toxin_effect_checkbox = getattr(self, f'toxin_effect_checkbox_{index}')
+		aft_entry = getattr(self, f'aft_entry_{index}')
+		receive_entry = getattr(self, f'receive_entry_{index}')
+		sendSpeed_entry = getattr(self, f'sendSpeed_entry_{index}')
+
 		# Disable or enable fields based on the substance type
 		if substance_var.get() == 'Toxin':
-			receive_entry.config(state='disabled')
-			aft_entry.config(state='disabled')
 			substance_spreadtype_menu.config(state='disabled')
-			sendSpeed_entry.config(state='disable')
+			sendSpeed_entry.config(state='disabled')
 			toxin_effect_checkbox.config(state='normal')
+			receive_entry.config(state='disable')
+			aft_entry.config(state='disabled')
 		else:
-			receive_entry.config(state='normal')
-			aft_entry.config(state='normal')
 			substance_spreadtype_menu.config(state='normal')
 			sendSpeed_entry.config(state='normal')
 			toxin_effect_checkbox.config(state='disable')
-	
-	
+			receive_entry.config(state='normal')
+			aft_entry.config(state='normal')
+			
+
 	def update_scrollregion(self, canvas, event=None):
 		"""Aktualisiert die Scrollregion des Canvas basierend auf dem gesamten Inhalt."""
 		
@@ -550,36 +596,184 @@ class Gui():
 			y2 -= 4  # Etwas Platz unten entfernen
 			# Konfiguriere die Scrollregion des Canvas
 			canvas.config(scrollregion=(x1, y1, x2, y2))
+
+
+	def open_plotWindow(self):
+		"""_summary_
+			Öffnet ein neues Fenster mit Tabs, in denen die Plots angezeigt werden.
+		"""
+		# Überprüfen, ob das Fenster bereits existiert und sichtbar ist
+		if hasattr(self, 'plotWindow') and self.plotWindow.winfo_exists():
+			self.plotWindow.lift()  # Bringt das vorhandene Fenster in den Vordergrund
+			return
+		
+		# Neues Tkinter-Fenster erstellen
+		self.plotWindow = tk.Toplevel()
+		self.plotWindow.title('Plots')
+
+		# Fenster zentrieren
+		window_width = 1000  # Beispielbreite
+		window_height = 650  # Beispielhöhe
+		screen_width = self.plotWindow.winfo_screenwidth()
+		screen_height = self.plotWindow.winfo_screenheight()
+		x = int((screen_width / 2) - (window_width / 2))
+		y = int((screen_height / 2) - (window_height / 2))
+
+		# Größe und Position des Fensters festlegen
+		self.plotWindow.geometry(f'{window_width}x{window_height}+{x}+{y}')
+
+		self.create_plotTabs()
+		
+
+	def create_plotTabs(self):
+		# Notebook (Tabs) erstellen
+		self.plot_tabs = ttk.Notebook(self.plotWindow)
+
+		# Tab 1: Pflanzen - Energy
+		self.plants_energy_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.plants_energy_plot_tab, text='Plants-Energy')
+		self.diagrams.dataPlotter(
+			root=self.plants_energy_plot_tab,
+			data_dict=self.grid.plantData,
+			simLength=self.simulation.simLength,
+			measure='energy',
+			title='Energy by Plant Type Over Time',
+			ylabel='Energy'
+		)
+
+		# Tab 2: Pflanzen - Count
+		self.plants_count_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.plants_count_plot_tab, text='Plants-Count')
+		self.diagrams.dataPlotter(
+			root=self.plants_count_plot_tab,
+			data_dict=self.grid.plantData,
+			simLength=self.simulation.simLength,
+			measure='count',
+			title='Number by Plant Types Over Time',
+			ylabel='Count'
+		)
+
+		# Tab 3: Feinde - Size
+		self.enemies_size_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.enemies_size_plot_tab, text='Enemies-Size')
+		self.diagrams.dataPlotter(
+			root=self.enemies_size_plot_tab,
+			data_dict=self.grid.EnemyData,
+			simLength=self.simulation.simLength,
+			measure='size',
+			title='Clustersize by Enemy Type Over Time',
+			ylabel='Cluster Size'
+		)
+
+		# Tab 4: Feinde - Count
+		self.enemies_count_plot_tab = tk.Frame(self.plot_tabs)
+		self.plot_tabs.add(self.enemies_count_plot_tab, text='Enemies-Count')
+		self.diagrams.dataPlotter(
+			root=self.enemies_count_plot_tab,
+			data_dict=self.grid.EnemyData,
+			simLength=self.simulation.simLength,
+			measure='count',
+			title='Number by Enemy Types Over Time',
+			ylabel='Count'
+		)
+
+		# Tabs anzeigen
+		self.plot_tabs.pack(fill='both', expand=True)
 	
 
-	def createBattlefield(self):
-		try:
-			gridSize = int(self.grid_size_entry.get())
-		except ValueError:
-			messagebox.showerror('Invalid input', 'Please enter a valid number')
+	def open_breakupWindow(self):
+		if hasattr(self, 'breakupWindow') and self.breakupWindow.winfo_exists():
+			self.breakupWindow.deiconify()  # Fenster wieder anzeigen, falls es schon existiert
 			return
-
-		if gridSize < 1 or gridSize > 80:
-			messagebox.showwarning('Invalid number', 'The number of gridsize must be between 1 and 80!')
-			return
-		else:
-			self.grid = Grid(gridSize, gridSize)
 		
-		self.clear_grid_frame()
-		self.create_canvas_and_frame_grid(gridSize, gridSize)
+		
+		self.breakupWindow = tk.Toplevel()
+		self.breakupWindow.title('Breakups')
+		x = int(self.breakupWindow.winfo_screenwidth() / 2 - 400 / 2)
+		y = int(self.breakupWindow.winfo_screenheight() / 2 - 200 / 2)
+		# Setzen der Fenstergröße und Position
+		self.breakupWindow.geometry(f'300x200+{x}+{y}')
+
+		self.breakupWindow.grid_columnconfigure(0, weight=0)  # Kein Platz für Spalte 0
+		self.breakupWindow.grid_columnconfigure(1, weight=1)  # Platz für Labels
+
+		self.create_breakupWindow()
 
 
-	def clear_grid_frame(self):
-		if hasattr(self, 'grid_frame'):
-			# Zerstöre alle Kinder-Widgets im Frame
-			for widget in self.grid_frame.winfo_children():
-				widget.destroy()
-			# Lösche den Frame selbst
-			self.grid_frame.destroy()
-			del self.grid_frame  # Entferne die Referenz auf das Attribut
+	def create_breakupWindow(self):
+		tk.Label(self.breakupWindow, text='Maximum Sim-Steps:').grid(row=1, column=1, padx=2, pady=2, sticky='w')
+		self.maxStepsBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.maxStepsBreakup_entry.grid(row=1, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Death of plant:').grid(row=2, column=1, padx=2, pady=2, sticky='w')
+		self.plantBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.plantBreakup_entry.grid(row=2, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Death of enemy:').grid(row=3, column=1, padx=2, pady=2, sticky='w')
+		self.enemyBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.enemyBreakup_entry.grid(row=3, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Maximum plant energy:').grid(row=4, column=1, padx=2, pady=2, sticky='w')
+		self.maxEnergyBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.maxEnergyBreakup_entry.grid(row=4, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Label(self.breakupWindow, text='Maximum number of enemies:').grid(row=5, column=1, padx=2, pady=2, sticky='w')
+		self.maxEnemiesBreakup_entry = tk.Entry(self.breakupWindow, width=10)
+		self.maxEnemiesBreakup_entry.grid(row=5, column=2, padx=2, pady=2, sticky='w')
+
+		tk.Button(self.breakupWindow, text='Apply', command=self.set_breakupsManuelly).grid(row=6, column=2, padx=2, pady=2, sticky='e')
 
 
-	def create_canvas_and_frame_grid(self, width, height):
+	def set_breakupsAuto(self):
+		self.maxSteps = None
+		self.plant_death = None
+		self.enemy_death = None
+		self.max_plant_energy = None
+		self.max_enemies_num = None
+
+
+	def set_breakupsManuelly(self):
+		try:
+			self.maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum Sim-Steps')
+			return
+		
+		self.plant_death = self.plantBreakup_entry.get()
+		# Überprüfen, ob plant_death die Form 'p' gefolgt von 1 bis 16 hat
+		if self.plant_death:
+			if not re.fullmatch(r'p(1[0-6]|[1-9])', self.plant_death):
+				messagebox.showerror('Invalid input', 'Please enter a valid format for plant death (e.g., p1 to p16)')
+				return
+		else:
+			self.plant_death = None
+		
+		self.enemy_death = self.enemyBreakup_entry.get()
+		# Überprüfen, ob enemy_death die Form 'e' gefolgt von 1 bis 15 hat
+		if self.enemy_death:
+			if not re.fullmatch(r'e(1[0-5]|[1-9])', self.enemy_death):
+				messagebox.showerror('Invalid input', 'Please enter a valid format for enemy death (e.g., e1 to e15)')
+				return
+		else:
+			self.enemy_death = None
+
+		try:
+			self.max_plant_energy = int(self.maxEnergyBreakup_entry.get()) if self.maxEnergyBreakup_entry.get() else None
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum energy')
+			return
+		
+		try:
+			self.max_enemies_num = int(self.maxEnemiesBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+		except ValueError:
+			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum enemies number')
+			return
+		
+		# Fenster verstecken
+		self.breakupWindow.withdraw()
+
+
+	def create_gridFrame(self, width, height):
 		self.grid_frame = tk.Frame(self.right_frame, bg='white')
 		self.grid_frame.pack_propagate(False)  # Verhindert, dass der Frame seine Größe an Inhalte anpasst
 		self.grid_frame.pack(fill='both', expand=True)
@@ -589,7 +783,7 @@ class Gui():
 		self.gridCanvas.pack(fill='both', expand=True)
 
 		# Registriere den Event-Handler für Mausklicks
-		self.gridCanvas.bind('<Button-1>', self.onGridClick_player)
+		self.gridCanvas.bind('<Button-1>', self.on_GridClick_player)
 
 		# Bereinige die Canvas vor dem Zeichnen
 		self.gridCanvas.delete('all')
@@ -623,30 +817,30 @@ class Gui():
 	def drawGrid(self, width, height, x_offset, y_offset, square_width, square_height):
 		# Zeichne die Quadrate
 		self.squares = {}
-		for i in range(width):
-			for j in range(height):
+		for i in range(height):
+			for j in range(width):
 				x1 = x_offset + i * square_width
 				y1 = y_offset + j * square_height
 				x2 = x1 + square_width
 				y2 = y1 + square_height 
 				squareID = self.gridCanvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=1)
-				self.squares[(j,i)] = squareID
+				self.squares[(i,j)] = squareID
 
 
-	def onGridClick_player(self, event):
+	def on_GridClick_player(self, event):
 		# Ermittle die angeklickte Zelle
 		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
 		if clicked_item:
 			item_id = clicked_item[0]
 
 			# Finde die (x, y)-Koordinaten der angeklickten Zelle
-			clicked_coords = None
-			for coords, id in self.squares.items():
+			clicked_position = None
+			for position, id in self.squares.items():
 				if id == item_id:
-					clicked_coords = coords
+					clicked_position = position
 					break
 
-			if clicked_coords is None:
+			if clicked_position is None:
 				print(f'Zelle mit ID {item_id} nicht gefunden.')
 				return
 
@@ -658,17 +852,17 @@ class Gui():
 
 			# Überprüfen, ob eine Pflanze oder ein Feind ausgewählt wurde
 			if selected_index < 16:  # Pflanzen haben Werte von 0 bis 15
-				self.place_plant_on_grid(clicked_coords, selected_index)
+				self.plantPlacer(clicked_position, selected_index)
 			else:  # Feinde haben Werte ab 16
-				self.place_enemy_on_grid(clicked_coords, selected_index)
+				self.enemyClusterPlacer(clicked_position, selected_index)
 
 
-	def place_plant_on_grid(self, coords, selected_index):
+	def plantPlacer(self, position, selected_index):
 		"""
 		Platziert eine Pflanze auf dem Grid an den gegebenen Koordinaten (x, y).
 		Zeigt die Energie der Pflanze oben innerhalb der Zelle an.
 		"""
-		square_id = self.squares.get(coords)
+		square_id = self.squares.get(position)
 		
 		if square_id:
 			# Hole die Eingabewerte für die Pflanze
@@ -676,7 +870,7 @@ class Gui():
 			
 			# Überprüfe, ob alle Eingabewerte gültig sind (nicht leer und im richtigen Format)
 			try:
-				init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist = self.get_plant_input(plant_entries)
+				init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist = self.get_plantsInput(plant_entries)
 
 			except ValueError:
 				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
@@ -693,12 +887,11 @@ class Gui():
 			self.gridCanvas.itemconfig(square_id, fill=plant_color)
 			
 			# Erzeuge und füge Pflanze hinzu
-			plant = self.create_add_plant(selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color)
+			plant = self.create_add_plant(selected_index, position, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color)
+			self.plantDetails(plant, square_id)
+	
 
-			self.plant_lifeline(plant, square_id)
-
-
-	def get_plant_input(self, plant_entries):
+	def get_plantsInput(self, plant_entries):
 		init_energy = float(plant_entries['initEnergy'].get())
 		growth_rate = float(plant_entries['growthRate'].get())
 		min_energy = float(plant_entries['minEnergy'].get())
@@ -720,7 +913,39 @@ class Gui():
 		return init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist
 	
 
-	def plant_lifeline(self, plant, square_id):
+	def create_add_plant(self, selected_index, position, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color):
+		# Überprüfen, ob auf der Position bereits eine Pflanze existiert
+		existing_plant = self.grid.getPlantAt(position)
+		
+		if existing_plant:
+			# Wenn eine Pflanze vorhanden ist, entfernen sie
+			self.grid.removePlant(existing_plant)  # Entferne die alte Pflanze
+			print(f'Pflanze auf {position} entfernt und durch neue ersetzt.')
+
+		# Pflanze instanziieren
+		plant = Plant(
+				name=f'p{selected_index + 1}',
+				initEnergy=init_energy,
+				growthRateEnergy=growth_rate,
+				minEnergy=min_energy,
+				reproductionIntervall=repro_interval,
+				minDist=min_dist,
+				maxDist=max_dist,
+				position=position,
+				grid=self.grid,
+				color=plant_color)
+
+		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
+		# Pflanze zur Grid hinzufügen
+		if plant not in self.grid.plants:
+			self.grid.addPlant(plant)
+		else:
+			pass
+		print(self.grid.plants)
+		return plant
+	
+
+	def plantDetails(self, plant, square_id):
 		"""
 		Zeigt die Energie der Pflanze als Tooltip an, wenn die Maus über die Zelle bewegt wird.
 		"""
@@ -770,43 +995,11 @@ class Gui():
 		self.gridCanvas.tag_bind(square_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus die Zelle verlässt
 
 
-	def create_add_plant(self, selected_index, coords, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color):
-		# Überprüfen, ob auf den Koordinaten bereits eine Pflanze existiert
-		existing_plant = self.grid.getPlantAt(coords)
-		
-		if existing_plant:
-			# Wenn eine Pflanze vorhanden ist, entfernen wir sie
-			self.grid.removePlant(existing_plant)  # Entferne die alte Pflanze
-			print(f'Pflanze auf {coords} entfernt und durch neue ersetzt.')
-
-		# Pflanze instanziieren
-		plant = Plant(
-				name=f'p{selected_index + 1}',
-				initEnergy=init_energy,
-				growthRateEnergy=growth_rate,
-				minEnergy=min_energy,
-				reproductionIntervall=repro_interval,
-				minDist=min_dist,
-				maxDist=max_dist,
-				position=coords,
-				grid=self.grid,
-				color=plant_color)
-
-		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
-		# Pflanze zur Grid hinzufügen
-		if plant not in self.grid.plants:
-			self.grid.addPlant(plant)
-		else:
-			pass
-		print(self.grid.plants)
-		return plant
-
-
-	def place_enemy_on_grid(self, coords, selected_index):
+	def enemyClusterPlacer(self, clicked_position, selected_index):
 		"""
 		Platziert einen Feind auf dem Grid an den gegebenen Koordinaten (x, y).
 		"""
-		if not self.validate_enemy_selection(selected_index):
+		if not self.validate_enemySelection(selected_index):
 			return
 
 		# Übersetze den Index
@@ -814,23 +1007,23 @@ class Gui():
 		enemy_entries = self.enemy_entries[actual_index]
 
 		# Hole die Eingabewerte
-		enemy_data = self.get_and_validate_enemy_data(enemy_entries)
+		enemy_data = self.get_enemyData(enemy_entries)
 		if not enemy_data:
 			return  # Abbrechen, wenn die Eingabewerte ungültig sind
 		clusterSize, speed, eatSpeed, eatVictory = enemy_data
 
 		# Berechne die Zellenkoordinaten
-		position_data = self.calculate_cell_position(coords)
+		position_data = self.calculate_cellPosition(clicked_position)
 		if not position_data:
 			return  # Abbrechen, wenn die Zelle nicht existiert
 		x_pos, y_pos = position_data
 
 		# Platzierung und Darstellung des Feinds
-		self.place_enemy_marker(coords, x_pos, y_pos, selected_index, clusterSize)
-		self.create_add_cluster(actual_index, coords, clusterSize, speed, eatSpeed, eatVictory)
+		self.place_enemyMarker(clicked_position, x_pos, y_pos, selected_index, clusterSize)
+		self.create_add_cluster(actual_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory)
+	
 
-
-	def validate_enemy_selection(self, selected_index):
+	def validate_enemySelection(self, selected_index):
 		"""
 		Überprüft, ob der ausgewählte Index gültig ist.
 		"""
@@ -840,7 +1033,7 @@ class Gui():
 		return True
 
 
-	def get_and_validate_enemy_data(self, enemy_entries):
+	def get_enemyData(self, enemy_entries):
 		"""
 		Ruft die Eingabewerte für einen Feind ab und validiert sie.
 		"""
@@ -858,13 +1051,13 @@ class Gui():
 		return clusterSize, speed, eatSpeed, eatVictory
 
 
-	def calculate_cell_position(self, coords):
+	def calculate_cellPosition(self, position):
 		"""
 		Berechnet die Position der Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
 		"""
-		square_id = self.squares.get(coords)  # Erhalte die Zellen-ID von den Koordinaten
+		square_id = self.squares.get(position)  # Erhalte die Zellen-ID von den Koordinaten
 		if square_id is None:
-			print(f'Fehler: Keine Zelle mit den Koordinaten {coords} gefunden.')
+			print(f'Fehler: Keine Zelle mit den Koordinaten {position} gefunden.')
 			return None  # Zelle nicht gefunden
 
 		bbox = self.gridCanvas.bbox(square_id)
@@ -880,39 +1073,40 @@ class Gui():
 		if not hasattr(self, 'enemy_positions'):
 			self.enemy_positions = {}
 
-		if coords not in self.enemy_positions:
-			self.enemy_positions[coords] = 0
+		if position not in self.enemy_positions:
+			self.enemy_positions[position] = 0
 
-		current_enemy_count = self.enemy_positions[coords]
+		current_enemy_count = self.enemy_positions[position]
 		y_pos += current_enemy_count * 15  # Verschiebe die Y-Position für mehrere Feinde in derselben Zelle
 
 		return x_pos, y_pos
 
 
-	def place_enemy_marker(self, coords, x_pos, y_pos, selected_index, clusterSize):
+	def place_enemyMarker(self, position, x_pos, y_pos, selected_index, clusterSize):
 		"""
 		Platziert einen Marker für den Feind auf dem Canvas.
 		"""
+
 		enemy_name = f'e{selected_index - 15}'  # Feindname
-		circle_id = self.cluster_sign(x_pos, y_pos, enemy_name)
+		circle_id = self.clusterSign(x_pos, y_pos, enemy_name)
 
 		# Feindinformationen speichern
 		enemy_data = {'name': enemy_name, 'clusterSize': clusterSize}
 		
 		# Überprüfen, ob es für diese Position bereits eine Liste gibt
-		if coords not in self.enemies_at_positions:
-			self.enemies_at_positions[coords] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
+		if position not in self.enemies_at_positions:
+			self.enemies_at_positions[position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
 		
 		# Füge die Feindinformationen hinzu
-		self.enemies_at_positions[coords].append(enemy_data)
+		self.enemies_at_positions[position].append(enemy_data)
 
 		# Tooltip-Logik hinzufügen
-		self.add_tooltip(circle_id, coords)
+		self.addTooltip(circle_id, position)
 
-		print(f'Feind {enemy_name} mit Clustergröße {clusterSize} platziert auf: {coords}')
+		print(f'Feind {enemy_name} mit Clustergröße {clusterSize} platziert auf: {position}')
+	
 
-
-	def cluster_sign(self, x_pos, y_pos, eName):
+	def clusterSign(self, x_pos, y_pos, eName):
 		"""
 		Zeichnet den Feind als kleinen Kreis auf dem Canvas und gibt die Text-ID zurück.
 		"""
@@ -931,7 +1125,7 @@ class Gui():
 		return circle_id
 
 
-	def add_tooltip(self, circle_id, coords):
+	def addTooltip(self, circle_id, coords):
 		"""
 		Fügt Tooltip-Logik für einen Canvas-Text hinzu.
 		"""
@@ -1013,176 +1207,30 @@ class Gui():
 		eatVictory = float(enemy_entries['eatVictory'].get())
 		
 		return clusterSize, speed, eatSpeed, eatVictory
-
-
-	def openBreakupsWindow(self):
-		if hasattr(self, 'breakupWindow') and self.breakupWindow.winfo_exists():
-			self.breakupWindow.deiconify()  # Fenster wieder anzeigen, falls es schon existiert
-			return
-		
-		
-		self.breakupWindow = tk.Toplevel()
-		self.breakupWindow.title('Breakups')
-		x = int(self.breakupWindow.winfo_screenwidth() / 2 - 400 / 2)
-		y = int(self.breakupWindow.winfo_screenheight() / 2 - 200 / 2)
-		# Setzen der Fenstergröße und Position
-		self.breakupWindow.geometry(f'300x200+{x}+{y}')
-
-		self.breakupWindow.grid_columnconfigure(0, weight=0)  # Kein Platz für Spalte 0
-		self.breakupWindow.grid_columnconfigure(1, weight=1)  # Platz für Labels
-
-		tk.Label(self.breakupWindow, text='Maximum Sim-Steps:').grid(row=1, column=1, padx=2, pady=2, sticky='w')
-		self.maxStepsBreakup_entry = tk.Entry(self.breakupWindow, width=10)
-		self.maxStepsBreakup_entry.grid(row=1, column=2, padx=2, pady=2, sticky='w')
-
-		tk.Label(self.breakupWindow, text='Death of plant:').grid(row=2, column=1, padx=2, pady=2, sticky='w')
-		self.plantBreakup_entry = tk.Entry(self.breakupWindow, width=10)
-		self.plantBreakup_entry.grid(row=2, column=2, padx=2, pady=2, sticky='w')
-
-		tk.Label(self.breakupWindow, text='Death of enemy:').grid(row=3, column=1, padx=2, pady=2, sticky='w')
-		self.enemyBreakup_entry = tk.Entry(self.breakupWindow, width=10)
-		self.enemyBreakup_entry.grid(row=3, column=2, padx=2, pady=2, sticky='w')
-
-		tk.Label(self.breakupWindow, text='Maximum plant energy:').grid(row=4, column=1, padx=2, pady=2, sticky='w')
-		self.maxEnergyBreakup_entry = tk.Entry(self.breakupWindow, width=10)
-		self.maxEnergyBreakup_entry.grid(row=4, column=2, padx=2, pady=2, sticky='w')
-
-		tk.Label(self.breakupWindow, text='Maximum number of enemies:').grid(row=5, column=1, padx=2, pady=2, sticky='w')
-		self.maxEnemiesBreakup_entry = tk.Entry(self.breakupWindow, width=10)
-		self.maxEnemiesBreakup_entry.grid(row=5, column=2, padx=2, pady=2, sticky='w')
-
-		tk.Button(self.breakupWindow, text='Apply', command=self.set_breakups_manuelly).grid(row=6, column=2, padx=2, pady=2, sticky='e')
-
-
-	def set_breakups_auto(self):
-		self.maxSteps = None
-		self.plant_death = None
-		self.enemy_death = None
-		self.max_plant_energy = None
-		self.max_enemies_num = None
-
-
-	def set_breakups_manuelly(self):
-		try:
-			self.maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
-		except ValueError:
-			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum Sim-Steps')
-			return
-		
-		self.plant_death = self.plantBreakup_entry.get()
-		# Überprüfen, ob plant_death die Form 'p' gefolgt von 1 bis 16 hat
-		if self.plant_death:
-			if not re.fullmatch(r'p(1[0-6]|[1-9])', self.plant_death):
-				messagebox.showerror('Invalid input', 'Please enter a valid format for plant death (e.g., p1 to p16)')
-				return
-		else:
-			self.plant_death = None
-		
-		self.enemy_death = self.enemyBreakup_entry.get()
-		# Überprüfen, ob enemy_death die Form 'e' gefolgt von 1 bis 15 hat
-		if self.enemy_death:
-			if not re.fullmatch(r'e(1[0-5]|[1-9])', self.enemy_death):
-				messagebox.showerror('Invalid input', 'Please enter a valid format for enemy death (e.g., e1 to e15)')
-				return
-		else:
-			self.enemy_death = None
-
-		try:
-			self.max_plant_energy = int(self.maxEnergyBreakup_entry.get()) if self.maxEnergyBreakup_entry.get() else None
-		except ValueError:
-			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum energy')
-			return
-		
-		try:
-			self.max_enemies_num = int(self.maxEnemiesBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
-		except ValueError:
-			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum enemies number')
-			return
-		
-		# Fenster verstecken
-		self.breakupWindow.withdraw()
-
-
-
+	
+	
 	def run_simulation(self):
 		sim = Simulation(self.grid)
-		sim.run(self.maxSteps, self.plant_death, self.enemy_death, self.max_plant_energy, self.max_enemies_num)
+		count = 1
+		while True:
+			if count - 1 == self.maxSteps:
+				break
+			if sim.noSpecificPlantBreak(self.plant_death):
+				break
+			if sim.noSpeceficEnemyBreak(self.enemy_death):
+				break
+			if sim.noEnemiesBreak():
+				break
+			if sim.noPlantsBreak():
+				break
+			if sim.upperGridEnergyBreak(self.max_plant_energy):
+				break
+			if sim.upperEnemyNumBreak(self.max_enemies_num):
+				break
 
+			# Feinde sammeln und bewegen
+			self.grid.collectAndManageEnemies()
+			for ec in self.grid.enemies:
+				print(count, ec.position)
 
-	def openPlotWindow(self):
-		"""_summary_
-			Öffnet ein neues Fenster mit Tabs, in denen die Plots angezeigt werden.
-		"""
-		# Überprüfen, ob das Fenster bereits existiert und sichtbar ist
-		if hasattr(self, 'plotWindow') and self.plotWindow.winfo_exists():
-			self.plotWindow.lift()  # Bringt das vorhandene Fenster in den Vordergrund
-			return
-		
-		# Neues Tkinter-Fenster erstellen
-		self.plotWindow = tk.Toplevel()
-		self.plotWindow.title('Plots')
-
-		# Fenster zentrieren
-		window_width = 1000  # Beispielbreite
-		window_height = 650  # Beispielhöhe
-		screen_width = self.plotWindow.winfo_screenwidth()
-		screen_height = self.plotWindow.winfo_screenheight()
-		x = int((screen_width / 2) - (window_width / 2))
-		y = int((screen_height / 2) - (window_height / 2))
-
-		# Größe und Position des Fensters festlegen
-		self.plotWindow.geometry(f'{window_width}x{window_height}+{x}+{y}')
-
-		# Notebook (Tabs) erstellen
-		self.plot_tabs = ttk.Notebook(self.plotWindow)
-
-		# Tab 1: Pflanzen - Energy
-		self.plants_energy_plot_tab = tk.Frame(self.plot_tabs)
-		self.plot_tabs.add(self.plants_energy_plot_tab, text='Plants-Energy')
-		self.diagrams.dataPlotter(
-			root=self.plants_energy_plot_tab,
-			data_dict=self.grid.plantData,
-			simLength=self.simulation.simLength,
-			measure='energy',
-			title='Energy by Plant Type Over Time',
-			ylabel='Energy'
-		)
-
-		# Tab 2: Pflanzen - Count
-		self.plants_count_plot_tab = tk.Frame(self.plot_tabs)
-		self.plot_tabs.add(self.plants_count_plot_tab, text='Plants-Count')
-		self.diagrams.dataPlotter(
-			root=self.plants_count_plot_tab,
-			data_dict=self.grid.plantData,
-			simLength=self.simulation.simLength,
-			measure='count',
-			title='Number by Plant Types Over Time',
-			ylabel='Count'
-		)
-
-		# Tab 3: Feinde - Size
-		self.enemies_size_plot_tab = tk.Frame(self.plot_tabs)
-		self.plot_tabs.add(self.enemies_size_plot_tab, text='Enemies-Size')
-		self.diagrams.dataPlotter(
-			root=self.enemies_size_plot_tab,
-			data_dict=self.grid.EnemyData,
-			simLength=self.simulation.simLength,
-			measure='size',
-			title='Clustersize by Enemy Type Over Time',
-			ylabel='Cluster Size'
-		)
-
-		# Tab 4: Feinde - Count
-		self.enemies_count_plot_tab = tk.Frame(self.plot_tabs)
-		self.plot_tabs.add(self.enemies_count_plot_tab, text='Enemies-Count')
-		self.diagrams.dataPlotter(
-			root=self.enemies_count_plot_tab,
-			data_dict=self.grid.EnemyData,
-			simLength=self.simulation.simLength,
-			measure='count',
-			title='Number by Enemy Types Over Time',
-			ylabel='Count'
-		)
-
-		# Tabs anzeigen
-		self.plot_tabs.pack(fill='both', expand=True)
+			count += 1

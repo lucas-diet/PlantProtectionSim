@@ -193,7 +193,7 @@ class Simulation():
             self.grid.collectAndManageEnemies()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
-            self.grid.displayGrid()
+            self.grid.displayGrid()  
             self.getPlantData(count)
             self.getEnemyData(count)
             count += 1

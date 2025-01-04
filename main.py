@@ -130,7 +130,7 @@ sc2 = SymbioticConnection(p2, p3)
 
 
 sim = Simulation(grid)
-#sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 dia = Diagrams(grid)
 #dia.dataPlotter(grid.plantData, sim.simLength, measure1='energy', measure2='count', title1='Energy by Plant Type Over Time', title2='Number by Plant Types Over Time')
