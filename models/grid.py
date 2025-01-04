@@ -283,9 +283,9 @@ class Grid():
                 list: Eine Liste, die die Fressfeindcluster darstellt.
             """
             if ec.intoxicated:
-                return [f'{ec.enemy.name}-#{ec.num}*']
+                return [f'{ec.enemy.name}-#{int(ec.num)}*']
             else:
-                return [f'{ec.enemy.name}-#{ec.num}']
+                return [f'{ec.enemy.name}-#{int(ec.num)}']
 
         def format_enemy_clusters(ecs):
             """_summary_

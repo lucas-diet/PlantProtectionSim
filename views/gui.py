@@ -3,10 +3,12 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import re
+import time
 
 from models.grid import Grid
 from models.plant import Plant
 from models.enemyCluster import Enemy, EnemyCluster
+from controllers.simulation import Simulation
 
 
 class Gui():
@@ -25,6 +27,8 @@ class Gui():
 		self.selectedItem = tk.IntVar(value=-1)
 		self.players = []
 		self.enemies_at_positions = {}
+
+		self.set_breakups_auto()
 		
 	
 	def mainloop(self):
@@ -119,7 +123,7 @@ class Gui():
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
 		
 		tk.Button(self.top_frame, text='Breakups', command=self.openBreakupsWindow).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Play').grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
 
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=12, padx=1, pady=1, sticky='ew')
 
@@ -626,7 +630,7 @@ class Gui():
 				x2 = x1 + square_width
 				y2 = y1 + square_height 
 				squareID = self.gridCanvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=1)
-				self.squares[(i,j)] = squareID
+				self.squares[(j,i)] = squareID
 
 
 	def onGridClick_player(self, event):
@@ -656,7 +660,6 @@ class Gui():
 			if selected_index < 16:  # Pflanzen haben Werte von 0 bis 15
 				self.place_plant_on_grid(clicked_coords, selected_index)
 			else:  # Feinde haben Werte ab 16
-				pass
 				self.place_enemy_on_grid(clicked_coords, selected_index)
 
 
@@ -986,7 +989,7 @@ class Gui():
 
 	def create_add_cluster(self, actual_index, coords, clusterSize, speed, eatSpeed, eatVictory):
 		self.error_enemies.config(text='')
-		e = Enemy(name=f'e{actual_index}', symbol=f'E{actual_index}')
+		e = Enemy(name=f'e{actual_index+1}', symbol=f'E{actual_index}')
 
 		ec = EnemyCluster(enemy=e,
 					num=clusterSize,
@@ -1048,54 +1051,62 @@ class Gui():
 		self.maxEnemiesBreakup_entry = tk.Entry(self.breakupWindow, width=10)
 		self.maxEnemiesBreakup_entry.grid(row=5, column=2, padx=2, pady=2, sticky='w')
 
-		tk.Button(self.breakupWindow, text='Apply', command=self.set_breakups).grid(row=6, column=2, padx=2, pady=2, sticky='e')
+		tk.Button(self.breakupWindow, text='Apply', command=self.set_breakups_manuelly).grid(row=6, column=2, padx=2, pady=2, sticky='e')
 
 
-	def set_breakups(self):
+	def set_breakups_auto(self):
+		self.maxSteps = None
+		self.plant_death = None
+		self.enemy_death = None
+		self.max_plant_energy = None
+		self.max_enemies_num = None
+
+
+	def set_breakups_manuelly(self):
 		try:
-			maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+			self.maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
 		except ValueError:
 			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum Sim-Steps')
 			return
 		
-		plant_death = self.plantBreakup_entry.get()
+		self.plant_death = self.plantBreakup_entry.get()
 		# Überprüfen, ob plant_death die Form 'p' gefolgt von 1 bis 16 hat
-		if plant_death:
-			if not re.fullmatch(r'p(1[0-6]|[1-9])', plant_death):
+		if self.plant_death:
+			if not re.fullmatch(r'p(1[0-6]|[1-9])', self.plant_death):
 				messagebox.showerror('Invalid input', 'Please enter a valid format for plant death (e.g., p1 to p16)')
 				return
 		else:
-			plant_death = None
+			self.plant_death = None
 		
-		enemy_death = self.enemyBreakup_entry.get()
+		self.enemy_death = self.enemyBreakup_entry.get()
 		# Überprüfen, ob enemy_death die Form 'e' gefolgt von 1 bis 15 hat
-		if enemy_death:
-			if not re.fullmatch(r'e(1[0-5]|[1-9])', enemy_death):
+		if self.enemy_death:
+			if not re.fullmatch(r'e(1[0-5]|[1-9])', self.enemy_death):
 				messagebox.showerror('Invalid input', 'Please enter a valid format for enemy death (e.g., e1 to e15)')
 				return
 		else:
-			enemy_death = None
+			self.enemy_death = None
 
 		try:
-			max_plant_energy = int(self.maxEnergyBreakup_entry.get()) if self.maxEnergyBreakup_entry.get() else None
+			self.max_plant_energy = int(self.maxEnergyBreakup_entry.get()) if self.maxEnergyBreakup_entry.get() else None
 		except ValueError:
 			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum energy')
 			return
 		
 		try:
-			max_enemies_num = int(self.maxEnemiesBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+			self.max_enemies_num = int(self.maxEnemiesBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
 		except ValueError:
 			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum enemies number')
 			return
 		
 		# Fenster verstecken
 		self.breakupWindow.withdraw()
-		print(maxSteps, plant_death, enemy_death, max_plant_energy, max_enemies_num)
-		return maxSteps, plant_death, enemy_death, max_plant_energy, max_enemies_num
 
 
 
-
+	def run_simulation(self):
+		sim = Simulation(self.grid)
+		sim.run(self.maxSteps, self.plant_death, self.enemy_death, self.max_plant_energy, self.max_enemies_num)
 
 
 	def openPlotWindow(self):
