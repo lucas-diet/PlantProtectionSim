@@ -104,7 +104,7 @@ class Diagrams:
         return aggregated_data
 
 
-    def dataPlotter(self, data_dict, simLength, measure, title, ylabel=['energy', 'count', 'size', 'count'], root=None):
+    def dataPlotter(self, data_dict, simLength, measure, title, ylabel=['energy', 'count,', 'size', 'count'], root=None):
         """_summary_
             Erstellt einen einzelnen Plot und zeigt ihn entweder in einer GUI oder außerhalb an.
         Args:
@@ -112,7 +112,7 @@ class Diagrams:
             simLength (int): Die Anzahl der Zeitschritte.
             measure (str): Die zu plottende Messgröße.
             title (str): Titel des Plots.
-            ylabel (str): Beschriftung der y-Achse.
+            ylabel (list, optional): Liste von Beschriftungen der y-Achse.
             root (tk.Widget, optional): Das Tkinter-Widget für die Anzeige in der GUI. Falls None, wird der Plot außerhalb angezeigt.
         """
         aggregated_data = self.aggregateBySpecies(data_dict)
@@ -163,11 +163,16 @@ class Diagrams:
             # Plot außerhalb der GUI anzeigen
             plt.figure(figsize=(11, 5))
             for line in axis.lines:
-                plt.plot(line.get_xdata(), line.get_ydata(), label=line.get_label())
+                if line.get_label() == 'Total':
+                    # Zeichne den Total-Wert in Schwarz und gestrichelt
+                    plt.plot(line.get_xdata(), line.get_ydata(), label=line.get_label(), linestyle='--', color='black', linewidth=1)
+                else:
+                    plt.plot(line.get_xdata(), line.get_ydata(), label=line.get_label())
             plt.title(title)
-            plt.xlabel("Time")
+            plt.xlabel('Time')
             plt.ylabel(ylabel_text)
-            plt.legend(title="Species", loc='center left', bbox_to_anchor=(1.0, 0.5))
+            plt.xticks(simArr)
+            plt.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
             plt.grid(True)
             plt.show()
 
