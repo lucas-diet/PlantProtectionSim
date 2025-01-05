@@ -104,7 +104,7 @@ class Diagrams:
         return aggregated_data
 
 
-    def dataPlotter(self, data_dict, simLength, measure, title, ylabel=['energy', 'count,', 'size', 'count'], root=None):
+    def dataPlotter(self, data_dict, simLength, measure, title, ylabel=['energy', 'count', 'size', 'count'], root=None):
         """_summary_
             Erstellt einen einzelnen Plot und zeigt ihn entweder in einer GUI oder außerhalb an.
         Args:
