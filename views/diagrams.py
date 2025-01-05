@@ -1,4 +1,5 @@
 
+import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')  # Setze das Backend für matplot lib, bevor pyplot importiert wird
 print(matplotlib.get_backend())
@@ -103,16 +104,16 @@ class Diagrams:
         return aggregated_data
 
 
-    def dataPlotter(self, root, data_dict, simLength, measure, title, ylabel):
+    def dataPlotter(self, data_dict, simLength, measure, title, ylabel=['energy', 'count', 'size', 'count'], root=None):
         """_summary_
-            Erstellt einen einzelnen Plot in einem spezifischen Tkinter-Widget.
+            Erstellt einen einzelnen Plot und zeigt ihn entweder in einer GUI oder außerhalb an.
         Args:
-            root (tk.Widget): Das Tkinter-Widget, in dem der Plot angezeigt wird.
             data_dict (dict): Ein Dictionary mit den Daten.
             simLength (int): Die Anzahl der Zeitschritte.
             measure (str): Die zu plottende Messgröße.
             title (str): Titel des Plots.
             ylabel (str): Beschriftung der y-Achse.
+            root (tk.Widget, optional): Das Tkinter-Widget für die Anzeige in der GUI. Falls None, wird der Plot außerhalb angezeigt.
         """
         aggregated_data = self.aggregateBySpecies(data_dict)
         simArr = list(range(simLength + 1))
@@ -141,21 +142,34 @@ class Diagrams:
             axis.plot(simArr, total_values, label='Total', linestyle='--', color='black', linewidth=1)
 
         # Achsen und Titel setzen
+        ylabel_text = ylabel.pop(0) if isinstance(ylabel, list) and ylabel else ylabel or 'Value'
         axis.set_title(title)
         axis.set_xlabel('Time')
         axis.set_xticks(simArr)
-        axis.set_ylabel(ylabel)
+        axis.set_ylabel(ylabel_text)
         axis.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axis.grid(True)
 
-        # Plot in das übergebene Widget einfügen
-        canvas = FigureCanvasTkAgg(fig, master=root)
-        canvas_widget = canvas.get_tk_widget()
-        canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
-        canvas.draw()
+        if root:
+            # Plot in das übergebene Widget einfügen
+            canvas = FigureCanvasTkAgg(fig, master=root)
+            canvas_widget = canvas.get_tk_widget()
+            canvas_widget.pack(side=tk.TOP, fill=tk.BOTH, expand=True)
+            canvas.draw()
 
-        # Speicherbutton hinzufügen
-        self.save_plot(fig, root)
+            # Speicherbutton hinzufügen
+            self.save_plot(fig, root)
+        else:
+            # Plot außerhalb der GUI anzeigen
+            plt.figure(figsize=(11, 5))
+            for line in axis.lines:
+                plt.plot(line.get_xdata(), line.get_ydata(), label=line.get_label())
+            plt.title(title)
+            plt.xlabel("Time")
+            plt.ylabel(ylabel_text)
+            plt.legend(title="Species", loc='center left', bbox_to_anchor=(1.0, 0.5))
+            plt.grid(True)
+            plt.show()
 
 
     def fillMissingValues(self, times, values, simArr):
