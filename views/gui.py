@@ -14,11 +14,7 @@ from views.diagrams import Diagrams
 
 class Gui():
 
-	def __init__(self, grid, simulation):
-		self.grid = grid
-		self.simulation = simulation
-
-
+	def __init__(self):
 		self.initSimulationWindow()
 		self.set_breakupsAuto()
 
@@ -105,7 +101,8 @@ class Gui():
 		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow ).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
 
-		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=12, padx=1, pady=1, sticky='ew')
+		self.roundCount = tk.Label(self.top_frame, text='0', width=4)
+		self.roundCount.grid(row=0, column=12, padx=1, pady=1, sticky='ew')
 
 		tk.Button(self.top_frame, text='Plot', command=self.open_plotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
 
@@ -636,7 +633,7 @@ class Gui():
 		diagram.dataPlotter(
 			root=self.plants_energy_plot_tab,
 			data_dict=self.grid.plantData,
-			simLength=self.simulation.simLength,
+			simLength=self.sim.simLength,
 			measure='energy',
 			title='Energy by Plant Type Over Time',
 			ylabel='Energy'
@@ -648,7 +645,7 @@ class Gui():
 		diagram.dataPlotter(
 			root=self.plants_count_plot_tab,
 			data_dict=self.grid.plantData,
-			simLength=self.simulation.simLength,
+			simLength=self.sim.simLength,
 			measure='count',
 			title='Number by Plant Types Over Time',
 			ylabel='Count'
@@ -660,7 +657,7 @@ class Gui():
 		diagram.dataPlotter(
 			root=self.enemies_size_plot_tab,
 			data_dict=self.grid.EnemyData,
-			simLength=self.simulation.simLength,
+			simLength=self.sim.simLength,
 			measure='size',
 			title='Clustersize by Enemy Type Over Time',
 			ylabel='Size'
@@ -672,7 +669,7 @@ class Gui():
 		diagram.dataPlotter(
 			root=self.enemies_count_plot_tab,
 			data_dict=self.grid.EnemyData,
-			simLength=self.simulation.simLength,
+			simLength=self.sim.simLength,
 			measure='count',
 			title='Number by Enemy Types Over Time',
 			ylabel='Count'
@@ -1222,26 +1219,27 @@ class Gui():
 
 
 	def run_simulation(self):
-		sim = Simulation(self.grid)
-		sim.getPlantData(0)
-		sim.getEnemyData(0)
+		self.sim = Simulation(self.grid)
+		self.sim.getPlantData(0)
+		self.sim.getEnemyData(0)
 		count = 1
 		while True:
 			if count - 1 == self.maxSteps:
 				break
-			if sim.noSpecificPlantBreak(self.plant_death):
+			if self.sim.noSpecificPlantBreak(self.plant_death):
 				break
-			if sim.noSpeceficEnemyBreak(self.enemy_death):
+			if self.sim.noSpeceficEnemyBreak(self.enemy_death):
 				break
-			if sim.noEnemiesBreak():
+			if self.sim.noEnemiesBreak():
 				break
-			if sim.noPlantsBreak():
+			if self.sim.noPlantsBreak():
 				break
-			if sim.upperGridEnergyBreak(self.max_plant_energy):
+			if self.sim.upperGridEnergyBreak(self.max_plant_energy):
 				break
-			if sim.upperEnemyNumBreak(self.max_enemies_num):
+			if self.sim.upperEnemyNumBreak(self.max_enemies_num):
 				break
-
+			
+			self.sim.runStep()
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
@@ -1250,10 +1248,13 @@ class Gui():
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
-			sim.getPlantData(count)
-			sim.getEnemyData(count)
+			self.sim.getPlantData(count)
+			self.sim.getEnemyData(count)
+			self.roundCount.config(text=f'{count}')
 			count += 1
+			
 			self.gridCanvas.after(500)
+		self.sim.simLength = count - 1
 
 
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
@@ -1296,44 +1297,3 @@ class Gui():
 		self.addTooltip(circle_id, new_position)
 		self.gridCanvas.update_idletasks()
 		print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
-		
-
-
-
-
-
-
-'''
-
-# Wenn es einen alten Marker gibt, lösche ihn
-		if cluster:
-			if old_position in self.enemies_at_positions:
-				for enemy in self.enemies_at_positions[old_position]:
-					if enemy['name'] == cluster.enemy.name and 'circle_id' in enemy:
-						print(f'Entferne alten Marker: {enemy['circle_id']}')
-						self.gridCanvas.delete(enemy['circle_id'])  # Lösche den alten Marker
-						# Entferne den Eintrag aus der alten Position
-						self.enemies_at_positions[old_position] = [
-							enemy for enemy in self.enemies_at_positions[old_position]
-							if enemy['name'] != cluster.enemy.name 
-						]
-						if not self.enemies_at_positions[old_position]:
-							del self.enemies_at_positions[old_position]
-
-				# Erstelle den neuen Marker
-				circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name)
-				self.addTooltip(circle_id, new_position)
-
-				# Füge die neue Position zur Liste hinzu
-				if new_position not in self.enemies_at_positions:
-					self.enemies_at_positions[new_position] = []
-				self.enemies_at_positions[new_position].append({
-					'name': cluster.enemy.name,
-					'circle_id': circle_id,  # Speichere die neue Marker-ID
-					'clusterSize': len(self.enemies_at_positions.get(new_position, [])) + 1
-				})
-
-				# Stelle sicher, dass das Canvas aktualisiert wird
-				self.gridCanvas.update_idletasks()
-				print(f'{old_position} -> {new_position}')
-'''
