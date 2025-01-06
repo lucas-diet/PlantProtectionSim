@@ -38,6 +38,7 @@ class EnemyCluster():
         self.currentPath = []
         self.intoxicated = False
         self.lastVisitedPlants = {}
+        self.circle_id = None
 
     
     def insertLastVisits(self, plant, signal):

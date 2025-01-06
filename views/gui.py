@@ -1102,16 +1102,21 @@ class Gui():
 		enemy_name = cluster.enemy.name  
 		circle_id = self.create_clusterCircle(x_pos, y_pos, enemy_name)  # Feindinformationen speichern
 
-		# Feindinformationen für diese Position speichern
-		enemy_data = {'name': enemy_name, 'clusterSize': cluster.num}  
+		# Speichere die Marker-ID im Cluster
+		cluster.circle_id = circle_id
+
+		# Feindinformationen für diese Position speichern  
 		if clicked_position not in self.enemies_at_positions:
 			self.enemies_at_positions[clicked_position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
 
 		# Füge die Feindinformationen zur Liste hinzu
 		self.enemies_at_positions[clicked_position].append(cluster)
+
+		# Füge Tooltip hinzu
 		self.addTooltip(circle_id, clicked_position)
 
 		print(f'Feind {enemy_name} mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
+
 
 
 	def get_cellPosition(self, position):
@@ -1238,13 +1243,12 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			
 			for ec in self.grid.enemies:
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
 			count += 1
-			self.gridCanvas.after(1000)
+			self.gridCanvas.after(500)
 
 
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
