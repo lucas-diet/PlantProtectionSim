@@ -145,7 +145,6 @@ class Diagrams:
         ylabel_text = ylabel.pop(0) if isinstance(ylabel, list) and ylabel else ylabel or 'Value'
         axis.set_title(title)
         axis.set_xlabel('Time')
-        axis.set_xticks(simArr)
         axis.set_ylabel(ylabel_text)
         axis.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
         axis.grid(True)
@@ -171,7 +170,6 @@ class Diagrams:
             plt.title(title)
             plt.xlabel('Time')
             plt.ylabel(ylabel_text)
-            plt.xticks(simArr)
             plt.legend(title='Species', loc='center left', bbox_to_anchor=(1.0, 0.5))
             plt.grid(True)
             plt.show()

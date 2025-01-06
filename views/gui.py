@@ -101,7 +101,7 @@ class Gui():
 		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow ).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
 
-		self.roundCount = tk.Label(self.top_frame, text='0', width=4)
+		self.roundCount = tk.Label(self.top_frame, text='0', width=4, bg='red')
 		self.roundCount.grid(row=0, column=12, padx=1, pady=1, sticky='ew')
 
 		tk.Button(self.top_frame, text='Plot', command=self.open_plotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
@@ -1250,11 +1250,12 @@ class Gui():
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
-			self.roundCount.config(text=f'{count}')
+			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
 			
 			self.gridCanvas.after(500)
 		self.sim.simLength = count - 1
+		self.roundCount.config(bg='green')
 
 
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
