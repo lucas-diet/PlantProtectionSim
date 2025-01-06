@@ -1040,7 +1040,6 @@ class Gui():
 
 	def create_add_cluster(self, selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory):
 		enemy = Enemy(name=f'e{selected_index}', symbol=f'E{selected_index}')
-		print(type(enemy), enemy.name, enemy.symbol)
 
 		cluster = EnemyCluster(enemy=enemy,
 						 num=clusterSize,
@@ -1074,8 +1073,7 @@ class Gui():
 
 
 	def create_add_cluster(self, selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory):
-		enemy = Enemy(name=f'e{selected_index}', symbol=f'E{selected_index}')
-		print(type(enemy), enemy.name, enemy.symbol)
+		enemy = Enemy(name=f'e{selected_index - 15}', symbol=f'E{selected_index - 15}')
 
 		cluster = EnemyCluster(enemy=enemy,
 						 num=clusterSize,
@@ -1110,7 +1108,7 @@ class Gui():
 			self.enemies_at_positions[clicked_position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
 
 		# Füge die Feindinformationen zur Liste hinzu
-		self.enemies_at_positions[clicked_position].append(enemy_data)
+		self.enemies_at_positions[clicked_position].append(cluster)
 		self.addTooltip(circle_id, clicked_position)
 
 		print(f'Feind {enemy_name} mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
@@ -1172,8 +1170,8 @@ class Gui():
 
 			# Sammle Informationen zu allen Feinden an dieser Position
 			enemies_at_pos = self.enemies_at_positions.get(position, [])
-			for enemy in enemies_at_pos:
-				tooltip_text.append(f'{enemy["name"]}: Size {int(enemy["clusterSize"])}')
+			for ec in enemies_at_pos:
+				tooltip_text.append(f'{ec.enemy.name}: Size {int(ec.num)}')
 
 			# Verarbeite die Tooltip-Texte zu einer mehrzeiligen Darstellung
 			tooltip_full_text = '\n'.join(tooltip_text)
@@ -1217,8 +1215,6 @@ class Gui():
 		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Text-Item verlässt
 
 
-
-
 	def run_simulation(self):
 		sim = Simulation(self.grid)
 		count = 1
@@ -1238,29 +1234,69 @@ class Gui():
 			if sim.upperEnemyNumBreak(self.max_enemies_num):
 				break
 
-			# Feinde sammeln und bewegen
+			# Feinde sammeln und bewegen (alle gleichzeitig)
+			old_positions = {ec: ec.position for ec in self.grid.enemies}
+			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
+			new_positions = {ec: ec.position for ec in self.grid.enemies}
 			
 			for ec in self.grid.enemies:
-				old_position = ec.position
-				self.grid.collectAndManageEnemies()
-				new_position = ec.position
+				old_position = old_positions[ec]
+				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
-				self.gridCanvas.after(1000)
 			count += 1
+			self.gridCanvas.after(1000)
 
 
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
 		"""
-		# Berechne die neue Position
+		# Berechne die neue Position für den Cluster
 		position_data = self.get_cellPosition(new_position)
 		if not position_data:
 			print(f'Fehler: Ungültige neue Position {new_position}.')
 			return
 		x_pos, y_pos = position_data
 
-		# Wenn es einen alten Marker gibt, lösche ihn
+		# Entferne den Marker des Clusters von der alten Position
+		if old_position in self.enemies_at_positions:
+			# Prüfe, ob der Cluster an der alten Position existiert
+			if cluster in self.enemies_at_positions[old_position]:
+				# Lösche den Marker, falls vorhanden
+				if hasattr(cluster, 'circle_id') and cluster.circle_id:
+					self.gridCanvas.delete(cluster.circle_id)
+				# Entferne den Cluster aus der alten Position
+				self.enemies_at_positions[old_position].remove(cluster)
+				# Wenn die alte Position leer ist, entferne sie aus dem Dictionary
+				if not self.enemies_at_positions[old_position]:
+					del self.enemies_at_positions[old_position]
+
+		# Aktualisiere die Position des Clusters
+		cluster.position = new_position
+
+		# Erstelle einen neuen Marker für die neue Position
+		circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name)
+		cluster.circle_id = circle_id  # Speichere die Marker-ID im Cluster
+
+		# Füge den Cluster zur neuen Position hinzu
+		if new_position not in self.enemies_at_positions:
+			self.enemies_at_positions[new_position] = []
+		self.enemies_at_positions[new_position].append(cluster)
+
+		# Tooltip aktualisieren
+		self.addTooltip(circle_id, new_position)
+		self.gridCanvas.update_idletasks()
+		print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
+		
+
+
+
+
+
+
+'''
+
+# Wenn es einen alten Marker gibt, lösche ihn
 		if cluster:
 			if old_position in self.enemies_at_positions:
 				for enemy in self.enemies_at_positions[old_position]:
@@ -1291,3 +1327,4 @@ class Gui():
 				# Stelle sicher, dass das Canvas aktualisiert wird
 				self.gridCanvas.update_idletasks()
 				print(f'{old_position} -> {new_position}')
+'''
