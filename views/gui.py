@@ -102,7 +102,7 @@ class Gui():
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
 		
 		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow ).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
 
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=12, padx=1, pady=1, sticky='ew')
 
@@ -870,8 +870,7 @@ class Gui():
 			
 			# Überprüfe, ob alle Eingabewerte gültig sind (nicht leer und im richtigen Format)
 			try:
-				init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist = self.get_plantsInput(plant_entries)
-
+				init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist = self.get_plantInputs(plant_entries)
 			except ValueError:
 				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
 				self.error_plants.config(text='Error: All input values ​​must be valid numbers!', fg='red')
@@ -891,20 +890,20 @@ class Gui():
 			self.plantDetails(plant, square_id)
 	
 
-	def get_plantsInput(self, plant_entries):
-		init_energy = float(plant_entries['initEnergy'].get())
-		growth_rate = float(plant_entries['growthRate'].get())
-		min_energy = float(plant_entries['minEnergy'].get())
+	def get_plantInputs(self, plant_entries):
+		init_energy = int(plant_entries['initEnergy'].get())
+		growth_rate = int(plant_entries['growthRate'].get())
+		min_energy = int(plant_entries['minEnergy'].get())
 				
 		# Überprüfe, ob repro_interval leer ist, falls ja, setze auf 0
 		repro_interval_str = plant_entries['reproInterval'].get()
 		if repro_interval_str == '':
 			repro_interval = 0  # Setze auf 0, wenn leer
 		else:
-			repro_interval = float(repro_interval_str)
+			repro_interval = int(repro_interval_str)
 				
-		min_dist = float(plant_entries['minDist'].get())
-		max_dist = float(plant_entries['maxDist'].get())
+		min_dist = int(plant_entries['minDist'].get())
+		max_dist = int(plant_entries['maxDist'].get())
 		if max_dist < min_dist:
 			max_dist = min_dist + 1
 		else:
@@ -997,61 +996,127 @@ class Gui():
 
 	def enemyClusterPlacer(self, clicked_position, selected_index):
 		"""
-		Platziert einen Feind auf dem Grid an den gegebenen Koordinaten (x, y).
+		Platziert einen Feind-Cluster auf dem Grid an den gegebenen Koordinaten (x, y).
 		"""
-		if not self.validate_enemySelection(selected_index):
-			return
+		square_id = self.squares.get(clicked_position)
 
-		# Übersetze den Index
-		actual_index = self.enemy_index_mapping[selected_index]
-		enemy_entries = self.enemy_entries[actual_index]
+		if square_id:
+			# Übersetze den Index
+			actual_index = self.enemy_index_mapping[selected_index]
+			enemy_entries = self.enemy_entries[actual_index]
 
-		# Hole die Eingabewerte
-		enemy_data = self.get_enemyData(enemy_entries)
-		if not enemy_data:
-			return  # Abbrechen, wenn die Eingabewerte ungültig sind
-		clusterSize, speed, eatSpeed, eatVictory = enemy_data
+			# Überprüfe, ob alle Eingabewerte gültig sind
+			try:
+				clusterSize, speed, eatSpeed, eatVictory = self.get_enemyInputs(enemy_entries)
+			except ValueError:
+				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
+				self.error_enemies.config(text='Error: All input values must be valid numbers!', fg='red')
+				return  # Beende die Funktion ohne den Feind hinzuzufügen
 
-		# Berechne die Zellenkoordinaten
-		position_data = self.calculate_cellPosition(clicked_position)
-		if not position_data:
-			return  # Abbrechen, wenn die Zelle nicht existiert
-		x_pos, y_pos = position_data
+			# Überprüfe, ob alle Eingabewerte nicht leer sind
+			if not all([clusterSize, speed, eatSpeed, eatVictory]):
+				self.error_enemies.config(text='Error: All fields must be filled in!', fg='red')
+				return  # Beende die Funktion ohne den Feind hinzuzufügen
 
-		# Platzierung und Darstellung des Feinds
-		self.place_enemyMarker(clicked_position, x_pos, y_pos, selected_index, clusterSize)
-		self.create_add_cluster(actual_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory)
-	
+			# Färbe die angeklickte Zelle
+			#self.gridCanvas.itemconfig(square_id, fill='red')
+			eCluster = self.create_add_cluster(selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory)
+			self.clusterMarker(clicked_position, selected_index, eCluster)
 
-	def validate_enemySelection(self, selected_index):
+
+	def get_enemyInputs(self, enemy_entries):
 		"""
-		Überprüft, ob der ausgewählte Index gültig ist.
+		Holt und validiert die Eingabewerte für einen Feind-Cluster.
 		"""
-		if selected_index not in self.enemy_index_mapping:
-			print(f'Fehler: Kein Feind mit Index {selected_index} gefunden.')
-			return False
-		return True
+		# Extrahiere die Eingabewerte
+		clusterSize = int(enemy_entries['clusterSize'].get())
+		speed = int(enemy_entries['speed'].get())
+		eatSpeed = int(enemy_entries['eatSpeed'].get())
+		eatVictory = int(enemy_entries['eatVictory'].get())
 
-
-	def get_enemyData(self, enemy_entries):
-		"""
-		Ruft die Eingabewerte für einen Feind ab und validiert sie.
-		"""
-		try:
-			clusterSize, speed, eatSpeed, eatVictory = self.get_enemy_input(enemy_entries)
-		except ValueError as e:
-			print(f'Fehler beim Abrufen der Eingabewerte: {e}')
-			self.error_enemies.config(text='Error: All input values ​​must be valid numbers!', fg='red')
-			return None  # Ungültige Eingabewerte
-
-		if not all([clusterSize, speed, eatSpeed, eatVictory]):
-			self.error_enemies.config(text='Error: All fields must be filled in!', fg='red')
-			return None  # Fehlende Eingabewerte
-
+		# Rückgabe der validierten Werte
 		return clusterSize, speed, eatSpeed, eatVictory
 
 
-	def calculate_cellPosition(self, position):
+	def create_add_cluster(self, selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory):
+		enemy = Enemy(name=f'e{selected_index}', symbol=f'E{selected_index}')
+		print(type(enemy), enemy.name, enemy.symbol)
+
+		cluster = EnemyCluster(enemy=enemy,
+						 num=clusterSize,
+						 position=clicked_position,
+						 grid=self.grid,
+						 speed=speed,
+						 eatingSpeed=eatSpeed,
+						 eatVictory=eatVictory)
+
+		self.error_enemies.config(text='')
+
+		if cluster not in self.grid.enemies:
+			self.grid.addEnemies(cluster)
+		else:
+			pass
+		return cluster
+
+		
+	def get_enemyInputs(self, enemy_entries):
+		"""
+		Holt und validiert die Eingabewerte für einen Feind-Cluster.
+		"""
+		# Extrahiere die Eingabewerte
+		clusterSize = int(enemy_entries['clusterSize'].get())
+		speed = int(enemy_entries['speed'].get())
+		eatSpeed = int(enemy_entries['eatSpeed'].get())
+		eatVictory = int(enemy_entries['eatVictory'].get())
+
+		# Rückgabe der validierten Werte
+		return clusterSize, speed, eatSpeed, eatVictory
+
+
+	def create_add_cluster(self, selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory):
+		enemy = Enemy(name=f'e{selected_index}', symbol=f'E{selected_index}')
+		print(type(enemy), enemy.name, enemy.symbol)
+
+		cluster = EnemyCluster(enemy=enemy,
+						 num=clusterSize,
+						 position=clicked_position,
+						 grid=self.grid,
+						 speed=speed,
+						 eatingSpeed=eatSpeed,
+						 eatVictory=eatVictory)
+
+		self.error_enemies.config(text='')
+
+		if cluster not in self.grid.enemies:
+			self.grid.addEnemies(cluster)
+		else:
+			pass
+		return cluster
+	
+
+	def clusterMarker(self, clicked_position, selected_index, cluster):
+		"""Platziert einen Marker für den Feind auf dem Canvas als kleinen Kreis."""
+
+		# Berechne die Pixelposition aus den Gitterkoordinaten
+		x_pos, y_pos = self.get_cellPosition(clicked_position)
+
+		# Feindname und Clustergröße
+		enemy_name = cluster.enemy.name  
+		circle_id = self.create_clusterCircle(x_pos, y_pos, enemy_name)  # Feindinformationen speichern
+
+		# Feindinformationen für diese Position speichern
+		enemy_data = {'name': enemy_name, 'clusterSize': cluster.num}  
+		if clicked_position not in self.enemies_at_positions:
+			self.enemies_at_positions[clicked_position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
+
+		# Füge die Feindinformationen zur Liste hinzu
+		self.enemies_at_positions[clicked_position].append(enemy_data)
+		self.addTooltip(circle_id, clicked_position)
+
+		print(f'Feind {enemy_name} mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
+
+
+	def get_cellPosition(self, position):
 		"""
 		Berechnet die Position der Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
 		"""
@@ -1080,50 +1145,21 @@ class Gui():
 		y_pos += current_enemy_count * 15  # Verschiebe die Y-Position für mehrere Feinde in derselben Zelle
 
 		return x_pos, y_pos
-
-
-	def place_enemyMarker(self, position, x_pos, y_pos, selected_index, clusterSize):
-		"""
-		Platziert einen Marker für den Feind auf dem Canvas.
-		"""
-		
-		enemy_name = f'e{selected_index - 15}'  # Feindname
-		circle_id = self.clusterSign(x_pos, y_pos, enemy_name)
-
-		# Feindinformationen speichern
-		enemy_data = {'name': enemy_name, 'clusterSize': clusterSize}
-		
-		# Überprüfen, ob es für diese Position bereits eine Liste gibt
-		if position not in self.enemies_at_positions:
-			self.enemies_at_positions[position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
-		
-		# Füge die Feindinformationen hinzu
-		self.enemies_at_positions[position].append(enemy_data)
-
-		# Tooltip-Logik hinzufügen
-		self.addTooltip(circle_id, position)
-
-		print(f'Feind {enemy_name} mit Clustergröße {clusterSize} platziert auf: {position}')
 	
+	
+	def create_clusterCircle(self, x_pos, y_pos, enemy_name): 
+		""" Zeichnet einen kleinen Kreis, um den Feind auf dem Canvas darzustellen. """
 
-	def clusterSign(self, x_pos, y_pos, eName):
-		"""
-		Zeichnet den Feind als kleinen Kreis auf dem Canvas und gibt die Text-ID zurück.
-		"""
-		# Größe des Kreises
-		circle_radius = 2.5
-		# Berechne die Koordinaten für den Kreis (Bounding Box: (left, top, right, bottom))
-		left = x_pos - circle_radius
-		top = y_pos - circle_radius
-		right = x_pos + circle_radius
-		bottom = y_pos + circle_radius
-
-		# Zeichne den Kreis
-		circle_id = self.gridCanvas.create_oval(left, top, right, bottom, fill='red', outline='black')
-
-		# Rückgabe der IDs für Kreis und Text
+		circle_radius = 2.5  # Kleinere Kreisgröße für den Feind 
+		
+		# Berechne die Koordinaten für den Kreis (Bounding Box: (left, top, right, bottom)) 
+		left = x_pos - circle_radius 
+		top = y_pos - circle_radius 
+		right = x_pos + circle_radius 
+		bottom = y_pos + circle_radius # Zeichne den Kreis 
+		circle_id = self.gridCanvas.create_oval(left, top, right, bottom, fill='red', outline='black') 
 		return circle_id
-
+	
 
 	def addTooltip(self, circle_id, position):
 		"""
@@ -1181,34 +1217,8 @@ class Gui():
 		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Text-Item verlässt
 
 
-	def create_add_cluster(self, actual_index, coords, clusterSize, speed, eatSpeed, eatVictory):
-		self.error_enemies.config(text='')
-		e = Enemy(name=f'e{actual_index + 1}', symbol=f'E{actual_index + 1}')
 
-		ec = EnemyCluster(enemy=e,
-					num=clusterSize,
-					speed=speed,
-					position=coords,
-					grid=self.grid,
-					eatingSpeed=eatSpeed,
-					eatVictory=eatVictory)
-		
-		self.grid.addEnemies(ec)
-		print(self.grid.enemies)
-	
 
-	def get_enemy_input(self, enemy_entries):
-		"""
-		Holt die Eingabewerte für den Feind aus den entsprechenden Entry-Widgets.
-		"""
-		clusterSize = float(enemy_entries['clusterSize'].get())
-		speed = float(enemy_entries['speed'].get())
-		eatSpeed = float(enemy_entries['eatSpeed'].get())
-		eatVictory = float(enemy_entries['eatVictory'].get())
-		
-		return clusterSize, speed, eatSpeed, eatVictory
-	
-	
 	def run_simulation(self):
 		sim = Simulation(self.grid)
 		count = 1
@@ -1234,53 +1244,50 @@ class Gui():
 				old_position = ec.position
 				self.grid.collectAndManageEnemies()
 				new_position = ec.position
-				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol)
+				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
 				self.gridCanvas.after(1000)
 			count += 1
 
 
-	
-	def update_enemyMarker(self, old_position, new_position, selected_index):
+	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
 		"""
 		# Berechne die neue Position
-		for ec in self.grid.enemies:
-			position_data = self.calculate_cellPosition(new_position)
-			if not position_data:
-				print(f'Fehler: Ungültige neue Position {new_position}.')
-				return
-			x_pos, y_pos = position_data
+		position_data = self.get_cellPosition(new_position)
+		if not position_data:
+			print(f'Fehler: Ungültige neue Position {new_position}.')
+			return
+		x_pos, y_pos = position_data
 
-			# Wenn es einen alten Marker gibt, lösche ihn
+		# Wenn es einen alten Marker gibt, lösche ihn
+		if cluster:
 			if old_position in self.enemies_at_positions:
 				for enemy in self.enemies_at_positions[old_position]:
-					if enemy['name'] == f'e{selected_index}' and 'circle_id' in enemy:
-						print(enemy['name'])
+					if enemy['name'] == cluster.enemy.name and 'circle_id' in enemy:
 						print(f'Entferne alten Marker: {enemy['circle_id']}')
 						self.gridCanvas.delete(enemy['circle_id'])  # Lösche den alten Marker
 						# Entferne den Eintrag aus der alten Position
 						self.enemies_at_positions[old_position] = [
 							enemy for enemy in self.enemies_at_positions[old_position]
-							if enemy['name'] != f'e{selected_index}'
+							if enemy['name'] != cluster.enemy.name 
 						]
 						if not self.enemies_at_positions[old_position]:
 							del self.enemies_at_positions[old_position]
 
-			# Erstelle den neuen Marker
-			circle_id = self.clusterSign(x_pos, y_pos, f'e{selected_index}')
-			self.addTooltip(circle_id, new_position)
+				# Erstelle den neuen Marker
+				circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name)
+				self.addTooltip(circle_id, new_position)
 
-			# Füge die neue Position zur Liste hinzu
-			if new_position not in self.enemies_at_positions:
-				self.enemies_at_positions[new_position] = []
-			self.enemies_at_positions[new_position].append({
-				'name': f'e{selected_index}',
-				'circle_id': circle_id,  # Speichere die neue Marker-ID
-				'clusterSize': len(self.enemies_at_positions.get(new_position, [])) + 1
-			})
+				# Füge die neue Position zur Liste hinzu
+				if new_position not in self.enemies_at_positions:
+					self.enemies_at_positions[new_position] = []
+				self.enemies_at_positions[new_position].append({
+					'name': cluster.enemy.name,
+					'circle_id': circle_id,  # Speichere die neue Marker-ID
+					'clusterSize': len(self.enemies_at_positions.get(new_position, [])) + 1
+				})
 
-			# Stelle sicher, dass das Canvas aktualisiert wird
-			self.gridCanvas.update_idletasks()
-			print(f'{old_position} -> {new_position}')
-
+				# Stelle sicher, dass das Canvas aktualisiert wird
+				self.gridCanvas.update_idletasks()
+				print(f'{old_position} -> {new_position}')

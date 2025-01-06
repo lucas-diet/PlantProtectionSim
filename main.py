@@ -133,10 +133,11 @@ sim = Simulation(grid)
 sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 dia = Diagrams(grid)
-dia.dataPlotter(grid.plantData, sim.simLength, measure='energy', title='Energy by Plant Type Over Time')
-dia.dataPlotter(grid.plantData, sim.simLength, measure='count', title='Number by Plant Types Over Time')
-dia.dataPlotter(grid.EnemyData, sim.simLength, measure='size', title='Clustersize by Enemy Type Over Time')
-dia.dataPlotter(grid.EnemyData, sim.simLength, measure='count', title='Number by Enemy Types Over Time')
+#dia.dataPlotter(grid.plantData, sim.simLength, measure='energy', title='Energy by Plant Type Over Time')
+#dia.dataPlotter(grid.plantData, sim.simLength, measure='count', title='Number by Plant Types Over Time')
+#dia.dataPlotter(grid.EnemyData, sim.simLength, measure='size', title='Clustersize by Enemy Type Over Time')
+#dia.dataPlotter(grid.EnemyData, sim.simLength, measure='count', title='Number by Enemy Types Over Time')
+
 # Beinhaltet die DEBUG-Prints, die bei bedarf ausgegen werden können.
 #sim.logSafer(grid.log)
 #sim.logLoader('log.pkl')
