@@ -3,7 +3,6 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import re
-import time
 
 from models.grid import Grid
 from models.plant import Plant
@@ -98,7 +97,7 @@ class Gui():
 		
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
 		
-		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow ).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
 
 		self.roundCount = tk.Label(self.top_frame, text='0', width=4, bg='red')
@@ -114,8 +113,9 @@ class Gui():
 		self.input_plantsTab()
 		self.input_enemiesTab()
 		self.input_substancesTab()
-		
 		self.input_gridSize()
+
+		self.roundCount.config(text='0', bg='red')
 	
 
 	def sidebarTabs(self):
@@ -684,7 +684,6 @@ class Gui():
 			self.breakupWindow.deiconify()  # Fenster wieder anzeigen, falls es schon existiert
 			return
 		
-		
 		self.breakupWindow = tk.Toplevel()
 		self.breakupWindow.title('Breakups')
 		x = int(self.breakupWindow.winfo_screenwidth() / 2 - 400 / 2)
@@ -938,7 +937,6 @@ class Gui():
 			self.grid.addPlant(plant)
 		else:
 			pass
-		print(self.grid.plants)
 		return plant
 	
 
@@ -1096,9 +1094,7 @@ class Gui():
 		# Berechne die Pixelposition aus den Gitterkoordinaten
 		x_pos, y_pos = self.get_cellPosition(clicked_position)
 
-		# Feindname und Clustergröße
-		enemy_name = cluster.enemy.name  
-		circle_id = self.create_clusterCircle(x_pos, y_pos, enemy_name)  # Feindinformationen speichern
+		circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name  )  # Feindinformationen speichern
 
 		# Speichere die Marker-ID im Cluster
 		cluster.circle_id = circle_id
@@ -1113,7 +1109,7 @@ class Gui():
 		# Füge Tooltip hinzu
 		self.addTooltip(circle_id, clicked_position)
 
-		print(f'Feind {enemy_name} mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
+		print(f'Feind {cluster.enemy.name  } mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
 
 
 
@@ -1240,14 +1236,16 @@ class Gui():
 				break
 			
 			self.sim.runStep()
+
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			for ec in self.grid.enemies:
+			for ec in self.grid.enemies:							
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
+ 
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
@@ -1298,3 +1296,6 @@ class Gui():
 		self.addTooltip(circle_id, new_position)
 		self.gridCanvas.update_idletasks()
 		print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
+
+
+				

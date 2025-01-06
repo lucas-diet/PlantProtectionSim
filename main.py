@@ -129,6 +129,7 @@ sc2 = SymbioticConnection(p2, p3)
 #p2.airSpreadSignal(ec1, sig1)
 
 
+
 sim = Simulation(grid)
 sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
