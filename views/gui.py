@@ -9,14 +9,15 @@ from models.grid import Grid
 from models.plant import Plant
 from models.enemyCluster import Enemy, EnemyCluster
 from controllers.simulation import Simulation
+from views.diagrams import Diagrams
 
 
 class Gui():
 
-	def __init__(self, grid, simulation, diagrams):
+	def __init__(self, grid, simulation):
 		self.grid = grid
 		self.simulation = simulation
-		self.diagrams = diagrams
+
 
 		self.initSimulationWindow()
 		self.set_breakupsAuto()
@@ -628,11 +629,11 @@ class Gui():
 	def create_plotTabs(self):
 		# Notebook (Tabs) erstellen
 		self.plot_tabs = ttk.Notebook(self.plotWindow)
-
+		diagram = Diagrams(self.grid)
 		# Tab 1: Pflanzen - Energy
 		self.plants_energy_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.plants_energy_plot_tab, text='Plants-Energy')
-		self.diagrams.dataPlotter(
+		diagram.dataPlotter(
 			root=self.plants_energy_plot_tab,
 			data_dict=self.grid.plantData,
 			simLength=self.simulation.simLength,
@@ -644,7 +645,7 @@ class Gui():
 		# Tab 2: Pflanzen - Count
 		self.plants_count_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.plants_count_plot_tab, text='Plants-Count')
-		self.diagrams.dataPlotter(
+		diagram.dataPlotter(
 			root=self.plants_count_plot_tab,
 			data_dict=self.grid.plantData,
 			simLength=self.simulation.simLength,
@@ -656,7 +657,7 @@ class Gui():
 		# Tab 3: Feinde - Size
 		self.enemies_size_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.enemies_size_plot_tab, text='Enemies-Size')
-		self.diagrams.dataPlotter(
+		diagram.dataPlotter(
 			root=self.enemies_size_plot_tab,
 			data_dict=self.grid.EnemyData,
 			simLength=self.simulation.simLength,
@@ -668,7 +669,7 @@ class Gui():
 		# Tab 4: Feinde - Count
 		self.enemies_count_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.enemies_count_plot_tab, text='Enemies-Count')
-		self.diagrams.dataPlotter(
+		diagram.dataPlotter(
 			root=self.enemies_count_plot_tab,
 			data_dict=self.grid.EnemyData,
 			simLength=self.simulation.simLength,
@@ -1222,6 +1223,8 @@ class Gui():
 
 	def run_simulation(self):
 		sim = Simulation(self.grid)
+		sim.getPlantData(0)
+		sim.getEnemyData(0)
 		count = 1
 		while True:
 			if count - 1 == self.maxSteps:
@@ -1247,6 +1250,8 @@ class Gui():
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
+			sim.getPlantData(count)
+			sim.getEnemyData(count)
 			count += 1
 			self.gridCanvas.after(500)
 

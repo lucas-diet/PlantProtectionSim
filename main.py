@@ -142,5 +142,5 @@ dia = Diagrams(grid)
 #sim.logSafer(grid.log)
 #sim.logLoader('log.pkl')
 
-gui = Gui(grid, sim, dia)
+gui = Gui(grid, sim)
 gui.mainloop()
