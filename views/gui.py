@@ -1209,6 +1209,7 @@ class Gui():
 		self.sim.getEnemyData(0)
 		count = 1
 		while True:
+			
 			if count - 1 == self.maxSteps:
 				break
 			if self.sim.noSpecificPlantBreak(self.plant_death):
@@ -1244,7 +1245,7 @@ class Gui():
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
 			
-			self.gridCanvas.after(500)
+			
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
 
@@ -1289,6 +1290,7 @@ class Gui():
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
 		"""
+		self.gridCanvas.after(500)
 		# Berechne die neue Position für den Cluster
 		position_data = self.get_cellPosition(new_position)
 		if not position_data:
@@ -1325,6 +1327,5 @@ class Gui():
 		self.enemyDetails(circle_id, new_position)
 		self.gridCanvas.update_idletasks()
 		#print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
-
 
 				
