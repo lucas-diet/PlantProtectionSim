@@ -732,7 +732,7 @@ class Gui():
 
 	def set_breakupsManuelly(self):
 		try:
-			self.maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxEnemiesBreakup_entry.get() else None
+			self.maxSteps = int(self.maxStepsBreakup_entry.get()) if self.maxStepsBreakup_entry.get() else None
 		except ValueError:
 			messagebox.showerror('Invalid input', 'Please enter a valid number for maximum Sim-Steps')
 			return
@@ -769,6 +769,7 @@ class Gui():
 		
 		# Fenster verstecken
 		self.breakupWindow.withdraw()
+		print(self.maxSteps, self.plant_death, self.enemy_death, self.max_plant_energy, self.max_enemies_num)
 
 
 	def create_gridFrame(self, width, height):
@@ -1239,7 +1240,7 @@ class Gui():
 				break
 			
 			self.sim.runStep()
-			self.updateFieldColor()
+			
 			
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
@@ -1249,6 +1250,7 @@ class Gui():
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
+				self.updateFieldColor()
 			
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
@@ -1271,8 +1273,9 @@ class Gui():
 					# Entferne die Pflanze aus der plant_at_position-Datenstruktur
 					self.plant_at_position[id] = None  # Setze den Eintrag auf None, um anzuzeigen, dass das Feld leer ist
 
+					self.gridCanvas.update_idletasks()
 
-
+	
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
