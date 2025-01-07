@@ -1040,26 +1040,6 @@ class Gui():
 		# Rückgabe der validierten Werte
 		return clusterSize, speed, eatSpeed, eatVictory
 
-
-	def create_add_cluster(self, selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory):
-		enemy = Enemy(name=f'e{selected_index}', symbol=f'E{selected_index}')
-
-		cluster = EnemyCluster(enemy=enemy,
-						 num=clusterSize,
-						 position=clicked_position,
-						 grid=self.grid,
-						 speed=speed,
-						 eatingSpeed=eatSpeed,
-						 eatVictory=eatVictory)
-
-		self.error_enemies.config(text='')
-
-		if cluster not in self.grid.enemies:
-			self.grid.addEnemies(cluster)
-		else:
-			pass
-		return cluster
-
 		
 	def get_enemyInputs(self, enemy_entries):
 		"""
@@ -1244,8 +1224,9 @@ class Gui():
 			if self.sim.upperEnemyNumBreak(self.max_enemies_num):
 				break
 			
-			self.sim.runStep()
-			
+			for plant in self.grid.plants[:]:
+				plant.grow()
+				
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen

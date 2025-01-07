@@ -108,13 +108,13 @@ grid.addPlant(p2)
 grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
+#grid.addEnemies(ec2)
 grid.addEnemies(ec3)
 
-grid.addSubstance(sig1)
-grid.addSubstance(sig2)
-grid.addSubstance(tox1)
-grid.addSubstance(tox2)
+#grid.addSubstance(sig1)
+#grid.addSubstance(sig2)
+#grid.addSubstance(tox1)
+#grid.addSubstance(tox2)
     
 
 sc1 = SymbioticConnection(p1, p2)
