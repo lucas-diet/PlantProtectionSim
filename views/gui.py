@@ -24,6 +24,7 @@ class Gui():
 		self.players = []
 		self.enemies_at_positions = {}
 		self.plant_at_position = {}
+		self.lock = threading.Lock()
 
 
 	def initSimulationWindow(self):
@@ -1350,7 +1351,7 @@ class Gui():
 			for plant in self.grid.plants[:]:
 				plant.grow()
 			
-			self.gridCanvas.after(500)
+			self.gridCanvas.after(100)
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
@@ -1376,22 +1377,25 @@ class Gui():
 	def updateFieldColor(self):
 		"""
 		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips, wenn die Pflanze entfernt wird.
+		Setzt auch die Farbe auf Weiß, wenn die Pflanze tot ist und das Feld nicht bereits weiß ist.
 		"""
-		# Durchlaufe alle Positionen und Pflanzen
-		for id, plant in list(self.plant_at_position.items()):  # Nutze list(), um Änderungen am Dict zu ermöglichen
-			if plant:  # Sicherstellen, dass eine Pflanze vorhanden ist
-				if plant.currEnergy < plant.minEnergy:  # Überprüfen, ob die Energie zu niedrig ist
-					# Setze das Feld auf Weiß
-					self.gridCanvas.itemconfig(id, fill='white')
+		with self.lock:
+			# Durchlaufe alle Positionen und Pflanzen
+			for id, plant in list(self.plant_at_position.items()):
+				current_color = self.gridCanvas.itemcget(id, "fill")  # Aktuelle Farbe des Feldes abrufen
 
-					# Entferne die Pflanze aus der plant_at_position-Datenstruktur
-					self.plant_at_position[id] = None  # Setze den Eintrag auf None, um anzuzeigen, dass das Feld leer ist
+				# Wenn die Pflanze tot ist (currEnergy < minEnergy oder plant ist None)
+				if not plant or plant.currEnergy < plant.minEnergy:
+					if current_color != 'white':  # Nur aktualisieren, wenn die Farbe nicht bereits weiß ist
+						self.gridCanvas.itemconfig(id, fill='white')  # Setze die Farbe auf Weiß
+						self.plant_at_position[id] = None  # Entferne die Pflanze aus der Position
+						self.remove_tooltip(id)  # Entferne den Tooltip, falls vorhanden
 
-					# Entferne den Tooltip, falls vorhanden
-					self.remove_tooltip(id)
+			# Canvas-Update
+			self.gridCanvas.update_idletasks()
 
-					# Aktualisiere die Canvas
-					self.gridCanvas.update_idletasks()
+	
+
 
 
 	def remove_tooltip(self, square_id):
