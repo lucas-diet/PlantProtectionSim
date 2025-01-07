@@ -1261,7 +1261,8 @@ class Gui():
 					tk.Checkbutton(popup, text=f'{plant.name} connection to {neighbor}', variable=var).pack()
 		
 		else:
-			tk.Label(popup, text=f'No neighbors at {neighbor}').pack()
+			# Falls keine benachbarten Felder existieren
+			tk.Label(popup, text=f'No neighbors at {position}').pack()
 
 
 	def get_neighbors(self, position):
