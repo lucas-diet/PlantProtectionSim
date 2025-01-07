@@ -22,6 +22,7 @@ class Gui():
 		
 		self.players = []
 		self.enemies_at_positions = {}
+		self.plant_at_position = {}
 
 
 	def initSimulationWindow(self):
@@ -935,6 +936,8 @@ class Gui():
 		# Pflanze zur Grid hinzufügen
 		if plant not in self.grid.plants:
 			self.grid.addPlant(plant)
+			square_id = self.squares.get(plant.position)
+			self.plant_at_position[square_id] = plant
 		else:
 			pass
 		return plant
@@ -1236,7 +1239,8 @@ class Gui():
 				break
 			
 			self.sim.runStep()
-
+			self.updateFieldColor()
+			
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
@@ -1245,7 +1249,7 @@ class Gui():
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
- 
+			
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
@@ -1254,6 +1258,19 @@ class Gui():
 			self.gridCanvas.after(500)
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
+
+	
+	def updateFieldColor(self):
+		# Durchlaufe alle Positionen und Pflanzen
+		for id, plant in list(self.plant_at_position.items()):  # Nutze list() um Änderungen am Dict zu ermöglichen
+			if plant:  # Sicherstellen, dass eine Pflanze vorhanden ist
+				if plant.currEnergy < plant.minEnergy:  # Überprüfen, ob die Energie zu niedrig ist
+					# Setze das Feld auf Weiß
+					self.gridCanvas.itemconfig(id, fill='white')
+
+					# Entferne die Pflanze aus der plant_at_position-Datenstruktur
+					self.plant_at_position[id] = None  # Setze den Eintrag auf None, um anzuzeigen, dass das Feld leer ist
+
 
 
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
