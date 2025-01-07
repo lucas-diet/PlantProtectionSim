@@ -784,6 +784,7 @@ class Gui():
 
 		# Registriere den Event-Handler für Mausklicks
 		self.gridCanvas.bind('<Button-1>', self.on_GridClick_player)
+		self.gridCanvas.bind('<Button-2>', self.on_GridRightClick)  # Rechtsklick registrieren
 
 		# Bereinige die Canvas vor dem Zeichnen
 		self.gridCanvas.delete('all')
@@ -1194,6 +1195,126 @@ class Gui():
 		# Binde die Maus-Events an das Canvas-Element
 		self.gridCanvas.tag_bind(circle_id, '<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus das Element betritt
 		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Element verlässt
+
+
+	def on_GridRightClick(self, event):
+		# Ermittle die angeklickte Zelle
+		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
+		if clicked_item:
+			item_id = clicked_item[0]
+
+			# Finde die (x, y)-Koordinaten der angeklickten Zelle
+			clicked_position = None
+			for position, id in self.squares.items():
+				if id == item_id:
+					clicked_position = position
+					break
+
+			if clicked_position is None:
+				print(f'Zelle mit ID {item_id} nicht gefunden.')
+				return
+
+			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
+			selected_index = self.selectedItem.get()
+			if selected_index == -1:
+				# Keine Auswahl getroffen
+				return
+
+			# Überprüfe, ob an dieser Position eine Pflanze existiert
+			plant = self.grid.getPlantAt(clicked_position)
+			if plant:
+				# Zeige das Popup nur, wenn eine Pflanze existiert
+				self.show_popup(clicked_position, event)
+			else:
+				print(f'Keine Pflanze an Position {clicked_position}.')
+
+
+	def show_popup(self, position, event):
+		# Öffnet ein Popup-Fenster, das die benachbarten Felder anzeigt
+		popup = tk.Toplevel(self.grid_frame)
+
+		# Berechne die Position des Popups basierend auf den Mauskoordinaten
+		x = event.x_root
+		y = event.y_root
+		
+		# Setze die Position des Popups relativ zur Mausposition
+		popup.geometry(f'+{x+10}+{y+10}')  # Füge einen kleinen Abstand hinzu, damit es nicht direkt unter der Maus erscheint
+
+		# Erhalte die benachbarten Felder mit Pflanzen für die angeklickte Zelle
+		neighbors = self.get_neighbors(position)
+
+		# Wenn benachbarte Felder mit Pflanzen existieren, füge einen Checkbutton hinzu
+		if neighbors:
+			tk.Label(popup, text=f'Neighbos of {position}:').pack()
+
+			# Dictionary, um die Checkbutton-Status zu speichern
+			self.checkbutton_neighbors_vars = {}
+
+			# Erstelle für jedes benachbarte Feld einen Checkbutton
+			for neighbor in neighbors:
+				plant = self.grid.getPlantAt(neighbor)  # Überprüfe, ob eine Pflanze an diesem Nachbarfeld existiert
+				if plant:
+					var = tk.BooleanVar()  # BooleanVar für den Checkbutton (True/False)
+					self.checkbutton_neighbors_vars[neighbor] = var  # Speichere die Variable für jedes benachbarte Feld
+
+					# Erstelle einen Checkbutton für jede benachbarte Pflanze
+					tk.Checkbutton(popup, text=f'{plant.name} connection to {neighbor}', variable=var).pack()
+		
+		else:
+			tk.Label(popup, text=f'No neighbors at {neighbor}').pack()
+
+
+	def get_neighbors(self, position):
+		"""
+		Diese Methode gibt die benachbarten Felder zurück, auf denen eine Pflanze vorhanden ist.
+		Überprüft alle benachbarten Felder (oben, unten, links, rechts).
+		"""
+		
+		x, y = position
+		neighbors = [
+			(x - 1, y), # oben
+			(x, y - 1), # links
+			(x, y + 1), # rechts
+			(x + 1, y)  # unten
+		]
+		
+		valid_neighbors = []
+		
+		for neighbor in neighbors:
+			# Stelle sicher, dass der Nachbar innerhalb der Grenzen des Grids liegt
+			if 0 <= neighbor[0] < int(self.grid_size_entry.get()) and 0 <= neighbor[1] < int(self.grid_size_entry.get()):
+				# Überprüfe, ob an dieser Position eine Pflanze existiert
+				plant = self.grid.getPlantAt(neighbor)  # Methode getPlantAt überprüft, ob dort eine Pflanze ist
+				if plant:  # Wenn eine Pflanze gefunden wurde
+					valid_neighbors.append(neighbor)
+		
+		return valid_neighbors
+
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 	def start_simulation(self):
