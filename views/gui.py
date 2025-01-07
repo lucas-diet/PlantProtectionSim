@@ -948,46 +948,48 @@ class Gui():
 		"""
 		Zeigt die Energie der Pflanze als Tooltip an, wenn die Maus über die Zelle bewegt wird.
 		"""
-		# Berechne die Energie der Pflanze
-		energy_percentage = int((plant.currEnergy / plant.initEnergy) * 100)
+		tooltip_window = None  # Variable für das Tooltip-Fenster
 
 		# Funktion zum Anzeigen des Tooltips
 		def show_tooltip(event):
-			# Berechne die Position der Maus
-			x, y = event.x, event.y
-			
-			# Berechne die Textgröße und die Bounding Box
+			nonlocal tooltip_window
+
+			if tooltip_window is not None:
+				return  # Verhindert mehrfaches Erstellen von Tooltips
+
+			# Berechne die Energie der Pflanze dynamisch
+			energy_percentage = int((plant.currEnergy / plant.initEnergy) * 100)
 			tooltip_text = f'Name: {plant.name}\nEnergy: {energy_percentage}%\nPosition: {plant.position}'
-			text_id = self.gridCanvas.create_text(
-				x + 10, y - 10,  # Text leicht versetzt von der Maus
+
+			# Erstelle ein neues Fenster für den Tooltip
+			tooltip_window = tk.Toplevel(self.gridCanvas)
+			tooltip_window.wm_overrideredirect(True)  # Entferne Fensterrahmen
+			tooltip_window.attributes('-topmost', True)  # Halte den Tooltip im Vordergrund
+
+			# Setze die Tooltip-Position
+			x, y = self.gridCanvas.winfo_pointerxy()  # Mausposition relativ zum Bildschirm
+			tooltip_window.geometry(f'+{x + 10}+{y + 10}')
+
+			# Tooltip-Inhalt
+			label = tk.Label(
+				tooltip_window,
 				text=tooltip_text,
-				font=('Arial', 15),
-				fill='black',
-				anchor='nw'  # Text oben links ausrichten
+				font=('Arial', 12),
+				bg='white',
+				fg='black',
+				relief='solid',
+				bd=1,
+				padx=5,
+				pady=3,
 			)
-			bbox = self.gridCanvas.bbox(text_id)  # Bounding Box des Textes
-
-			# Zeichne ein Rechteck als Hintergrund
-			if bbox:
-				rect_id = self.gridCanvas.create_rectangle(
-					bbox[0] - 5, bbox[1] - 2,  # Leichtes Padding um den Text
-					bbox[2] + 5, bbox[3] + 2,
-					fill='white',  # Hintergrundfarbe
-					outline='black',  # Rahmenfarbe
-					width=1  # Rahmenbreite
-				)
-				# Das Rechteck hinter den Text verschieben
-				self.gridCanvas.tag_lower(rect_id, text_id)
-
-			# Speichern der IDs für späteres Entfernen
-			self.tooltip_ids = (rect_id, text_id)
+			label.pack()
 
 		# Funktion zum Verstecken des Tooltips
 		def hide_tooltip(event):
-			if hasattr(self, 'tooltip_ids'):
-				for item_id in self.tooltip_ids:
-					self.gridCanvas.delete(item_id)
-				del self.tooltip_ids
+			nonlocal tooltip_window
+			if tooltip_window is not None:
+				tooltip_window.destroy()  # Entferne das Tooltip-Fenster
+				tooltip_window = None
 
 		# Binde die Maus-Events an das Zellen-Item
 		self.gridCanvas.tag_bind(square_id, '<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus die Zelle betritt
@@ -1111,8 +1113,7 @@ class Gui():
 		self.enemies_at_positions[clicked_position].append(cluster)
 
 		# Füge Tooltip hinzu
-		self.addTooltip(circle_id, clicked_position)
-
+		self.enemyDetails(circle_id, clicked_position)
 		print(f'Feind {cluster.enemy.name  } mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
 
 
@@ -1162,60 +1163,56 @@ class Gui():
 		return circle_id
 	
 
-	def addTooltip(self, circle_id, position):
+	def enemyDetails(self, circle_id, position):
 		"""
-		Fügt Tooltip-Logik für einen Canvas-Text hinzu.
+		Fügt Tooltip-Logik für einen Canvas-Text hinzu, der auch außerhalb des Hauptfensters sichtbar ist.
 		"""
+		tooltip_window = None  # Variable für das Tooltip-Fenster
+
 		# Funktion zum Anzeigen des Tooltips
 		def show_tooltip(event):
-			x, y = event.x, event.y
-			tooltip_text = []
+			nonlocal tooltip_window
+
+			if tooltip_window is not None:
+				return  # Verhindert mehrfaches Erstellen des Tooltips
 
 			# Sammle Informationen zu allen Feinden an dieser Position
 			enemies_at_pos = self.enemies_at_positions.get(position, [])
-			for ec in enemies_at_pos:
-				tooltip_text.append(f'{ec.enemy.name}: Size {int(ec.num)}')
+			tooltip_text = '\n'.join(f'{ec.enemy.name}: Size {int(ec.num)}' for ec in enemies_at_pos)
 
-			# Verarbeite die Tooltip-Texte zu einer mehrzeiligen Darstellung
-			tooltip_full_text = '\n'.join(tooltip_text)
+			# Erstelle ein neues Fenster für den Tooltip
+			tooltip_window = tk.Toplevel(self.gridCanvas)
+			tooltip_window.wm_overrideredirect(True)  # Entferne Fensterrahmen
+			tooltip_window.attributes("-topmost", True)  # Halte den Tooltip im Vordergrund
 
-			# Erstelle den Tooltip-Text
-			tooltip_text_id = self.gridCanvas.create_text(
-				x + 10, y - 10,  # Text leicht versetzt von der Maus
-				text=tooltip_full_text,
-				font=('Arial', 15),
-				fill='black',
-				anchor='nw'  # Text oben links ausrichten
+			# Positioniere das Tooltip-Fenster
+			x, y = self.gridCanvas.winfo_pointerxy()  # Mausposition relativ zum Bildschirm
+			tooltip_window.geometry(f"+{x + 10}+{y + 10}")
+
+			# Tooltip-Inhalt
+			label = tk.Label(
+				tooltip_window,
+				text=tooltip_text,
+				font=("Arial", 12),
+				bg="white",
+				fg="black",
+				relief="solid",
+				bd=1,
+				padx=5,
+				pady=3,
 			)
-
-			# Berechne die Bounding Box für den Tooltip-Text
-			bbox = self.gridCanvas.bbox(tooltip_text_id)
-
-			# Erstelle ein Rechteck als Hintergrund
-			if bbox:
-				rect_id = self.gridCanvas.create_rectangle(
-					bbox[0] - 5, bbox[1] - 2,  # Leichtes Padding um den Text
-					bbox[2] + 5, bbox[3] + 2,
-					fill='white',  # Hintergrundfarbe
-					outline='black',  # Rahmenfarbe
-					width=1  # Rahmenbreite
-				)
-				# Setze das Rechteck hinter den Text
-				self.gridCanvas.tag_lower(rect_id, tooltip_text_id)
-
-			# Speichere die IDs für späteres Entfernen
-			self.tooltip_ids = (rect_id, tooltip_text_id)
+			label.pack()
 
 		# Funktion zum Verstecken des Tooltips
 		def hide_tooltip(event):
-			if hasattr(self, 'tooltip_ids'):
-				for item_id in self.tooltip_ids:
-					self.gridCanvas.delete(item_id)
-				del self.tooltip_ids
+			nonlocal tooltip_window
+			if tooltip_window is not None:
+				tooltip_window.destroy()  # Entferne das Tooltip-Fenster
+				tooltip_window = None
 
-		# Binde die Maus-Events an das Text-Item
-		self.gridCanvas.tag_bind(circle_id, '<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus das Text-Item betritt
-		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Text-Item verlässt
+		# Binde die Maus-Events an das Canvas-Element
+		self.gridCanvas.tag_bind(circle_id, '<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus das Element betritt
+		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Element verlässt
 
 
 	def run_simulation(self):
@@ -1245,11 +1242,13 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			for ec in self.grid.enemies:							
+			for ec in self.grid.enemies:
+				self.updateFieldColor()
+
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
-				self.updateFieldColor()
+				
 			
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
@@ -1312,9 +1311,9 @@ class Gui():
 		self.enemies_at_positions[new_position].append(cluster)
 
 		# Tooltip aktualisieren
-		self.addTooltip(circle_id, new_position)
+		self.enemyDetails(circle_id, new_position)
 		self.gridCanvas.update_idletasks()
-		print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
+		#print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
 
 
 				
