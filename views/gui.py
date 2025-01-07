@@ -1349,7 +1349,8 @@ class Gui():
 			
 			for plant in self.grid.plants[:]:
 				plant.grow()
-				
+			
+			self.gridCanvas.after(500)
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
@@ -1412,7 +1413,6 @@ class Gui():
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
 		"""
-		self.gridCanvas.after(500)
 		# Berechne die neue Position für den Cluster
 		position_data = self.get_cellPosition(new_position)
 		if not position_data:
