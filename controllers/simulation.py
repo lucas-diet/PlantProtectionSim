@@ -45,22 +45,28 @@ class Simulation():
         #time.sleep(2)
 
 
-    def noSpecificPlantBreak(self, plant=None):
-        if plant is not None:
-            if plant not in self.grid.plants:
-                print(f'no more plants of {plant.name}')
-                return True
+    def noSpecificPlantBreak(self, pName=None):
+        if pName is not None:
+            # Prüfe, ob es eine Pflanze mit dem angegebenen Namen gibt
+            for plant in self.grid.plants:
+                if plant.name == pName:
+                    return False  # Eine Pflanze mit diesem Namen existiert noch
+            print(f'No more plants of type {pName}')
+            return True  # Keine Pflanze mit diesem Namen existiert
         else:
-            return False
+            return False  # Kein spezifischer Name angegeben
+
 
     
-    def noSpeceficEnemyBreak(self, ec=None):
-        if ec is not None:
-            if ec not in self.grid.enemies:
+    def noSpeceficEnemyBreak(self, ecName=None):
+        if ecName is not None:
+            for ec in self.grid.enemies:
+                if ec.name == ecName:
+                    return False
                 print(f'no more enemies of {ec.enemy.name}')
                 return True
-        else:
-            return False
+            else:
+                return True
         
     
     def noEnemiesBreak(self):
@@ -165,7 +171,6 @@ class Simulation():
         
         while True:
             if count - 1 == maxSteps:
-                print('maximum number of steps reached')
                 break
 
             if self.noSpecificPlantBreak(plant):

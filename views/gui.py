@@ -1241,7 +1241,6 @@ class Gui():
 			
 			self.sim.runStep()
 			
-			
 			# Feinde sammeln und bewegen (alle gleichzeitig)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
@@ -1275,7 +1274,7 @@ class Gui():
 
 					self.gridCanvas.update_idletasks()
 
-	
+
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
