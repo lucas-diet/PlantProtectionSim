@@ -3,6 +3,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 import re
+import threading
 
 from models.grid import Grid
 from models.plant import Plant
@@ -99,7 +100,7 @@ class Gui():
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
 		
 		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Play', command=self.run_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
+		tk.Button(self.top_frame, text='Play', command=self.start_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
 
 		self.roundCount = tk.Label(self.top_frame, text='0', width=4, bg='red')
 		self.roundCount.grid(row=0, column=12, padx=1, pady=1, sticky='ew')
@@ -1215,6 +1216,13 @@ class Gui():
 		self.gridCanvas.tag_bind(circle_id, '<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Element verlässt
 
 
+	def start_simulation(self):
+		# Starte die Simulation in einem separaten Thread
+		sim_thread = threading.Thread(target=self.run_simulation)
+		sim_thread.daemon = True  # Beendet den Thread automatisch, wenn das Hauptprogramm endet
+		sim_thread.start()
+
+
 	def run_simulation(self):
 		self.sim = Simulation(self.grid)
 		self.sim.getPlantData(0)
@@ -1261,8 +1269,11 @@ class Gui():
 
 	
 	def updateFieldColor(self):
+		"""
+		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips, wenn die Pflanze entfernt wird.
+		"""
 		# Durchlaufe alle Positionen und Pflanzen
-		for id, plant in list(self.plant_at_position.items()):  # Nutze list() um Änderungen am Dict zu ermöglichen
+		for id, plant in list(self.plant_at_position.items()):  # Nutze list(), um Änderungen am Dict zu ermöglichen
 			if plant:  # Sicherstellen, dass eine Pflanze vorhanden ist
 				if plant.currEnergy < plant.minEnergy:  # Überprüfen, ob die Energie zu niedrig ist
 					# Setze das Feld auf Weiß
@@ -1271,7 +1282,26 @@ class Gui():
 					# Entferne die Pflanze aus der plant_at_position-Datenstruktur
 					self.plant_at_position[id] = None  # Setze den Eintrag auf None, um anzuzeigen, dass das Feld leer ist
 
+					# Entferne den Tooltip, falls vorhanden
+					self.remove_tooltip(id)
+
+					# Aktualisiere die Canvas
 					self.gridCanvas.update_idletasks()
+
+
+	def remove_tooltip(self, square_id):
+		"""
+		Entfernt den Tooltip für ein bestimmtes Feld.
+		"""
+		# Entferne alle Binds für den Tooltip
+		self.gridCanvas.tag_unbind(square_id, '<Enter>')
+		self.gridCanvas.tag_unbind(square_id, '<Leave>')
+
+		# Falls ein Tooltip aktuell angezeigt wird, lösche ihn
+		if hasattr(self, 'tooltip_ids'):
+			for item_id in self.tooltip_ids:
+				self.gridCanvas.delete(item_id)
+			del self.tooltip_ids
 
 
 	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
