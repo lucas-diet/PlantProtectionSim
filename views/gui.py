@@ -1520,7 +1520,7 @@ class Gui():
 				current_color = self.gridCanvas.itemcget(id, 'fill')  # Aktuelle Farbe des Feldes abrufen
 
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy oder plant ist None)
-				if not plant or plant.currEnergy < plant.minEnergy:
+				if not plant or plant.currEnergy <= plant.minEnergy:
 					if current_color != 'white':  # Nur aktualisieren, wenn die Farbe nicht bereits weiß ist
 						self.gridCanvas.itemconfig(id, fill='white')  # Setze die Farbe auf Weiß
 						self.plant_at_position[id] = None  # Entferne die Pflanze aus der Position
@@ -1533,9 +1533,19 @@ class Gui():
 								# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
 								self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
 								del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
+						for (p1, p2) in list(self.plant_connections.items()):
+							if p1 == plant or p2 == plant:
 								del self.connect_plants[(p1, p2)] # Löscht die Verbindung aus dem Dict
 								del self.connect_plants[(p2, p1)] # Löscht auch die Gegenrichtung
+				
+				# Sicherheitscheck: Wenn Pflanze tot, aber Farbe nicht weiß
+				elif plant.currEnergy <= plant.minEnergy and current_color != 'white':
+					print(f'Sicherheitscheck: Setze Feld {id} auf weiß.')
+					self.gridCanvas.itemconfig(id, fill='white')
 
+				# Debugging: Nach der Verarbeitung
+				new_color = self.gridCanvas.itemcget(id, 'fill')
+				print(f'Nach Update: Position {id}: Neue Farbe={new_color}')	
 
 	def remove_tooltip(self, square_id):
 		"""
