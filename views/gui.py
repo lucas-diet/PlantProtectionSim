@@ -28,6 +28,7 @@ class Gui():
 		self.plant_at_position = {}
 		self.lock = threading.Lock()
 		self.plant_connections = {}
+		self.grid_lines = {}
 
 
 	def initSimulationWindow(self):
@@ -1103,7 +1104,6 @@ class Gui():
 		print(f'Feind {cluster.enemy.name  } mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
 
 
-
 	def get_cellPosition(self, position):
 		"""
 		Berechnet die Position der Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
@@ -1169,7 +1169,7 @@ class Gui():
 			# Erstelle ein neues Fenster für den Tooltip
 			tooltip_window = tk.Toplevel(self.gridCanvas)
 			tooltip_window.wm_overrideredirect(True)  # Entferne Fensterrahmen
-			tooltip_window.attributes("-topmost", True)  # Halte den Tooltip im Vordergrund
+			tooltip_window.attributes('-topmost', True)  # Halte den Tooltip im Vordergrund
 
 			# Positioniere das Tooltip-Fenster
 			x, y = self.gridCanvas.winfo_pointerxy()  # Mausposition relativ zum Bildschirm
@@ -1179,10 +1179,10 @@ class Gui():
 			label = tk.Label(
 				tooltip_window,
 				text=tooltip_text,
-				font=("Arial", 12),
-				bg="white",
-				fg="black",
-				relief="solid",
+				font=('Arial', 12),
+				bg='white',
+				fg='black',
+				relief='solid',
 				bd=1,
 				padx=5,
 				pady=3,
@@ -1327,9 +1327,8 @@ class Gui():
 		self.plant_connections[(plant, neighbor)] = True
 		self.plant_connections[(neighbor, plant)] = True
 
-		# Debug-Ausgabe
 		print(f'Verbindung gespeichert: {plant.name} <-> {neighbor.name}')
-		print(f'Aktuelle Verbindungen: {self.plant_connections}')
+		self.create_connectionLine(plant, neighbor)
 
 
 	def disconnect_plants(self, plant, neighbor):
@@ -1343,8 +1342,36 @@ class Gui():
 			del self.plant_connections[(neighbor, plant)]
 
 		print(f'Verbindung entfernt: {plant.name} <-> {neighbor.name}')
-		print(f'Aktuelle Verbindungen: {self.plant_connections}')
+		self.remove_connectionLine(plant, neighbor)
 
+
+	def create_connectionLine(self, plant, neighbor):
+		plant_center = self.get_cellPosition(plant.position)
+		neighbor_center = self.get_cellPosition(neighbor.position)
+
+		if plant_center is None or neighbor_center is None:
+			print(f'Fehler: Ungültige Positionen für Pflanzen {plant.name} und {neighbor.name}')
+			return
+
+		# Ziehe eine Linie zwischen den Mittelpunkten der beiden Zellen
+		line = self.gridCanvas.create_line(
+			plant_center[0], plant_center[1], neighbor_center[0], neighbor_center[1],
+			fill='purple', width=2  # Optional: Anpassung der Farbe und Breite der Linie
+		)
+		# Speichere die Linie, um sie später zu bearbeiten oder zu löschen
+		self.grid_lines[(plant, neighbor)] = line
+
+
+	def remove_connectionLine(self, plant, neighbor):
+		# Entferne die Linie, falls sie existiert
+		if (plant, neighbor) in self.grid_lines:
+			line_id = self.grid_lines[(plant, neighbor)]  # Hole die Linien-ID
+			self.gridCanvas.delete(line_id)  # Lösche die Linie von der Canvas
+			del self.grid_lines[(plant, neighbor)]  # Lösche den Eintrag aus grid_lines
+		elif (neighbor, plant) in self.grid_lines:
+			line_id = self.grid_lines[(neighbor, plant)]  # Hole die Linien-ID
+			self.gridCanvas.delete(line_id)  # Lösche die Linie von der Canvas
+			del self.grid_lines[(neighbor, plant)]  # Lösche den Eintrag aus grid_lines
 
 
 
