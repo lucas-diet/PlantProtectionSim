@@ -1374,6 +1374,18 @@ class Gui():
 			del self.grid_lines[(neighbor, plant)]  # Lösche den Eintrag aus grid_lines
 
 
+	
+	
+	def seeds(self, plant_index):
+		plant_entries = self.plant_entries[plant_index]
+		
+		# Abrufen der Eingabewerte für Nachkommen
+		repro_interval = int(plant_entries['reproInterval'].get()) if plant_entries['reproInterval'].get() else 0
+		min_dist = int(plant_entries['minDist'].get()) if plant_entries['minDist'].get() else 1
+		max_dist = int(plant_entries['maxDist'].get()) if plant_entries['maxDist'].get() else 2
+
+		# Ausgabe der Eingabewerte in der Konsole
+		print(f"Plant {plant_index+1} - Repro-Interval: {repro_interval}, Min-Dist: {min_dist}, Max-Dist: {max_dist}")
 
 		
 
@@ -1407,11 +1419,6 @@ class Gui():
 		sim_thread.start()
 
 
-	
-
-	def grow_plant(self, plant):
-		plant.grow()
-
 	def run_simulation(self):
 		self.sim = Simulation(self.grid)
 		self.sim.getPlantData(0)
@@ -1431,9 +1438,14 @@ class Gui():
 
 			# Pflanzenwachstum parallelisieren
 			with ThreadPoolExecutor() as executor:
-				executor.map(self.grow_plant, self.grid.plants)
+				executor.map(self.grow_plant_para, self.grid.plants)
 
-			# Feindbewegung und Farbupdate (wird später parallelisiert)
+			# Nachkommen verteilen (scatterSeed) parallelisieren
+			# Hier wird der `count` als Argument mitgegeben
+			plants_with_index = [(i, plant) for i, plant in enumerate(self.grid.plants)]
+			with ThreadPoolExecutor() as executor:
+				executor.map(lambda plant_with_index: self.scatter_seed_para(plant_with_index, count), plants_with_index)
+
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Diese Methode könnte auch parallelisiert werden
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
@@ -1457,7 +1469,46 @@ class Gui():
 		self.roundCount.config(bg='green')
 
 
-	
+	def grow_plant_para(self, plant):
+		plant.grow()
+
+
+	def scatter_seed_para(self, plant_with_index, count):
+		# plant_with_index ist ein Tuple: (Index, Pflanze)
+		plant_index, plant = plant_with_index
+
+		# Holen des Reproduktionsintervalls für die aktuelle Pflanze
+		repro_interval = plant.reproductionIntervall
+
+		# Wenn repro_interval gleich 0 ist, gibt es keinen reproduktiven Schritt
+		if repro_interval == 0:
+			return
+
+		# Nur dann eine Ausgabe, wenn der aktuelle Schritt ein Vielfaches des Reproduktionsintervalls ist
+		if count % repro_interval == 0:
+			print(f'Scatter Seed für Pflanze {plant_index + 1} im Schritt {count}:')
+			
+			# Pop-up zur Eingabe der Energie für das Nachkommen
+			energy = tk.simpledialog.askinteger(
+				'offspring energy', 
+				f'offspring energy of p{plant_index + 1} at {plant.position}:',
+				minvalue=1,  # Mindestwert für Energie
+				initialvalue=100
+			)
+			
+			# Falls der Benutzer etwas eingegeben hat (nicht abgebrochen)
+			if energy is not None:
+				print(f'Energie für Nachkommen von p{plant_index + 1} auf {plant.position}: {energy}')
+				# Setze die Energie des Nachkommens (beispielsweise beim Erstellen eines Nachkommens)
+			else:
+				print(f'Keine Energie eingegeben für Pflanze {plant_index + 1}.')
+			
+		# Aufruf der scatterSeed Methode (um die Nachkommen zu verteilen)
+		plant.scatterSeed()
+
+
+
+
 	def updateFieldColor(self):
 		"""
 		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips, wenn die Pflanze entfernt wird.
@@ -1466,7 +1517,7 @@ class Gui():
 		with self.lock:
 			# Durchlaufe alle Positionen und Pflanzen
 			for id, plant in list(self.plant_at_position.items()):
-				current_color = self.gridCanvas.itemcget(id, "fill")  # Aktuelle Farbe des Feldes abrufen
+				current_color = self.gridCanvas.itemcget(id, 'fill')  # Aktuelle Farbe des Feldes abrufen
 
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy oder plant ist None)
 				if not plant or plant.currEnergy < plant.minEnergy:
@@ -1481,9 +1532,9 @@ class Gui():
 							if p1 == plant or p2 == plant:
 								# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
 								self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
-								del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus der Datenstruktur
-								print(f"Verbindung zwischen {p1.name} und {p2.name} entfernt.")
-
+								del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
+								del self.connect_plants[(p1, p2)] # Löscht die Verbindung aus dem Dict
+								del self.connect_plants[(p2, p1)] # Löscht auch die Gegenrichtung
 
 
 	def remove_tooltip(self, square_id):
