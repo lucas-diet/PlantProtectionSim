@@ -1357,16 +1357,16 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Diese Methode könnte auch parallelisiert werden
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			
+			self.updateFieldColor()
 			for ec in self.grid.enemies:
-				self.updateFieldColor()
+				
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
 
-			# Update der GUI (ggf. alle 10 Schritte)
-			if count % 10 == 0:
-				self.gridCanvas.update_idletasks()
+				# Update der GUI
+				if count % 100 == 0:
+					self.gridCanvas.update_idletasks()
 
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
