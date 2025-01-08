@@ -4,6 +4,7 @@ from tkinter import ttk
 from tkinter import messagebox
 import re
 import threading
+from concurrent.futures import ThreadPoolExecutor
 
 from models.grid import Grid
 from models.plant import Plant
@@ -1326,52 +1327,55 @@ class Gui():
 		sim_thread.start()
 
 
+	
+
+	def grow_plant(self, plant):
+		plant.grow()
+
 	def run_simulation(self):
 		self.sim = Simulation(self.grid)
 		self.sim.getPlantData(0)
 		self.sim.getEnemyData(0)
 		count = 1
+		
 		while True:
-			
-			if count - 1 == self.maxSteps:
+			# Abbruchbedingungen
+			if count - 1 == self.maxSteps or \
+			self.sim.noSpecificPlantBreak(self.plant_death) or \
+			self.sim.noSpeceficEnemyBreak(self.enemy_death) or \
+			self.sim.noEnemiesBreak() or \
+			self.sim.noPlantsBreak() or \
+			self.sim.upperGridEnergyBreak(self.max_plant_energy) or \
+			self.sim.upperEnemyNumBreak(self.max_enemies_num):
 				break
-			if self.sim.noSpecificPlantBreak(self.plant_death):
-				break
-			if self.sim.noSpeceficEnemyBreak(self.enemy_death):
-				break
-			if self.sim.noEnemiesBreak():
-				break
-			if self.sim.noPlantsBreak():
-				break
-			if self.sim.upperGridEnergyBreak(self.max_plant_energy):
-				break
-			if self.sim.upperEnemyNumBreak(self.max_enemies_num):
-				break
-			
-			for plant in self.grid.plants[:]:
-				plant.grow()
-			
-			self.gridCanvas.after(100)
-			# Feinde sammeln und bewegen (alle gleichzeitig)
+
+			# Pflanzenwachstum parallelisieren
+			with ThreadPoolExecutor() as executor:
+				executor.map(self.grow_plant, self.grid.plants)
+
+			# Feindbewegung und Farbupdate (wird später parallelisiert)
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
-			self.grid.collectAndManageEnemies()  # Alle Cluster bewegen
+			self.grid.collectAndManageEnemies()  # Diese Methode könnte auch parallelisiert werden
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
+			
 			for ec in self.grid.enemies:
 				self.updateFieldColor()
-
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
-				
-			
+
+			# Update der GUI (ggf. alle 10 Schritte)
+			if count % 10 == 0:
+				self.gridCanvas.update_idletasks()
+
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
-			
-			
+			self.gridCanvas.after(100)
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
+
 
 	
 	def updateFieldColor(self):
@@ -1390,9 +1394,6 @@ class Gui():
 						self.gridCanvas.itemconfig(id, fill='white')  # Setze die Farbe auf Weiß
 						self.plant_at_position[id] = None  # Entferne die Pflanze aus der Position
 						self.remove_tooltip(id)  # Entferne den Tooltip, falls vorhanden
-
-			# Canvas-Update
-			self.gridCanvas.update_idletasks()
 
 	
 
@@ -1451,7 +1452,6 @@ class Gui():
 
 		# Tooltip aktualisieren
 		self.enemyDetails(circle_id, new_position)
-		self.gridCanvas.update_idletasks()
 		#print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
 
 				

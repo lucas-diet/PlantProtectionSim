@@ -16,7 +16,7 @@ class Plant():
         self.maxDist = maxDist
         self.position = position
         self.grid = grid
-        self.color = color[int(self.name[1])-1]
+        self.color = color
         
         self.age = 0
         self.gridConnections = {}
@@ -105,10 +105,10 @@ class Plant():
                     print(f'[DEBUG]: {self.name} auf {self.position} erzeugt Nachkommen auf {newX, newY}')
                     return (newX, newY)
                 else:
-                    print(f'[DEGUB]: Position {newX, newY} ist belegt. Nachkomme wird nicht erzeugt.')
+                    #print(f'[DEGUB]: Position {newX, newY} ist belegt. Nachkomme wird nicht erzeugt.')
                     pass
             else:
-                print(f'[DEBUG]: Position {newX, newY} liegt außerhalb der Grenzen.')
+                #print(f'[DEBUG]: Position {newX, newY} liegt außerhalb der Grenzen.')
                 pass
             
         return None
