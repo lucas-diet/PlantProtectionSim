@@ -11,6 +11,7 @@ from models.plant import Plant
 from models.enemyCluster import Enemy, EnemyCluster
 from controllers.simulation import Simulation
 from views.diagrams import Diagrams
+from models.connection import SymbioticConnection
 
 
 class Gui():
@@ -26,6 +27,7 @@ class Gui():
 		self.enemies_at_positions = {}
 		self.plant_at_position = {}
 		self.lock = threading.Lock()
+		self.plant_connections = {}
 
 
 	def initSimulationWindow(self):
@@ -1247,21 +1249,40 @@ class Gui():
 
 		# Wenn benachbarte Felder mit Pflanzen existieren, füge einen Checkbutton hinzu
 		if neighbors:
-			tk.Label(popup, text=f'Neighbos of {position}:').pack()
+			tk.Label(popup, text=f'Neighbors of {position}:').pack()
 
 			# Dictionary, um die Checkbutton-Status zu speichern
 			self.checkbutton_neighbors_vars = {}
+			plant = self.grid.getPlantAt(position)
 
 			# Erstelle für jedes benachbarte Feld einen Checkbutton
-			for neighbor in neighbors:
-				plant = self.grid.getPlantAt(neighbor)  # Überprüfe, ob eine Pflanze an diesem Nachbarfeld existiert
-				if plant:
-					var = tk.BooleanVar()  # BooleanVar für den Checkbutton (True/False)
-					self.checkbutton_neighbors_vars[neighbor] = var  # Speichere die Variable für jedes benachbarte Feld
+			for neighbor_position in neighbors:
+				neighbor_plant = self.grid.getPlantAt(neighbor_position)  # Überprüfe, ob eine Pflanze an diesem Nachbarfeld existiert
+				if neighbor_plant:
+					# Initialisiere BooleanVar basierend auf dem aktuellen Verbindungsstatus
+					is_connected = self.plant_connections.get((plant, neighbor_plant), False)
+					var = tk.BooleanVar(value=is_connected)
+					self.checkbutton_neighbors_vars[neighbor_plant] = var  # Speichere die Variable für jede benachbarte Pflanze
+					
+					# Erstelle eine Callback-Funktion für jeden Checkbutton
+					def toggle_connection(n_plant, n_var):
+						if n_var.get():
+							# Verbindung herstellen
+							print(f'Verbindung hergestellt: {plant.name} <-> {n_plant.name}')
+							self.connect_plants(plant, n_plant)
+						else:
+							# Verbindung entfernen
+							print(f'Verbindung entfernt: {plant.name} <-> {n_plant.name}')
+							self.disconnect_plants(plant, n_plant)
 
-					# Erstelle einen Checkbutton für jede benachbarte Pflanze
-					tk.Checkbutton(popup, text=f'{plant.name} connection to {neighbor}', variable=var).pack()
-		
+					# Erstelle einen Checkbutton und binde die spezifische Nachbarpflanze
+					tk.Checkbutton(
+						popup,
+						text=f'{plant.name} connection to {neighbor_plant.name}',
+						variable=var,
+						command=lambda n=neighbor_plant, v=var: toggle_connection(n, v)
+					).pack()
+
 		else:
 			# Falls keine benachbarten Felder existieren
 			tk.Label(popup, text=f'No neighbors at {position}').pack()
@@ -1292,6 +1313,38 @@ class Gui():
 					valid_neighbors.append(neighbor)
 		
 		return valid_neighbors
+
+
+	def connect_plants(self, plant, neighbor):
+		"""
+		Diese Methode erstellt eine Symbiose-Verbindung zwischen zwei Pflanzen.
+		"""
+		# Verbindung erstellen und in der Datenstruktur speichern
+		connection = SymbioticConnection(plant, neighbor)
+		connection.createConnection()
+
+		# Speichere die Verbindung in beiden Richtungen
+		self.plant_connections[(plant, neighbor)] = True
+		self.plant_connections[(neighbor, plant)] = True
+
+		# Debug-Ausgabe
+		print(f'Verbindung gespeichert: {plant.name} <-> {neighbor.name}')
+		print(f'Aktuelle Verbindungen: {self.plant_connections}')
+
+
+	def disconnect_plants(self, plant, neighbor):
+		"""
+		Entfernt die Symbiose-Verbindung zwischen zwei Pflanzen.
+		"""
+		# Entferne die Verbindung aus dem Dictionary
+		if (plant, neighbor) in self.plant_connections:
+			del self.plant_connections[(plant, neighbor)]
+		if (neighbor, plant) in self.plant_connections:
+			del self.plant_connections[(neighbor, plant)]
+
+		print(f'Verbindung entfernt: {plant.name} <-> {neighbor.name}')
+		print(f'Aktuelle Verbindungen: {self.plant_connections}')
+
 
 
 
