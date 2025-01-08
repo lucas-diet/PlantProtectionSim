@@ -1475,7 +1475,14 @@ class Gui():
 						self.plant_at_position[id] = None  # Entferne die Pflanze aus der Position
 						self.remove_tooltip(id)  # Entferne den Tooltip, falls vorhanden
 
-	
+						# Entferne alle Verbindungen zu dieser Pflanze
+						# Iteriere über alle gespeicherten Verbindungen
+						for (p1, p2), line_id in list(self.grid_lines.items()):
+							if p1 == plant or p2 == plant:
+								# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
+								self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
+								del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus der Datenstruktur
+								print(f"Verbindung zwischen {p1.name} und {p2.name} entfernt.")
 
 
 
