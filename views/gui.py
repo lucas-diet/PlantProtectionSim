@@ -5,6 +5,7 @@ from tkinter import messagebox
 import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
+import random
 
 from models.grid import Grid
 from models.plant import Plant
@@ -351,7 +352,7 @@ class Gui():
 		self.error_plants.grid(row=0, column=0, columnspan=5, sticky='w', padx=2, pady=2)
 				
 		for i in range(number_of_plants):
-			row = i * 6
+			row = i * 7
 		
 			# Checkbutton für Pflanze
 			plant_checkbox = tk.Checkbutton(
@@ -385,23 +386,28 @@ class Gui():
 			self.plant_entries[i]['minEnergy'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
 			
 			repInter_label = tk.Label(self.plants_setting_frame, text='Repro-Interval:')
-			repInter_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
+			repInter_label.grid(row=row+4, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['reproInterval'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['reproInterval'].grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['reproInterval'].grid(row=row+4, column=1, sticky='ew', padx=2, pady=2)
+
+			offspringEnergy_label = tk.Label(self.plants_setting_frame, text='offspring-Energy:')
+			offspringEnergy_label.grid(row=row+4, column=2, sticky='w', padx=2, pady=2)
+			self.plant_entries[i]['offspring'] = tk.Entry(self.plants_setting_frame, width=4)
+			self.plant_entries[i]['offspring'].grid(row=row+4, column=3, sticky='ew', padx=2, pady=2)
 			
 			minDist_label = tk.Label(self.plants_setting_frame, text='Min-Distance:')
-			minDist_label.grid(row=row+4, column=0, sticky='w', padx=2, pady=2)
+			minDist_label.grid(row=row+5, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['minDist'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['minDist'].grid(row=row+4, column=1, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['minDist'].grid(row=row+5, column=1, sticky='ew', padx=2, pady=2)
 			
 			maxDist_label = tk.Label(self.plants_setting_frame, text='Max-Distance:')
-			maxDist_label.grid(row=row+4, column=2, sticky='w', padx=2, pady=2)
+			maxDist_label.grid(row=row+5, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['maxDist'] = tk.Entry(self.plants_setting_frame, width=4)
-			self.plant_entries[i]['maxDist'].grid(row=row+4, column=3, sticky='ew', padx=2, pady=2)
+			self.plant_entries[i]['maxDist'].grid(row=row+5, column=3, sticky='ew', padx=2, pady=2)
 			
 			# Platzhalter für Abstand
 			space_label = tk.Label(self.plants_setting_frame, width=4)
-			space_label.grid(row=row+5, column=0, padx=2, pady=2, sticky='w')
+			space_label.grid(row=row+6, column=0, padx=2, pady=2, sticky='w')
 		
 		# Scrollregion aktualisieren
 		self.plants_setting_frame.update_idletasks()
@@ -876,7 +882,7 @@ class Gui():
 			
 			# Überprüfe, ob alle Eingabewerte gültig sind (nicht leer und im richtigen Format)
 			try:
-				init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist = self.get_plantInputs(plant_entries)
+				init_energy, growth_rate, min_energy, repro_interval, off_energy, min_dist, max_dist = self.get_plantInputs(plant_entries)
 			except ValueError:
 				# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
 				self.error_plants.config(text='Error: All input values ​​must be valid numbers!', fg='red')
@@ -892,7 +898,7 @@ class Gui():
 			self.gridCanvas.itemconfig(square_id, fill=plant_color)
 			
 			# Erzeuge und füge Pflanze hinzu
-			plant = self.create_add_plant(selected_index, position, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color)
+			plant = self.create_add_plant(selected_index, position, init_energy, growth_rate, min_energy, repro_interval, off_energy, min_dist, max_dist, plant_color)
 			self.plantDetails(plant, square_id)
 	
 
@@ -907,6 +913,8 @@ class Gui():
 			repro_interval = 0  # Setze auf 0, wenn leer
 		else:
 			repro_interval = int(repro_interval_str)
+
+		off_energy = int(plant_entries['offspring'].get())
 				
 		min_dist = int(plant_entries['minDist'].get())
 		max_dist = int(plant_entries['maxDist'].get())
@@ -915,10 +923,10 @@ class Gui():
 		else:
 			pass
 
-		return init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist
+		return init_energy, growth_rate, min_energy, repro_interval, off_energy, min_dist, max_dist
 	
 
-	def create_add_plant(self, selected_index, position, init_energy, growth_rate, min_energy, repro_interval, min_dist, max_dist, plant_color):
+	def create_add_plant(self, selected_index, position, init_energy, growth_rate, min_energy, repro_interval, off_energy, min_dist, max_dist, plant_color):
 		# Überprüfen, ob auf der Position bereits eine Pflanze existiert
 		existing_plant = self.grid.getPlantAt(position)
 		
@@ -933,7 +941,8 @@ class Gui():
 				initEnergy=init_energy,
 				growthRateEnergy=growth_rate,
 				minEnergy=min_energy,
-				reproductionIntervall=repro_interval,
+				reproductionInterval=repro_interval,
+				offspringEnergy=off_energy,
 				minDist=min_dist,
 				maxDist=max_dist,
 				position=position,
@@ -1028,7 +1037,6 @@ class Gui():
 				return  # Beende die Funktion ohne den Feind hinzuzufügen
 
 			# Färbe die angeklickte Zelle
-			#self.gridCanvas.itemconfig(square_id, fill='red')
 			eCluster = self.create_add_cluster(selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory)
 			self.clusterMarker(clicked_position, selected_index, eCluster)
 
@@ -1084,7 +1092,7 @@ class Gui():
 	def clusterMarker(self, clicked_position, selected_index, cluster):
 		"""Platziert einen Marker für den Feind auf dem Canvas als kleinen Kreis."""
 
-		# Berechne die Pixelposition aus den Gitterkoordinaten
+		# Berechne die Pixelposition aus den Gridkoordinaten
 		x_pos, y_pos = self.get_cellPosition(clicked_position)
 
 		circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name  )  # Feindinformationen speichern
@@ -1374,8 +1382,6 @@ class Gui():
 			del self.grid_lines[(neighbor, plant)]  # Lösche den Eintrag aus grid_lines
 
 
-	
-	
 	def seeds(self, plant_index):
 		plant_entries = self.plant_entries[plant_index]
 		
@@ -1385,7 +1391,7 @@ class Gui():
 		max_dist = int(plant_entries['maxDist'].get()) if plant_entries['maxDist'].get() else 2
 
 		# Ausgabe der Eingabewerte in der Konsole
-		print(f"Plant {plant_index+1} - Repro-Interval: {repro_interval}, Min-Dist: {min_dist}, Max-Dist: {max_dist}")
+		print(f'Plant {plant_index+1} - Repro-Interval: {repro_interval}, Min-Dist: {min_dist}, Max-Dist: {max_dist}')
 
 		
 
@@ -1441,7 +1447,7 @@ class Gui():
 				executor.map(self.grow_plant_para, self.grid.plants)
 
 			# Nachkommen verteilen (scatterSeed) parallelisieren
-			# Hier wird der `count` als Argument mitgegeben
+			# Hier wird der 'count' als Argument mitgegeben
 			plants_with_index = [(i, plant) for i, plant in enumerate(self.grid.plants)]
 			with ThreadPoolExecutor() as executor:
 				executor.map(lambda plant_with_index: self.scatter_seed_para(plant_with_index, count), plants_with_index)
@@ -1474,60 +1480,117 @@ class Gui():
 
 
 	def scatter_seed_para(self, plant_with_index, count):
-		# plant_with_index ist ein Tuple: (Index, Pflanze)
+		# Pflanze und deren Index extrahieren
 		plant_index, plant = plant_with_index
 
-		# Holen des Reproduktionsintervalls für die aktuelle Pflanze
-		repro_interval = plant.reproductionIntervall
+		# Holen des Reproduktionsintervalls und der Offspring-Energie
+		repro_interval = plant.reproductionInterval
+		offspring_energy = plant.offspringEnergy
 
-		# Wenn repro_interval gleich 0 ist, gibt es keinen reproduktiven Schritt
-		if repro_interval == 0:
-			return
+		# Prüfen, ob die Pflanze reproduktiv ist und das Intervall erreicht wurde
+		if repro_interval == 0 or count % repro_interval != 0:
+			return  # Kein Fenster wird erzeugt, wenn das Intervall nicht erfüllt ist
 
-		# Nur dann eine Ausgabe, wenn der aktuelle Schritt ein Vielfaches des Reproduktionsintervalls ist
-		if count % repro_interval == 0:
-			print(f'Scatter Seed für Pflanze {plant_index + 1} im Schritt {count}:')
-			
-			# Pop-up zur Eingabe der Energie für das Nachkommen
-			energy = tk.simpledialog.askinteger(
-				'offspring energy', 
-				f'offspring energy of p{plant_index + 1} at {plant.position}:',
-				minvalue=1,  # Mindestwert für Energie
-				initialvalue=100
+		# Anzahl der Nachkommen ermitteln (z. B. 1 bis 4, abhängig von der scatterSeed-Logik)
+		num_offspring = random.randint(1, 4)
+
+		# Positionen für die Nachkommen ermitteln
+		offspring_positions = [plant.setOffspringPos() for _ in range(num_offspring)]
+		offspring_positions = [pos for pos in offspring_positions if pos]  # Filtere ungültige Positionen
+
+		# Zufällige Auswahl der Positionen für die Nachkommen
+		random.shuffle(offspring_positions)  # Zufällige Reihenfolge der Positionen
+		
+		# Platzieren der Nachkommen auf den zufälligen Positionen
+		for i in range(min(num_offspring, len(offspring_positions))):  # Falls es weniger Positionen gibt als Nachkommen
+			offspring_position = offspring_positions[i]
+
+			# Hier wird ein Nachkomme erzeugt
+			offspring = Plant(
+				name=plant.name,
+				initEnergy=offspring_energy,  # Die Energie des Nachkommens
+				growthRateEnergy=plant.growthRateEnergy,  # Die Wachstumsrate der Mutterpflanze
+				minEnergy=plant.minEnergy,  # Mindestenergie der Mutterpflanze
+				reproductionInterval=plant.reproductionInterval,  # Reproduktionsintervall der Mutterpflanze
+				offspringEnergy=plant.offspringEnergy,  # Energie für Nachkommen
+				minDist=plant.minDist,  # Mindestdistanz der Mutterpflanze
+				maxDist=plant.maxDist,  # Maximale Distanz der Mutterpflanze
+				position=offspring_position,  # Position des Nachkommens
+				grid=plant.grid,  # Grid der Mutterpflanze
+				color=plant.color,  # Farbe der Mutterpflanze
 			)
-			
-			# Falls der Benutzer etwas eingegeben hat (nicht abgebrochen)
-			if energy is not None:
-				print(f'Energie für Nachkommen von p{plant_index + 1} auf {plant.position}: {energy}')
-				# Setze die Energie des Nachkommens (beispielsweise beim Erstellen eines Nachkommens)
-			else:
-				print(f'Keine Energie eingegeben für Pflanze {plant_index + 1}.')
-			
-		# Aufruf der scatterSeed Methode (um die Nachkommen zu verteilen)
-		plant.scatterSeed()
 
+			# Füge das Nachkommen zum Grid hinzu
+			self.add_offspring_to_grid(offspring, offspring_position)
+
+			print(f'Nachkomme {i+1} wird auf Position {offspring_position} gesetzt.')
+
+
+	def add_offspring_to_grid(self, offspring, offspring_position):
+		"""
+		Fügt das Nachkommen zum Grid hinzu und zeigt es auf der Canvas, wenn das Feld frei ist.
+		Die Farbe des Feldes wird eingefärbt, und Felder können mehrfach genutzt werden.
+		"""
+		# Prüfe, ob das Feld existiert und initialisiere es, falls erforderlich
+		if offspring_position not in self.squares:
+			# Wenn das Feld noch keine ID hat, erstellen wir ein neues Quadrat auf der Canvas
+			square_id = self.gridCanvas.create_rectangle(
+				offspring_position[0] * self.cell_size, offspring_position[1] * self.cell_size,
+				(offspring_position[0] + 1) * self.cell_size, (offspring_position[1] + 1) * self.cell_size,
+				fill='white'  # Standardfarbe ist Weiß
+			)
+			self.squares[offspring_position] = square_id
+
+		# Hole die aktuelle ID des Feldes
+		square_id = self.squares[offspring_position]
+
+		# Entferne eine eventuell vorhandene Pflanze auf der Position (wenn sie tot ist)
+		existing_plant = self.plant_at_position.get(offspring_position)
+		if existing_plant and existing_plant.currEnergy < existing_plant.minEnergy:
+			self.gridCanvas.itemconfig(square_id, fill='white')  # Setze das Feld auf Weiß
+			del self.plant_at_position[offspring_position]  # Entferne die Pflanze aus der Position
+
+		# Füge das Nachkommen zum Grid hinzu
+		if offspring not in self.grid.plants:
+			self.grid.addPlant(offspring)
+			print(f'Nachkomme {offspring.name} wurde dem Grid hinzugefügt.')
+
+		# Aktualisiere die Canvas-Farbe und das Mapping
+		self.gridCanvas.itemconfig(square_id, fill=offspring.color)  # Ändere die Farbe des Quadrats
+		self.plant_at_position[offspring_position] = offspring  # Aktualisiere die Pflanze an der Position
+		self.plantDetails(offspring, square_id)  # Zeige Pflanzendetails an
+		print(f'Nachkomme {offspring.name} wurde auf Position {offspring_position} eingefärbt.')
 
 
 
 	def updateFieldColor(self):
 		"""
-		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips, wenn die Pflanze entfernt wird.
-		Setzt auch die Farbe auf Weiß, wenn die Pflanze tot ist und das Feld nicht bereits weiß ist.
+		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips,
+		wenn die Pflanze entfernt wird. Setzt auch die Farbe auf Weiß, wenn die Pflanze tot ist
+		und das Feld nicht bereits weiß ist.
 		"""
 		with self.lock:
 			# Durchlaufe alle Positionen und Pflanzen
-			for id, plant in list(self.plant_at_position.items()):
-				current_color = self.gridCanvas.itemcget(id, 'fill')  # Aktuelle Farbe des Feldes abrufen
+			for position, plant in list(self.plant_at_position.items()):
+				# Hole die Canvas-ID aus dem Mapping 'self.squares'
+				canvas_id = self.squares.get(position)
+				
+				if not canvas_id:
+					print(f'WARNUNG: Keine Canvas-ID für Position {position}.')
+					continue  # Überspringe, wenn keine Canvas-ID gefunden wird
+					
+				# Aktuelle Farbe des Feldes abrufen
+				current_color = self.gridCanvas.itemcget(canvas_id, 'fill')
 
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy oder plant ist None)
-				if not plant or plant.currEnergy <= plant.minEnergy:
+				if plant and plant.currEnergy < plant.minEnergy:
 					if current_color != 'white':  # Nur aktualisieren, wenn die Farbe nicht bereits weiß ist
-						self.gridCanvas.itemconfig(id, fill='white')  # Setze die Farbe auf Weiß
-						self.plant_at_position[id] = None  # Entferne die Pflanze aus der Position
-						self.remove_tooltip(id)  # Entferne den Tooltip, falls vorhanden
+						# Setze die Farbe auf Weiß
+						self.gridCanvas.itemconfig(canvas_id, fill='white')  
+						del self.plant_at_position[position]  # Entferne die Pflanze aus der Position
+						self.remove_tooltip(canvas_id)  # Entferne den Tooltip, falls vorhanden
 
 						# Entferne alle Verbindungen zu dieser Pflanze
-						# Iteriere über alle gespeicherten Verbindungen
 						for (p1, p2), line_id in list(self.grid_lines.items()):
 							if p1 == plant or p2 == plant:
 								# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
@@ -1535,18 +1598,16 @@ class Gui():
 								del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
 						for (p1, p2) in list(self.plant_connections.items()):
 							if p1 == plant or p2 == plant:
-								del self.connect_plants[(p1, p2)] # Löscht die Verbindung aus dem Dict
-								del self.connect_plants[(p2, p1)] # Löscht auch die Gegenrichtung
-				
+								del self.plant_connections[(p1, p2)]  # Lösche die Verbindung aus dem Dict
+								del self.plant_connections[(p2, p1)]  # Lösche auch die Gegenrichtung
+
 				# Sicherheitscheck: Wenn Pflanze tot, aber Farbe nicht weiß
-				elif plant.currEnergy <= plant.minEnergy and current_color != 'white':
-					#print(f'Sicherheitscheck: Setze Feld {id} auf weiß.')
-					self.gridCanvas.itemconfig(id, fill='white')
+				elif plant and plant.currEnergy < plant.minEnergy and current_color != 'white':
+					print(f'Sicherheitscheck: Setze Feld {canvas_id} auf weiß.')
+					self.gridCanvas.itemconfig(canvas_id, fill='white')
+					del self.plant_at_position[position]  # Lösche auch den Eintrag aus plant_at_position
 
-				# Debugging: Nach der Verarbeitung
-				new_color = self.gridCanvas.itemcget(id, 'fill')
-				#print(f'Nach Update: Position {id}: Neue Farbe={new_color}')	
-
+	
 	def remove_tooltip(self, square_id):
 		"""
 		Entfernt den Tooltip für ein bestimmtes Feld.
@@ -1602,4 +1663,3 @@ class Gui():
 		self.enemyDetails(circle_id, new_position)
 		#print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
 
-				

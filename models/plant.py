@@ -5,13 +5,14 @@ import numpy as np
 
 class Plant():
 
-    def __init__(self, name, initEnergy, growthRateEnergy, minEnergy, reproductionIntervall, minDist, maxDist, position, grid, color):
+    def __init__(self, name, initEnergy, growthRateEnergy, minEnergy, reproductionInterval, offspringEnergy, minDist, maxDist, position, grid, color):
         self.name = name
         self.initEnergy = initEnergy
         self.currEnergy = initEnergy
         self.growthRateEnergy = growthRateEnergy
         self.minEnergy = minEnergy
-        self.reproductionIntervall = reproductionIntervall
+        self.reproductionInterval = reproductionInterval
+        self.offspringEnergy = offspringEnergy
         self.minDist = minDist
         self.maxDist = maxDist
         self.position = position
@@ -33,6 +34,7 @@ class Plant():
 
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
         self.airSpreadCounters = {}
+        self.offspringEnergies = []
 
     def grow(self):
         """_summary_
@@ -51,8 +53,8 @@ class Plant():
         """
         if self.currEnergy < self.minEnergy:
             self.grid.removePlant(self)
-            
-        
+    
+
     def scatterSeed(self):
         """_summary_
             Überprüft, ob die Pflanze bereit ist, Samen zu verstreuen, basierend auf ihrem Alter und dem Reproduktionsintervall. 
@@ -60,21 +62,22 @@ class Plant():
             Für jedes Nachkommen wird die anfängliche Energie abgefragt, und es wird ein neues Pflanzenobjekt erstellt. 
             Die Position jedes Nachkommens wird mittels 'setOffspringPos()' ermittelt, und das Nachkommen wird dem Grid hinzugefügt.
         """
-        if self.reproductionIntervall == 0:
+        if self.reproductionInterval == 0:
             pass
 
-        elif self.age % self.reproductionIntervall == 0:
+        elif self.age % self.reproductionInterval == 0:
             for _ in range(random.randint(1, 4)):       ## Zufall zwischen 1 und 4              # Wie viele Kinder soll es max geben?
                 offspringPosition = self.setOffspringPos()
                 
                 if offspringPosition:
-                    energyInput = input('Init-Energy of offspring:')                        # Input() famit Energie für jedes Nachkommen individuell ist
-                    offspringEnergy = float(energyInput) if energyInput else 100            # default ist 100 Einheiten
+                    #energyInput = input('Init-Energy of offspring:')                        # Input() famit Energie für jedes Nachkommen individuell ist
+                    #offspringEnergy = float(energyInput) if energyInput else 100            # default ist 100 Einheiten
                     offspring = Plant(name=self.name, 
-                                      initEnergy=offspringEnergy, 
+                                      initEnergy=self.offspringEnergy, 
                                       growthRateEnergy=self.growthRateEnergy, 
                                       minEnergy=self.minEnergy, 
-                                      reproductionIntervall=self.reproductionIntervall,
+                                      reproductionInterval=self.reproductionInterval,
+                                      offspringEnergy=self.offspringEnergy,
                                       minDist=self.minDist, 
                                       maxDist=self.maxDist, 
                                       position=offspringPosition, 

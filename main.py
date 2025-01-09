@@ -26,21 +26,21 @@ PLANT_COLORS = ['#00FF00', '#32CD32', '#228B22', '#006400',
 
 # Pflanzen
 p1 = Plant(name='p1', initEnergy=100, growthRateEnergy=1, minEnergy=50, 
-           reproductionIntervall=3, minDist=1, maxDist=3, position=(5, 5), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=0, offspringEnergy=60, minDist=1, maxDist=3, position=(5, 5), grid=grid, color=PLANT_COLORS)
 p2 = Plant(name='p2', initEnergy=110, growthRateEnergy=2, minEnergy=55, 
-           reproductionIntervall=4, minDist=2, maxDist=4, position=(15, 10), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=4, offspringEnergy=60, minDist=2, maxDist=4, position=(15, 10), grid=grid, color=PLANT_COLORS)
 p3 = Plant(name='p3', initEnergy=120, growthRateEnergy=3, minEnergy=60, 
-           reproductionIntervall=5, minDist=1, maxDist=3, position=(25, 15), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=5, offspringEnergy=60, minDist=1, maxDist=3, position=(25, 15), grid=grid, color=PLANT_COLORS)
 p4 = Plant(name='p4', initEnergy=130, growthRateEnergy=1, minEnergy=65, 
-           reproductionIntervall=6, minDist=2, maxDist=5, position=(35, 20), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=6, offspringEnergy=60, minDist=2, maxDist=5, position=(35, 20), grid=grid, color=PLANT_COLORS)
 p5 = Plant(name='p5', initEnergy=140, growthRateEnergy=2, minEnergy=70, 
-           reproductionIntervall=7, minDist=3, maxDist=6, position=(45, 25), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=7, offspringEnergy=60, minDist=3, maxDist=6, position=(45, 25), grid=grid, color=PLANT_COLORS)
 p6 = Plant(name='p6', initEnergy=150, growthRateEnergy=3, minEnergy=75, 
-           reproductionIntervall=8, minDist=1, maxDist=3, position=(55, 30), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=8, offspringEnergy=60, minDist=1, maxDist=3, position=(55, 30), grid=grid, color=PLANT_COLORS)
 p7 = Plant(name='p7', initEnergy=160, growthRateEnergy=1, minEnergy=80, 
-           reproductionIntervall=9, minDist=2, maxDist=4, position=(65, 35), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=9, offspringEnergy=60, minDist=2, maxDist=4, position=(65, 35), grid=grid, color=PLANT_COLORS)
 p8 = Plant(name='p8', initEnergy=170, growthRateEnergy=2, minEnergy=85, 
-           reproductionIntervall=10, minDist=1, maxDist=2, position=(75, 40), grid=grid, color=PLANT_COLORS)
+           reproductionInterval=10, offspringEnergy=60, minDist=1, maxDist=2, position=(75, 40), grid=grid, color=PLANT_COLORS)
 
 # Feinde
 e1 = Enemy(name='e1', symbol='E1')
@@ -106,7 +106,7 @@ sc2.createConnection()
 
 
 sim = Simulation(grid)
-#sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 dia = Diagrams(grid)
 #dia.dataPlotter(grid.plantData, sim.simLength, measure='energy', title='Energy by Plant Type Over Time')
