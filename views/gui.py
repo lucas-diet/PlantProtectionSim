@@ -1540,12 +1540,12 @@ class Gui():
 				
 				# Sicherheitscheck: Wenn Pflanze tot, aber Farbe nicht weiß
 				elif plant.currEnergy <= plant.minEnergy and current_color != 'white':
-					print(f'Sicherheitscheck: Setze Feld {id} auf weiß.')
+					#print(f'Sicherheitscheck: Setze Feld {id} auf weiß.')
 					self.gridCanvas.itemconfig(id, fill='white')
 
 				# Debugging: Nach der Verarbeitung
 				new_color = self.gridCanvas.itemcget(id, 'fill')
-				print(f'Nach Update: Position {id}: Neue Farbe={new_color}')	
+				#print(f'Nach Update: Position {id}: Neue Farbe={new_color}')	
 
 	def remove_tooltip(self, square_id):
 		"""
