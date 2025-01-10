@@ -471,104 +471,130 @@ class Gui():
 
 	def create_substancesSettings(self, number_of_substances):
 		tk.Label(self.substances_setting_frame, text='', width=15).grid(row=0, column=5, padx=1, pady=1, sticky='w')
+
+		self.substance_entries = {}
+
+		self.error_substances = tk.Label(self.substances_setting_frame, text='')
+		self.error_substances.grid(row=0, column=0, columnspan=5, sticky='w', padx=2, pady=2)
 		
 		for i in range(number_of_substances):
-			row = i * 10 
+			row = i * 11
 			
-			# Oberste Zeile: Checkbox und Dropdown
-			substance_checkbox = tk.Checkbutton(self.substances_setting_frame, text=f'Substance {i+1}:')
-			substance_checkbox.grid(row=row, column=0, sticky='w', padx=2, pady=2)
+			# Flachere Struktur: Direkt die Widgets in `self.substance_entries[i]` speichern
+			self.substance_entries[i] = {}
 
-			substance_options = ['Signal', 'Toxin']  # Dropdown-Optionen
-			substance_var = tk.StringVar()
-			substance_var.set(substance_options[0])
-			substance_menu = tk.OptionMenu(self.substances_setting_frame, substance_var, *substance_options)
-			substance_menu.grid(row=row, column=1, padx=2, pady=2, sticky='w')
-			substance_menu.config(fg='black', width=5)
+			# Checkbox und Dropdown für Substanztyp
+			self.substance_entries[i]['checkbox_var'] = tk.IntVar()  # Variable für Checkbox
+			self.substance_entries[i]['checkbox'] = tk.Checkbutton(
+				self.substances_setting_frame,
+				text=f'Substance {i+1}:',
+				variable=self.substance_entries[i]['checkbox_var']
+			)
+			self.substance_entries[i]['checkbox'].grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
+
+			substance_options = ['Signal', 'Toxin']
+			self.substance_entries[i]['type_var'] = tk.StringVar()
+			self.substance_entries[i]['type_var'].set(substance_options[0])
+
+			self.substance_entries[i]['type'] = tk.OptionMenu(
+				self.substances_setting_frame, 
+				self.substance_entries[i]['type_var'], 
+				*substance_options
+			)
+			self.substance_entries[i]['type'].grid(row=row+1, column=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['type'].config(fg='black', width=5)
 			
-			toxin_effect_checkbox = tk.Checkbutton(self.substances_setting_frame, text='Deadly Toxin')
-			toxin_effect_checkbox.grid(row=row, column=2, padx=2, pady=2, sticky='w')
-			toxin_effect_checkbox.config(state='disable')
+			self.substance_entries[i]['toxinEffect_var'] = tk.IntVar()
+			self.substance_entries[i]['toxinEffect'] = tk.Checkbutton(
+				self.substances_setting_frame, 
+				text='Deadly Toxin',
+				variable=self.substance_entries[i]['toxinEffect_var'])
 			
-			# Darunter: Spread-Type Label und Dropdown
+			self.substance_entries[i]['toxinEffect'].grid(row=row+1, column=2, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['toxinEffect'].config(state='disable')
+			
+			# Spread-Type Dropdown
 			spreadType_label = tk.Label(self.substances_setting_frame, text='Spread:')
-			spreadType_label.grid(row=row+1, column=0, padx=2, pady=2, sticky='w')
+			spreadType_label.grid(row=row+2, column=0, padx=2, pady=2, sticky='w')
 
-			substance_spreadtype_options = ['Symbiotic', 'Air']  # Dropdown-Optionen
-			substance_spreadtype_var = tk.StringVar()
-			substance_spreadtype_var.set(substance_spreadtype_options[0])
-			substance_spreadtype_menu = tk.OptionMenu(self.substances_setting_frame, substance_spreadtype_var, *substance_spreadtype_options)
-			substance_spreadtype_menu.grid(row=row+1, column=1, padx=2, pady=2, sticky='w')
-			substance_spreadtype_menu.config(fg='black', width=5)
+			substance_spreadtype_options = ['Symbiotic', 'Air']
+			self.substance_entries[i]['spreadType_var'] = tk.StringVar()
+			self.substance_entries[i]['spreadType_var'].set(substance_spreadtype_options[0])
+
+			self.substance_entries[i]['spreadType'] = tk.OptionMenu(
+				self.substances_setting_frame, 
+				self.substance_entries[i]['spreadType_var'], 
+				*substance_spreadtype_options)
 			
-			# Eingabefeld für den Namen der Substanz (über mehrere Zellen)
+			self.substance_entries[i]['spreadType'].grid(row=row+2, column=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['spreadType'].config(fg='black', width=5)
+
+			# Name Eingabefeld
 			name_label = tk.Label(self.substances_setting_frame, text='Name:')
-			name_label.grid(row=row+2, column=0, columnspan=1, padx=2, pady=2, sticky='w')
-			name_entry = tk.Entry(self.substances_setting_frame)
-			name_entry.grid(row=row+2, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
-			
-			# Eingabefeld für den Produzenten der Substanz (über mehrere Zellen)
+			name_label.grid(row=row+3, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['subName'] = tk.Entry(self.substances_setting_frame)
+			self.substance_entries[i]['subName'].grid(row=row+3, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+
+			# Producer Eingabefeld
 			emit_label = tk.Label(self.substances_setting_frame, text='Producer:')
-			emit_label.grid(row=row+3, column=0, columnspan=1, padx=2, pady=2, sticky='w')
-			emit_entry = tk.Entry(self.substances_setting_frame)
-			emit_entry.grid(row=row+3, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
-			
-			# Eingabefeld für den Empfänger der Substanz (über mehrere Zellen)
+			emit_label.grid(row=row+4, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['producer'] = tk.Entry(self.substances_setting_frame)
+			self.substance_entries[i]['producer'].grid(row=row+4, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+
+			# Receiver Eingabefeld
 			receive_label = tk.Label(self.substances_setting_frame, text='Receiver:')
-			receive_label.grid(row=row+4, column=0, columnspan=1, padx=2, pady=2, sticky='w')
-			receive_entry = tk.Entry(self.substances_setting_frame)
-			receive_entry.grid(row=row+4, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
-			receive_checkbox_var = tk.IntVar()
-			
-			# Eingabefeld für den Trigger der Substanz (über mehrere Zellen)
+			receive_label.grid(row=row+5, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['receiver'] = tk.Entry(self.substances_setting_frame)
+			self.substance_entries[i]['receiver'].grid(row=row+5, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+
+			# Trigger Eingabefeld
 			trigger_label = tk.Label(self.substances_setting_frame, text='Trigger:')
-			trigger_label.grid(row=row+5, column=0, columnspan=1, padx=2, pady=1, sticky='w')
-			trigger_entry = tk.Entry(self.substances_setting_frame)
-			trigger_entry.grid(row=row+5, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
-			
-			# Eingabefeld für den Produktionszeit der Substanz
+			trigger_label.grid(row=row+6, column=0, columnspan=1, padx=2, pady=1, sticky='w')
+			self.substance_entries[i]['trigger'] = tk.Entry(self.substances_setting_frame)
+			self.substance_entries[i]['trigger'].grid(row=row+6, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+
+			# Prod-Time Eingabefeld
 			prodTime_label = tk.Label(self.substances_setting_frame, text='Prod-Time:')
-			prodTime_label.grid(row=row+6, column=0, columnspan=1, padx=2, pady=2, sticky='w')
-			prodTime_entry = tk.Entry(self.substances_setting_frame, width=4)
-			prodTime_entry.grid(row=row+6, column=1, columnspan=1, padx=2, pady=2, sticky='w')
-			
-			# Eingabefeld für die Sendegeschwindigkeit (Send-Speed)
+			prodTime_label.grid(row=row+7, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['prodTime'] = tk.Entry(self.substances_setting_frame, width=4)
+			self.substance_entries[i]['prodTime'].grid(row=row+7, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+
+			# Send-Speed Eingabefeld
 			sendSpeed_label = tk.Label(self.substances_setting_frame, text='Send-Speed:')
-			sendSpeed_label.grid(row=row+6, column=2, columnspan=1, padx=2, pady=2, sticky='w')
-			sendSpeed_entry = tk.Entry(self.substances_setting_frame, width=4)
-			sendSpeed_entry.grid(row=row+6, column=3, columnspan=1, padx=2, pady=2, sticky='w')
-			
-			# Eingabefeld für die Energiekosten (Energy-Costs)
+			sendSpeed_label.grid(row=row+7, column=2, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['sendSpeed'] = tk.Entry(self.substances_setting_frame, width=4)
+			self.substance_entries[i]['sendSpeed'].grid(row=row+7, column=3, columnspan=1, padx=2, pady=2, sticky='w')
+
+			# Energy-Costs Eingabefeld
 			eCosts_label = tk.Label(self.substances_setting_frame, text='Energy-Costs:')
-			eCosts_label.grid(row=row+7, column=0, columnspan=1, padx=2, pady=2, sticky='w')
-			eCosts_entry = tk.Entry(self.substances_setting_frame, width=4)
-			eCosts_entry.grid(row=row+7, column=1, columnspan=1, padx=2, pady=2, sticky='w')
-			
-			# Eingabefeld für die Nachwirkzeit (AftereffectTime)
+			eCosts_label.grid(row=row+8, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['energyCosts'] = tk.Entry(self.substances_setting_frame, width=4)
+			self.substance_entries[i]['energyCosts'].grid(row=row+8, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+
+			# AftereffectTime Eingabefeld
 			aft_label = tk.Label(self.substances_setting_frame, text='AfterEffectTime:')
-			aft_label.grid(row=row+7, column=2, columnspan=1, padx=2, pady=2, sticky='w')
-			aft_entry = tk.Entry(self.substances_setting_frame, width=4)
-			aft_entry.grid(row=row+7, column=3, columnspan=1, padx=2, pady=2, sticky='w')
-			
+			aft_label.grid(row=row+8, column=2, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['aft'] = tk.Entry(self.substances_setting_frame, width=4)
+			self.substance_entries[i]['aft'].grid(row=row+8, column=3, columnspan=1, padx=2, pady=2, sticky='w')
+
 			space_label = tk.Label(self.substances_setting_frame, width=4)
-			space_label.grid(row=row+8, column=0, padx=2, pady=2, sticky='w')
+			space_label.grid(row=row+9, column=0, padx=2, pady=2, sticky='w')
 
 			# Instanzvariablen für die Felder speichern
-			setattr(self, f'substance_var_{i}', substance_var)
-			setattr(self, f'substance_menu_{i}', substance_menu)
-			setattr(self, f'toxin_effect_checkbox_{i}', toxin_effect_checkbox)
-			setattr(self, f'substance_spreadtype_menu_{i}', substance_spreadtype_menu)
-			setattr(self, f'aft_entry_{i}', aft_entry)
-			setattr(self, f'receive_entry_{i}', receive_entry)
-			setattr(self, f'sendSpeed_entry_{i}', sendSpeed_entry)
+			setattr(self, f'substance_var_{i}', self.substance_entries[i]['type_var'])
+			setattr(self, f'substance_menu_{i}', self.substance_entries[i]['type'])
+			setattr(self, f'toxin_effect_checkbox_{i}', self.substance_entries[i]['toxinEffect'])
+			setattr(self, f'substance_spreadtype_menu_{i}', self.substance_entries[i]['spreadType'])
+			setattr(self, f'receive_entry_{i}', self.substance_entries[i]['receiver'])
+			setattr(self, f'sendSpeed_entry_{i}', self.substance_entries[i]['sendSpeed'])
+			setattr(self, f'aft_entry_{i}', self.substance_entries[i]['aft'])
 
-			# Ereignis an Substanzmenü binden, um den ausgewählten Wert zu überprüfen
-			substance_var.trace_add('write', lambda *args, i=i: self.change_SubstanceType(i))
-				
+			# Ereignis an Substanzmenü binden
+			self.substance_entries[i]['type_var'].trace_add('write', lambda *args, i=i: self.change_SubstanceType(i))
 			
 		self.substances_setting_frame.update_idletasks()
-		# Scrollregion aktualisieren, wenn das Frame konfiguriert wird
-		self.substances_setting_frame.bind('<Configure>',lambda e: self.update_scrollregion(self.substances_setting_canvas))
+		# Scrollregion aktualisieren
+		self.substances_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.substances_setting_canvas))
 
 
 	def change_SubstanceType(self, index):
@@ -576,9 +602,10 @@ class Gui():
 		substance_var = getattr(self, f'substance_var_{index}')
 		substance_spreadtype_menu = getattr(self, f'substance_spreadtype_menu_{index}')
 		toxin_effect_checkbox = getattr(self, f'toxin_effect_checkbox_{index}')
-		aft_entry = getattr(self, f'aft_entry_{index}')
+
 		receive_entry = getattr(self, f'receive_entry_{index}')
 		sendSpeed_entry = getattr(self, f'sendSpeed_entry_{index}')
+		aft_entry = getattr(self, f'aft_entry_{index}')
 
 		# Disable or enable fields based on the substance type
 		if substance_var.get() == 'Toxin':
@@ -1376,22 +1403,47 @@ class Gui():
 			del self.grid_lines[(neighbor, plant)]  # Lösche den Eintrag aus grid_lines
 
 
-	def get_substanceInputs(self):
-		pass
+	def get_substanceInputs(self, substance_entries):
+		substance_values = []
+		for index, entry_data in substance_entries.items():
+			checkbox_var = entry_data['checkbox_var'].get()
+			type_var = entry_data['type_var'].get()
+			toxin_effect_var = entry_data['toxinEffect_var'].get()
+			spread_type_var = entry_data['spreadType_var'].get()
+			name = entry_data['subName'].get()
+			producer = entry_data['producer'].get()
+			receiver = entry_data['receiver'].get()
+			trigger = entry_data['trigger'].get()
+			prod_time = entry_data['prodTime'].get()
+			send_speed = entry_data['sendSpeed'].get()
+			energy_costs = entry_data['energyCosts'].get()
+			after_effect_time = entry_data['aft'].get()
+
+			# Alle Werte für eine Substanz als Tuple in der Liste speichern
+			substance_values.append(
+				(checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time)
+			)
+
+		# Alle Werte nach dem Schleifenende zurückgeben
+		return substance_values
+
+	def validate_substanceInputs(self, substance_entries):
+
+		substance_values = []
+		
+		try:
+			substance_values  = self.get_substanceInputs(substance_entries)
+		
+		except ValueError:
+			# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
+			self.error_substances.config(text='Error: All input values ​​must be valid!', fg='red')
+			return  # Beende die Funktion ohne die Pflanze hinzuzufügen
+
+		for checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time in substance_values:
+			print(checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time)
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+		
 
 
 
@@ -1410,6 +1462,7 @@ class Gui():
 		self.sim.getPlantData(0)
 		self.sim.getEnemyData(0)
 		count = 1
+		self.validate_substanceInputs(self.substance_entries)
 		
 		while True:
 			# Abbruchbedingungen
