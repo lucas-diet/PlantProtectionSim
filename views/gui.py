@@ -825,8 +825,6 @@ class Gui():
 
 		self.drawGrid(width, height, x_offset, y_offset, square_width, square_height)
 
-		print(self.squares)
-
 
 	def drawGrid(self, width, height, x_offset, y_offset, square_width, square_height):
 		# Zeichne die Quadrate
@@ -970,7 +968,6 @@ class Gui():
 		return plant
 
 	
-
 	def plantDetails(self, plant, square_id):
 		"""
 		Zeigt die Energie der Pflanze als Tooltip an, wenn die Maus über die Zelle bewegt wird.
@@ -1052,20 +1049,6 @@ class Gui():
 			self.clusterMarker(clicked_position, selected_index, eCluster)
 
 
-	def get_enemyInputs(self, enemy_entries):
-		"""
-		Holt und validiert die Eingabewerte für einen Feind-Cluster.
-		"""
-		# Extrahiere die Eingabewerte
-		clusterSize = int(enemy_entries['clusterSize'].get())
-		speed = int(enemy_entries['speed'].get())
-		eatSpeed = int(enemy_entries['eatSpeed'].get())
-		eatVictory = int(enemy_entries['eatVictory'].get())
-
-		# Rückgabe der validierten Werte
-		return clusterSize, speed, eatSpeed, eatVictory
-
-		
 	def get_enemyInputs(self, enemy_entries):
 		"""
 		Holt und validiert die Eingabewerte für einen Feind-Cluster.
@@ -1393,7 +1376,8 @@ class Gui():
 			del self.grid_lines[(neighbor, plant)]  # Lösche den Eintrag aus grid_lines
 
 
-
+	def get_substanceInputs(self):
+		pass
 
 
 
@@ -1451,7 +1435,7 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()  # Diese Methode könnte auch parallelisiert werden
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			self.updateFieldColor()
+			self.remove_fieldColor()
 			for ec in self.grid.enemies:
 				
 				old_position = old_positions[ec]
@@ -1554,7 +1538,7 @@ class Gui():
 			print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
 
 
-	def updateFieldColor(self):
+	def remove_fieldColor(self):
 		"""
 		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips, wenn die Pflanze entfernt wird.
 		Setzt auch die Farbe auf Weiß, wenn die Pflanze tot ist und das Feld nicht bereits weiß ist.
@@ -1568,7 +1552,6 @@ class Gui():
 				
 				# Hole die aktuelle Farbe des Feldes
 				current_color = self.gridCanvas.itemcget(gridID, 'fill')
-
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy and current_color != 'white':
 					#print(f'Setze Farbe auf weiß für {gridID} (Pflanze tot).')
@@ -1579,7 +1562,6 @@ class Gui():
 		"""
 		Setzt die Farbe des Feldes auf Weiß und entfernt alle Verbindungen, wenn die Pflanze tot ist.
 		"""
-	
 		try:
 			# Setze die Farbe auf Weiß
 			self.gridCanvas.itemconfig(canvas_id, fill='white')
@@ -1609,7 +1591,6 @@ class Gui():
 			if p1 == plant or p2 == plant:
 				del self.connect_plants[(p1, p2)]  # Löscht die Verbindung aus dem Dict
 				del self.connect_plants[(p2, p1)]  # Löscht auch die Gegenrichtung
-
 
 
 	def remove_tooltip(self, square_id):
@@ -1666,4 +1647,3 @@ class Gui():
 		# Tooltip aktualisieren
 		self.enemyDetails(circle_id, new_position)
 		#print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
-
