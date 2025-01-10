@@ -825,6 +825,8 @@ class Gui():
 
 		self.drawGrid(width, height, x_offset, y_offset, square_width, square_height)
 
+		print(self.squares)
+
 
 	def drawGrid(self, width, height, x_offset, y_offset, square_width, square_height):
 		# Zeichne die Quadrate
@@ -950,14 +952,23 @@ class Gui():
 				color=plant_color)
 
 		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
+
 		# Pflanze zur Grid hinzufügen
 		if plant not in self.grid.plants:
 			self.grid.addPlant(plant)
+			
+			# Hole die Square-ID für diese Position
 			square_id = self.squares.get(plant.position)
-			self.plant_at_position[square_id] = plant
+			
+			if square_id:
+				self.plant_at_position[square_id] = plant
+			else:
+				print(f'Fehler: Keine gültige Square-ID für Position {plant.position}')
+
 		else:
 			pass
 		return plant
+
 	
 
 	def plantDetails(self, plant, square_id):
@@ -1382,21 +1393,6 @@ class Gui():
 			del self.grid_lines[(neighbor, plant)]  # Lösche den Eintrag aus grid_lines
 
 
-	def seeds(self, plant_index):
-		plant_entries = self.plant_entries[plant_index]
-		
-		# Abrufen der Eingabewerte für Nachkommen
-		repro_interval = int(plant_entries['reproInterval'].get()) if plant_entries['reproInterval'].get() else 0
-		min_dist = int(plant_entries['minDist'].get()) if plant_entries['minDist'].get() else 1
-		max_dist = int(plant_entries['maxDist'].get()) if plant_entries['maxDist'].get() else 2
-
-		# Ausgabe der Eingabewerte in der Konsole
-		print(f'Plant {plant_index+1} - Repro-Interval: {repro_interval}, Min-Dist: {min_dist}, Max-Dist: {max_dist}')
-
-		
-
-
-
 
 
 
@@ -1523,7 +1519,7 @@ class Gui():
 			# Füge das Nachkommen zum Grid hinzu
 			self.add_offspring_to_grid(offspring, offspring_position)
 
-			print(f'Nachkomme {i+1} wird auf Position {offspring_position} gesetzt.')
+			#print(f'Nachkomme {i+1} wird auf Position {offspring_position} gesetzt.')
 
 
 	def add_offspring_to_grid(self, offspring, offspring_position):
@@ -1531,83 +1527,91 @@ class Gui():
 		Fügt das Nachkommen zum Grid hinzu und zeigt es auf der Canvas, wenn das Feld frei ist.
 		Die Farbe des Feldes wird eingefärbt, und Felder können mehrfach genutzt werden.
 		"""
-		# Prüfe, ob das Feld existiert und initialisiere es, falls erforderlich
-		if offspring_position not in self.squares:
-			# Wenn das Feld noch keine ID hat, erstellen wir ein neues Quadrat auf der Canvas
-			square_id = self.gridCanvas.create_rectangle(
-				offspring_position[0] * self.cell_size, offspring_position[1] * self.cell_size,
-				(offspring_position[0] + 1) * self.cell_size, (offspring_position[1] + 1) * self.cell_size,
-				fill='white'  # Standardfarbe ist Weiß
-			)
-			self.squares[offspring_position] = square_id
+		# Prüfe, ob das Feld bereits existiert (es sollte aufgrund von drawGrid existieren)
+		if offspring_position in self.squares:
+			# Hole die ID des Rechtecks für diese Position
+			square_id = self.squares[offspring_position]
+		
+			# Falls es eine Pflanze auf dieser Position gibt, entfernen wir diese, falls sie tot ist
+			existing_plant = self.plant_at_position.get(offspring_position)
+			if existing_plant and existing_plant.currEnergy < existing_plant.minEnergy:
+				self.gridCanvas.itemconfig(square_id, fill='white')  # Setze das Feld auf Weiß
+				del self.plant_at_position[offspring_position]  # Entferne die Pflanze aus der Position
 
-		# Hole die aktuelle ID des Feldes
-		square_id = self.squares[offspring_position]
+			# Füge das Nachkommen zum Grid hinzu
+			if offspring not in self.grid.plants:
+				self.grid.addPlant(offspring)
+				#print(f'Nachkomme {offspring.name} wurde dem Grid hinzugefügt.')
 
-		# Entferne eine eventuell vorhandene Pflanze auf der Position (wenn sie tot ist)
-		existing_plant = self.plant_at_position.get(offspring_position)
-		if existing_plant and existing_plant.currEnergy < existing_plant.minEnergy:
-			self.gridCanvas.itemconfig(square_id, fill='white')  # Setze das Feld auf Weiß
-			del self.plant_at_position[offspring_position]  # Entferne die Pflanze aus der Position
+			# Aktualisiere die Canvas-Farbe des Rechtecks und das Mapping
+			self.gridCanvas.itemconfig(square_id, fill=offspring.color)  # Ändere die Farbe des Quadrats
+			self.plant_at_position[square_id] = offspring  # Aktualisiere die Pflanze an der Position
+			self.plantDetails(offspring, square_id)  # Zeige Pflanzendetails an
+			#print(f'Nachkomme {offspring.name} wurde auf Position {offspring_position} eingefärbt.')
 
-		# Füge das Nachkommen zum Grid hinzu
-		if offspring not in self.grid.plants:
-			self.grid.addPlant(offspring)
-			print(f'Nachkomme {offspring.name} wurde dem Grid hinzugefügt.')
-
-		# Aktualisiere die Canvas-Farbe und das Mapping
-		self.gridCanvas.itemconfig(square_id, fill=offspring.color)  # Ändere die Farbe des Quadrats
-		self.plant_at_position[offspring_position] = offspring  # Aktualisiere die Pflanze an der Position
-		self.plantDetails(offspring, square_id)  # Zeige Pflanzendetails an
-		print(f'Nachkomme {offspring.name} wurde auf Position {offspring_position} eingefärbt.')
-
+		else:
+			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
+			print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
 
 
 	def updateFieldColor(self):
 		"""
-		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips,
-		wenn die Pflanze entfernt wird. Setzt auch die Farbe auf Weiß, wenn die Pflanze tot ist
-		und das Feld nicht bereits weiß ist.
+		Aktualisiert die Feldfarben basierend auf dem Zustand der Pflanzen und entfernt Tooltips, wenn die Pflanze entfernt wird.
+		Setzt auch die Farbe auf Weiß, wenn die Pflanze tot ist und das Feld nicht bereits weiß ist.
 		"""
 		with self.lock:
 			# Durchlaufe alle Positionen und Pflanzen
-			for position, plant in list(self.plant_at_position.items()):
-				# Hole die Canvas-ID aus dem Mapping 'self.squares'
-				canvas_id = self.squares.get(position)
+			for gridID, plant in list(self.plant_at_position.items()):
+				# Überprüfe, ob die Pflanze null oder tot ist
+				if not plant:
+					continue
 				
-				if not canvas_id:
-					print(f'WARNUNG: Keine Canvas-ID für Position {position}.')
-					continue  # Überspringe, wenn keine Canvas-ID gefunden wird
+				# Hole die aktuelle Farbe des Feldes
+				current_color = self.gridCanvas.itemcget(gridID, 'fill')
+
+				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
+				if plant.currEnergy < plant.minEnergy and current_color != 'white':
+					#print(f'Setze Farbe auf weiß für {gridID} (Pflanze tot).')
+					self.set_white(gridID, plant)
 					
-				# Aktuelle Farbe des Feldes abrufen
-				current_color = self.gridCanvas.itemcget(canvas_id, 'fill')
 
-				# Wenn die Pflanze tot ist (currEnergy < minEnergy oder plant ist None)
-				if plant and plant.currEnergy < plant.minEnergy:
-					if current_color != 'white':  # Nur aktualisieren, wenn die Farbe nicht bereits weiß ist
-						# Setze die Farbe auf Weiß
-						self.gridCanvas.itemconfig(canvas_id, fill='white')  
-						del self.plant_at_position[position]  # Entferne die Pflanze aus der Position
-						self.remove_tooltip(canvas_id)  # Entferne den Tooltip, falls vorhanden
-
-						# Entferne alle Verbindungen zu dieser Pflanze
-						for (p1, p2), line_id in list(self.grid_lines.items()):
-							if p1 == plant or p2 == plant:
-								# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
-								self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
-								del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
-						for (p1, p2) in list(self.plant_connections.items()):
-							if p1 == plant or p2 == plant:
-								del self.plant_connections[(p1, p2)]  # Lösche die Verbindung aus dem Dict
-								del self.plant_connections[(p2, p1)]  # Lösche auch die Gegenrichtung
-
-				# Sicherheitscheck: Wenn Pflanze tot, aber Farbe nicht weiß
-				elif plant and plant.currEnergy < plant.minEnergy and current_color != 'white':
-					print(f'Sicherheitscheck: Setze Feld {canvas_id} auf weiß.')
-					self.gridCanvas.itemconfig(canvas_id, fill='white')
-					del self.plant_at_position[position]  # Lösche auch den Eintrag aus plant_at_position
-
+	def set_white(self, canvas_id, plant):
+		"""
+		Setzt die Farbe des Feldes auf Weiß und entfernt alle Verbindungen, wenn die Pflanze tot ist.
+		"""
 	
+		try:
+			# Setze die Farbe auf Weiß
+			self.gridCanvas.itemconfig(canvas_id, fill='white')
+			del self.plant_at_position[canvas_id]  # Entferne die Pflanze aus der Position
+			self.remove_tooltip(canvas_id)  # Entferne den Tooltip, falls vorhanden
+
+			# Entferne alle Verbindungen zu dieser Pflanze
+			self.remove_plant_connections(plant)
+
+		except Exception as e:
+			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {canvas_id}: {e}')
+
+
+	def remove_plant_connections(self, plant):
+		"""
+		Entfernt alle Verbindungen (Linien) von und zu dieser Pflanze.
+		"""
+		# Entferne alle Verbindungen zu dieser Pflanze
+		for (p1, p2), line_id in list(self.grid_lines.items()):
+			if p1 == plant or p2 == plant:
+				# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
+				self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
+				del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
+
+		# Lösche auch die Pflanzverbindungen
+		for (p1, p2) in list(self.plant_connections.items()):
+			if p1 == plant or p2 == plant:
+				del self.connect_plants[(p1, p2)]  # Löscht die Verbindung aus dem Dict
+				del self.connect_plants[(p2, p1)]  # Löscht auch die Gegenrichtung
+
+
+
 	def remove_tooltip(self, square_id):
 		"""
 		Entfernt den Tooltip für ein bestimmtes Feld.
