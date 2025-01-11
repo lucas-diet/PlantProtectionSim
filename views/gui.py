@@ -13,6 +13,9 @@ from models.enemyCluster import Enemy, EnemyCluster
 from controllers.simulation import Simulation
 from views.diagrams import Diagrams
 from models.connection import SymbioticConnection
+from models.substance import Substance
+from models.signal import Signal
+from models.toxin import Toxin
 
 
 class Gui():
@@ -1555,34 +1558,70 @@ class Gui():
 	
 
 	def create_add_substance(self):
+		self.validate_substanceInputs(self.substance_entries)
 		
 		for substance_value in self.vald_substances_set:
-			if substance_value[1] == 'Signal':
+			substance_type = substance_value[1]
+			input_name = substance_value[4]
+			input_producer = substance_value[5]
+			input_trigger = substance_value[7]
+			input_prodTime = substance_value[8]
+
+			sub = Substance(name=input_name, type=substance_type.lower())
+
+			if  substance_type == 'Signal':
 				input_spreadType = substance_value[3]
-				input_name = substance_value[4]
-				input_producer = substance_value[5]
 				input_receiver = substance_value[6]
-				input_trigger = substance_value[7]
-				input_prodTime = substance_value[8]
 				input_sendSpeed = substance_value[9]
 				input_energyCost = substance_value[10]
 				input_afterEffectTime = substance_value[11]
 				
-				
-				print(input_spreadType, input_name, input_producer, input_receiver, input_trigger, input_producer, input_prodTime, input_sendSpeed, input_energyCost, input_afterEffectTime)
-			
-			elif substance_value[1] == 'Toxin':
-				input_deadly = substance_value[2]
-				input_name = substance_value[4]
-				input_producer = substance_value[5]
-				input_trigger = substance_value[7]
-				input_prodTime = substance_value[8]
+				sig = self.create_signal(sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime)
+
+				# Überprüfen, ob das Signal bereits in self.grid.signals vorhanden ist
+				if not any(s.substance.name == sig.substance.name for s in self.grid.signals):
+					self.grid.addSubstance(sig)  # Füge nur hinzu, wenn es nicht existiert
+				else:
+					pass
+
+			elif substance_type == 'Toxin':
+				input_deadly = bool(substance_value[2])
 				input_energyCost = substance_value[10]
 				input_eliStrength = substance_value[12]
 
+				tox = self.create_toxin(sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength)
 				
-				print(input_deadly, input_name, input_producer, input_trigger, input_prodTime, input_energyCost, input_eliStrength)
-			
+				# Überprüfen, ob das Toxin bereits in self.grid.toxins vorhanden ist
+				if not any(t.substance.name == tox.substance.name for t in self.grid.toxins):
+					self.grid.addSubstance(tox)  # Füge nur hinzu, wenn es nicht existiert
+				else:
+					pass
+
+	
+	def create_signal(self, sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime):
+		sig = Signal(substance=sub, 
+				 		emit=input_producer,
+						receive=input_receiver,
+						triggerCombination=input_trigger,
+						prodTime=input_prodTime,
+						spreadType=input_spreadType.lower(),
+						sendingSpeed=input_sendSpeed,
+						energyCosts=input_energyCost,
+						afterEffectTime=input_afterEffectTime)
+
+		return sig
+	
+
+	def create_toxin(self, sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength):
+		tox = Toxin(substance=sub,
+						plantTransmitter=input_producer,
+						energyCosts=input_energyCost,
+						triggerCombination=input_trigger,
+						prodTime=input_prodTime,
+						deadly=input_deadly,
+						eliminationStrength=input_eliStrength)
+
+		return tox
 	
 	
 
@@ -1605,7 +1644,6 @@ class Gui():
 		self.sim.getPlantData(0)
 		self.sim.getEnemyData(0)
 		count = 1
-		self.validate_substanceInputs(self.substance_entries)
 		self.create_add_substance()
 		while True:
 			# Abbruchbedingungen
