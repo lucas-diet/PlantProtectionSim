@@ -1421,6 +1421,7 @@ class Gui():
 	def get_substanceInputs(self, substance_entries):
 		substance_values = []
 		idxs = []
+
 		for index, entry_data in substance_entries.items():
 			checkbox_var = entry_data['checkbox_var'].get()
 			type_var = entry_data['type_var'].get()
@@ -1450,7 +1451,6 @@ class Gui():
 		idxs = []
 		valid_substances = []
 		errors = []
-
 		try:
 			substance_values, idxs = self.get_substanceInputs(substance_entries)
 		except ValueError:
@@ -1542,7 +1542,7 @@ class Gui():
 
 				# Wenn keine Fehler, füge die Substanz zu valid_substances hinzu
 				if not errors:
-					valid_substances.append((checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time))
+					valid_substances.append((checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time, eli_stren))
 					self.vald_substances_set = set(valid_substances)
 			else:
 				continue  # Wenn checkbox_var nicht 1 ist, überspringe die Substanz
@@ -1556,8 +1556,33 @@ class Gui():
 
 	def create_add_substance(self):
 		
-		for substance in self.vald_substances_set:
-			print(substance)
+		for substance_value in self.vald_substances_set:
+			if substance_value[1] == 'Signal':
+				input_spreadType = substance_value[3]
+				input_name = substance_value[4]
+				input_producer = substance_value[5]
+				input_receiver = substance_value[6]
+				input_trigger = substance_value[7]
+				input_prodTime = substance_value[8]
+				input_sendSpeed = substance_value[9]
+				input_energyCost = substance_value[10]
+				input_afterEffectTime = substance_value[11]
+				
+				
+				print(input_spreadType, input_name, input_producer, input_receiver, input_trigger, input_producer, input_prodTime, input_sendSpeed, input_energyCost, input_afterEffectTime)
+			
+			elif substance_value[1] == 'Toxin':
+				input_deadly = substance_value[2]
+				input_name = substance_value[4]
+				input_producer = substance_value[5]
+				input_trigger = substance_value[7]
+				input_prodTime = substance_value[8]
+				input_energyCost = substance_value[10]
+				input_eliStrength = substance_value[12]
+
+				
+				print(input_deadly, input_name, input_producer, input_trigger, input_prodTime, input_energyCost, input_eliStrength)
+			
 	
 	
 
