@@ -1434,122 +1434,108 @@ class Gui():
 	def validate_substanceInputs(self, substance_entries):
 
 		substance_values = []
-		
+		valid_substances = []
 		try:
-			substance_values  = self.get_substanceInputs(substance_entries)
-		
+			substance_values = self.get_substanceInputs(substance_entries)
 		except ValueError:
 			# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
 			self.error_substances.config(text='Error: All input values ​​must be valid!', fg='red')
 			return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
+		# Fehlerliste, um alle Fehler zu sammeln
+		errors = []
+
+		# Schleife über alle Substanzen in substance_values
 		for checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time in substance_values:
-			if name:
+
+			# Nur wenn das Checkbox-Feld aktiviert ist
+			if checkbox_var == 1:
+
+				# Überprüfe Name
 				if not name or re.fullmatch(r'\s*', name):  # Prüfen, ob der Name leer oder nur aus Leerzeichen besteht
-					self.error_substances.config(text='Error: Please enter a name!', fg='red')
-					return
-			
-			if producer:
+					errors.append('Please enter a valid name!')
+				
+				# Überprüfe Producer
 				producer_pattern = r'^(p[1-9]|p1[0-6])(\s*,\s*(p[1-9]|p1[0-6]))*$'
-				#^(p[1-9]|p1[0-6]):  Ausdruck stellt sicher, dass der Wert mit p gefolgt von einer Zahl zwischen 1 und 9 oder einer Zahl von 10 bis 16 beginnt.
-				# (\s*,\s*(p[1-9]|p1[0-6]))*: Ausdruck stellt sicher, dass nach dem ersten p-Eintrag eine beliebige Anzahl weiterer Einträge folgen kann, die durch ein Komma und optional durch Leerzeichen getrennt sind. 
-				# * bedeutet, dass beliebig viele dieser Einträge erlaubt sind.
-				#^ und $: Zeichen sichern den Beginn und das Ende des Strings
-				if not re.fullmatch(producer_pattern, producer):
-					messagebox.showerror('Invalid input', 'Producer must be in the format "p1, p2, ..., p16"!')
-					return
-				# Duplikate entfernen
+				if not producer or not re.fullmatch(producer_pattern, producer):
+					errors.append('Producer must be in the format "p1, p2, ..., p16"!')
+
+				# Duplikate im Producer entfernen
 				producers_list = [prod.strip() for prod in producer.split(',')]  # Liste von Produzenten
 				producers_set = set(producers_list)  # Duplikate entfernen
 				if len(producers_list) != len(producers_set):  # Wenn Duplikate entfernt wurden
 					producers_list = list(producers_set)  # Umwandeln in Liste ohne Duplikate
-
 				producer = ', '.join(producers_list)  # Zurück in einen kommagetrennten String
 
-			if receiver:
+				# Überprüfe Receiver
 				receiver_pattern = r'^(p[1-9]|p1[0-6])(\s*,\s*(p[1-9]|p1[0-6]))*$'
-				if not re.fullmatch(receiver_pattern, receiver):
-					messagebox.showerror('Invalid input', 'Receiver must be in the format "p1, p2, ..., p16"!')
-					return
+				if not receiver or not re.fullmatch(receiver_pattern, receiver):
+					errors.append('Receiver must be in the format "p1, p2, ..., p16"!')
 
-				# Duplikate entfernen
+				# Duplikate im Receiver entfernen
 				receivers_list = [rec.strip() for rec in receiver.split(',')]  # Liste von Empfängern
 				receivers_set = set(receivers_list)  # Duplikate entfernen
 				if len(receivers_list) != len(receivers_set):  # Wenn Duplikate entfernt wurden
 					receivers_list = list(receivers_set)  # Umwandeln in Liste ohne Duplikate
-
 				receiver = ', '.join(receivers_list)  # Zurück in einen kommagetrennten String
 
-			# Wenn 'type_var' == "Signal", Trigger validieren
+				# Überprüfe Trigger
+				if type_var == 'Signal':
+					trigger_pattern = r'^(e([1-9]|1[0-5]),\s*(\d+))(\s*;\s*e([1-9]|1[0-5]),\s*(\d+))*$'
+					if not trigger or not re.fullmatch(trigger_pattern, trigger):
+						errors.append('Trigger must follow the format "e1, 1; e2, 2"!')
+
+					# Wenn Trigger korrekt, verarbeite ihn weiter
+					triggers_list = [block.strip() for block in trigger.split(';')]  # Aufteilen in Blocke, durch Semikolons getrennt
+					for i in range(len(triggers_list)):
+						triggers_list[i] = ', '.join(set(triggers_list[i].split(',')))  # Entferne Duplikate innerhalb jedes Blocks
+					trigger = '; '.join(triggers_list)  # Setze den Trigger zurück als korrekt formatierten String
+
+				if type_var == 'Toxin':
+					trigger_pattern = r'^((s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)(\s*;\s*(s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)*$'
+					if not trigger or not re.fullmatch(trigger_pattern, trigger):
+						errors.append('Trigger must be in the format "s1, e1, 1; s2, e2, 2"!')
+
+					# Duplikate im Trigger entfernen
+					triggers_list = [tr.strip() for tr in trigger.split(';')]  # Liste von Triggern
+					triggers_set = set(triggers_list)  # Duplikate entfernen
+					if len(triggers_list) != len(triggers_set):  # Wenn Duplikate entfernt wurden
+						triggers_list = list(triggers_set)  # Umwandeln in Liste ohne Duplikate
+					trigger = '; '.join(triggers_list)  # Zurück in einen Semikolon-getrennten String
+
+				# Überprüfe prod_time
+				if not prod_time or not prod_time.isdigit():  # Prüft, ob es eine Zahl ist
+					errors.append('prod time must be a valid number!')
+
+				# Überprüfe send_speed
+				if not send_speed or not send_speed.isdigit():
+					errors.append('send speed must be a valid number!')
+
+				# Überprüfe energy_costs
+				if not energy_costs or not energy_costs.isdigit():
+					errors.append('energy costs must be a valid number!')
+
+				# Überprüfe after_effect_time
+				if not after_effect_time or not after_effect_time.isdigit():
+					errors.append('after effect time must be a valid number!')
+
+				# Wenn keine Fehler, füge die Substanz zu valid_substances hinzu
+				if not errors:
+					valid_substances.append((checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time))
 			
-			if type_var == 'Signal' and trigger:
-				# e([1-9]|1[0-5]),\s*([1-9]|1[0-5]): e gefolgt von einer Zahl zwischen 1 und 15
-				# ,\s*: Ein Komma, gefolgt von optionalen Leerzeichen
-				# (\d+): Eine beliebige Zahl, die nach dem Komma kommen kann. Der Ausdruck \d+ erlaubt eine beliebige Anzahl an Ziffern.
-				# (\s*;\s*e([1-9]|1[0-5]),\s*(\d+))*: Erlaubt, dass mehrere Paare durch Semikolons getrennt werden können
-				trigger_pattern = r'^(e([1-9]|1[0-5]),\s*(\d+))(\s*;\s*e([1-9]|1[0-5]),\s*(\d+))*$'
-				if not re.fullmatch(trigger_pattern, trigger):
-					messagebox.showerror('Invalid input', 'Trigger must follow the format "e1, 1; e2, 2"!')
-					return
-				
-				# Wenn Trigger korrekt, verarbeite ihn weiter
-				# Optional: Trigger ohne Duplikate verarbeiten (hier wird kein Duplikat entfernt, aber du könntest dies hinzufügen, falls nötig)
-				triggers_list = [block.strip() for block in trigger.split(';')]  # Aufteilen in Blocke, durch Semikolons getrennt
-				for i in range(len(triggers_list)):
-					triggers_list[i] = ', '.join(set(triggers_list[i].split(',')))  # Entferne Duplikate innerhalb jedes Blocks
-					
-				trigger = '; '.join(triggers_list)  # Setze den Trigger zurück als korrekt formatierten String
-
-			# Validierung für 'trigger' wenn 'type_var == "Toxin"'
-			if type_var == 'Toxin' and trigger:
-				# Regulärer Ausdruck für das Format: s1, e1, 1; s2, e2, 2
-				trigger_pattern = r'^((s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)(\s*;\s*(s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)*$'
-
-				if not re.fullmatch(trigger_pattern, trigger):
-					messagebox.showerror('Invalid input', 'Trigger must be in the format "s1, e1, 1; s2, e2, 2"!')
-					return
-
-				# Duplikate entfernen
-				triggers_list = [tr.strip() for tr in trigger.split(';')]  # Liste von Triggern
-				triggers_set = set(triggers_list)  # Duplikate entfernen
-				if len(triggers_list) != len(triggers_set):  # Wenn Duplikate entfernt wurden
-					triggers_list = list(triggers_set)  # Umwandeln in Liste ohne Duplikate
-
-				trigger = '; '.join(triggers_list)  # Zurück in einen Semikolon-getrennten String
-			
-			if prod_time:
-				if not prod_time.isdigit():  # Prüft, ob es eine Zahl ist
-					messagebox.showerror('Invalid input', 'prod_time must be a valid number!')
-					return
 			else:
-				return
+				continue  # Wenn checkbox_var nicht 1 ist, überspringe die Substanz
 
-			# Prüfen, ob send_speed eine Zahl ist
-			if send_speed:
-				if not send_speed.isdigit():
-					messagebox.showerror('Invalid input', 'send_speed must be a valid number!')
-					return
-			else:
-				return
+		# Wenn Fehler gefunden wurden, zeige sie an
+		if errors:
+			for error in errors:
+				messagebox.showerror('Invalid input', error)
+			return
 
-			# Prüfen, ob energy_costs eine Zahl ist
-			if energy_costs:
-				if not energy_costs.isdigit():
-					messagebox.showerror('Invalid input', 'energy_costs must be a valid number!')
-					return
-			else:
-				return
-
-			# Prüfen, ob after_effect_time eine Zahl ist
-			if after_effect_time:
-				if not after_effect_time.isdigit():
-					messagebox.showerror('Invalid input', 'after effect time must be a valid number!')
-					return
-			else:
-				return
-					
-			print(checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time)
-
+		# Ausgabe der validen Substanzen
+		for substance in valid_substances:
+			print(substance)
+	
 
 		
 
