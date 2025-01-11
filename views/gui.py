@@ -30,6 +30,7 @@ class Gui():
 		self.lock = threading.Lock()
 		self.plant_connections = {}
 		self.grid_lines = {}
+		self.vald_substances_set = set()
 
 
 	def initSimulationWindow(self):
@@ -478,7 +479,7 @@ class Gui():
 		self.error_substances.grid(row=0, column=0, columnspan=5, sticky='w', padx=2, pady=2)
 		
 		for i in range(number_of_substances):
-			row = i * 11
+			row = i * 12
 			
 			# Flachere Struktur: Direkt die Widgets in `self.substance_entries[i]` speichern
 			self.substance_entries[i] = {}
@@ -577,8 +578,14 @@ class Gui():
 			self.substance_entries[i]['aft'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['aft'].grid(row=row+8, column=3, columnspan=1, padx=2, pady=2, sticky='w')
 
+			eliStrength_label = tk.Label(self.substances_setting_frame, text='Eli-Strength:')
+			eliStrength_label.grid(row=row+9, column=0, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['eliStrength'] = tk.Entry(self.substances_setting_frame, width=4)
+			self.substance_entries[i]['eliStrength'].grid(row=row+9, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['eliStrength'].config(state='disable')
+
 			space_label = tk.Label(self.substances_setting_frame, width=4)
-			space_label.grid(row=row+9, column=0, padx=2, pady=2, sticky='w')
+			space_label.grid(row=row+10, column=0, padx=2, pady=2, sticky='w')
 
 			# Instanzvariablen für die Felder speichern
 			setattr(self, f'substance_var_{i}', self.substance_entries[i]['type_var'])
@@ -588,6 +595,7 @@ class Gui():
 			setattr(self, f'receive_entry_{i}', self.substance_entries[i]['receiver'])
 			setattr(self, f'sendSpeed_entry_{i}', self.substance_entries[i]['sendSpeed'])
 			setattr(self, f'aft_entry_{i}', self.substance_entries[i]['aft'])
+			setattr(self, f'eli_entry_{i}', self.substance_entries[i]['eliStrength'])
 
 			# Ereignis an Substanzmenü binden
 			self.substance_entries[i]['type_var'].trace_add('write', lambda *args, i=i: self.change_SubstanceType(i))
@@ -602,10 +610,10 @@ class Gui():
 		substance_var = getattr(self, f'substance_var_{index}')
 		substance_spreadtype_menu = getattr(self, f'substance_spreadtype_menu_{index}')
 		toxin_effect_checkbox = getattr(self, f'toxin_effect_checkbox_{index}')
-
 		receive_entry = getattr(self, f'receive_entry_{index}')
 		sendSpeed_entry = getattr(self, f'sendSpeed_entry_{index}')
 		aft_entry = getattr(self, f'aft_entry_{index}')
+		eli_stren_entry = getattr(self, f'eli_entry_{index}')
 
 		# Disable or enable fields based on the substance type
 		if substance_var.get() == 'Toxin':
@@ -617,6 +625,7 @@ class Gui():
 			receive_entry.config(state='disable')
 			aft_entry.delete(0, tk.END)
 			aft_entry.config(state='disabled')
+			eli_stren_entry.config(state='normal')
 			
 		else:
 			substance_spreadtype_menu.config(state='normal')
@@ -624,6 +633,8 @@ class Gui():
 			toxin_effect_checkbox.config(state='disable')
 			receive_entry.config(state='normal')
 			aft_entry.config(state='normal')
+			eli_stren_entry.delete(0, tk.END)
+			eli_stren_entry.config(state='disable')
 			
 
 	def update_scrollregion(self, canvas, event=None):
@@ -1409,6 +1420,7 @@ class Gui():
 
 	def get_substanceInputs(self, substance_entries):
 		substance_values = []
+		idxs = []
 		for index, entry_data in substance_entries.items():
 			checkbox_var = entry_data['checkbox_var'].get()
 			type_var = entry_data['type_var'].get()
@@ -1422,35 +1434,36 @@ class Gui():
 			send_speed = entry_data['sendSpeed'].get()
 			energy_costs = entry_data['energyCosts'].get()
 			after_effect_time = entry_data['aft'].get()
-
+			eli_stren = entry_data['eliStrength'].get()
 			# Alle Werte für eine Substanz als Tuple in der Liste speichern
 			substance_values.append((checkbox_var, type_var, toxin_effect_var, spread_type_var, 
 									name, producer, receiver, trigger, 
-									prod_time, send_speed, energy_costs, after_effect_time))
+									prod_time, send_speed, energy_costs, after_effect_time, eli_stren))
 
+			idxs.append(index)
 		# Alle Werte nach dem Schleifenende zurückgeben
-		return substance_values
+		return substance_values, idxs
 
 	def validate_substanceInputs(self, substance_entries):
 
 		substance_values = []
+		idxs = []
 		valid_substances = []
+		errors = []
+
 		try:
-			substance_values = self.get_substanceInputs(substance_entries)
+			substance_values, idxs = self.get_substanceInputs(substance_entries)
 		except ValueError:
 			# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
 			self.error_substances.config(text='Error: All input values ​​must be valid!', fg='red')
 			return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
-		# Fehlerliste, um alle Fehler zu sammeln
-		errors = []
-
 		# Schleife über alle Substanzen in substance_values
-		for checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time in substance_values:
+		for i, values in zip(idxs, substance_values):
+			checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time, eli_stren = values
 
 			# Nur wenn das Checkbox-Feld aktiviert ist
 			if checkbox_var == 1:
-
 				# Überprüfe Name
 				if not name or re.fullmatch(r'\s*', name):  # Prüfen, ob der Name leer oder nur aus Leerzeichen besteht
 					errors.append('Please enter a valid name!')
@@ -1469,8 +1482,9 @@ class Gui():
 
 				# Überprüfe Receiver
 				receiver_pattern = r'^(p[1-9]|p1[0-6])(\s*,\s*(p[1-9]|p1[0-6]))*$'
-				if not receiver or not re.fullmatch(receiver_pattern, receiver):
-					errors.append('Receiver must be in the format "p1, p2, ..., p16"!')
+				if self.substance_entries[i]['receiver'].cget('state') == 'normal':
+					if not receiver or not re.fullmatch(receiver_pattern, receiver):
+						errors.append('Receiver must be in the format "p1, p2, ..., p16"!')			
 
 				# Duplikate im Receiver entfernen
 				receivers_list = [rec.strip() for rec in receiver.split(',')]  # Liste von Empfängern
@@ -1508,21 +1522,28 @@ class Gui():
 					errors.append('prod time must be a valid number!')
 
 				# Überprüfe send_speed
-				if not send_speed or not send_speed.isdigit():
-					errors.append('send speed must be a valid number!')
+				if self.substance_entries[i]['sendSpeed'].cget('state') == 'normal':
+					if not send_speed or not send_speed.isdigit():
+						errors.append('send speed must be a valid number!')
 
 				# Überprüfe energy_costs
-				if not energy_costs or not energy_costs.isdigit():
-					errors.append('energy costs must be a valid number!')
+				if self.substance_entries[i]['energyCosts'].cget('state') == 'normal':
+					if not energy_costs or not energy_costs.isdigit():
+						errors.append('energy costs must be a valid number!')
 
 				# Überprüfe after_effect_time
-				if not after_effect_time or not after_effect_time.isdigit():
-					errors.append('after effect time must be a valid number!')
+				if self.substance_entries[i]['aft'].cget('state') == 'normal':
+					if not after_effect_time or not after_effect_time.isdigit():
+						errors.append('after effect time must be a valid number!')
+				
+				if self.substance_entries[i]['eliStrength'].cget('state') == 'normal':
+					if not eli_stren or not eli_stren.isdigit():
+						errors.append('elimination strength must be a valid number!')
 
 				# Wenn keine Fehler, füge die Substanz zu valid_substances hinzu
 				if not errors:
 					valid_substances.append((checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time))
-			
+					self.vald_substances_set = set(valid_substances)
 			else:
 				continue  # Wenn checkbox_var nicht 1 ist, überspringe die Substanz
 
@@ -1531,10 +1552,13 @@ class Gui():
 			for error in errors:
 				messagebox.showerror('Invalid input', error)
 			return
+	
 
-		# Ausgabe der validen Substanzen
-		for substance in valid_substances:
+	def create_add_substance(self):
+		
+		for substance in self.vald_substances_set:
 			print(substance)
+	
 	
 
 		
@@ -1557,7 +1581,7 @@ class Gui():
 		self.sim.getEnemyData(0)
 		count = 1
 		self.validate_substanceInputs(self.substance_entries)
-		
+		self.create_add_substance()
 		while True:
 			# Abbruchbedingungen
 			if count - 1 == self.maxSteps or \
