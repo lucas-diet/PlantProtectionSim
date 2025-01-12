@@ -1599,38 +1599,40 @@ class Gui():
 
 	
 	def create_signal(self, sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime):
+		trigger_elements = input_trigger.split(';')  
+
+		# Nun jedes Element (z.B. 'e1,1') in eine Liste von 2 Elementen umwandeln
+		trigger_list = [elem.strip().split(',') for elem in trigger_elements]
+
 		sig = Signal(substance=sub, 
-				 		emit=input_producer,
-						receive=input_receiver,
-						triggerCombination=input_trigger,
+				 		emit=list(input_producer),
+						receive=list(input_receiver),
+						triggerCombination=trigger_list,
 						prodTime=input_prodTime,
 						spreadType=input_spreadType.lower(),
 						sendingSpeed=input_sendSpeed,
 						energyCosts=input_energyCost,
 						afterEffectTime=input_afterEffectTime)
-
+		#print('sig', sig.triggerCombination)
 		return sig
 	
 
 	def create_toxin(self, sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength):
+		trigger_elements = input_trigger.split(';')  
+
+		# Nun jedes Element (z.B. 'e1,1') in eine Liste von 2 Elementen umwandeln
+		trigger_list = [elem.strip().split(',') for elem in trigger_elements]
+
 		tox = Toxin(substance=sub,
-						plantTransmitter=input_producer,
+						plantTransmitter=list(input_producer),
 						energyCosts=input_energyCost,
-						triggerCombination=input_trigger,
+						triggerCombination=trigger_list,
 						prodTime=input_prodTime,
 						deadly=input_deadly,
 						eliminationStrength=input_eliStrength)
-
+		#print('tox', tox.triggerCombination)
 		return tox
 	
-	
-
-		
-
-
-
-
-
 
 	def start_simulation(self):
 		# Starte die Simulation in einem separaten Thread
@@ -1667,14 +1669,14 @@ class Gui():
 				executor.map(lambda plant_with_index: self.scatter_seed_para(plant_with_index, count), plants_with_index)
 
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
-			self.grid.collectAndManageEnemies()  # Diese Methode könnte auch parallelisiert werden
+			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.remove_fieldColor()
 			for ec in self.grid.enemies:
 				
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
-				self.update_enemyMarker(old_position, new_position, ec.enemy.symbol, ec)
+				self.update_enemyMarker(old_position, new_position, ec)
 
 				# Update der GUI
 				if count % 100 == 0:
@@ -1842,7 +1844,7 @@ class Gui():
 			del self.tooltip_ids
 
 
-	def update_enemyMarker(self, old_position, new_position, selected_index, cluster):
+	def update_enemyMarker(self, old_position, new_position, cluster):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
 		"""
