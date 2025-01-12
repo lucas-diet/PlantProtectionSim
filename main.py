@@ -86,27 +86,29 @@ sc2 = SymbioticConnection(p3, p2)
 sc1.createConnection()
 sc2.createConnection()
 
-
+# Simulation
 sim = Simulation(grid)
 sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
-#Export und Import
-
-#Exporter('test.pkl', grid).save()
-#rGrid = Importer('test.pkl').load()
-#rSim = Simulation(rGrid)
-#rSim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
-
 # Diagramme ohne GUI
-
 dia = Diagrams(grid)
 #dia.dataPlotter(grid.plantData, sim.simLength, measure='energy', title='Energy by Plant Type Over Time')
 #dia.dataPlotter(grid.plantData, sim.simLength, measure='count', title='Number by Plant Types Over Time')
 #dia.dataPlotter(grid.EnemyData, sim.simLength, measure='size', title='Clustersize by Enemy Type Over Time')
 #dia.dataPlotter(grid.EnemyData, sim.simLength, measure='count', title='Number by Enemy Types Over Time')
 
-# Beinhaltet die DEBUG-Prints, die bei bedarf ausgegen werden können.
+# Export und Import
+#Exporter('test.pkl', grid, dia).save()
+#rGrid, rDia = Importer('test.pkl').load()
+#rSim = Simulation(rGrid)
+#rSim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
+#rDia.dataPlotter(rGrid.plantData, rSim.simLength, measure='energy', title='Energy by Plant Type Over Time')
+#rDia.dataPlotter(rGrid.plantData, rSim.simLength, measure='count', title='Number by Plant Types Over Time')
+#rDia.dataPlotter(rGrid.EnemyData, rSim.simLength, measure='size', title='Clustersize by Enemy Type Over Time')
+#rDia.dataPlotter(rGrid.EnemyData, rSim.simLength, measure='count', title='Number by Enemy Types Over Time')
+
+# Beinhaltet die DEBUG-Prints, die bei bedarf ausgegen werden können.
 #sim.logSafer(grid.log)
 #sim.logLoader('log.pkl')
 

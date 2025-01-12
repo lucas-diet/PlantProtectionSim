@@ -5,9 +5,10 @@ import pickle as pkl
 
 class Exporter():
 
-    def __init__(self, path, grid):
+    def __init__(self, path, grid, dia):
         self.path =  path
         self.grid = grid
+        self.dia = dia
 
     
     def getDate(self):
@@ -16,11 +17,12 @@ class Exporter():
         cluster = self.grid.enemies
         signals = self.grid.signals
         toxins = self.grid.toxins
+        diagrams = self.dia
 
         # Verbindungen aus Pflanzen extrahieren
         plant_connections = {plant.name: plant.gridConnections for plant in plants}
 
-        return {'grid': grid, 'plants': plants, 'cluster': cluster, 'signals': signals, 'toxins': toxins, 'connections': plant_connections}
+        return {'grid': grid, 'plants': plants, 'cluster': cluster, 'signals': signals, 'toxins': toxins, 'connections': plant_connections, 'diagrams': diagrams}
     
 
     def save(self):
@@ -49,35 +51,52 @@ class Importer():
     
     def reconstructData(self, data):
         grid = data['grid']
+        dia = data['diagrams']
         
+        self.reconstructPlants(data, grid)
+        self.reconstructEnemies(data, grid)
+        self.reconstructSignals(data, grid)
+        self.reconstructToxins(data, grid)
+        self.reconstructConnections(data, grid)
+        
+        return grid, dia
+    
+
+    def reconstructPlants(self, data, grid):
         # Pflanzen hinzufügen
         for plant in data['plants']:
             if plant not in grid.plants:
                 grid.addPlant(plant)
+    
 
+    def reconstructEnemies(self, data, grid):
         # Feinde hinzufügen
         for ec in data['cluster']:
             if ec not in grid.enemies:
                 grid.addEnemies(ec)
 
+    
+    def reconstructSignals(self, data, grid):
         # Signale hinzufügen
         for signal in data['signals']:
             if signal not in grid.signals:
                 grid.addSubstance(signal)
 
+    
+    def reconstructToxins(self, data, grid):
         # Toxine hinzufügen
         for toxin in data['toxins']:
             if toxin not in grid.toxins:
                 grid.addSubstance(toxin)
 
+    
+    def reconstructConnections(self, data, grid):
         # Symbiotische Verbindungen herstellen
         for pName, connection in data['connections'].items():
             plant = self.getPlantByName(pName, grid)
             if plant:
                 plant.gridConnections = connection
-
-        return grid
-
+            
 
     def getPlantByName(self, name, grid):
         for plant in grid.plants:
