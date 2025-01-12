@@ -2,8 +2,6 @@
 
 import pickle as pkl
 
-from models.grid import Grid
-
 
 class Exporter():
 
@@ -79,7 +77,6 @@ class Importer():
                 plant.gridConnections = connection
 
         return grid
-
 
 
     def getPlantByName(self, name, grid):
