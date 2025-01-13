@@ -1675,7 +1675,7 @@ class Gui():
 					pass
 
 			elif substance_type == 'Toxin':
-				input_deadly = bool(substance_value[2])
+				input_deadly = substance_value[2]
 				input_energyCost = substance_value[10]
 				input_eliStrength = substance_value[12]
 
@@ -1689,38 +1689,43 @@ class Gui():
 
 	
 	def create_signal(self, sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime):
-		trigger_elements = input_trigger.split(';')  
+		trigger_elements = input_trigger.split(';')
+		emit_elements = input_producer.split(',') 
+		receive_elements = input_receiver.split(',')
 
-		# Nun jedes Element (z.B. 'e1,1') in eine Liste von 2 Elementen umwandeln
-		trigger_list = [elem.strip().split(',') for elem in trigger_elements]
+		trigger_list = [[part.strip() if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))]
+							for elem in trigger_elements]
+		emit_list = [part.strip() for elem in emit_elements for part in elem.split(',')]
+		receive_list = [part.strip() for elem in receive_elements for part in elem.split(',')]
 
 		sig = Signal(substance=sub, 
-				 		emit=list(input_producer),
-						receive=list(input_receiver),
+				 		emit=emit_list,
+						receive=receive_list,
 						triggerCombination=trigger_list,
-						prodTime=input_prodTime,
+						prodTime=int(input_prodTime),
 						spreadType=input_spreadType.lower(),
-						sendingSpeed=input_sendSpeed,
-						energyCosts=input_energyCost,
-						afterEffectTime=input_afterEffectTime)
-		#print('sig', sig.triggerCombination)
+						sendingSpeed=int(input_sendSpeed),
+						energyCosts=int(input_energyCost),
+						afterEffectTime=int(input_afterEffectTime))
 		return sig
 	
 
 	def create_toxin(self, sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength):
-		trigger_elements = input_trigger.split(';')  
+		trigger_elements = input_trigger.split(';')
+		producer_elements = input_producer.split(',')
 
-		# Nun jedes Element (z.B. 'e1,1') in eine Liste von 2 Elementen umwandeln
-		trigger_list = [elem.strip().split(',') for elem in trigger_elements]
+		trigger_list = [[part.strip() if i < 2 else int(part.strip())
+            				for i, part in enumerate(elem.split(','))]
+        					for elem in trigger_elements]
+		producer_list = [part.strip() for elem in producer_elements for part in elem.split(',')]
 
 		tox = Toxin(substance=sub,
-						plantTransmitter=list(input_producer),
+						plantTransmitter=producer_list,
 						energyCosts=input_energyCost,
 						triggerCombination=trigger_list,
-						prodTime=input_prodTime,
-						deadly=input_deadly,
-						eliminationStrength=input_eliStrength)
-		#print('tox', tox.triggerCombination)
+						prodTime=int(input_prodTime),
+						deadly=bool(input_deadly),
+						eliminationStrength=int(input_eliStrength))
 		return tox
 	
 
@@ -1767,6 +1772,8 @@ class Gui():
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec)
+
+				self.show_signal(ec)
 
 				# Update der GUI
 				if count % 100 == 0:
@@ -1828,8 +1835,6 @@ class Gui():
 
 			# Füge das Nachkommen zum Grid hinzu
 			self.add_offspring_to_grid(offspring, offspring_position)
-
-			#print(f'Nachkomme {i+1} wird auf Position {offspring_position} gesetzt.')
 
 
 	def add_offspring_to_grid(self, offspring, offspring_position):
@@ -1972,4 +1977,13 @@ class Gui():
 
 		# Tooltip aktualisieren
 		self.enemyDetails(circle_id, new_position)
-		#print(f'Feind {cluster.enemy.name} von {old_position} nach {new_position} verschoben.')
+
+
+	def show_signal(self, ec):
+		for plant in self.grid.plants:
+			for signal in self.grid.signals:
+				if ec.position == plant.position:
+					print(plant.isSignalPresent(signal))
+					print(signal.name, signal.emit, signal.receive, 
+						signal.triggerCombination, signal.prodTime, signal.spreadType, 
+						signal.sendingSpeed, signal.energyCosts, signal.afterEffectTime)

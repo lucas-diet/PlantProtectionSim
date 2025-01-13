@@ -410,7 +410,6 @@ class Grid():
         self.afterEffectTimeAfterDeath()
             
 
-
     def canMove(self, ec):
         # Überprüfe, ob genug Zeitschritte vergangen sind, bis Feind sich bewegen darf
         if ec.stepCounter < ec.speed - 1:
