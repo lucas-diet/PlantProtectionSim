@@ -378,36 +378,50 @@ class Gui():
 			self.plant_entries[i] = {}  # Erstelle einen Dictionary für die Eingabewerte dieser Pflanze
 			self.plant_entries[i]['initEnergy'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['initEnergy'].grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
-			
+
+			self.create_tooltip_inputs(self.plant_entries[i]['initEnergy'], 'Initial energy level of the plant e.g. 100.')
+
 			growEnergy_label = tk.Label(self.plants_setting_frame, text='Growth-Rate:')
 			growEnergy_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['growthRate'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['growthRate'].grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.plant_entries[i]['growthRate'], 'Growth rate of energy e.g. 1')
 			
 			minEnergy_label = tk.Label(self.plants_setting_frame, text='Min-Energy:')
 			minEnergy_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['minEnergy'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['minEnergy'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.plant_entries[i]['minEnergy'], 'Minimum energy for survival e.g. 50')
 			
 			repInter_label = tk.Label(self.plants_setting_frame, text='Repro-Interval:')
 			repInter_label.grid(row=row+4, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['reproInterval'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['reproInterval'].grid(row=row+4, column=1, sticky='ew', padx=2, pady=2)
 
+			self.create_tooltip_inputs(self.plant_entries[i]['reproInterval'], 'Number of steps until plant reproduces e.g. 10')
+
 			offspringEnergy_label = tk.Label(self.plants_setting_frame, text='offspring-Energy:')
 			offspringEnergy_label.grid(row=row+4, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['offspring'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['offspring'].grid(row=row+4, column=3, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.plant_entries[i]['offspring'], 'Initial energy level of offspring e.g. 90')
 			
 			minDist_label = tk.Label(self.plants_setting_frame, text='Min-Distance:')
 			minDist_label.grid(row=row+5, column=0, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['minDist'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['minDist'].grid(row=row+5, column=1, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.plant_entries[i]['minDist'], 'Minimum range for offspring e.g. 2')
 			
 			maxDist_label = tk.Label(self.plants_setting_frame, text='Max-Distance:')
 			maxDist_label.grid(row=row+5, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['maxDist'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['maxDist'].grid(row=row+5, column=3, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.plant_entries[i]['maxDist'], 'Maximum range for offspring e.g. 5')
 			
 			# Platzhalter für Abstand
 			space_label = tk.Label(self.plants_setting_frame, width=4)
@@ -450,21 +464,29 @@ class Gui():
 			clusterNum_label.grid(row=row+2, column=0, sticky='w', padx=2, pady=2)
 			self.enemy_entries[i]['clusterSize'] = tk.Entry(self.enemies_setting_frame, width=4)
 			self.enemy_entries[i]['clusterSize'].grid(row=row+2, column=1, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.enemy_entries[i]['clusterSize'], 'Number of individuals in a cluster e.g. 10')
 			
 			speed_label = tk.Label(self.enemies_setting_frame, text='Speed:')
 			speed_label.grid(row=row+2, column=2, sticky='w', padx=2, pady=2)
 			self.enemy_entries[i]['speed'] = tk.Entry(self.enemies_setting_frame, width=4)
 			self.enemy_entries[i]['speed'].grid(row=row+2, column=3, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.enemy_entries[i]['speed'], 'Running speed how many time steps are needed for one step e.g 2')
 			
 			eatingSpeed_label = tk.Label(self.enemies_setting_frame, text='Eat-Speed:')
 			eatingSpeed_label.grid(row=row+3, column=0, sticky='w', padx=2, pady=2)
 			self.enemy_entries[i]['eatSpeed'] = tk.Entry(self.enemies_setting_frame, width=4)
 			self.enemy_entries[i]['eatSpeed'].grid(row=row+3, column=1, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.enemy_entries[i]['eatSpeed'], 'number of energy units eaten per time step e.g. 2')
 			
 			eatingVic_label = tk.Label(self.enemies_setting_frame, text='Eat-Victory:')
 			eatingVic_label.grid(row=row+3, column=2, sticky='w', padx=2, pady=2)
 			self.enemy_entries[i]['eatVictory'] = tk.Entry(self.enemies_setting_frame, width=4)
 			self.enemy_entries[i]['eatVictory'].grid(row=row+3, column=3, sticky='ew', padx=2, pady=2)
+
+			self.create_tooltip_inputs(self.enemy_entries[i]['eatVictory'], 'Energy units required to produce an offspring, e.g. 2')
 			
 			space_label = tk.Label(self.enemies_setting_frame, width=4)
 			space_label.grid(row=row+4, column=0, padx=2, pady=2, sticky='w')
@@ -533,11 +555,14 @@ class Gui():
 			substance_spredType_om.grid(row=row+2, column=1, padx=2, pady=2, sticky='w')
 			substance_spredType_om.config(fg='black', width=5)
 
+		
 			# Name Eingabefeld
 			name_label = tk.Label(self.substances_setting_frame, text='Name:')
 			name_label.grid(row=row+3, column=0, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['subName'] = tk.Entry(self.substances_setting_frame)
 			self.substance_entries[i]['subName'].grid(row=row+3, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+
+			self.create_tooltip_inputs(self.substance_entries[i]['subName'], 'Name of the substance e.g. methyl jasmonate')
 
 			# Producer Eingabefeld
 			emit_label = tk.Label(self.substances_setting_frame, text='Producer:')
@@ -545,11 +570,15 @@ class Gui():
 			self.substance_entries[i]['producer'] = tk.Entry(self.substances_setting_frame)
 			self.substance_entries[i]['producer'].grid(row=row+4, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
 
+			self.create_tooltip_inputs(self.substance_entries[i]['producer'], 'Plants that can produce the substances e.g. p1, p2, p5')
+
 			# Receiver Eingabefeld
 			receive_label = tk.Label(self.substances_setting_frame, text='Receiver:')
 			receive_label.grid(row=row+5, column=0, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['receiver'] = tk.Entry(self.substances_setting_frame)
 			self.substance_entries[i]['receiver'].grid(row=row+5, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
+
+			self.create_tooltip_inputs(self.substance_entries[i]['receiver'], 'Plants that can receive the substances e.g. p3, p6')
 
 			# Trigger Eingabefeld
 			trigger_label = tk.Label(self.substances_setting_frame, text='Trigger:')
@@ -557,11 +586,15 @@ class Gui():
 			self.substance_entries[i]['trigger'] = tk.Entry(self.substances_setting_frame)
 			self.substance_entries[i]['trigger'].grid(row=row+6, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
 
+			self.create_tooltip_inputs(self.substance_entries[i]['trigger'], 'Combination that triggers a signaling substance or a toxic substance:\n - Signaling substance: e1,2; e3,5\n - Toxic substance: s1,e1,2; s2,e3,5')
+
 			# Prod-Time Eingabefeld
 			prodTime_label = tk.Label(self.substances_setting_frame, text='Prod-Time:')
 			prodTime_label.grid(row=row+7, column=0, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['prodTime'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['prodTime'].grid(row=row+7, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+
+			self.create_tooltip_inputs(self.substance_entries[i]['prodTime'], 'required time steps to produce the substance e.g. 5.')
 
 			# Send-Speed Eingabefeld
 			sendSpeed_label = tk.Label(self.substances_setting_frame, text='Send-Speed:')
@@ -569,11 +602,15 @@ class Gui():
 			self.substance_entries[i]['sendSpeed'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['sendSpeed'].grid(row=row+7, column=3, columnspan=1, padx=2, pady=2, sticky='w')
 
+			self.create_tooltip_inputs(self.substance_entries[i]['sendSpeed'], 'Time steps required to send the signal substance e.g. 4\n\nA poison is only local to the plant and is not sent - Entry is blocked')
+
 			# Energy-Costs Eingabefeld
 			eCosts_label = tk.Label(self.substances_setting_frame, text='Energy-Costs:')
 			eCosts_label.grid(row=row+8, column=0, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['energyCosts'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['energyCosts'].grid(row=row+8, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+
+			self.create_tooltip_inputs(self.substance_entries[i]['energyCosts'], 'Required energy costs that are deducted per time step e.g. 5')
 
 			# AftereffectTime Eingabefeld
 			aft_label = tk.Label(self.substances_setting_frame, text='AfterEffectTime:')
@@ -581,11 +618,15 @@ class Gui():
 			self.substance_entries[i]['aft'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['aft'].grid(row=row+8, column=3, columnspan=1, padx=2, pady=2, sticky='w')
 
+			self.create_tooltip_inputs(self.substance_entries[i]['aft'], 'Number of time steps for how long a signaling substance has an aftereffect after its production has ended, e.g. 5\n\nA poisonous substance has no aftereffect time - Entry is blocked')
+
 			eliStrength_label = tk.Label(self.substances_setting_frame, text='Eli-Strength:')
 			eliStrength_label.grid(row=row+9, column=0, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['eliStrength'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['eliStrength'].grid(row=row+9, column=1, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['eliStrength'].config(state='disable')
+
+			self.create_tooltip_inputs(self.substance_entries[i]['eliStrength'], 'Number of individuals that die per time step if the poison is lethal e.g. 3')
 
 			space_label = tk.Label(self.substances_setting_frame, width=4)
 			space_label.grid(row=row+10, column=0, padx=2, pady=2, sticky='w')
@@ -638,7 +679,56 @@ class Gui():
 			aft_entry.config(state='normal')
 			eli_stren_entry.delete(0, tk.END)
 			eli_stren_entry.config(state='disable')
-			
+
+	
+	def create_tooltip_inputs(self, widget, text):
+		"""
+		Zeigt den Tooltip über einem Eingabefeld an, wenn die Maus darüber fährt.
+		"""
+		tooltip_window = None  # Variable für das Tooltip-Fenster
+
+		# Funktion zum Anzeigen des Tooltips
+		def show_tooltip(event):
+			nonlocal tooltip_window
+
+			if tooltip_window is not None:
+				return  # Verhindert mehrfaches Erstellen von Tooltips
+
+			# Erstelle ein neues Fenster für den Tooltip
+			tooltip_window = tk.Toplevel(self.left_frame)
+			tooltip_window.wm_overrideredirect(True)  # Entferne Fensterrahmen
+			tooltip_window.attributes('-topmost', True)  # Halte den Tooltip im Vordergrund
+
+			# Berechne die Position des Tooltips basierend auf der Mausposition
+			x, y = widget.winfo_rootx(), widget.winfo_rooty()  # Mausposition relativ zum Eingabefeld
+			tooltip_window.geometry(f'+{x + 50}+{y}')  # Positionieren Sie den Tooltip nahe dem Eingabefeld
+
+			# Tooltip-Inhalt
+			label = tk.Label(
+				tooltip_window,
+				text=text,
+				font=('Arial', 12),
+				bg='lightyellow',
+				fg='black',
+				relief='solid',
+				bd=1,
+				padx=5,
+				pady=3,
+				justify='left',
+			)
+			label.pack()
+
+		# Funktion zum Verstecken des Tooltips
+		def hide_tooltip(event):
+			nonlocal tooltip_window
+			if tooltip_window is not None:
+				tooltip_window.destroy()  # Entferne das Tooltip-Fenster
+				tooltip_window = None
+
+		# Binde die Maus-Events an das Eingabefeld
+		widget.bind('<Enter>', show_tooltip)  # Tooltip anzeigen, wenn Maus das Eingabefeld betritt
+		widget.bind('<Leave>', hide_tooltip)  # Tooltip verstecken, wenn Maus das Eingabefeld verlässt
+
 
 	def update_scrollregion(self, canvas, event=None):
 		"""Aktualisiert die Scrollregion des Canvas basierend auf dem gesamten Inhalt."""

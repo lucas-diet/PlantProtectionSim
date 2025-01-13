@@ -88,7 +88,7 @@ sc2.createConnection()
 
 # Simulation
 sim = Simulation(grid)
-sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+#sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 # Diagramme ohne GUI
 dia = Diagrams(grid)
@@ -113,4 +113,4 @@ dia = Diagrams(grid)
 #sim.logLoader('log.pkl')
 
 gui = Gui()
-#gui.mainloop()
+gui.mainloop()
