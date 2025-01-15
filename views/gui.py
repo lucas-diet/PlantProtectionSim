@@ -1592,24 +1592,23 @@ class Gui():
 					if not trigger or not re.fullmatch(trigger_pattern, trigger):
 						errors.append('Trigger must follow the format "e1, 1; e2, 2"!')
 
-					# Wenn Trigger korrekt, verarbeite ihn weiter
-					triggers_list = [block.strip() for block in trigger.split(';')]  # Aufteilen in Blocke, durch Semikolons getrennt
+					triggers_list = [block.strip() for block in trigger.split(';')]  # Aufteilen in Blöcke, durch Semikolons getrennt
 					for i in range(len(triggers_list)):
-						triggers_list[i] = ', '.join(set(triggers_list[i].split(',')))  # Entferne Duplikate innerhalb jedes Blocks
+						triggers_list[i] = ', '.join(
+							dict.fromkeys([part.strip() for part in triggers_list[i].split(',')])
+						)  # Entferne Duplikate, behalte Reihenfolge
 					trigger = '; '.join(triggers_list)  # Setze den Trigger zurück als korrekt formatierten String
-
+				
 				if type_var == 'Toxin':
 					trigger_pattern = r'^((s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)(\s*;\s*(s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)*$'
 					if not trigger or not re.fullmatch(trigger_pattern, trigger):
 						errors.append('Trigger must be in the format "s1, e1, 1; s2, e2, 2"!')
 
 					# Duplikate im Trigger entfernen
-					triggers_list = [tr.strip() for tr in trigger.split(';')]  # Liste von Triggern
-					triggers_set = set(triggers_list)  # Duplikate entfernen
-					if len(triggers_list) != len(triggers_set):  # Wenn Duplikate entfernt wurden
-						triggers_list = list(triggers_set)  # Umwandeln in Liste ohne Duplikate
-					trigger = '; '.join(triggers_list)  # Zurück in einen Semikolon-getrennten String
-
+					triggers_list = [tr.strip() for tr in trigger.split(';')]  # Liste von Trigger-Blöcken
+					triggers_list = list(dict.fromkeys(triggers_list))  # Entferne Duplikate, behalte Reihenfolge
+					trigger = '; '.join(triggers_list)  # Setze den Trigger zurück als korrekt formatierten String
+				
 				# Überprüfe prod_time
 				if not prod_time or not prod_time.isdigit():  # Prüft, ob es eine Zahl ist
 					errors.append('prod time must be a valid number!')
@@ -1665,7 +1664,6 @@ class Gui():
 				input_sendSpeed = substance_value[9]
 				input_energyCost = substance_value[10]
 				input_afterEffectTime = substance_value[11]
-				
 				sig = self.create_signal(sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime)
 
 				# Überprüfen, ob das Signal bereits in self.grid.signals vorhanden ist
@@ -1693,11 +1691,10 @@ class Gui():
 		emit_elements = input_producer.split(',') 
 		receive_elements = input_receiver.split(',')
 
-		trigger_list = [[part.strip() if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))]
-							for elem in trigger_elements]
+		trigger_list = [[part.strip() if i == 0 else part.strip() for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
 		emit_list = [part.strip() for elem in emit_elements for part in elem.split(',')]
 		receive_list = [part.strip() for elem in receive_elements for part in elem.split(',')]
-
+		#print(trigger_list)
 		sig = Signal(substance=sub, 
 				 		emit=emit_list,
 						receive=receive_list,
@@ -1981,10 +1978,11 @@ class Gui():
 
 
 	def show_signal(self, ec):
-		for plant in self.grid.plants:
-			for signal in self.grid.signals:
-				if ec.position == plant.position:
-					print(plant.isSignalPresent(signal))
-					print(signal.name, signal.emit, signal.receive, 
-						signal.triggerCombination, signal.prodTime, signal.spreadType, 
-						signal.sendingSpeed, signal.energyCosts, signal.afterEffectTime)
+		pass
+		#for plant in self.grid.plants:
+		#	for signal in self.grid.signals:
+		#		if ec.position == plant.position:
+		#			print(plant.isSignalPresent(signal))
+		#			print(signal.name, signal.emit, signal.receive, 
+		#				signal.triggerCombination, signal.prodTime, signal.spreadType, 
+		#				signal.sendingSpeed, signal.energyCosts, signal.afterEffectTime)
