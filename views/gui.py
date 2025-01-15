@@ -1691,7 +1691,7 @@ class Gui():
 		emit_elements = input_producer.split(',') 
 		receive_elements = input_receiver.split(',')
 
-		trigger_list = [[part.strip() if i == 0 else part.strip() for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
+		trigger_list = [[part.strip() if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
 		emit_list = [part.strip() for elem in emit_elements for part in elem.split(',')]
 		receive_list = [part.strip() for elem in receive_elements for part in elem.split(',')]
 		#print(trigger_list)
@@ -1763,14 +1763,15 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			self.remove_fieldColor()
+			
 			for ec in self.grid.enemies:
 				
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec)
-
+				
 				self.show_signal(ec)
+				self.remove_fieldColor()
 
 				# Update der GUI
 				if count % 100 == 0:
@@ -1978,11 +1979,14 @@ class Gui():
 
 
 	def show_signal(self, ec):
-		pass
-		#for plant in self.grid.plants:
-		#	for signal in self.grid.signals:
-		#		if ec.position == plant.position:
-		#			print(plant.isSignalPresent(signal))
-		#			print(signal.name, signal.emit, signal.receive, 
-		#				signal.triggerCombination, signal.prodTime, signal.spreadType, 
-		#				signal.sendingSpeed, signal.energyCosts, signal.afterEffectTime)
+		for plant in self.grid.plants:
+			for signal in self.grid.signals:
+				if ec.position == plant.position:
+					for itm in signal.triggerCombination:
+						for i in itm:
+							if i == ec.enemy.name:
+								print(plant.isSignalPresent(signal))
+
+								print(i, type(i))
+								self.grid.collectAndManageEnemies()
+					#print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, signal.spreadType, signal.sendingSpeed, signal.energyCosts, signal.afterEffectTime)
