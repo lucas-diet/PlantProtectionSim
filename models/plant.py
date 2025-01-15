@@ -105,7 +105,7 @@ class Plant():
             
             if self.grid.isWithinBounds(newX, newY):
                 if not self.grid.isOccupied((newX, newY)):
-                    print(f'[DEBUG]: {self.name} auf {self.position} erzeugt Nachkommen auf {newX, newY}')
+                    #print(f'[DEBUG]: {self.name} auf {self.position} erzeugt Nachkommen auf {newX, newY}')
                     return (newX, newY)
                 else:
                     #print(f'[DEGUB]: Position {newX, newY} ist belegt. Nachkomme wird nicht erzeugt.')

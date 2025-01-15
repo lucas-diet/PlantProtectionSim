@@ -1901,6 +1901,7 @@ class Gui():
 
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
+			self.grid.removePlant(plant)
 
 		except Exception as e:
 			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {canvas_id}: {e}')
