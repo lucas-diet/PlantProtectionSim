@@ -1794,15 +1794,13 @@ class Gui():
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.remove_fieldColor()
 
-			for ec in self.grid.enemies:
-				old_position = old_positions[ec]
-				new_position = new_positions[ec]
-				self.update_enemyMarker(old_position, new_position, ec)
+			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
+			self.update_enemyMarker(old_new_positions)
 				
-				self.show_signal(ec)
-				# Update der GUI
-				if count % 100 == 0:
-					self.gridCanvas.update_idletasks()
+			#self.show_signal(ec)
+			# Update der GUI
+			#if count % 100 == 0:
+		#		self.gridCanvas.update_idletasks()
 
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
@@ -1965,54 +1963,42 @@ class Gui():
 			del self.tooltip_ids
 
 
-	def update_enemyMarker(self, old_position, new_position, cluster):
+	def update_enemyMarker(self, old_new_positions):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
 		"""
-		# Berechne die neue Position für den Cluster
-		position_data = self.get_cellPosition(new_position)
-		if not position_data:
-			print(f'Fehler: Ungültige neue Position {new_position}.')
-			return
-		x_pos, y_pos = position_data
+		for cluster, (old_position, new_position) in old_new_positions.items():
+			# Berechne die neue Position für den Cluster
+			position_data = self.get_cellPosition(new_position)
+			if not position_data:
+				print(f'Fehler: Ungültige neue Position {new_position}.')
+				continue
+			x_pos, y_pos = position_data
 
-		# Entferne den Marker des Clusters von der alten Position
-		if old_position in self.enemies_at_positions:
-			# Prüfe, ob der Cluster an der alten Position existiert
-			if cluster in self.enemies_at_positions[old_position]:
-				# Lösche den Marker, falls vorhanden
-				if hasattr(cluster, 'circle_id') and cluster.circle_id:
-					self.gridCanvas.delete(cluster.circle_id)
-				# Entferne den Cluster aus der alten Position
-				self.enemies_at_positions[old_position].remove(cluster)
-				# Wenn die alte Position leer ist, entferne sie aus dem Dictionary
-				if not self.enemies_at_positions[old_position]:
-					del self.enemies_at_positions[old_position]
+			# Entferne den Marker des Clusters von der alten Position
+			if old_position in self.enemies_at_positions:
+				if cluster in self.enemies_at_positions[old_position]:
+					if hasattr(cluster, 'circle_id') and cluster.circle_id:
+						self.gridCanvas.delete(cluster.circle_id)
+					self.enemies_at_positions[old_position].remove(cluster)
+					if not self.enemies_at_positions[old_position]:
+						del self.enemies_at_positions[old_position]
 
-		# Aktualisiere die Position des Clusters
-		cluster.position = new_position
-
-		# Erstelle einen neuen Marker für die neue Position
-		circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name)
-		cluster.circle_id = circle_id  # Speichere die Marker-ID im Cluster
-
-		# Füge den Cluster zur neuen Position hinzu
-		if new_position not in self.enemies_at_positions:
-			self.enemies_at_positions[new_position] = []
-		self.enemies_at_positions[new_position].append(cluster)
-
-		# Tooltip aktualisieren
-		self.enemyDetails(circle_id, new_position)
+			# Füge den Marker an der neuen Position hinzu
+			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name)
+			if new_position not in self.enemies_at_positions:
+				self.enemies_at_positions[new_position] = []
+			self.enemies_at_positions[new_position].append(cluster)
 
 
 	def show_signal(self,ec):
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				self.grid.processInteractionWithPlant(ec)
-				#print(plant.isSignalPresent(signal))
-				#print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, 
-				#		signal.spreadType, signal.sendingSpeed, signal.energyCosts, 
-			#			signal.afterEffectTime)
+				print(plant.isSignalPresent(signal))
+				print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, 
+						signal.spreadType, signal.sendingSpeed, signal.energyCosts, 
+						signal.afterEffectTime)
 			
-			for toxin in self.grid.toxins:
-				print(toxin.name, toxin.triggerCombination)
+			#for toxin in self.grid.toxins:
+			#	print(toxin.name, toxin.triggerCombination)
