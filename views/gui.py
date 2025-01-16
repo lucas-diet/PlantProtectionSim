@@ -33,7 +33,7 @@ class Gui():
 		self.lock = threading.Lock()
 		self.plant_connections = {}
 		self.grid_lines = {}
-		self.vald_substances_set = set()
+		self.valid_substances_set = set()
 
 
 	def initSimulationWindow(self):
@@ -586,7 +586,7 @@ class Gui():
 			self.substance_entries[i]['trigger'] = tk.Entry(self.substances_setting_frame)
 			self.substance_entries[i]['trigger'].grid(row=row+6, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
 
-			self.create_tooltip_inputs(self.substance_entries[i]['trigger'], 'Combination that triggers a signaling substance or a toxic substance:\n - Signaling substance: e1,2; e3,5\n - Toxic substance: s1,e1,2; s2,e3,5')
+			self.create_tooltip_inputs(self.substance_entries[i]['trigger'], 'Combination that triggers a signaling substance or a toxic substance:\n - Signaling substance: e1,2; e3,5\n - Toxic substance: -signal-name1-,e1,2; -signal-name2-,e3,5')
 
 			# Prod-Time Eingabefeld
 			prodTime_label = tk.Label(self.substances_setting_frame, text='Prod-Time:')
@@ -1549,7 +1549,7 @@ class Gui():
 		except ValueError:
 			# Falls ein Wert ungültig ist, gebe eine Fehlermeldung aus
 			self.error_substances.config(text='Error: All input values ​​must be valid!', fg='red')
-			return  # Beende die Funktion ohne die Pflanze hinzuzufügen
+			return  # Beende die Funktion ohne die Substanz hinzuzufügen
 
 		# Schleife über alle Substanzen in substance_values
 		for i, values in zip(idxs, substance_values):
@@ -1635,21 +1635,23 @@ class Gui():
 				# Wenn keine Fehler, füge die Substanz zu valid_substances hinzu
 				if not errors:
 					valid_substances.append((checkbox_var, type_var, toxin_effect_var, spread_type_var, name, producer, receiver, trigger, prod_time, send_speed, energy_costs, after_effect_time, eli_stren))
-					self.vald_substances_set = set(valid_substances)
-			else:
-				continue  # Wenn checkbox_var nicht 1 ist, überspringe die Substanz
+					self.valid_substances_set = set(valid_substances)
+				else:
+					continue  # Wenn checkbox_var nicht 1 ist, überspringe die Substanz
 
-		# Wenn Fehler gefunden wurden, zeige sie an
+		 # Wenn Fehler gefunden wurden, zeige sie an und gib False zurück
 		if errors:
 			for error in errors:
 				messagebox.showerror('Invalid input', error)
-			return
+			return False
+		
+		return True  # Rückgabewert True, wenn keine Fehler gefunden wurden
 	
-
+	
 	def create_add_substance(self):
 		self.validate_substanceInputs(self.substance_entries)
 		
-		for substance_value in self.vald_substances_set:
+		for substance_value in self.valid_substances_set:
 			substance_type = substance_value[1]
 			input_name = substance_value[4]
 			input_producer = substance_value[5]
@@ -1664,26 +1666,28 @@ class Gui():
 				input_sendSpeed = substance_value[9]
 				input_energyCost = substance_value[10]
 				input_afterEffectTime = substance_value[11]
+				
 				sig = self.create_signal(sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime)
 
-				# Überprüfen, ob das Signal bereits in self.grid.signals vorhanden ist
 				if not any(s.substance.name == sig.substance.name for s in self.grid.signals):
-					self.grid.addSubstance(sig)  # Füge nur hinzu, wenn es nicht existiert
-				else:
-					pass
+					self.grid.addSubstance(sig)
 
-			elif substance_type == 'Toxin':
+		# Verarbeitung der Toxine
+		for substance_value in self.valid_substances_set:
+			if substance_value[1] == 'Toxin':
+				input_name = substance_value[4]
+				input_producer = substance_value[5]
+				input_trigger = substance_value[7]
+				input_prodTime = substance_value[8]
 				input_deadly = substance_value[2]
 				input_energyCost = substance_value[10]
 				input_eliStrength = substance_value[12]
-
+				
+				sub = Substance(name=input_name, type='toxin')
 				tox = self.create_toxin(sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength)
 				
-				# Überprüfen, ob das Toxin bereits in self.grid.toxins vorhanden ist
 				if not any(t.substance.name == tox.substance.name for t in self.grid.toxins):
-					self.grid.addSubstance(tox)  # Füge nur hinzu, wenn es nicht existiert
-				else:
-					pass
+					self.grid.addSubstance(tox)
 
 	
 	def create_signal(self, sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime):
@@ -1697,7 +1701,7 @@ class Gui():
 
 		# Ersetze Strings in receive_list durch Objekte
 		receive_list = [self.find_object_by_name(part.strip(), self.grid.plants) for part in receive_elements]
-
+		
 		sig = Signal(substance=sub, 
 				 		emit=emit_list,
 						receive=receive_list,
@@ -1713,17 +1717,17 @@ class Gui():
 	def create_toxin(self, sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength):
 		trigger_elements = input_trigger.split(';')
 		producer_elements = input_producer.split(',')
-		print(self.grid.signals)
+
 		trigger_list = [[self.find_object_by_name(part.strip(), self.grid.signals) if i == 0 
-            				else self.find_object_by_name(part.strip(), self.grid.enemies) if i == 1
-            				else int(part.strip())
-            				for i, part in enumerate(elem.split(','))]for elem in trigger_elements]
+							else self.find_object_by_name(part.strip(), self.grid.enemies) if i == 1
+            				else int(part.strip()) for i, part in enumerate(elem.split(','))] 
+							for elem in trigger_elements]
 		
 		producer_list = [self.find_object_by_name(part.strip(), self.grid.plants) for elem in producer_elements for part in elem.split(',')]
-		
+
 		tox = Toxin(substance=sub,
 						plantTransmitter=producer_list,
-						energyCosts=input_energyCost,
+						energyCosts=int(input_energyCost),
 						triggerCombination=trigger_list,
 						prodTime=int(input_prodTime),
 						deadly=bool(input_deadly),
@@ -1736,13 +1740,14 @@ class Gui():
 			if isinstance(obj, EnemyCluster):
 				if obj.enemy.name == name:
 					return obj
-			elif isinstance(obj, Plant):
+			if isinstance(obj, Plant):
 				if obj.name == name:
 					return obj
-			elif isinstance(obj, Signal):
+			if isinstance(obj, Signal):
 				if obj.name == name:
-					return obj 
-		return None  # Falls kein Objekt gefunden wird
+					return obj
+			else:
+				return None  # Falls kein Objekt gefunden wird
 	
 
 	def start_simulation(self):
@@ -1757,7 +1762,12 @@ class Gui():
 		self.sim.getPlantData(0)
 		self.sim.getEnemyData(0)
 		count = 1
+		if not self.validate_substanceInputs(self.substance_entries):
+			self.error_substances.config(text='Please check substance inputs.', fg='red')
+			return  # Beende die Funktion, falls die Validierung fehlschlägt
+
 		self.create_add_substance()
+		self.error_substances.config(text='')
 		while True:
 			# Abbruchbedingungen
 			if count - 1 == self.maxSteps or \
@@ -1999,7 +2009,10 @@ class Gui():
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				self.grid.processInteractionWithPlant(ec)
-				print(plant.isSignalPresent(signal))
-				print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, 
-						signal.spreadType, signal.sendingSpeed, signal.energyCosts, 
-						signal.afterEffectTime)
+				#print(plant.isSignalPresent(signal))
+				#print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, 
+				#		signal.spreadType, signal.sendingSpeed, signal.energyCosts, 
+			#			signal.afterEffectTime)
+			
+			for toxin in self.grid.toxins:
+				print(toxin.name, toxin.triggerCombination)
