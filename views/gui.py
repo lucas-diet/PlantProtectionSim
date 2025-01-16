@@ -1600,9 +1600,9 @@ class Gui():
 					trigger = '; '.join(triggers_list)  # Setze den Trigger zurück als korrekt formatierten String
 				
 				if type_var == 'Toxin':
-					trigger_pattern = r'^((s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)(\s*;\s*(s[1-9]|s1[0-5]),\s*(e[1-9]|e1[0-5]),\s*\d+)*$'
+					trigger_pattern = r'^((\w+),\s*(e[1-9]|e1[0-5]),\s*\d+)(\s*;\s*(\w+),\s*(e[1-9]|e1[0-5]),\s*\d+)*$'
 					if not trigger or not re.fullmatch(trigger_pattern, trigger):
-						errors.append('Trigger must be in the format "s1, e1, 1; s2, e2, 2"!')
+						errors.append('Trigger must be in the format "signal-name, e1, 1; s2, e2, 2"!')
 
 					# Duplikate im Trigger entfernen
 					triggers_list = [tr.strip() for tr in trigger.split(';')]  # Liste von Trigger-Blöcken
@@ -1691,10 +1691,13 @@ class Gui():
 		emit_elements = input_producer.split(',') 
 		receive_elements = input_receiver.split(',')
 
-		trigger_list = [[part.strip() if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
-		emit_list = [part.strip() for elem in emit_elements for part in elem.split(',')]
-		receive_list = [part.strip() for elem in receive_elements for part in elem.split(',')]
-		#print(trigger_list)
+		trigger_list = [[self.find_object_by_name(part.strip(), self.grid.enemies) if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
+		# Ersetze Strings in emit_list durch Objekte
+		emit_list = [self.find_object_by_name(part.strip(), self.grid.plants) for part in emit_elements]
+
+		# Ersetze Strings in receive_list durch Objekte
+		receive_list = [self.find_object_by_name(part.strip(), self.grid.plants) for part in receive_elements]
+
 		sig = Signal(substance=sub, 
 				 		emit=emit_list,
 						receive=receive_list,
@@ -1710,12 +1713,14 @@ class Gui():
 	def create_toxin(self, sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength):
 		trigger_elements = input_trigger.split(';')
 		producer_elements = input_producer.split(',')
-
-		trigger_list = [[part.strip() if i < 2 else int(part.strip())
-            				for i, part in enumerate(elem.split(','))]
-        					for elem in trigger_elements]
-		producer_list = [part.strip() for elem in producer_elements for part in elem.split(',')]
-
+		print(self.grid.signals)
+		trigger_list = [[self.find_object_by_name(part.strip(), self.grid.signals) if i == 0 
+            				else self.find_object_by_name(part.strip(), self.grid.enemies) if i == 1
+            				else int(part.strip())
+            				for i, part in enumerate(elem.split(','))]for elem in trigger_elements]
+		
+		producer_list = [self.find_object_by_name(part.strip(), self.grid.plants) for elem in producer_elements for part in elem.split(',')]
+		
 		tox = Toxin(substance=sub,
 						plantTransmitter=producer_list,
 						energyCosts=input_energyCost,
@@ -1724,6 +1729,20 @@ class Gui():
 						deadly=bool(input_deadly),
 						eliminationStrength=int(input_eliStrength))
 		return tox
+	
+
+	def find_object_by_name(self, name, object_list):
+		for obj in object_list:
+			if isinstance(obj, EnemyCluster):
+				if obj.enemy.name == name:
+					return obj
+			elif isinstance(obj, Plant):
+				if obj.name == name:
+					return obj
+			elif isinstance(obj, Signal):
+				if obj.name == name:
+					return obj 
+		return None  # Falls kein Objekt gefunden wird
 	
 
 	def start_simulation(self):
@@ -1763,16 +1782,14 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			
+			self.remove_fieldColor()
+
 			for ec in self.grid.enemies:
-				
 				old_position = old_positions[ec]
 				new_position = new_positions[ec]
 				self.update_enemyMarker(old_position, new_position, ec)
 				
 				self.show_signal(ec)
-				self.remove_fieldColor()
-
 				# Update der GUI
 				if count % 100 == 0:
 					self.gridCanvas.update_idletasks()
@@ -1978,15 +1995,11 @@ class Gui():
 		self.enemyDetails(circle_id, new_position)
 
 
-	def show_signal(self, ec):
+	def show_signal(self,ec):
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
-				if ec.position == plant.position:
-					for itm in signal.triggerCombination:
-						for i in itm:
-							if i == ec.enemy.name:
-								print(plant.isSignalPresent(signal))
-
-								print(i, type(i))
-								self.grid.collectAndManageEnemies()
-					#print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, signal.spreadType, signal.sendingSpeed, signal.energyCosts, signal.afterEffectTime)
+				self.grid.processInteractionWithPlant(ec)
+				print(plant.isSignalPresent(signal))
+				print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, 
+						signal.spreadType, signal.sendingSpeed, signal.energyCosts, 
+						signal.afterEffectTime)
