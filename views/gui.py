@@ -402,7 +402,7 @@ class Gui():
 
 			self.create_tooltip_inputs(self.plant_entries[i]['reproInterval'], 'Number of steps until plant reproduces e.g. 10')
 
-			offspringEnergy_label = tk.Label(self.plants_setting_frame, text='offspring-Energy:')
+			offspringEnergy_label = tk.Label(self.plants_setting_frame, text='Offspring-Energy:')
 			offspringEnergy_label.grid(row=row+4, column=2, sticky='w', padx=2, pady=2)
 			self.plant_entries[i]['offspring'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['offspring'].grid(row=row+4, column=3, sticky='ew', padx=2, pady=2)
@@ -1238,7 +1238,7 @@ class Gui():
 
 		# Füge Tooltip hinzu
 		self.enemyDetails(circle_id, clicked_position)
-		print(f'Feind {cluster.enemy.name  } mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
+		#print(f'Feind {cluster.enemy.name} mit Clustergröße {cluster.num} platziert auf: {clicked_position}')
 
 
 	def get_cellPosition(self, position):
@@ -1793,14 +1793,11 @@ class Gui():
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.remove_fieldColor()
-
+			self.show_signal()
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
 				
-			#self.show_signal(ec)
-			# Update der GUI
-			#if count % 100 == 0:
-		#		self.gridCanvas.update_idletasks()
+			
 
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
@@ -1991,14 +1988,12 @@ class Gui():
 			self.enemies_at_positions[new_position].append(cluster)
 
 
-	def show_signal(self,ec):
-		for plant in self.grid.plants:
-			for signal in self.grid.signals:
-				self.grid.processInteractionWithPlant(ec)
-				print(plant.isSignalPresent(signal))
-				print(signal.name, signal.emit, signal.receive, signal.triggerCombination, signal.prodTime, 
-						signal.spreadType, signal.sendingSpeed, signal.energyCosts, 
-						signal.afterEffectTime)
-			
-			#for toxin in self.grid.toxins:
-			#	print(toxin.name, toxin.triggerCombination)
+	def show_signal(self):
+		for ec_pos, list in self.enemies_at_positions.items():
+			for id, plant in self.plant_at_position.items():
+				dist = self.grid.getDistance(ec_pos, plant.position)
+				for ec in list:
+					self.grid.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
+					
+					for signal in self.grid.signals:
+						print(plant.isSignalPresent(signal))
