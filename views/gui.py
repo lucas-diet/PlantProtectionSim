@@ -1933,6 +1933,7 @@ class Gui():
 
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
+			self.remove_tooltip(canvas_id)
 			self.grid.removePlant(plant)
 
 		except Exception as e:
