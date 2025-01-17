@@ -2006,6 +2006,22 @@ class Gui():
 		Prüft Feinde und Pflanzen und verarbeitet Signale basierend auf Alarmbedingungen.
 		Färbt außerdem das Umrandungsrechteck der Pflanze ein, wenn ein Signal ausgelöst wird.
 		"""
+		for plant in self.grid.plants:
+			for signal in self.grid.signals:
+				square_id = self.squares.get(plant.position)
+				if plant.isSignalPresent(signal) and square_id:
+					self.gridCanvas.itemconfig(square_id, outline='blue', width=2)
+				else:
+					self.gridCanvas.itemconfig(square_id, outline='black', width=1)
+
+
+
+
+
+
+
+
+		'''
 		for ec in self.grid.enemies:
 			for plant in self.grid.plants:
 				# Berechne die Distanz zwischen Feind und Zielpflanze
@@ -2020,3 +2036,4 @@ class Gui():
 				else:
 					self.gridCanvas.itemconfig(square_id, outline='black', width=1)
 
+		'''
