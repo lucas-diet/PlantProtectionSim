@@ -1698,12 +1698,12 @@ class Gui():
 		# Extrahiere Enemy-Objekte aus der Liste der EnemyCluster
 		all_enemies = [cluster.enemy for cluster in self.grid.enemies if isinstance(cluster, EnemyCluster)]
 
-		trigger_list = [[self.find_object_by_name(part.strip(), all_enemies) if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
+		trigger_list = [[part.strip() if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
 		# Ersetze Strings in emit_list durch Objekte
-		emit_list = [self.find_object_by_name(part.strip(), self.grid.plants) for part in emit_elements]
+		emit_list = [part.strip() for part in emit_elements]
 
 		# Ersetze Strings in receive_list durch Objekte
-		receive_list = [self.find_object_by_name(part.strip(), self.grid.plants) for part in receive_elements]
+		receive_list = [part.strip() for part in receive_elements]
 		
 		sig = Signal(substance=sub, 
 				 		emit=emit_list,
@@ -1724,12 +1724,12 @@ class Gui():
 		# Extrahiere Enemy-Objekte aus der Liste der EnemyCluster
 		all_enemies = [cluster.enemy for cluster in self.grid.enemies if isinstance(cluster, EnemyCluster)]
 
-		trigger_list = [[self.find_object_by_name(part.strip(), self.grid.signals) if i == 0 
-							else self.find_object_by_name(part.strip(), all_enemies) if i == 1
+		trigger_list = [[part.strip() if i == 0 
+							else part.strip() if i == 1
             				else int(part.strip()) for i, part in enumerate(elem.split(','))] 
 							for elem in trigger_elements]
 		
-		producer_list = [self.find_object_by_name(part.strip(), self.grid.plants) for elem in producer_elements for part in elem.split(',')]
+		producer_list = [part.strip() for elem in producer_elements for part in elem.split(',')]
 
 		tox = Toxin(substance=sub,
 						plantTransmitter=producer_list,
@@ -2009,7 +2009,7 @@ class Gui():
 			for signal in self.grid.signals:
 				square_id = self.squares.get(plant.position)
 				if square_id:
-					if any(plant.name == p.name for p in signal.emit):
+					if any(plant.name == name for name in signal.emit):
 						if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):
 							self.gridCanvas.itemconfig(square_id, outline='yellow', width=5)
 						elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal):
@@ -2025,7 +2025,7 @@ class Gui():
 				for toxin in self.grid.toxins:
 					square_id = self.squares.get(plant.position)
 					if square_id:
-						if any(plant.name == p.name for p in toxin.plantTransmitter):
+						if any(plant.name == name for name in toxin.plantTransmitter):
 							if plant.isToxinAlarmed(toxin):
 								self.gridCanvas.itemconfig(square_id, outline='orange', width=5)
 							elif plant.isToxinPresent(toxin):

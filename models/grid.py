@@ -539,7 +539,7 @@ class Grid():
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 triggerEnemy, minClusterSize = trigger
-                if plant in signal.emit and ec.enemy == triggerEnemy and ec.position == plant.position:
+                if plant.name in signal.emit and ec.enemy.name == triggerEnemy and ec.position == plant.position:
                     # Alarmprozess
                     self.processSignalAlarm(ec, dist, plant, signal, trigger)
                     # Produktionsprozess
@@ -627,7 +627,7 @@ class Grid():
                 for trigger in toxin.triggerCombination:
                     triggerSignal, triggerEnemy, minClusterSize = trigger
                     
-                    if plant in toxin.plantTransmitter and signal == triggerSignal and ec.enemy == triggerEnemy and ec.position == plant.position:
+                    if plant.name in toxin.plantTransmitter and signal.name == triggerSignal and ec.enemy.name == triggerEnemy and ec.position == plant.position:
                         # Alarmprozess
                         self.processToxinAlarm(ec, dist, plant, signal, toxin, trigger)
                         # Produktionsprozess
@@ -671,7 +671,7 @@ class Grid():
         for signal in self.signals:
             for trigger in signal.triggerCombination:
                 triggerEnemy, minClusterSize = trigger
-                if triggerEnemy == ec.enemy:
+                if triggerEnemy == ec.enemy.name:
                     self.symCommunication(ec, plant, signal)
                     self.airCommunication(ec, plant, signal)
                 if plant.currEnergy <= plant.minEnergy:
@@ -688,13 +688,13 @@ class Grid():
                     triggerSignal, triggerEnemy, minClusterSize = trigger
 
                     # Verarbeite nicht-tödliche Toxine
-                    if not toxin.deadly and plant.isToxinPresent(toxin) and ec.enemy == triggerEnemy and signal == triggerSignal and plant in toxin.plantTransmitter:
+                    if not toxin.deadly and plant.isToxinPresent(toxin) and ec.enemy.name == triggerEnemy and signal.name == triggerSignal and plant.name in toxin.plantTransmitter:
                         self.processNonDeadlyToxin(toxin, ec, plant, signal)
                         self.log.append(f'Nicht-tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
                         print(f'[DEBUG]: Nicht-tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
 
                     # Verarbeite tödliche Toxine
-                    elif toxin.deadly and plant.isToxinPresent(toxin) and plant in toxin.plantTransmitter:
+                    elif toxin.deadly and plant.isToxinPresent(toxin) and plant.name in toxin.plantTransmitter:
                         self.processDeadlyToxin(toxin, ec, plant, signal)
                         print(f'[DEBUG]: Tödliches Toxin ({toxin.name}) verarbeitet für {ec.enemy.name}')
 
@@ -715,7 +715,7 @@ class Grid():
         # Wende den Effekt des tödlichen Toxins auf den Feind an wenn er in dem Trigger vorhanden ist.
         for trigger in toxin.triggerCombination:
             triggerSignal, triggerEnemy, minClusterSize = trigger
-            if triggerEnemy == ec.enemy and triggerSignal == signal:
+            if triggerEnemy == ec.enemy.name and triggerSignal == signal.name:
                 toxin.empoisonEnemies(ec)
                 self.log.append(f'{ec.enemy.name} wurde durch {toxin.name} vergiftet\n')
                 print(f'[DEBUG]: {ec.enemy.name} wurde durch {toxin.name} vergiftet')
@@ -741,7 +741,7 @@ class Grid():
 
 
     def symCommunication(self, ec, plant, signal):
-        if plant in signal.emit and signal.spreadType == 'symbiotic':
+        if plant.name in signal.emit and signal.spreadType == 'symbiotic':
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
                 sPos, rPos = plantsPos
@@ -752,12 +752,12 @@ class Grid():
                         if len(rPlant.gridConnections) > 1 and (next_sPlant, next_rPlant) != (rPlant, sPlant):
                             self.symInteraction(next_sPlant, next_rPlant, signal, ec)
                 else:
-                    if sPlant == plant and sPlant.isSignalPresent(signal):
+                    if sPlant.name == plant.name and sPlant.isSignalPresent(signal):
                         self.symInteraction(sPlant, rPlant, signal, ec)
                 
 
     def symInteraction(self, sPlant, rPlant, signal, ec):
-        if rPlant in signal.receive:
+        if rPlant.name in signal.receive:
             if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
                 if not rPlant.isSignalPresent(signal):
                     self.log.append(f'{sPlant.name}{sPlant.position} ist verbunden mit {rPlant.name}{rPlant.position}\n')
@@ -780,7 +780,7 @@ class Grid():
 
 
     def airCommunication(self, ec, plant, signal):
-        if plant in signal.emit and signal.spreadType == 'air':
+        if plant.name in signal.emit and signal.spreadType == 'air':
             if plant.isSignalPresent(signal):
                 # Berechnung der Signalreichweite
                 radius = plant.airSignalRange(signal)
@@ -829,7 +829,7 @@ class Grid():
     
     def airInteraction(self, plant, signal, ec):
         for otherPlant in self.plants:
-            if otherPlant != plant and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant in signal.receive:
+            if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant in signal.receive:
                 sPlant, rPlant = plant, otherPlant
                 sPos, rPos = plant.position, otherPlant.position
                 if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:

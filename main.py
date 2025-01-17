@@ -75,9 +75,9 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=[p1, p2],
-              receive=[p1, p2],
-              triggerCombination=[[e1, 2]],
+              emit=['p1', 'p2'],
+              receive=['p1', 'p2'],
+              triggerCombination=[['e1', 2]],
               prodTime=2,
               spreadType='symbiotic',
               sendingSpeed=2,
@@ -85,9 +85,9 @@ sig1 = Signal(substance=s1,
               afterEffectTime=2)
 
 sig2 = Signal(substance=s2,
-              emit=[p1, p2, p3],
-              receive=[p1, p2, p3],
-              triggerCombination=[[e2, 2], [e1, 2]],
+              emit=['p1', 'p2', 'p3'],
+              receive=['p1', 'p2', 'p3'],
+              triggerCombination=[['e2', 2], ['e1', 2]],
               prodTime=3, 
               spreadType='air',
               sendingSpeed=3,
@@ -95,17 +95,17 @@ sig2 = Signal(substance=s2,
               afterEffectTime=5)
 
 tox1 = Toxin(substance=s3, 
-             plantTransmitter=[p1],
+             plantTransmitter=['p1'],
              energyCosts=1,
-             triggerCombination=[[sig1, e1, 2]],   
+             triggerCombination=[['s1', 'e1', 2]],   
              prodTime=5,
              deadly=True,
              eliminationStrength=3)
 
 tox2 = Toxin(substance=s4,
-             plantTransmitter=[p1],
+             plantTransmitter=['p1'],
              energyCosts=1,
-             triggerCombination=[[sig2, e2, 2]],   
+             triggerCombination=[['s2', 'e2', 2]],   
              prodTime=3,
              deadly=False,
              eliminationStrength=1)
@@ -128,12 +128,12 @@ sc1 = SymbioticConnection(p1, p2)
 sc2 = SymbioticConnection(p2, p3)
 
 #sc1.createConnection()
-#sc2.createConnection()
+sc2.createConnection()
 
 
 # Simulation
 sim = Simulation(grid)
-#sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 # Diagramme ohne GUI
 dia = Diagrams(grid)
