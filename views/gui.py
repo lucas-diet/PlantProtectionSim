@@ -1801,15 +1801,14 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			self.remove_fieldColor()
+			
 			self.show_signal()
-
+			self.show_toxin()
+			self.remove_fieldColor()
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
 				
-			
-
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
@@ -2009,31 +2008,30 @@ class Gui():
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				square_id = self.squares.get(plant.position)
-				if plant.isSignalPresent(signal) and square_id:
-					self.gridCanvas.itemconfig(square_id, outline='blue', width=2)
-				else:
-					self.gridCanvas.itemconfig(square_id, outline='black', width=1)
+				if square_id:
+					if any(plant.name == p.name for p in signal.emit):
+						if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):
+							self.gridCanvas.itemconfig(square_id, outline='yellow', width=5)
+						elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal):
+							self.gridCanvas.itemconfig(square_id, outline='blue', width=5)
+						else:
+							self.gridCanvas.itemconfig(square_id, outline='black', width=1)
 
+	
+	def show_toxin(self):
 
-
-
-
-
-
-
-		'''
-		for ec in self.grid.enemies:
-			for plant in self.grid.plants:
-				# Berechne die Distanz zwischen Feind und Zielpflanze
-				dist = self.grid.getDistance(ec.position, ec.targetPlant)
-
-				# Färbe die Umrandung des Rechtecks, wenn ein Alarm vorliegt
-				square_id = self.squares.get(plant.position)
-				
-				if square_id and ec.position == plant.position:
-					self.grid.plantAlarmAndSignalProd(ec, dist, plant)
-					self.gridCanvas.itemconfig(square_id, outline='blue', width=2)
-				else:
-					self.gridCanvas.itemconfig(square_id, outline='black', width=1)
-
-		'''
+		for plant in self.grid.plants:
+			for signal in self.grid.signals:
+				for toxin in self.grid.toxins:
+					square_id = self.squares.get(plant.position)
+					if square_id:
+						if any(plant.name == p.name for p in toxin.plantTransmitter):
+							if plant.isToxinAlarmed(toxin):
+								self.gridCanvas.itemconfig(square_id, outline='orange', width=5)
+							elif plant.isToxinPresent(toxin):
+								if not toxin.deadly:
+									self.gridCanvas.itemconfig(square_id, outline='lightcoral', width=5)
+								elif toxin.deadly:
+									self.gridCanvas.itemconfig(square_id, outline='darkred', width=5)
+							else:
+								self.gridCanvas.itemconfig(square_id, outline='black', width=1)
