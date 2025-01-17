@@ -1695,7 +1695,10 @@ class Gui():
 		emit_elements = input_producer.split(',') 
 		receive_elements = input_receiver.split(',')
 
-		trigger_list = [[self.find_object_by_name(part.strip(), self.grid.enemies) if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
+		# Extrahiere Enemy-Objekte aus der Liste der EnemyCluster
+		all_enemies = [cluster.enemy for cluster in self.grid.enemies if isinstance(cluster, EnemyCluster)]
+
+		trigger_list = [[self.find_object_by_name(part.strip(), all_enemies) if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
 		# Ersetze Strings in emit_list durch Objekte
 		emit_list = [self.find_object_by_name(part.strip(), self.grid.plants) for part in emit_elements]
 
@@ -1718,8 +1721,11 @@ class Gui():
 		trigger_elements = input_trigger.split(';')
 		producer_elements = input_producer.split(',')
 
+		# Extrahiere Enemy-Objekte aus der Liste der EnemyCluster
+		all_enemies = [cluster.enemy for cluster in self.grid.enemies if isinstance(cluster, EnemyCluster)]
+
 		trigger_list = [[self.find_object_by_name(part.strip(), self.grid.signals) if i == 0 
-							else self.find_object_by_name(part.strip(), self.grid.enemies) if i == 1
+							else self.find_object_by_name(part.strip(), all_enemies) if i == 1
             				else int(part.strip()) for i, part in enumerate(elem.split(','))] 
 							for elem in trigger_elements]
 		
@@ -1739,6 +1745,9 @@ class Gui():
 		for obj in object_list:
 			if isinstance(obj, EnemyCluster):
 				if obj.enemy.name == name:
+					return obj
+			if isinstance(obj, Enemy):
+				if obj.name == name:
 					return obj
 			if isinstance(obj, Plant):
 				if obj.name == name:
@@ -1794,6 +1803,8 @@ class Gui():
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.remove_fieldColor()
 			self.show_signal()
+
+
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
 				
@@ -1916,8 +1927,10 @@ class Gui():
 		try:
 			# Setze die Farbe auf Weiß
 			self.gridCanvas.itemconfig(canvas_id, fill='white')
-			del self.plant_at_position[canvas_id]  # Entferne die Pflanze aus der Position
-			self.remove_tooltip(canvas_id)  # Entferne den Tooltip, falls vorhanden
+			
+			current_outline = self.gridCanvas.itemcget(canvas_id, 'outline')  # Hole die aktuelle Outline-Farbe
+			if current_outline != 'black':
+				self.gridCanvas.itemconfig(canvas_id, outline='black', width=1)  # Setze die Umrandung zurück
 
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
@@ -1989,11 +2002,21 @@ class Gui():
 
 
 	def show_signal(self):
-		for ec_pos, list in self.enemies_at_positions.items():
-			for id, plant in self.plant_at_position.items():
-				dist = self.grid.getDistance(ec_pos, plant.position)
-				for ec in list:
-					self.grid.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
-					
-					for signal in self.grid.signals:
-						print(plant.isSignalPresent(signal))
+		"""
+		Prüft Feinde und Pflanzen und verarbeitet Signale basierend auf Alarmbedingungen.
+		Färbt außerdem das Umrandungsrechteck der Pflanze ein, wenn ein Signal ausgelöst wird.
+		"""
+		for ec in self.grid.enemies:
+			for plant in self.grid.plants:
+				# Berechne die Distanz zwischen Feind und Zielpflanze
+				dist = self.grid.getDistance(ec.position, ec.targetPlant)
+
+				# Färbe die Umrandung des Rechtecks, wenn ein Alarm vorliegt
+				square_id = self.squares.get(plant.position)
+				
+				if square_id and ec.position == plant.position:
+					self.grid.plantAlarmAndSignalProd(ec, dist, plant)
+					self.gridCanvas.itemconfig(square_id, outline='blue', width=2)
+				else:
+					self.gridCanvas.itemconfig(square_id, outline='black', width=1)
+
