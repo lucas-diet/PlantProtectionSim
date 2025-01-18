@@ -1811,7 +1811,7 @@ class Gui():
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
-			self.gridCanvas.after(100)
+			self.gridCanvas.after(200)
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
 
@@ -2004,27 +2004,26 @@ class Gui():
 		Wenn das Signal nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
 		"""
 		for plant in self.grid.plants:
-			for ec in self.grid.enemies:
-				square_id = self.squares.get(plant.position)
-				if square_id:
-					outline_color = 'black'  # Standardfarbe für den Rand
-					outline_width = 1
+			square_id = self.squares.get(plant.position)
+			if square_id:
 
-					# Überprüfen, ob die Pflanze das Signal produziert und ob es aktiv ist
-					for signal in self.grid.signals:
-						if any(plant.name == name for name in signal.emit):
-							if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):  # Signal alarmiert und aktiv
-								outline_color = 'gold'  # Signal alarmiert
-								outline_width = 2
-							elif plant.isSignalPresent(signal) and ec.getAfterEffectTime(plant, signal) > 0:  # Signal aktiv
-								outline_color = 'purple'  # Signal vorhanden, aber nicht alarmiert
-								outline_width = 2
-							else:
-								# Signal nicht mehr aktiv -> zurücksetzen
-								outline_color = 'black'
+				# Überprüfen, ob die Pflanze das Signal produziert und ob es aktiv ist
+				for signal in self.grid.signals:
+					if any(plant.name == name for name in signal.emit):
+						if any(plant.signalAlarms.values()):  # Signal alarmiert und aktiv
+							outline_color = 'gold'  # Signal alarmiert
+							outline_width = 4
+						elif any(plant.isSignalSignaling.values()):  # Signal aktiv
+							#print('1', ec.getAfterEffectTime(plant, signal))
+							outline_color = 'purple'  # Signal vorhanden, aber nicht alarmiert
+							outline_width = 4
+						else:
+							# Signal nicht mehr aktiv -> zurücksetzen
+							outline_color = 'black'
+							outline_width = 1
 
-					# Setze den Rand für das äußere Rechteck (Grid-Feld) mit dem richtigen Zustand
-					self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
+				# Setze den Rand für das äußere Rechteck (Grid-Feld) mit dem richtigen Zustand
+				self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
 
 
 
@@ -2037,22 +2036,20 @@ class Gui():
 		for plant in self.grid.plants:
 			square_id = self.squares.get(plant.position)
 			if square_id:
-				outline_color = 'black'  # Standardfarbe für den Rand
-				outline_width = 1
 
 				# Überprüfen, ob die Pflanze das Toxin produziert und ob es aktiv ist
 				for toxin in self.grid.toxins:
 					if any(plant.name == name for name in toxin.plantTransmitter):
-						if plant.isToxinAlarmed(toxin) and not plant.isToxinPresent(toxin):  # Toxin alarmiert und aktiv
+						if any(plant.toxinAlarms.values()):  # Toxin alarmiert und aktiv
 							outline_color = 'maroon'  # Toxin alarmiert
-							outline_width = 2
-						elif plant.isToxinPresent(toxin):  # Toxin vorhanden und aktiv
+							outline_width = 4
+						elif any(plant.isToxically.values()):  # Toxin vorhanden und aktiv
 							if not toxin.deadly:
 								outline_color = 'firebrick1'  # Signal vorhanden, aber nicht alarmiert
-								outline_width = 2
+								outline_width = 4
 							elif toxin.deadly:
 								outline_color = 'red4'  # Toxin ist tödlich
-								outline_width = 2
+								outline_width = 4
 						else:
 							# Toxin nicht mehr aktiv -> zurücksetzen
 							outline_color = 'black'
