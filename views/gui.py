@@ -2000,70 +2000,66 @@ class Gui():
 
 	def show_signals(self):
 		"""
-		Zeigt den Status von Signalen auf dem Spielfeld an.
-		Ränder werden nur geändert, wenn relevante Bedingungen erfüllt sind (z. B. Feind ist auf dem Feld).
+		Prüft, ob die Pflanze ein Signal produziert, und stellt den Signalstatus durch ein farbiges Rechteck dar.
+		Wenn das Signal nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
 		"""
 		for plant in self.grid.plants:
-			square_id = self.squares.get(plant.position)
-			if square_id:
-				outline_color = 'black'  # Standardfarbe für den Rand
-				outline_width = 1
-				signal_active = False  # Flag, um zu prüfen, ob ein Signal aktiv ist
+			for ec in self.grid.enemies:
+				square_id = self.squares.get(plant.position)
+				if square_id:
+					outline_color = 'black'  # Standardfarbe für den Rand
+					outline_width = 1
 
-				# Überprüfen, ob die Pflanze das Signal produziert und ob es aktiv ist
-				for signal in self.grid.signals:
-					if any(plant.name == name for name in signal.emit):
-						if plant.isSignalAlarmed(signal):  # Signal alarmiert und aktiv
-							outline_color = 'gold'  # Signal alarmiert
-							outline_width = 2
-							signal_active = True
-						elif plant.isSignalPresent(signal):  # Signal aktiv
-							outline_color = 'purple'  # Signal vorhanden, aber nicht alarmiert
-							outline_width = 2
-							signal_active = True
-						else:
-							# Signal nicht mehr aktiv -> zurücksetzen
-							outline_color = 'black'
+					# Überprüfen, ob die Pflanze das Signal produziert und ob es aktiv ist
+					for signal in self.grid.signals:
+						if any(plant.name == name for name in signal.emit):
+							if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):  # Signal alarmiert und aktiv
+								outline_color = 'gold'  # Signal alarmiert
+								outline_width = 2
+							elif plant.isSignalPresent(signal) and ec.getAfterEffectTime(plant, signal) > 0:  # Signal aktiv
+								outline_color = 'purple'  # Signal vorhanden, aber nicht alarmiert
+								outline_width = 2
+							else:
+								# Signal nicht mehr aktiv -> zurücksetzen
+								outline_color = 'black'
 
-				if signal_active:  # Nur Ränder aktualisieren, wenn ein Signal aktiv ist
+					# Setze den Rand für das äußere Rechteck (Grid-Feld) mit dem richtigen Zustand
 					self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
+
 
 
 
 	def show_toxins(self):
 		"""
-		Zeigt den Status von Toxinen auf dem Spielfeld an.
-		Ränder werden nur geändert, wenn relevante Bedingungen erfüllt sind (z. B. Feind ist auf dem Feld).
+		Prüft, ob die Pflanze ein Toxin produziert, und stellt den Toxinstatus durch ein farbiges Rechteck dar.
+		Wenn das Toxin nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
 		"""
 		for plant in self.grid.plants:
 			square_id = self.squares.get(plant.position)
 			if square_id:
 				outline_color = 'black'  # Standardfarbe für den Rand
 				outline_width = 1
-				toxin_active = False  # Flag, um zu prüfen, ob ein Toxin aktiv ist
 
 				# Überprüfen, ob die Pflanze das Toxin produziert und ob es aktiv ist
 				for toxin in self.grid.toxins:
 					if any(plant.name == name for name in toxin.plantTransmitter):
-						if plant.isToxinAlarmed(toxin):  # Toxin alarmiert und aktiv
+						if plant.isToxinAlarmed(toxin) and not plant.isToxinPresent(toxin):  # Toxin alarmiert und aktiv
 							outline_color = 'maroon'  # Toxin alarmiert
 							outline_width = 2
-							toxin_active = True
 						elif plant.isToxinPresent(toxin):  # Toxin vorhanden und aktiv
 							if not toxin.deadly:
 								outline_color = 'firebrick1'  # Signal vorhanden, aber nicht alarmiert
 								outline_width = 2
-								toxin_active = True
 							elif toxin.deadly:
 								outline_color = 'red4'  # Toxin ist tödlich
 								outline_width = 2
-								toxin_active = True
 						else:
 							# Toxin nicht mehr aktiv -> zurücksetzen
 							outline_color = 'black'
 							outline_width = 1
 
-				if toxin_active:  # Nur Ränder aktualisieren, wenn ein Toxin aktiv ist
-					self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
+				# Setze den Rand für das äußere Rechteck (Grid-Feld) mit dem richtigen Zustand
+				self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
+
 
 

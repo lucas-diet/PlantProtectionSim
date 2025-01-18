@@ -591,7 +591,7 @@ class Grid():
         Verarbeitet die Nachwirkzeit eines Signals für eine Pflanze.
         """
         # Überprüfen, ob das Signal behandelt werden soll
-        if not (plant in signal.emit and ec.isPlantInLastVisits(plant) and plant.isSignalPresent(signal)):
+        if not (plant.name in signal.emit and ec.isPlantInLastVisits(plant) and plant.isSignalPresent(signal)):
             return
 
         # Holen der aktuellen Nachwirkzeit
@@ -600,13 +600,13 @@ class Grid():
         # Reduziere die Nachwirkzeit, falls sie größer als 0 ist
         for trigger in signal.triggerCombination:
             triggerEnemy, minClusterSize = trigger
-            if currAfterEffectTime > 0 and ec.enemy == triggerEnemy:
+            if currAfterEffectTime > 0 and ec.enemy.name == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
                 self.log.append(f'Reduziere Nachwirkzeit für {plant.name}({signal.name}, {ec.enemy.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
                 print(f'[DEBUG]: Reduziere Nachwirkzeit für {plant.name}({signal.name}, {ec.enemy.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
 
             # Wenn die Nachwirkzeit abgelaufen ist
-            if currAfterEffectTime < 1 and ec.enemy == triggerEnemy:
+            if currAfterEffectTime < 1 and ec.enemy.name == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
                 plant.setSignalPresence(signal, False)
                 self.log.append(f'Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
