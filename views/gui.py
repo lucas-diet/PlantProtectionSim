@@ -1695,9 +1695,6 @@ class Gui():
 		emit_elements = input_producer.split(',') 
 		receive_elements = input_receiver.split(',')
 
-		# Extrahiere Enemy-Objekte aus der Liste der EnemyCluster
-		all_enemies = [cluster.enemy for cluster in self.grid.enemies if isinstance(cluster, EnemyCluster)]
-
 		trigger_list = [[part.strip() if i == 0 else int(part.strip()) for i, part in enumerate(elem.split(','))] for elem in trigger_elements]
 		# Ersetze Strings in emit_list durch Objekte
 		emit_list = [part.strip() for part in emit_elements]
@@ -1714,6 +1711,7 @@ class Gui():
 						sendingSpeed=int(input_sendSpeed),
 						energyCosts=int(input_energyCost),
 						afterEffectTime=int(input_afterEffectTime))
+
 		return sig
 	
 
@@ -1802,8 +1800,8 @@ class Gui():
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 			
-			self.show_signal()
-			self.show_toxin()
+			self.show_signals()
+			self.show_toxins()
 			self.remove_fieldColor()
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
@@ -1892,7 +1890,6 @@ class Gui():
 			self.gridCanvas.itemconfig(square_id, fill=offspring.color)  # Ändere die Farbe des Quadrats
 			self.plant_at_position[square_id] = offspring  # Aktualisiere die Pflanze an der Position
 			self.plantDetails(offspring, square_id)  # Zeige Pflanzendetails an
-			#print(f'Nachkomme {offspring.name} wurde auf Position {offspring_position} eingefärbt.')
 
 		else:
 			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
@@ -2001,38 +1998,72 @@ class Gui():
 			self.enemies_at_positions[new_position].append(cluster)
 
 
-	def show_signal(self):
+	def show_signals(self):
 		"""
-		Prüft Feinde und Pflanzen und verarbeitet Signale basierend auf Alarmbedingungen.
-		Färbt außerdem das Umrandungsrechteck der Pflanze ein, wenn ein Signal ausgelöst wird.
+		Zeigt den Status von Signalen auf dem Spielfeld an.
+		Ränder werden nur geändert, wenn relevante Bedingungen erfüllt sind (z. B. Feind ist auf dem Feld).
 		"""
 		for plant in self.grid.plants:
-			for signal in self.grid.signals:
-				square_id = self.squares.get(plant.position)
-				if square_id:
+			square_id = self.squares.get(plant.position)
+			if square_id:
+				outline_color = 'black'  # Standardfarbe für den Rand
+				outline_width = 1
+				signal_active = False  # Flag, um zu prüfen, ob ein Signal aktiv ist
+
+				# Überprüfen, ob die Pflanze das Signal produziert und ob es aktiv ist
+				for signal in self.grid.signals:
 					if any(plant.name == name for name in signal.emit):
-						if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):
-							self.gridCanvas.itemconfig(square_id, outline='yellow', width=5)
-						elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal):
-							self.gridCanvas.itemconfig(square_id, outline='blue', width=5)
+						if plant.isSignalAlarmed(signal):  # Signal alarmiert und aktiv
+							outline_color = 'gold'  # Signal alarmiert
+							outline_width = 2
+							signal_active = True
+						elif plant.isSignalPresent(signal):  # Signal aktiv
+							outline_color = 'purple'  # Signal vorhanden, aber nicht alarmiert
+							outline_width = 2
+							signal_active = True
 						else:
-							self.gridCanvas.itemconfig(square_id, outline='black', width=1)
+							# Signal nicht mehr aktiv -> zurücksetzen
+							outline_color = 'black'
 
-	
-	def show_toxin(self):
+				if signal_active:  # Nur Ränder aktualisieren, wenn ein Signal aktiv ist
+					self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
 
+
+
+	def show_toxins(self):
+		"""
+		Zeigt den Status von Toxinen auf dem Spielfeld an.
+		Ränder werden nur geändert, wenn relevante Bedingungen erfüllt sind (z. B. Feind ist auf dem Feld).
+		"""
 		for plant in self.grid.plants:
-			for signal in self.grid.signals:
+			square_id = self.squares.get(plant.position)
+			if square_id:
+				outline_color = 'black'  # Standardfarbe für den Rand
+				outline_width = 1
+				toxin_active = False  # Flag, um zu prüfen, ob ein Toxin aktiv ist
+
+				# Überprüfen, ob die Pflanze das Toxin produziert und ob es aktiv ist
 				for toxin in self.grid.toxins:
-					square_id = self.squares.get(plant.position)
-					if square_id:
-						if any(plant.name == name for name in toxin.plantTransmitter):
-							if plant.isToxinAlarmed(toxin):
-								self.gridCanvas.itemconfig(square_id, outline='orange', width=5)
-							elif plant.isToxinPresent(toxin):
-								if not toxin.deadly:
-									self.gridCanvas.itemconfig(square_id, outline='lightcoral', width=5)
-								elif toxin.deadly:
-									self.gridCanvas.itemconfig(square_id, outline='darkred', width=5)
-							else:
-								self.gridCanvas.itemconfig(square_id, outline='black', width=1)
+					if any(plant.name == name for name in toxin.plantTransmitter):
+						if plant.isToxinAlarmed(toxin):  # Toxin alarmiert und aktiv
+							outline_color = 'maroon'  # Toxin alarmiert
+							outline_width = 2
+							toxin_active = True
+						elif plant.isToxinPresent(toxin):  # Toxin vorhanden und aktiv
+							if not toxin.deadly:
+								outline_color = 'firebrick1'  # Signal vorhanden, aber nicht alarmiert
+								outline_width = 2
+								toxin_active = True
+							elif toxin.deadly:
+								outline_color = 'red4'  # Toxin ist tödlich
+								outline_width = 2
+								toxin_active = True
+						else:
+							# Toxin nicht mehr aktiv -> zurücksetzen
+							outline_color = 'black'
+							outline_width = 1
+
+				if toxin_active:  # Nur Ränder aktualisieren, wenn ein Toxin aktiv ist
+					self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
+
+
