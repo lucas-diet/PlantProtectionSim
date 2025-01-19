@@ -966,12 +966,37 @@ class Gui():
 		self.squares = {}
 		for i in range(height):
 			for j in range(width):
-				x1 = x_offset + i * square_width
-				y1 = y_offset + j * square_height
-				x2 = x1 + square_width
-				y2 = y1 + square_height 
-				squareID = self.gridCanvas.create_rectangle(x1, y1, x2, y2, outline='black', fill='white', width=1)
-				self.squares[(i,j)] = squareID
+				# Koordinaten für das äußere Rechteck
+				outer_x1 = x_offset + i * square_width
+				outer_y1 = y_offset + j * square_height
+				outer_x2 = outer_x1 + square_width
+				outer_y2 = outer_y1 + square_height
+
+				# Zeichne das äußere Rechteck
+				outer_square_id = self.gridCanvas.create_rectangle(
+					outer_x1, outer_y1, outer_x2, outer_y2,
+					outline='black', fill='white', width=1
+				)
+
+				# Koordinaten für das innere Rechteck (leicht verkleinert)
+				margin = min(square_width, square_height) * 0.08  # 10% der kleineren Dimension
+
+				inner_x1 = outer_x1 + margin+2
+				inner_y1 = outer_y1 + margin+2
+				inner_x2 = outer_x2 - margin
+				inner_y2 = outer_y2 - margin
+
+				# Zeichne das innere Rechteck
+				inner_square_id = self.gridCanvas.create_rectangle(
+					inner_x1, inner_y1, inner_x2, inner_y2,
+					outline='', fill='white', width=1
+				)
+
+				# Speichere die IDs des inneren und äußeren Rechtecks
+				self.squares[(i, j)] = {
+					'outer': outer_square_id,
+					'inner': inner_square_id
+				}
 
 
 	def on_GridClick_player(self, event):
@@ -982,13 +1007,13 @@ class Gui():
 
 			# Finde die (x, y)-Koordinaten der angeklickten Zelle
 			clicked_position = None
-			for position, id in self.squares.items():
-				if id == item_id:
+			for position, ids in self.squares.items():
+				if ids['inner'] == item_id:  # Überprüfen, ob der Klick das innere Rechteck getroffen hat
 					clicked_position = position
 					break
 
 			if clicked_position is None:
-				print(f'Zelle mit ID {item_id} nicht gefunden.')
+				print(f'Zelle mit innerer ID {item_id} nicht gefunden.')
 				return
 
 			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
@@ -1004,14 +1029,17 @@ class Gui():
 				self.enemyClusterPlacer(clicked_position, selected_index)
 
 
+
 	def plantPlacer(self, position, selected_index):
 		"""
 		Platziert eine Pflanze auf dem Grid an den gegebenen Koordinaten (x, y).
 		Zeigt die Energie der Pflanze oben innerhalb der Zelle an.
 		"""
-		square_id = self.squares.get(position)
+		square_ids = self.squares.get(position)
 		
-		if square_id:
+		if square_ids:  # Sicherstellen, dass die Position im Grid existiert
+			inner_id = square_ids['inner']  # Nur den inneren Bereich ansprechen
+			
 			# Hole die Eingabewerte für die Pflanze
 			plant_entries = self.plant_entries[selected_index]
 			
@@ -1028,13 +1056,13 @@ class Gui():
 				self.error_plants.config(text='Error: All fields must be filled in!', fg='red')
 				return  # Beende die Funktion ohne die Pflanze hinzuzufügen
 
-			# Färbe die angeklickte Zelle
+			# Färbe den **inneren** Bereich der angeklickten Zelle
 			plant_color = self.PLANT_COLORS[selected_index]
-			self.gridCanvas.itemconfig(square_id, fill=plant_color)
+			self.gridCanvas.itemconfig(inner_id, fill=plant_color)
 			
 			# Erzeuge und füge Pflanze hinzu
 			plant = self.create_add_plant(selected_index, position, init_energy, growth_rate, min_energy, repro_interval, off_energy, min_dist, max_dist, plant_color)
-			self.plantDetails(plant, square_id)
+			self.plantDetails(plant, inner_id)
 	
 
 	def get_plantInputs(self, plant_entries):
@@ -1072,17 +1100,17 @@ class Gui():
 
 		# Pflanze instanziieren
 		plant = Plant(
-				name=f'p{selected_index + 1}',
-				initEnergy=init_energy,
-				growthRateEnergy=growth_rate,
-				minEnergy=min_energy,
-				reproductionInterval=repro_interval,
-				offspringEnergy=off_energy,
-				minDist=min_dist,
-				maxDist=max_dist,
-				position=position,
-				grid=self.grid,
-				color=plant_color)
+			name=f'p{selected_index + 1}',
+			initEnergy=init_energy,
+			growthRateEnergy=growth_rate,
+			minEnergy=min_energy,
+			reproductionInterval=repro_interval,
+			offspringEnergy=off_energy,
+			minDist=min_dist,
+			maxDist=max_dist,
+			position=position,
+			grid=self.grid,
+			color=plant_color)
 
 		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
 
@@ -1090,17 +1118,19 @@ class Gui():
 		if plant not in self.grid.plants:
 			self.grid.addPlant(plant)
 			
-			# Hole die Square-ID für diese Position
-			square_id = self.squares.get(plant.position)
+			# Hole die Square-IDs für diese Position (inner und outer)
+			square_ids = self.squares.get(plant.position)
 			
-			if square_id:
-				self.plant_at_position[square_id] = plant
+			if square_ids:
+				inner_id = square_ids['inner']  # ID für den inneren Bereich
+				self.plant_at_position[inner_id] = plant
 			else:
-				print(f'Fehler: Keine gültige Square-ID für Position {plant.position}')
+				print(f'Fehler: Keine gültigen Square-IDs für Position {plant.position}')
 
 		else:
 			pass
 		return plant
+
 
 	
 	def plantDetails(self, plant, square_id):
@@ -1159,9 +1189,11 @@ class Gui():
 		"""
 		Platziert einen Feind-Cluster auf dem Grid an den gegebenen Koordinaten (x, y).
 		"""
-		square_id = self.squares.get(clicked_position)
+		square_ids = self.squares.get(clicked_position)
 
-		if square_id:
+		if square_ids:
+			# Hole die ID des äußeren Bereichs (outer) - für Feind-Visualisierung
+			inner_id = square_ids['inner']
 			# Übersetze den Index
 			actual_index = self.enemy_index_mapping[selected_index]
 			enemy_entries = self.enemy_entries[actual_index]
@@ -1182,6 +1214,7 @@ class Gui():
 			# Färbe die angeklickte Zelle
 			eCluster = self.create_add_cluster(selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory)
 			self.clusterMarker(clicked_position, selected_index, eCluster)
+
 
 
 	def get_enemyInputs(self, enemy_entries):
@@ -1243,23 +1276,33 @@ class Gui():
 
 	def get_cellPosition(self, position):
 		"""
-		Berechnet die Position der Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
+		Berechnet die Position der inneren Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
 		"""
-		square_id = self.squares.get(position)  # Erhalte die Zellen-ID von den Koordinaten
-		if square_id is None:
+		# Hole die Square-IDs für die gegebene Position
+		square_ids = self.squares.get(position)  # Erhalte die IDs (inner/outer) von den Koordinaten
+		if square_ids is None:
 			print(f'Fehler: Keine Zelle mit den Koordinaten {position} gefunden.')
 			return None  # Zelle nicht gefunden
 
-		bbox = self.gridCanvas.bbox(square_id)
+		# Verwende die ID des inneren Bereichs ('inner')
+		inner_id = square_ids.get('inner')
+		if inner_id is None:
+			print(f'Fehler: Keine innere Zelle für die Koordinaten {position} gefunden.')
+			return None  # Innerer Bereich nicht gefunden
+
+		# Hole die Bounding Box der inneren Zelle
+		bbox = self.gridCanvas.bbox(inner_id)
 		if bbox is None:
-			print(f'Fehler: Keine Bounding Box für die Zelle mit item_id {square_id} gefunden.')
+			print(f'Fehler: Keine Bounding Box für die Zelle mit item_id {inner_id} gefunden.')
 			return None  # Bounding Box nicht gefunden
 
+		# Berechne die zentrale Position der inneren Zelle
 		cell_width = bbox[2] - bbox[0]
 		cell_height = bbox[3] - bbox[1]
 		x_pos = bbox[0] + cell_width / 2
 		y_pos = bbox[1] + cell_height / 2
 
+		# Positionen für Feinde in der Zelle berücksichtigen
 		if not hasattr(self, 'enemy_positions'):
 			self.enemy_positions = {}
 
@@ -1270,6 +1313,7 @@ class Gui():
 		y_pos += current_enemy_count * 15  # Verschiebe die Y-Position für mehrere Feinde in derselben Zelle
 
 		return x_pos, y_pos
+
 	
 	
 	def create_clusterCircle(self, x_pos, y_pos, enemy_name): 
@@ -1339,20 +1383,24 @@ class Gui():
 
 
 	def on_GridRightClick(self, event):
-		# Ermittle die angeklickte Zelle
+		"""
+		Behandelt Rechtsklicks auf das Grid und zeigt ein Popup an, wenn der innere Bereich einer Zelle geklickt wird.
+		"""
+		# Ermittle das angeklickte Canvas-Element
 		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
 		if clicked_item:
 			item_id = clicked_item[0]
 
-			# Finde die (x, y)-Koordinaten der angeklickten Zelle
+			# Finde die (x, y)-Koordinaten der angeklickten Zelle basierend auf der inner-ID
 			clicked_position = None
-			for position, id in self.squares.items():
-				if id == item_id:
+			for position, ids in self.squares.items():
+				inner_id = ids.get('inner')  # Hole die ID des inneren Bereichs
+				if inner_id == item_id:  # Überprüfe, ob die geklickte ID mit der inner-ID übereinstimmt
 					clicked_position = position
 					break
 
 			if clicked_position is None:
-				print(f'Zelle mit ID {item_id} nicht gefunden.')
+				print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
 				return
 
 			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
@@ -1799,10 +1847,12 @@ class Gui():
 			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
-			
+
+			self.gridCanvas.after(10)
 			self.show_signals()
 			self.show_toxins()
 			self.remove_fieldColor()
+			self.gridCanvas.after(10)
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
@@ -1865,35 +1915,40 @@ class Gui():
 			self.add_offspring_to_grid(offspring, offspring_position)
 
 
-	def add_offspring_to_grid(self, offspring, offspring_position):
+	def on_GridRightClick(self, event):
 		"""
-		Fügt das Nachkommen zum Grid hinzu und zeigt es auf der Canvas, wenn das Feld frei ist.
-		Die Farbe des Feldes wird eingefärbt, und Felder können mehrfach genutzt werden.
+		Behandelt Rechtsklicks auf das Grid und zeigt ein Popup an, wenn der innere Bereich einer Zelle geklickt wird.
 		"""
-		# Prüfe, ob das Feld bereits existiert (es sollte aufgrund von drawGrid existieren)
-		if offspring_position in self.squares:
-			# Hole die ID des Rechtecks für diese Position
-			square_id = self.squares[offspring_position]
-		
-			# Falls es eine Pflanze auf dieser Position gibt, entfernen wir diese, falls sie tot ist
-			existing_plant = self.plant_at_position.get(offspring_position)
-			if existing_plant and existing_plant.currEnergy < existing_plant.minEnergy:
-				self.gridCanvas.itemconfig(square_id, fill='white')  # Setze das Feld auf Weiß
-				del self.plant_at_position[offspring_position]  # Entferne die Pflanze aus der Position
+		# Ermittle das angeklickte Canvas-Element
+		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
+		if clicked_item:
+			item_id = clicked_item[0]
 
-			# Füge das Nachkommen zum Grid hinzu
-			if offspring not in self.grid.plants:
-				self.grid.addPlant(offspring)
-				#print(f'Nachkomme {offspring.name} wurde dem Grid hinzugefügt.')
+			# Finde die (x, y)-Koordinaten der angeklickten Zelle basierend auf der inner-ID
+			clicked_position = None
+			for position, ids in self.squares.items():
+				inner_id = ids.get('inner')  # Hole die ID des inneren Bereichs
+				if inner_id == item_id:  # Überprüfe, ob die geklickte ID mit der inner-ID übereinstimmt
+					clicked_position = position
+					break
 
-			# Aktualisiere die Canvas-Farbe des Rechtecks und das Mapping
-			self.gridCanvas.itemconfig(square_id, fill=offspring.color)  # Ändere die Farbe des Quadrats
-			self.plant_at_position[square_id] = offspring  # Aktualisiere die Pflanze an der Position
-			self.plantDetails(offspring, square_id)  # Zeige Pflanzendetails an
+			if clicked_position is None:
+				print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
+				return
 
-		else:
-			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
-			print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
+			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
+			selected_index = self.selectedItem.get()
+			if selected_index == -1:
+				# Keine Auswahl getroffen
+				return
+
+			# Überprüfe, ob an dieser Position eine Pflanze existiert
+			plant = self.grid.getPlantAt(clicked_position)
+			if plant:
+				# Zeige das Popup nur, wenn eine Pflanze existiert
+				self.show_popup(clicked_position, event)
+			else:
+				print(f'Keine Pflanze an Position {clicked_position}.')
 
 
 	def remove_fieldColor(self):
@@ -1921,13 +1976,16 @@ class Gui():
 		Setzt die Farbe des Feldes auf Weiß und entfernt alle Verbindungen, wenn die Pflanze tot ist.
 		"""
 		try:
-			# Setze die Farbe auf Weiß
-			self.gridCanvas.itemconfig(canvas_id, fill='white')
-			
-			current_outline = self.gridCanvas.itemcget(canvas_id, 'outline')  # Hole die aktuelle Outline-Farbe
-			if current_outline != 'black':
-				self.gridCanvas.itemconfig(canvas_id, outline='black', width=1)  # Setze die Umrandung zurück
 
+			# Hole das äußere Rechteck
+			square_ids = self.squares.get(plant.position)
+			if square_ids:
+				outer_square_id = square_ids['outer']
+				# Setze auch das äußere Rechteck auf Weiß
+				self.gridCanvas.itemconfig(outer_square_id, fill='white')
+			
+			# Setze die Farbe auf Weiß für das innere Rechteck
+			self.gridCanvas.itemconfig(canvas_id, fill='white')
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
 			self.remove_tooltip(canvas_id)
@@ -2004,28 +2062,22 @@ class Gui():
 		Wenn das Signal nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
 		"""
 		for plant in self.grid.plants:
-			square_id = self.squares.get(plant.position)
-			if square_id:
+			square_ids = self.squares.get(plant.position)
+			if square_ids:
+				square_id = square_ids['outer']
 
-				# Überprüfen, ob die Pflanze das Signal produziert und ob es aktiv ist
 				for signal in self.grid.signals:
-					if any(plant.name == name for name in signal.emit):
-						if any(plant.signalAlarms.values()):  # Signal alarmiert und aktiv
-							outline_color = 'gold'  # Signal alarmiert
-							outline_width = 4
-						elif any(plant.isSignalSignaling.values()):  # Signal aktiv
-							#print('1', ec.getAfterEffectTime(plant, signal))
-							outline_color = 'purple'  # Signal vorhanden, aber nicht alarmiert
-							outline_width = 4
-						else:
-							# Signal nicht mehr aktiv -> zurücksetzen
-							outline_color = 'black'
-							outline_width = 1
+					# Überprüfen der Signale
+					if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):  # Signal alarmiert und aktiv
+						fill_color = 'yellow'  # Füllfarbe gelb für Alarm
+					elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal):  # Signal aktiv, aber nicht alarmiert
+						fill_color = 'orange'  # Füllfarbe orange für Signal
+					else:
+						# Setze Standardfarbe auf Weiß
+						fill_color = 'white'
 
-				# Setze den Rand für das äußere Rechteck (Grid-Feld) mit dem richtigen Zustand
-				self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
-
-
+				# Setze die Füllfarbe des äußeren Rechtecks
+				self.gridCanvas.itemconfig(square_id, fill=fill_color)
 
 
 	def show_toxins(self):
@@ -2034,29 +2086,26 @@ class Gui():
 		Wenn das Toxin nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
 		"""
 		for plant in self.grid.plants:
-			square_id = self.squares.get(plant.position)
-			if square_id:
+			square_ids = self.squares.get(plant.position)
+			if square_ids:
+				square_id = square_ids['outer']
 
-				# Überprüfen, ob die Pflanze das Toxin produziert und ob es aktiv ist
-				for toxin in self.grid.toxins:
-					if any(plant.name == name for name in toxin.plantTransmitter):
-						if any(plant.toxinAlarms.values()):  # Toxin alarmiert und aktiv
-							outline_color = 'maroon'  # Toxin alarmiert
-							outline_width = 4
-						elif any(plant.isToxically.values()):  # Toxin vorhanden und aktiv
+				# Setze einen Standardwert für fill_color
+				fill_color = 'white'  # Standardfarbe für das Rechteck, falls keine Bedingung zutrifft
+
+				for signal in self.grid.signals:
+					# Überprüfen, ob die Pflanze das Toxin produziert und ob es aktiv ist
+					for toxin in self.grid.toxins:
+						if not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal) and plant.isToxinAlarmed(toxin):  # Toxin alarmiert und aktiv
+							fill_color = 'purple'  # Toxin alarmiert
+						elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal) and not plant.isToxinAlarmed(toxin) and plant.isToxinPresent(toxin):  # Toxin vorhanden und aktiv
 							if not toxin.deadly:
-								outline_color = 'firebrick1'  # Signal vorhanden, aber nicht alarmiert
-								outline_width = 4
+								fill_color = 'blue'  # Signal vorhanden, aber nicht alarmiert
 							elif toxin.deadly:
-								outline_color = 'red4'  # Toxin ist tödlich
-								outline_width = 4
-						else:
-							# Toxin nicht mehr aktiv -> zurücksetzen
-							outline_color = 'black'
-							outline_width = 1
+								fill_color = 'red'  # Toxin ist tödlich
 
-				# Setze den Rand für das äußere Rechteck (Grid-Feld) mit dem richtigen Zustand
-				self.gridCanvas.itemconfig(square_id, outline=outline_color, width=outline_width)
+				# Setze den Rand für das äußere Rechteck (Grid-Feld) mit der richtigen Farbe
+				self.gridCanvas.itemconfig(square_id, fill=fill_color)
 
 
 
