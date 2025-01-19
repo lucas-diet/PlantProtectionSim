@@ -1849,18 +1849,19 @@ class Gui():
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 
-			self.show_substance()
 			self.remove_fieldColor()
 			self.gridCanvas.after(10)
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
+
+			self.show_substance()
 				
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
-			self.gridCanvas.after(200)
+			self.gridCanvas.after(150)
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
 
@@ -1961,12 +1962,11 @@ class Gui():
 				# Überprüfe, ob die Pflanze null oder tot ist
 				if not plant:
 					continue
-				
+				self.gridCanvas.after(10)
 				# Hole die aktuelle Farbe des Feldes
 				current_color = self.gridCanvas.itemcget(gridID, 'fill')
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy and current_color != 'white':
-					#print(f'Setze Farbe auf weiß für {gridID} (Pflanze tot).')
 					self.set_white(gridID, plant)
 					
 
