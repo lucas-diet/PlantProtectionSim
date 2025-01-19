@@ -1848,7 +1848,6 @@ class Gui():
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 
-			self.gridCanvas.after(10)
 			self.show_signals()
 			self.show_toxins()
 			self.remove_fieldColor()
@@ -1976,7 +1975,6 @@ class Gui():
 		Setzt die Farbe des Feldes auf Weiß und entfernt alle Verbindungen, wenn die Pflanze tot ist.
 		"""
 		try:
-
 			# Hole das äußere Rechteck
 			square_ids = self.squares.get(plant.position)
 			if square_ids:
@@ -2057,55 +2055,50 @@ class Gui():
 
 
 	def show_signals(self):
-		"""
-		Prüft, ob die Pflanze ein Signal produziert, und stellt den Signalstatus durch ein farbiges Rechteck dar.
-		Wenn das Signal nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
-		"""
+
 		for plant in self.grid.plants:
 			square_ids = self.squares.get(plant.position)
 			if square_ids:
 				square_id = square_ids['outer']
 
-				for signal in self.grid.signals:
-					# Überprüfen der Signale
-					if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):  # Signal alarmiert und aktiv
-						fill_color = 'yellow'  # Füllfarbe gelb für Alarm
-					elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal):  # Signal aktiv, aber nicht alarmiert
-						fill_color = 'orange'  # Füllfarbe orange für Signal
-					else:
-						# Setze Standardfarbe auf Weiß
-						fill_color = 'white'
+				# Prüfen, welche Farbe angewendet werden soll
+				if any(plant.signalAlarms.values()):  # Signal alarmiert und aktiv
+					new_fill_color = 'yellow'
+				elif any(plant.isSignalSignaling.values()):  # Signal präsent, aber keine Alarmierung
+					new_fill_color = 'orange'
+				else:
+					new_fill_color = 'white'
 
-				# Setze die Füllfarbe des äußeren Rechtecks
-				self.gridCanvas.itemconfig(square_id, fill=fill_color)
+				# Aktuelle Farbe des Rechtecks abfragen
+				current_fill_color = self.gridCanvas.itemcget(square_id, 'fill')
+
+				# Nur aktualisieren, wenn die Farbe sich geändert hat
+				if current_fill_color != new_fill_color:
+					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
+					print(f"[DEBUG] Updated color for plant {plant.name} at {plant.position}: {new_fill_color}")
 
 
 	def show_toxins(self):
-		"""
-		Prüft, ob die Pflanze ein Toxin produziert, und stellt den Toxinstatus durch ein farbiges Rechteck dar.
-		Wenn das Toxin nicht mehr aktiv ist (Nachwirkzeit abgelaufen), wird der Rand zurückgesetzt.
-		"""
+
 		for plant in self.grid.plants:
 			square_ids = self.squares.get(plant.position)
 			if square_ids:
 				square_id = square_ids['outer']
 
-				# Setze einen Standardwert für fill_color
-				fill_color = 'white'  # Standardfarbe für das Rechteck, falls keine Bedingung zutrifft
+				# Hierarchische Prüfung der Farben
+				if any(plant.toxinAlarms.values()):  # Toxin alarmiert
+					new_fill_color = 'purple'
+				elif any(plant.isToxically.values()):  # Toxin vorhanden
+					new_fill_color = 'red'
+				else:
+					# Standardfarbe
+					new_fill_color = 'white'
 
-				for signal in self.grid.signals:
-					# Überprüfen, ob die Pflanze das Toxin produziert und ob es aktiv ist
-					for toxin in self.grid.toxins:
-						if not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal) and plant.isToxinAlarmed(toxin):  # Toxin alarmiert und aktiv
-							fill_color = 'purple'  # Toxin alarmiert
-						elif not plant.isSignalAlarmed(signal) and plant.isSignalPresent(signal) and not plant.isToxinAlarmed(toxin) and plant.isToxinPresent(toxin):  # Toxin vorhanden und aktiv
-							if not toxin.deadly:
-								fill_color = 'blue'  # Signal vorhanden, aber nicht alarmiert
-							elif toxin.deadly:
-								fill_color = 'red'  # Toxin ist tödlich
+				# Aktuelle Farbe des Rechtecks abfragen
+				current_fill_color = self.gridCanvas.itemcget(square_id, 'fill')
 
-				# Setze den Rand für das äußere Rechteck (Grid-Feld) mit der richtigen Farbe
-				self.gridCanvas.itemconfig(square_id, fill=fill_color)
-
-
+				# Nur aktualisieren, wenn die Farbe sich geändert hat
+				if current_fill_color != new_fill_color:
+					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
+					print(f"[DEBUG] Updated color for plant {plant.name} at {plant.position}: {new_fill_color}")
 

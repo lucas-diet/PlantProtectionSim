@@ -37,7 +37,7 @@ p1 = Plant(name='p1',
            grid=grid,
            color=PLANT_COLORS)
     
-p2 = Plant(name='p2', 
+p2 = Plant(name='p1', 
            initEnergy=100,
            growthRateEnergy=2,
            minEnergy=50, 
@@ -75,31 +75,31 @@ s3 = Substance(name='s3', type='toxin')
 s4 = Substance(name='s4', type='toxin')
 
 sig1 = Signal(substance=s1,
-              emit=['p1', 'p2'],
-              receive=['p1', 'p2'],
+              emit=['p1'],
+              receive=['p1'],
               triggerCombination=[['e1', 2]],
               prodTime=2,
               spreadType='symbiotic',
               sendingSpeed=2,
               energyCosts=3,
-              afterEffectTime=2)
+              afterEffectTime=10)
 
 sig2 = Signal(substance=s2,
-              emit=['p1', 'p2', 'p3'],
-              receive=['p1', 'p2', 'p3'],
-              triggerCombination=[['e2', 2], ['e1', 2]],
+              emit=['p1'],
+              receive=['p1'],
+              triggerCombination=[['e1', 2]],
               prodTime=3, 
               spreadType='air',
               sendingSpeed=3,
               energyCosts=1,
-              afterEffectTime=5)
+              afterEffectTime=3)
 
 tox1 = Toxin(substance=s3, 
              plantTransmitter=['p1'],
              energyCosts=1,
-             triggerCombination=[['s1', 'e1', 2]],   
-             prodTime=5,
-             deadly=True,
+             triggerCombination=[['s1', 'e1', 1]],   
+             prodTime=2,
+             deadly=False,
              eliminationStrength=3)
 
 tox2 = Toxin(substance=s4,
@@ -112,16 +112,16 @@ tox2 = Toxin(substance=s4,
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-grid.addPlant(p3)
+#grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
-grid.addEnemies(ec3)
+#grid.addEnemies(ec2)
+#grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)
-grid.addSubstance(sig2)
+#grid.addSubstance(sig2)
 grid.addSubstance(tox1)
-grid.addSubstance(tox2)
+#grid.addSubstance(tox2)
     
 
 sc1 = SymbioticConnection(p1, p2)
@@ -133,7 +133,7 @@ sc2.createConnection()
 
 # Simulation
 sim = Simulation(grid)
-#sim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 # Diagramme ohne GUI
 dia = Diagrams(grid)
@@ -158,4 +158,4 @@ dia = Diagrams(grid)
 #sim.logLoader('log.pkl')
 
 gui = Gui()
-gui.mainloop()
+#gui.mainloop()

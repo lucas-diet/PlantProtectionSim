@@ -571,6 +571,10 @@ class Grid():
         """
         Verarbeitet die Signalproduktion einer Pflanze.
         """
+        # Wenn der Signalstoff bereits vorhanden ist, keine Produktion notwendig
+        if plant.isSignalPresent(signal):
+            return
+        
         if plant.isSignalAlarmed(signal) and not plant.isSignalPresent(signal):
             # Überprüfen, ob die Pflanze genug Zeit hatte, das Signal zu produzieren
             if plant.getSignalProdCounter(ec, signal) < signal.prodTime:
@@ -605,10 +609,16 @@ class Grid():
                 self.log.append(f'Reduziere Nachwirkzeit für {plant.name}({signal.name}, {ec.enemy.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
                 print(f'[DEBUG]: Reduziere Nachwirkzeit für {plant.name}({signal.name}, {ec.enemy.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
 
+                # Wenn der Feind erneut da ist, verlängere die Nachwirkzeit oder setze sie zurück
+                if currAfterEffectTime > 0:
+                    ec.lastVisitedPlants[(plant, signal)] = signal.afterEffectTime
+                    return
+                
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy.name == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
                 plant.setSignalPresence(signal, False)
+                plant.signalProdCounters[(ec, signal)] = 0
                 self.log.append(f'Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
                 print(f'[DEBUG]: Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
 
