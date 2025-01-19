@@ -34,6 +34,7 @@ class Gui():
 		self.plant_connections = {}
 		self.grid_lines = {}
 		self.valid_substances_set = set()
+		self.last_plant_colors = {}
 
 
 	def initSimulationWindow(self):
@@ -1848,8 +1849,7 @@ class Gui():
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 
-			self.show_signals()
-			self.show_toxins()
+			self.show_substance()
 			self.remove_fieldColor()
 			self.gridCanvas.after(10)
 
@@ -2054,32 +2054,16 @@ class Gui():
 			self.enemies_at_positions[new_position].append(cluster)
 
 
-	def show_signals(self):
-
-		for plant in self.grid.plants:
-			square_ids = self.squares.get(plant.position)
-			if square_ids:
-				square_id = square_ids['outer']
-
-				# Prüfen, welche Farbe angewendet werden soll
-				if any(plant.signalAlarms.values()):  # Signal alarmiert und aktiv
-					new_fill_color = 'yellow'
-				elif any(plant.isSignalSignaling.values()):  # Signal präsent, aber keine Alarmierung
-					new_fill_color = 'orange'
-				else:
-					new_fill_color = 'white'
-
-				# Aktuelle Farbe des Rechtecks abfragen
-				current_fill_color = self.gridCanvas.itemcget(square_id, 'fill')
-
-				# Nur aktualisieren, wenn die Farbe sich geändert hat
-				if current_fill_color != new_fill_color:
-					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
-					print(f"[DEBUG] Updated color for plant {plant.name} at {plant.position}: {new_fill_color}")
-
-
-	def show_toxins(self):
-
+	def show_substance(self):
+		"""
+		Aktualisiert die Farben der äußeren Rechtecke basierend auf dem Status von Signalen und Toxinen.
+		Die Farben werden nach einer Hierarchie priorisiert:
+		1. Lila (Toxin alarmiert)
+		2. Rot (Toxin vorhanden)
+		3. Gelb (Signal alarmiert)
+		4. Orange (Signal präsent)
+		5. Weiß (keine Aktivität)
+		"""
 		for plant in self.grid.plants:
 			square_ids = self.squares.get(plant.position)
 			if square_ids:
@@ -2090,15 +2074,18 @@ class Gui():
 					new_fill_color = 'purple'
 				elif any(plant.isToxically.values()):  # Toxin vorhanden
 					new_fill_color = 'red'
+				elif any(plant.signalAlarms.values()):  # Signal alarmiert
+					new_fill_color = 'yellow'
+				elif any(plant.isSignalSignaling.values()):  # Signal präsent, keine Alarmierung
+					new_fill_color = 'orange'
 				else:
-					# Standardfarbe
-					new_fill_color = 'white'
+					new_fill_color = 'white'  # Standardfarbe, wenn keine Aktivität vorliegt
 
-				# Aktuelle Farbe des Rechtecks abfragen
-				current_fill_color = self.gridCanvas.itemcget(square_id, 'fill')
+				# Letzten bekannten Zustand abfragen
+				last_color = self.last_plant_colors.get(plant.position, 'white')
 
-				# Nur aktualisieren, wenn die Farbe sich geändert hat
-				if current_fill_color != new_fill_color:
+				# Nur aktualisieren, wenn sich die Farbe geändert hat
+				if last_color != new_fill_color:
 					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
+					self.last_plant_colors[plant.position] = new_fill_color  # Zustand aktualisieren
 					print(f"[DEBUG] Updated color for plant {plant.name} at {plant.position}: {new_fill_color}")
-

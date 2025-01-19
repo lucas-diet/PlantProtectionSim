@@ -601,19 +601,23 @@ class Grid():
         # Holen der aktuellen Nachwirkzeit
         currAfterEffectTime = ec.getAfterEffectTime(plant, signal)
 
-        # Reduziere die Nachwirkzeit, falls sie größer als 0 ist
+        # Wenn der Feind ankommt, der den Signalstoff triggert, unterbricht das die Nachwirkzeit
         for trigger in signal.triggerCombination:
             triggerEnemy, minClusterSize = trigger
+
+            # Falls der Feind da ist und das Signal ausgelöst wird
+            if ec.enemy.name == triggerEnemy and ec.position == plant.position:
+                # Überprüfen, ob der Feind das Reduzieren der Nachwirkzeit unterbricht
+                if currAfterEffectTime > 0:
+                    print(f"[DEBUG]: Nachwirkzeit wird unterbrochen für {plant.name}({signal.name}) durch Feind {ec.enemy.name}")
+                    return  # Unterbricht das Reduzieren der Nachwirkzeit, wenn der Feind ankommt
+
+            # Reduziere die Nachwirkzeit nur, wenn der Feind nicht mehr aktiv ist
             if currAfterEffectTime > 0 and ec.enemy.name == triggerEnemy:
                 ec.lastVisitedPlants[(plant, signal)] = currAfterEffectTime - 1
                 self.log.append(f'Reduziere Nachwirkzeit für {plant.name}({signal.name}, {ec.enemy.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
                 print(f'[DEBUG]: Reduziere Nachwirkzeit für {plant.name}({signal.name}, {ec.enemy.name}): {currAfterEffectTime}/{signal.afterEffectTime}')
-
-                # Wenn der Feind erneut da ist, verlängere die Nachwirkzeit oder setze sie zurück
-                if currAfterEffectTime > 0:
-                    ec.lastVisitedPlants[(plant, signal)] = signal.afterEffectTime
-                    return
-                
+            
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy.name == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
