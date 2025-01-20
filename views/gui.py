@@ -1258,7 +1258,7 @@ class Gui():
 		# Berechne die Pixelposition aus den Gridkoordinaten
 		x_pos, y_pos = self.get_cellPosition(clicked_position)
 
-		circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name  )  # Feindinformationen speichern
+		circle_id = self.create_clusterCircle(x_pos, y_pos)  # Feindinformationen speichern
 
 		# Speichere die Marker-ID im Cluster
 		cluster.circle_id = circle_id
@@ -1316,8 +1316,7 @@ class Gui():
 		return x_pos, y_pos
 
 	
-	
-	def create_clusterCircle(self, x_pos, y_pos, enemy_name): 
+	def create_clusterCircle(self, x_pos, y_pos, fill_color='navy'): 
 		""" Zeichnet einen kleinen Kreis, um den Feind auf dem Canvas darzustellen. """
 
 		circle_radius = 2.5  # Kleinere Kreisgröße für den Feind 
@@ -1327,7 +1326,7 @@ class Gui():
 		top = y_pos - circle_radius 
 		right = x_pos + circle_radius 
 		bottom = y_pos + circle_radius # Zeichne den Kreis 
-		circle_id = self.gridCanvas.create_oval(left, top, right, bottom, fill='red', outline='black') 
+		circle_id = self.gridCanvas.create_oval(left, top, right, bottom, fill=fill_color, outline='black') 
 		return circle_id
 	
 
@@ -1346,7 +1345,7 @@ class Gui():
 
 			# Sammle Informationen zu allen Feinden an dieser Position
 			enemies_at_pos = self.enemies_at_positions.get(position, [])
-			tooltip_text = '\n'.join(f'{ec.enemy.name}: Size {int(ec.num)}' for ec in enemies_at_pos)
+			tooltip_text = '\n'.join(f'{ec.enemy.name}: Size {int(ec.num)}, Intox-State {ec.intoxicated}' for ec in enemies_at_pos)
 
 			# Erstelle ein neues Fenster für den Tooltip
 			tooltip_window = tk.Toplevel(self.gridCanvas)
@@ -1355,7 +1354,7 @@ class Gui():
 
 			# Positioniere das Tooltip-Fenster
 			x, y = self.gridCanvas.winfo_pointerxy()  # Mausposition relativ zum Bildschirm
-			tooltip_window.geometry(f"+{x + 10}+{y + 10}")
+			tooltip_window.geometry(f'+{x + 10}+{y + 10}')
 
 			# Tooltip-Inhalt
 			label = tk.Label(
@@ -1853,8 +1852,9 @@ class Gui():
 			self.gridCanvas.after(10)
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
+			self.remove_dead_cluster(old_new_positions)
 			self.update_enemyMarker(old_new_positions)
-
+			
 			self.show_substance()
 				
 			self.sim.getPlantData(count)
@@ -1944,7 +1944,6 @@ class Gui():
 			self.gridCanvas.itemconfig(inner_square_id, fill=offspring.color)  # Ändere die Farbe des inneren Quadrats
 			self.plant_at_position[offspring_position] = offspring  # Aktualisiere die Pflanze an der Position
 			self.plantDetails(offspring, inner_square_id)  # Zeige Pflanzendetails an
-			# print(f'Nachkomme {offspring.name} wurde auf Position {offspring_position} im inneren Bereich eingefärbt.')
 
 		else:
 			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
@@ -2066,6 +2065,7 @@ class Gui():
 	def update_enemyMarker(self, old_new_positions):
 		"""
 		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
+		Entfernt den Marker, wenn die Clustergröße 0 erreicht.
 		"""
 		for cluster, (old_position, new_position) in old_new_positions.items():
 			# Berechne die neue Position für den Cluster
@@ -2085,17 +2085,34 @@ class Gui():
 						del self.enemies_at_positions[old_position]
 
 			# Füge den Marker an der neuen Position hinzu
-			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, cluster.enemy.name)
-			if new_position not in self.enemies_at_positions:
-				self.enemies_at_positions[new_position] = []
-			self.enemies_at_positions[new_position].append(cluster)
+			fill_color = 'red' if cluster.intoxicated == True else 'navy'  # Setze die Farbe basierend auf dem Vergiftungszustand
+			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, fill_color)
+			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
+
+
+	def remove_dead_cluster(self, old_new_positions):
+		"""
+		Entfernt Marker von Clustern, deren Größe 0 erreicht hat.
+		"""
+		for cluster, (old_position, new_position) in old_new_positions.items():
+			if cluster.num <= 0:
+				print('Cluster ist tot, Marker wird entfernt.')  # Debugging-Ausgabe
+				if hasattr(cluster, 'circle_id') and cluster.circle_id:
+					self.gridCanvas.delete(cluster.circle_id)  # Entferne den Marker
+					print(f'Marker für {cluster.enemy.name} wurde entfernt.')
+				# Entferne das Cluster aus der Position
+				if old_position in self.enemies_at_positions:
+					if cluster in self.enemies_at_positions[old_position]:
+						self.enemies_at_positions[old_position].remove(cluster)
+						if not self.enemies_at_positions[old_position]:
+							del self.enemies_at_positions[old_position]
 
 
 	def show_substance(self):
 		"""
 		Aktualisiert die Farben der äußeren Rechtecke basierend auf dem Status von Signalen und Toxinen.
 		Die Farben werden nach einer Hierarchie priorisiert:
-		1. Lila (Toxin alarmiert)
+		1. coral1 (Toxin alarmiert)
 		2. Rot (Toxin vorhanden)
 		3. Gelb (Signal alarmiert)
 		4. Orange (Signal präsent)
@@ -2125,4 +2142,3 @@ class Gui():
 				if last_color != new_fill_color:
 					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
 					self.last_plant_colors[plant.position] = new_fill_color  # Zustand aktualisieren
-					print(f"[DEBUG] Updated color for plant {plant.name} at {plant.position}: {new_fill_color}")
