@@ -1913,6 +1913,43 @@ class Gui():
 
 			# Füge das Nachkommen zum Grid hinzu
 			self.add_offspring_to_grid(offspring, offspring_position)
+	
+
+	def add_offspring_to_grid(self, offspring, offspring_position):
+		"""
+		Fügt das Nachkommen zum Grid hinzu und zeigt es auf der Canvas, wenn das Feld frei ist.
+		Der Nachkomme wird auf den inneren Bereich des Feldes gesetzt.
+		"""
+		# Prüfe, ob das Feld bereits existiert (es sollte aufgrund von drawGrid existieren)
+		if offspring_position in self.squares:
+			# Hole die IDs der inneren und äußeren Rechtecke für diese Position
+			square_ids = self.squares[offspring_position]
+			inner_square_id = square_ids['inner']  # ID für den inneren Bereich
+			outer_square_id = square_ids['outer']  # ID für den äußeren Bereich
+
+			# Falls es eine Pflanze auf dieser Position gibt, entfernen wir diese, falls sie tot ist
+			existing_plant = self.plant_at_position.get(offspring_position)
+			if existing_plant and existing_plant.currEnergy < existing_plant.minEnergy:
+				# Setze die Farbe des äußeren Bereichs zurück auf Weiß
+				self.gridCanvas.itemconfig(outer_square_id, fill='white')
+				self.gridCanvas.itemconfig(inner_square_id, fill='white')  # Setze auch den inneren Bereich auf Weiß
+				del self.plant_at_position[offspring_position]  # Entferne die Pflanze aus der Position
+
+			# Füge das Nachkommen zum Grid hinzu
+			if offspring not in self.grid.plants:
+				self.grid.addPlant(offspring)
+				# print(f'Nachkomme {offspring.name} wurde dem Grid hinzugefügt.')
+
+			# Aktualisiere die Canvas-Farbe des inneren Rechtecks und das Mapping
+			self.gridCanvas.itemconfig(inner_square_id, fill=offspring.color)  # Ändere die Farbe des inneren Quadrats
+			self.plant_at_position[offspring_position] = offspring  # Aktualisiere die Pflanze an der Position
+			self.plantDetails(offspring, inner_square_id)  # Zeige Pflanzendetails an
+			# print(f'Nachkomme {offspring.name} wurde auf Position {offspring_position} im inneren Bereich eingefärbt.')
+
+		else:
+			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
+			print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
+
 
 
 	def on_GridRightClick(self, event):
@@ -2071,7 +2108,7 @@ class Gui():
 
 				# Hierarchische Prüfung der Farben
 				if any(plant.toxinAlarms.values()):  # Toxin alarmiert
-					new_fill_color = 'purple'
+					new_fill_color = 'coral1'
 				elif any(plant.isToxically.values()):  # Toxin vorhanden
 					new_fill_color = 'red'
 				elif any(plant.signalAlarms.values()):  # Signal alarmiert
