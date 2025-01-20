@@ -702,7 +702,7 @@ class Gui():
 
 			# Berechne die Position des Tooltips basierend auf der Mausposition
 			x, y = widget.winfo_rootx(), widget.winfo_rooty()  # Mausposition relativ zum Eingabefeld
-			tooltip_window.geometry(f'+{x + 50}+{y}')  # Positionieren Sie den Tooltip nahe dem Eingabefeld
+			tooltip_window.geometry(f'+{x + 60}+{y}')  # Positionieren Sie den Tooltip nahe dem Eingabefeld
 
 			# Tooltip-Inhalt
 			label = tk.Label(
@@ -1588,10 +1588,7 @@ class Gui():
 
 	def validate_substanceInputs(self, substance_entries):
 
-		substance_values = []
-		idxs = []
-		valid_substances = []
-		errors = []
+		substance_values, idxs, valid_substances, errors = [], [], [], []
 		try:
 			substance_values, idxs = self.get_substanceInputs(substance_entries)
 		except ValueError:
@@ -1700,21 +1697,11 @@ class Gui():
 		self.validate_substanceInputs(self.substance_entries)
 		
 		for substance_value in self.valid_substances_set:
-			substance_type = substance_value[1]
-			input_name = substance_value[4]
-			input_producer = substance_value[5]
-			input_trigger = substance_value[7]
-			input_prodTime = substance_value[8]
-
+			substance_type, input_name, input_producer, input_trigger, input_prodTime = substance_value[1], substance_value[4], substance_value[5], substance_value[7], substance_value[8]
 			sub = Substance(name=input_name, type=substance_type.lower())
 
 			if  substance_type == 'Signal':
-				input_spreadType = substance_value[3]
-				input_receiver = substance_value[6]
-				input_sendSpeed = substance_value[9]
-				input_energyCost = substance_value[10]
-				input_afterEffectTime = substance_value[11]
-				
+				input_spreadType, input_receiver, input_sendSpeed, input_energyCost, input_afterEffectTime = substance_value[3], substance_value[6], substance_value[9], substance_value[10], substance_value[11]
 				sig = self.create_signal(sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime)
 
 				if not any(s.substance.name == sig.substance.name for s in self.grid.signals):
@@ -1723,14 +1710,7 @@ class Gui():
 		# Verarbeitung der Toxine
 		for substance_value in self.valid_substances_set:
 			if substance_value[1] == 'Toxin':
-				input_name = substance_value[4]
-				input_producer = substance_value[5]
-				input_trigger = substance_value[7]
-				input_prodTime = substance_value[8]
-				input_deadly = substance_value[2]
-				input_energyCost = substance_value[10]
-				input_eliStrength = substance_value[12]
-				
+				input_name, input_producer, input_trigger, input_prodTime, input_deadly, input_energyCost, input_eliStrength = substance_value[4], substance_value[5], substance_value[7], substance_value[8], substance_value[2], substance_value[10], substance_value[12]
 				sub = Substance(name=input_name, type='toxin')
 				tox = self.create_toxin(sub, input_producer, input_energyCost, input_trigger, input_prodTime, input_deadly, input_eliStrength)
 				
@@ -1767,9 +1747,6 @@ class Gui():
 		trigger_elements = input_trigger.split(';')
 		producer_elements = input_producer.split(',')
 
-		# Extrahiere Enemy-Objekte aus der Liste der EnemyCluster
-		all_enemies = [cluster.enemy for cluster in self.grid.enemies if isinstance(cluster, EnemyCluster)]
-
 		trigger_list = [[part.strip() if i == 0 
 							else part.strip() if i == 1
             				else int(part.strip()) for i, part in enumerate(elem.split(','))] 
@@ -1785,24 +1762,6 @@ class Gui():
 						deadly=bool(input_deadly),
 						eliminationStrength=int(input_eliStrength))
 		return tox
-	
-
-	def find_object_by_name(self, name, object_list):
-		for obj in object_list:
-			if isinstance(obj, EnemyCluster):
-				if obj.enemy.name == name:
-					return obj
-			if isinstance(obj, Enemy):
-				if obj.name == name:
-					return obj
-			if isinstance(obj, Plant):
-				if obj.name == name:
-					return obj
-			if isinstance(obj, Signal):
-				if obj.name == name:
-					return obj
-			else:
-				return None  # Falls kein Objekt gefunden wird
 	
 
 	def start_simulation(self):
@@ -1852,7 +1811,6 @@ class Gui():
 			self.gridCanvas.after(10)
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
-			self.remove_dead_cluster(old_new_positions)
 			self.update_enemyMarker(old_new_positions)
 			
 			self.show_substance()
@@ -1938,7 +1896,6 @@ class Gui():
 			# Füge das Nachkommen zum Grid hinzu
 			if offspring not in self.grid.plants:
 				self.grid.addPlant(offspring)
-				# print(f'Nachkomme {offspring.name} wurde dem Grid hinzugefügt.')
 
 			# Aktualisiere die Canvas-Farbe des inneren Rechtecks und das Mapping
 			self.gridCanvas.itemconfig(inner_square_id, fill=offspring.color)  # Ändere die Farbe des inneren Quadrats
@@ -2074,7 +2031,7 @@ class Gui():
 				print(f'Fehler: Ungültige neue Position {new_position}.')
 				continue
 			x_pos, y_pos = position_data
-
+			
 			# Entferne den Marker des Clusters von der alten Position
 			if old_position in self.enemies_at_positions:
 				if cluster in self.enemies_at_positions[old_position]:
@@ -2083,29 +2040,11 @@ class Gui():
 					self.enemies_at_positions[old_position].remove(cluster)
 					if not self.enemies_at_positions[old_position]:
 						del self.enemies_at_positions[old_position]
-
+			
 			# Füge den Marker an der neuen Position hinzu
-			fill_color = 'red' if cluster.intoxicated == True else 'navy'  # Setze die Farbe basierend auf dem Vergiftungszustand
+			fill_color = 'red' if cluster.intoxicated else 'navy'  # Setze die Farbe basierend auf dem Vergiftungszustand
 			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, fill_color)
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
-
-
-	def remove_dead_cluster(self, old_new_positions):
-		"""
-		Entfernt Marker von Clustern, deren Größe 0 erreicht hat.
-		"""
-		for cluster, (old_position, new_position) in old_new_positions.items():
-			if cluster.num <= 0:
-				print('Cluster ist tot, Marker wird entfernt.')  # Debugging-Ausgabe
-				if hasattr(cluster, 'circle_id') and cluster.circle_id:
-					self.gridCanvas.delete(cluster.circle_id)  # Entferne den Marker
-					print(f'Marker für {cluster.enemy.name} wurde entfernt.')
-				# Entferne das Cluster aus der Position
-				if old_position in self.enemies_at_positions:
-					if cluster in self.enemies_at_positions[old_position]:
-						self.enemies_at_positions[old_position].remove(cluster)
-						if not self.enemies_at_positions[old_position]:
-							del self.enemies_at_positions[old_position]
 
 
 	def show_substance(self):

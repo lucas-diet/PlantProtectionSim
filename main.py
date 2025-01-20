@@ -99,7 +99,7 @@ tox1 = Toxin(substance=s3,
              energyCosts=1,
              triggerCombination=[['s1', 'e1', 1]],   
              prodTime=2,
-             deadly=False,
+             deadly=True,
              eliminationStrength=3)
 
 tox2 = Toxin(substance=s4,
@@ -115,7 +115,7 @@ grid.addPlant(p2)
 #grid.addPlant(p3)
 
 grid.addEnemies(ec1)
-grid.addEnemies(ec2)
+#grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)
