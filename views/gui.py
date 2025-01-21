@@ -754,6 +754,11 @@ class Gui():
 			self.plotWindow.lift()  # Bringt das vorhandene Fenster in den Vordergrund
 			return
 		
+		if not hasattr(self, 'sim') or self.sim is None:
+			# Zeige eine Fehlermeldung an, wenn keine Simulation existiert
+			messagebox.showerror('Error', 'Simulation has not been started yet. Please start a simulation to generate plots')
+			return
+		
 		# Neues Tkinter-Fenster erstellen
 		self.plotWindow = tk.Toplevel()
 		self.plotWindow.title('Plots')
