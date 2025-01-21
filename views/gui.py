@@ -401,7 +401,7 @@ class Gui():
 			self.plant_entries[i]['reproInterval'] = tk.Entry(self.plants_setting_frame, width=4)
 			self.plant_entries[i]['reproInterval'].grid(row=row+4, column=1, sticky='ew', padx=2, pady=2)
 
-			self.create_tooltip_inputs(self.plant_entries[i]['reproInterval'], 'Number of steps until plant reproduces e.g. 10')
+			self.create_tooltip_inputs(self.plant_entries[i]['reproInterval'], 'Number of steps until the plant reproduces, e.g. 10 or 0 if the plant does not reproduce')
 
 			offspringEnergy_label = tk.Label(self.plants_setting_frame, text='Offspring-Energy:')
 			offspringEnergy_label.grid(row=row+4, column=2, sticky='w', padx=2, pady=2)
