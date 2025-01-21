@@ -1812,14 +1812,15 @@ class Gui():
 			self.grid.collectAndManageEnemies()
 			new_positions = {ec: ec.position for ec in self.grid.enemies}
 
-			self.remove_fieldColor()
-			self.gridCanvas.after(10)
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
 			self.grid.removeDeadCluster()
 
 			self.show_substance()
+
+			self.gridCanvas.after(10)
+			self.remove_fieldColor()
 				
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
@@ -1884,12 +1885,11 @@ class Gui():
 		Fügt das Nachkommen zum Grid hinzu und zeigt es auf der Canvas, wenn das Feld frei ist.
 		Der Nachkomme wird auf den inneren Bereich des Feldes gesetzt.
 		"""
-		# Prüfe, ob das Feld bereits existiert (es sollte aufgrund von drawGrid existieren)
-		if offspring_position in self.squares:
-			# Hole die IDs der inneren und äußeren Rechtecke für diese Position
-			square_ids = self.squares[offspring_position]
-			inner_square_id = square_ids['inner']  # ID für den inneren Bereich
-			outer_square_id = square_ids['outer']  # ID für den äußeren Bereich
+		squares_ids = self.squares.get(offspring_position)
+
+		if squares_ids:
+			inner_square_id = squares_ids['inner']  # ID für den inneren Bereich
+			outer_square_id = squares_ids['outer']  # ID für den äußeren Bereich
 
 			# Falls es eine Pflanze auf dieser Position gibt, entfernen wir diese, falls sie tot ist
 			existing_plant = self.plant_at_position.get(offspring_position)
@@ -1897,7 +1897,7 @@ class Gui():
 				# Setze die Farbe des äußeren Bereichs zurück auf Weiß
 				self.gridCanvas.itemconfig(outer_square_id, fill='white')
 				self.gridCanvas.itemconfig(inner_square_id, fill='white')  # Setze auch den inneren Bereich auf Weiß
-				del self.plant_at_position[offspring_position]  # Entferne die Pflanze aus der Position
+				del self.plant_at_position[inner_square_id]  # Entferne die Pflanze aus der Position
 
 			# Füge das Nachkommen zum Grid hinzu
 			if offspring not in self.grid.plants:
@@ -1905,13 +1905,12 @@ class Gui():
 
 			# Aktualisiere die Canvas-Farbe des inneren Rechtecks und das Mapping
 			self.gridCanvas.itemconfig(inner_square_id, fill=offspring.color)  # Ändere die Farbe des inneren Quadrats
-			self.plant_at_position[offspring_position] = offspring  # Aktualisiere die Pflanze an der Position
+			self.plant_at_position[inner_square_id] = offspring  # Aktualisiere die Pflanze an der Position
 			self.plantDetails(offspring, inner_square_id)  # Zeige Pflanzendetails an
 
 		else:
 			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
 			print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
-
 
 
 	def on_GridRightClick(self, event):
@@ -1959,6 +1958,7 @@ class Gui():
 			# Durchlaufe alle Positionen und Pflanzen
 			for gridID, plant in list(self.plant_at_position.items()):
 				# Überprüfe, ob die Pflanze null oder tot ist
+				print(gridID)
 				if not plant:
 					continue
 				self.gridCanvas.after(10)
@@ -1974,13 +1974,15 @@ class Gui():
 		Setzt die Farbe des Feldes auf Weiß und entfernt alle Verbindungen, wenn die Pflanze tot ist.
 		"""
 		try:
-			# Hole das äußere Rechteck
 			square_ids = self.squares.get(plant.position)
 			if square_ids:
 				outer_square_id = square_ids['outer']
-				# Setze auch das äußere Rechteck auf Weiß
+				inner_square_id = square_ids['inner']
 				self.gridCanvas.itemconfig(outer_square_id, fill='white')
+				self.gridCanvas.itemconfig(inner_square_id, fill='white')
 			
+			# Entferne alle Verbindungen zu dieser Pflanze
+			print(f"Entferne Pflanze {plant} an Position {plant.position}")
 			# Setze die Farbe auf Weiß für das innere Rechteck
 			self.gridCanvas.itemconfig(canvas_id, fill='white')
 			# Entferne alle Verbindungen zu dieser Pflanze
