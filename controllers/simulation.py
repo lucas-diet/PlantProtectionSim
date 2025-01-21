@@ -196,6 +196,7 @@ class Simulation():
             self.grid.log.append(f'\n##### Simulation-Step: {count} ######\n')
             self.runStep()
             self.grid.collectAndManageEnemies()
+            self.grid.removeDeadCluster()
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
             self.grid.displayGrid()  

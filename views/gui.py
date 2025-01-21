@@ -1812,7 +1812,8 @@ class Gui():
 
 			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
 			self.update_enemyMarker(old_new_positions)
-			
+			self.grid.removeDeadCluster()
+
 			self.show_substance()
 				
 			self.sim.getPlantData(count)
@@ -2025,14 +2026,31 @@ class Gui():
 		Entfernt den Marker, wenn die Clustergröße 0 erreicht.
 		"""
 		for cluster, (old_position, new_position) in old_new_positions.items():
-			# Berechne die neue Position für den Cluster
+			# Entferne GUI-Marker, wenn Clustergröße <= 0
+			if cluster.num <= 0:
+				# Entferne Marker vom Canvas
+				if hasattr(cluster, 'circle_id') and cluster.circle_id:
+					self.gridCanvas.delete(cluster.circle_id)
+				
+				# Entferne Cluster aus enemies_at_positions (GUI-Logik)
+				if old_position in self.enemies_at_positions:
+					if cluster in self.enemies_at_positions[old_position]:
+						self.enemies_at_positions[old_position].remove(cluster)
+						if not self.enemies_at_positions[old_position]:
+							del self.enemies_at_positions[old_position]
+				
+				# Entferne Cluster aus dem Grid (Konsolen- und Grid-Logik)
+				cluster.grid.removeEnemies(cluster)  # Entfernen aus dem Grid
+				continue  # Zum nächsten Cluster, da dieser entfernt wurde
+
+			# Aktualisiere Positionen für lebende Cluster
 			position_data = self.get_cellPosition(new_position)
 			if not position_data:
 				print(f'Fehler: Ungültige neue Position {new_position}.')
 				continue
 			x_pos, y_pos = position_data
-			
-			# Entferne den Marker des Clusters von der alten Position
+
+			# Entferne Marker von der alten Position
 			if old_position in self.enemies_at_positions:
 				if cluster in self.enemies_at_positions[old_position]:
 					if hasattr(cluster, 'circle_id') and cluster.circle_id:
@@ -2040,11 +2058,12 @@ class Gui():
 					self.enemies_at_positions[old_position].remove(cluster)
 					if not self.enemies_at_positions[old_position]:
 						del self.enemies_at_positions[old_position]
-			
-			# Füge den Marker an der neuen Position hinzu
-			fill_color = 'red' if cluster.intoxicated else 'navy'  # Setze die Farbe basierend auf dem Vergiftungszustand
+
+			# Erstelle neuen Marker an der neuen Position
+			fill_color = 'red' if cluster.intoxicated else 'navy'
 			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, fill_color)
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
+
 
 
 	def show_substance(self):

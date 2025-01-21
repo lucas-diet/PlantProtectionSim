@@ -405,7 +405,7 @@ class Grid():
             self.updateEnemyClusterPos(ec, oldPos, newPos)
             self.processInteractionWithPlant(ec)
             self.reduceClusterSize(ec)
-        
+
         self.processNewPathAfterDisplace()
         self.afterEffectTimeAfterDeath()
             
@@ -491,6 +491,24 @@ class Grid():
                 toxin.killEnemies(ec)
 
     
+    def removeDeadCluster(self):
+        """Entfernt alle Feind-Cluster mit Größe <= 0 aus dem Grid."""
+        dead_clusters = [ec for ec in self.enemies if ec.num <= 0]
+
+        for ec in dead_clusters:
+            # Entferne Cluster aus der Zelle im Grid
+            if ec.position:
+                _, ecs = self.grid[ec.position[0]][ec.position[1]]
+                if ec in ecs:
+                    ecs.remove(ec)
+
+            # Entferne Cluster aus der enemies-Liste
+            self.enemies.remove(ec)
+
+            # Setze Cluster-Attribute zurück
+            ec.lastToxin = None
+
+
     def processNewPathAfterDisplace(self):
         """
             Verarbeitet den neuen Weg nachdem ein Feindcluster durch ein nicht tötliches Gift vertieben wurde.
