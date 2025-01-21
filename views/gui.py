@@ -1958,7 +1958,6 @@ class Gui():
 			# Durchlaufe alle Positionen und Pflanzen
 			for gridID, plant in list(self.plant_at_position.items()):
 				# Überprüfe, ob die Pflanze null oder tot ist
-				print(gridID)
 				if not plant:
 					continue
 				self.gridCanvas.after(10)
@@ -1981,8 +1980,6 @@ class Gui():
 				self.gridCanvas.itemconfig(outer_square_id, fill='white')
 				self.gridCanvas.itemconfig(inner_square_id, fill='white')
 			
-			# Entferne alle Verbindungen zu dieser Pflanze
-			print(f"Entferne Pflanze {plant} an Position {plant.position}")
 			# Setze die Farbe auf Weiß für das innere Rechteck
 			self.gridCanvas.itemconfig(canvas_id, fill='white')
 			# Entferne alle Verbindungen zu dieser Pflanze
