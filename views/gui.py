@@ -535,7 +535,8 @@ class Gui():
 			self.substance_entries[i]['toxinEffect'] = tk.Checkbutton(
 				self.substances_setting_frame, 
 				text='Deadly Toxin',
-				variable=self.substance_entries[i]['toxinEffect_var'])
+				variable=self.substance_entries[i]['toxinEffect_var'],
+				command=lambda i=i: self.update_eli_entry_state(i))
 			
 			self.substance_entries[i]['toxinEffect'].grid(row=row+1, column=2, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['toxinEffect'].config(state='disable')
@@ -625,6 +626,7 @@ class Gui():
 			eliStrength_label.grid(row=row+9, column=0, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['eliStrength'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['eliStrength'].grid(row=row+9, column=1, columnspan=1, padx=2, pady=2, sticky='w')
+			self.substance_entries[i]['eliStrength'].insert(0,int(0))
 			self.substance_entries[i]['eliStrength'].config(state='disable')
 
 			self.create_tooltip_inputs(self.substance_entries[i]['eliStrength'], 'Number of individuals that die per time step if the poison is lethal e.g. 3')
@@ -636,6 +638,7 @@ class Gui():
 			setattr(self, f'substance_var_{i}', self.substance_entries[i]['type_var'])
 			setattr(self, f'substance_menu_{i}', substanceType_om)
 			setattr(self, f'toxin_effect_checkbox_{i}', self.substance_entries[i]['toxinEffect'])
+			setattr(self, f'toxinEffect_var_{i}', self.substance_entries[i]['toxinEffect_var'])
 			setattr(self, f'substance_spreadtype_menu_{i}', substance_spredType_om)
 			setattr(self, f'receive_entry_{i}', self.substance_entries[i]['receiver'])
 			setattr(self, f'sendSpeed_entry_{i}', self.substance_entries[i]['sendSpeed'])
@@ -650,6 +653,16 @@ class Gui():
 		self.substances_setting_frame.bind('<Configure>', lambda e: self.update_scrollregion(self.substances_setting_canvas))
 
 
+	def update_eli_entry_state(self, index):
+		toxin_effect_var = getattr(self, f'toxinEffect_var_{index}')
+		eli_stren_entry = getattr(self, f'eli_entry_{index}')
+		if toxin_effect_var.get() == 1:  # Checkbox ist aktiviert
+			eli_stren_entry .delete(0, tk.END)
+			eli_stren_entry.config(state='normal')
+		else:  # Checkbox ist deaktiviert
+			eli_stren_entry.config(state='disable')
+
+
 	def change_SubstanceType(self, index):
 		# Zugriff auf Instanzvariablen basierend auf dem Index
 		substance_var = getattr(self, f'substance_var_{index}')
@@ -662,15 +675,14 @@ class Gui():
 
 		# Disable or enable fields based on the substance type
 		if substance_var.get() == 'Toxin':
-			substance_spreadtype_menu.config(state='disabled')
+			substance_spreadtype_menu.config(state='disabl')
 			sendSpeed_entry.delete(0, tk.END)
-			sendSpeed_entry.config(state='disabled')
+			sendSpeed_entry.config(state='disabl')
 			toxin_effect_checkbox.config(state='normal')
 			receive_entry.delete(0, tk.END)
 			receive_entry.config(state='disable')
 			aft_entry.delete(0, tk.END)
 			aft_entry.config(state='disabled')
-			eli_stren_entry.config(state='normal')
 			
 		else:
 			substance_spreadtype_menu.config(state='normal')
