@@ -515,7 +515,7 @@ class Gui():
 			substance_beckbox = tk.Checkbutton(
 				self.substances_setting_frame,
 				text=f'Substance {i+1}:',
-				variable=self.substance_entries[i]['checkbox_var']
+				variable=self.substance_entries[i]['checkbox_var'],
 			)
 			substance_beckbox.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
 
@@ -535,7 +535,8 @@ class Gui():
 			self.substance_entries[i]['toxinEffect'] = tk.Checkbutton(
 				self.substances_setting_frame, 
 				text='Deadly Toxin',
-				variable=self.substance_entries[i]['toxinEffect_var'])
+				variable=self.substance_entries[i]['toxinEffect_var'],
+				command=lambda i=i: self.update_eli_entry_state(i))
 			
 			self.substance_entries[i]['toxinEffect'].grid(row=row+1, column=2, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['toxinEffect'].config(state='disable')
@@ -636,6 +637,7 @@ class Gui():
 			setattr(self, f'substance_var_{i}', self.substance_entries[i]['type_var'])
 			setattr(self, f'substance_menu_{i}', substanceType_om)
 			setattr(self, f'toxin_effect_checkbox_{i}', self.substance_entries[i]['toxinEffect'])
+			setattr(self, f'toxinEffect_var_{i}', self.substance_entries[i]['toxinEffect_var'])
 			setattr(self, f'substance_spreadtype_menu_{i}', substance_spredType_om)
 			setattr(self, f'receive_entry_{i}', self.substance_entries[i]['receiver'])
 			setattr(self, f'sendSpeed_entry_{i}', self.substance_entries[i]['sendSpeed'])
@@ -662,15 +664,14 @@ class Gui():
 
 		# Disable or enable fields based on the substance type
 		if substance_var.get() == 'Toxin':
-			substance_spreadtype_menu.config(state='disabled')
+			substance_spreadtype_menu.config(state='disable')
 			sendSpeed_entry.delete(0, tk.END)
-			sendSpeed_entry.config(state='disabled')
+			sendSpeed_entry.config(state='disable')
 			toxin_effect_checkbox.config(state='normal')
 			receive_entry.delete(0, tk.END)
 			receive_entry.config(state='disable')
 			aft_entry.delete(0, tk.END)
-			aft_entry.config(state='disabled')
-			eli_stren_entry.config(state='normal')
+			aft_entry.config(state='disable')
 			
 		else:
 			substance_spreadtype_menu.config(state='normal')
@@ -680,8 +681,19 @@ class Gui():
 			aft_entry.config(state='normal')
 			eli_stren_entry.delete(0, tk.END)
 			eli_stren_entry.config(state='disable')
-
 	
+
+	def update_eli_entry_state(self, index):
+		toxin_effect_var = getattr(self, f'toxinEffect_var_{index}')
+		eli_stren_entry = getattr(self, f'eli_entry_{index}')
+
+		if toxin_effect_var.get() == 1:  # Checkbox ist aktiviert
+			eli_stren_entry.config(state='normal')
+		else:  # Checkbox ist deaktiviert
+			eli_stren_entry.delete(0, tk.END)
+			eli_stren_entry.config(state='disable')
+
+
 	def create_tooltip_inputs(self, widget, text):
 		"""
 		Zeigt den Tooltip über einem Eingabefeld an, wenn die Maus darüber fährt.
