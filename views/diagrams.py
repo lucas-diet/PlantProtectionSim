@@ -2,7 +2,6 @@
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('TkAgg')  # Setze das Backend für matplot lib, bevor pyplot importiert wird
-print(matplotlib.get_backend())
 
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.figure import Figure
