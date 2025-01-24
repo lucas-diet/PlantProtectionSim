@@ -6,6 +6,7 @@ import re
 import threading
 from concurrent.futures import ThreadPoolExecutor
 import random
+import time
 
 from models.grid import Grid
 from models.plant import Plant
@@ -1756,7 +1757,6 @@ class Gui():
 						sendingSpeed=int(input_sendSpeed),
 						energyCosts=int(input_energyCost),
 						afterEffectTime=int(input_afterEffectTime))
-
 		return sig
 	
 
@@ -1820,25 +1820,20 @@ class Gui():
 			with ThreadPoolExecutor() as executor:
 				executor.map(lambda plant_with_index: self.scatter_seed_para(plant_with_index, count), plants_with_index)
 
-			old_positions = {ec: ec.position for ec in self.grid.enemies}
 			self.grid.collectAndManageEnemies()
-			new_positions = {ec: ec.position for ec in self.grid.enemies}
-
-
-			old_new_positions = {ec: (old_positions[ec], new_positions[ec]) for ec in self.grid.enemies}
-			self.update_enemyMarker(old_new_positions)
+			self.update_enemyMarkers()
 			self.grid.removeDeadCluster()
-
 			self.show_substance()
-
-			self.gridCanvas.after(10)
+			time.sleep(0.001)
 			self.remove_fieldColor()
 				
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
-			self.gridCanvas.after(150)
+			# Warte, bevor der nächste Schritt ausgeführt wird
+			self.gridCanvas.after(200)
+			
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
 
@@ -2036,48 +2031,39 @@ class Gui():
 			del self.tooltip_ids
 
 
-	def update_enemyMarker(self, old_new_positions):
+	def update_enemyMarkers(self):
 		"""
-		Aktualisiert die Position des Markers auf dem Canvas, wenn der Feind verschoben wird.
-		Entfernt den Marker, wenn die Clustergröße 0 erreicht.
+		Aktualisiert die Marker der Feinde auf der Canvas in einem einzigen Schritt basierend auf dem aktuellen Zustand.
 		"""
-		for cluster, (old_position, new_position) in old_new_positions.items():
-			# Entferne GUI-Marker, wenn Clustergröße <= 0
-			if cluster.num <= 0:
-				# Entferne Marker vom Canvas
+		# 1. Lösche alle vorhandenen Marker
+		for enemy_markers in self.enemies_at_positions.values():
+			for cluster in enemy_markers:
 				if hasattr(cluster, 'circle_id') and cluster.circle_id:
 					self.gridCanvas.delete(cluster.circle_id)
-				
-				# Entferne Cluster aus enemies_at_positions (GUI-Logik)
-				if old_position in self.enemies_at_positions:
-					if cluster in self.enemies_at_positions[old_position]:
-						self.enemies_at_positions[old_position].remove(cluster)
-						if not self.enemies_at_positions[old_position]:
-							del self.enemies_at_positions[old_position]
-				
-				# Entferne Cluster aus dem Grid (Konsolen- und Grid-Logik)
-				cluster.grid.removeEnemies(cluster)  # Entfernen aus dem Grid
-				continue  # Zum nächsten Cluster, da dieser entfernt wurde
+					cluster.circle_id = None  # Marker-ID zurücksetzen
 
-			# Aktualisiere Positionen für lebende Cluster
+		# Leere die aktuelle Datenstruktur
+		self.enemies_at_positions.clear()
+
+		# 2. Zeichne alle Feinde neu
+		for cluster in self.grid.enemies:  # Angenommen, alle Feinde sind im Grid gespeichert
+			if cluster.num <= 0:
+				# Überspringe tote Feinde
+				continue
+
+			# Hole die aktuelle Position und deren Koordinaten
+			new_position = cluster.position
 			position_data = self.get_cellPosition(new_position)
 			if not position_data:
-				print(f'Fehler: Ungültige neue Position {new_position}.')
+				print(f"Fehler: Ungültige Position {new_position} für Cluster {cluster}.")
 				continue
+
+			# 3. Zeichne den Marker auf der Canvas
 			x_pos, y_pos = position_data
-
-			# Entferne Marker von der alten Position
-			if old_position in self.enemies_at_positions:
-				if cluster in self.enemies_at_positions[old_position]:
-					if hasattr(cluster, 'circle_id') and cluster.circle_id:
-						self.gridCanvas.delete(cluster.circle_id)
-					self.enemies_at_positions[old_position].remove(cluster)
-					if not self.enemies_at_positions[old_position]:
-						del self.enemies_at_positions[old_position]
-
-			# Erstelle neuen Marker an der neuen Position
 			fill_color = 'red' if cluster.intoxicated else 'navy'
 			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, fill_color)
+
+			# 4. Aktualisiere die zentrale Datenstruktur
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
 
 
