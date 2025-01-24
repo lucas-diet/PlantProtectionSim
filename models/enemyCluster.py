@@ -230,7 +230,6 @@ class EnemyCluster():
                 self.targetPlant = nearestPlant  # Aktualisiere das Ziel
 
 
-    
     def getPath(self, start):
         return self.chooseRandomPlant(start)
 
