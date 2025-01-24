@@ -1975,8 +1975,8 @@ class Gui():
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy and current_color != 'white':
 					self.set_white(inner_id, plant)
-					self.remove_radiusColor()
-					
+					self.gridCanvas.after(10)
+				
 
 	def set_white(self, inner_id, plant):
 		"""
@@ -2161,15 +2161,12 @@ class Gui():
 				outer_id = squares_ids['outer']
 				inner_id = squares_ids['inner']
 
-                # Überprüfe, ob auf diesem Feld eine Pflanze steht
+				# Überprüfe, ob auf diesem Feld eine Pflanze steht
 				plants_on_field = [p for p in self.grid.plants if p.position == field]
 
-                # Wenn keine Pflanze auf dem Feld ist, setze die Farbe auf Weiß
+				# Wenn keine Pflanze auf dem Feld ist, setze die Farbe auf Weiß
 				if not plants_on_field:
-					current_fill = self.gridCanvas.itemcget(outer_id, 'fill')
-
-                    # Setze auf 'white', wenn die Farbe nicht bereits weiß ist
-					if current_fill != 'white':
-						self.gridCanvas.itemconfig(outer_id, fill='white')
-						self.gridCanvas.itemconfig(inner_id, fill='white')
+					self.gridCanvas.itemconfig(outer_id, fill='white')
+					self.gridCanvas.itemconfig(inner_id, fill='white')
+					
 

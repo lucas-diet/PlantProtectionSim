@@ -37,7 +37,7 @@ p1 = Plant(name='p1',
            grid=grid,
            color=PLANT_COLORS)
     
-p2 = Plant(name='p1', 
+p2 = Plant(name='p2', 
            initEnergy=100,
            growthRateEnergy=2,
            minEnergy=50, 
@@ -86,7 +86,7 @@ sig1 = Signal(substance=s1,
 
 sig2 = Signal(substance=s2,
               emit=['p1'],
-              receive=['p1'],
+              receive=['p1', 'p2'],
               triggerCombination=[['e1', 2]],
               prodTime=3, 
               spreadType='air',
@@ -112,16 +112,16 @@ tox2 = Toxin(substance=s4,
 
 grid.addPlant(p1)
 grid.addPlant(p2)
-#grid.addPlant(p3)
+grid.addPlant(p3)
 
 grid.addEnemies(ec1)
 #grid.addEnemies(ec2)
 #grid.addEnemies(ec3)
 
 grid.addSubstance(sig1)
-#grid.addSubstance(sig2)
-grid.addSubstance(tox1)
-#grid.addSubstance(tox2)
+grid.addSubstance(sig2)
+#grid.addSubstance(tox1)
+grid.addSubstance(tox2)
     
 
 sc1 = SymbioticConnection(p1, p2)

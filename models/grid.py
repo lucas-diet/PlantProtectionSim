@@ -872,7 +872,7 @@ class Grid():
     
     def airInteraction(self, plant, signal, ec):
         for otherPlant in self.plants:
-            if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant in signal.receive:
+            if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant.name in signal.receive:
                 sPlant, rPlant = plant, otherPlant
                 sPos, rPos = plant.position, otherPlant.position
                 if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
