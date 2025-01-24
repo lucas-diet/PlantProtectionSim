@@ -444,6 +444,12 @@ class Grid():
             # Aktualisiere die Position des Feindes
             ec.position = newPos
 
+            # Überprüfe, ob die Zielpflanze erreicht wurde
+            if ec.targetPlant == newPos:
+                # Pflanze wurde erreicht: in 'lastVisitedPlants' einfügen
+                ec.insertLastVisits(ec.targetPlant, signal=None)
+                ec.targetPlant = None  # Ziel zurücksetzen
+
             # Überprüfe, ob eine nähere Pflanze existiert
             ec.checkAndUpdatePath(newPos)
 
@@ -482,6 +488,7 @@ class Grid():
                     self.plantAlarmAndPoisonProd(ec, dist, plant)  # Alarm und Giftproduktion prüfen
 
                     if (i, j) == ec.position:  # Wenn der Feind auf der Pflanze steht
+                        ec.lastPlant = plant
                         ec.currentPath = []  # Setze den aktuellen Pfad zurück
                         self.eatAndReproduce(ec, plant)  # Feind frisst und reproduziert sich
                         

@@ -39,6 +39,7 @@ class EnemyCluster():
         self.currentPath = []
         self.intoxicated = False
         self.lastVisitedPlants = {}
+        self.lastPlant = None
         self.circle_id = None
 
     
@@ -196,6 +197,7 @@ class EnemyCluster():
     def checkAndUpdatePath(self, currentPos):
         """
         Überprüft, ob eine nähere Pflanze vorhanden ist, und aktualisiert den Pfad des Feindes.
+        Die zuletzt besuchte Pflanze wird bei der Auswahl ausgeschlossen.
         """
         # Überprüfe alle Pflanzen im Grid
         helperGrid = self.grid.helperGrid()
@@ -209,17 +211,24 @@ class EnemyCluster():
         shortestDistance = float('inf')
 
         for plantPos in plantPositions:
+            # Hole das Pflanzenobjekt an der entsprechenden Position
+            plant = self.grid.getPlantAt(plantPos)
+
+            if plant == self.lastPlant:
+                continue
+            
             distance = np.abs(plantPos[0] - currentPos[0]) + np.abs(plantPos[1] - currentPos[1])  # Manhatten-Distanz
             if distance < shortestDistance:
                 shortestDistance = distance
                 nearestPlant = plantPos
 
-        # Falls eine nähere Pflanze gefunden wurde, aktualisiere den Pfad
+        # Falls eine nähere Pflanze gefunden wurde und sie nicht die letzte besuchte Pflanze ist, aktualisiere den Pfad
         if nearestPlant and nearestPlant != self.targetPlant:
             newPath = self.findShortestPath(currentPos, nearestPlant)
             if newPath:
                 self.path = newPath
                 self.targetPlant = nearestPlant  # Aktualisiere das Ziel
+
 
     
     def getPath(self, start):
