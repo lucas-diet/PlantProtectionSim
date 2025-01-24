@@ -1825,6 +1825,7 @@ class Gui():
 			self.grid.removeDeadCluster()
 			self.show_substance()
 			self.sendSignal_symbiotic()
+			self.sendSignal_air()
 			time.sleep(0.001)
 			self.remove_fieldColor()
 				
@@ -2056,7 +2057,7 @@ class Gui():
 			new_position = cluster.position
 			position_data = self.get_cellPosition(new_position)
 			if not position_data:
-				print(f"Fehler: Ungültige Position {new_position} für Cluster {cluster}.")
+				print(f'Fehler: Ungültige Position {new_position} für Cluster {cluster}.')
 				continue
 
 			# 3. Zeichne den Marker auf der Canvas
@@ -2111,10 +2112,38 @@ class Gui():
 			for neighbor in neighbors:
 				neighborPlant = self.grid.getPlantAt(neighbor)
 				for signal in self.grid.signals:
-					if (plant, neighborPlant) in self.plant_connections and plant.isSignalPresent(signal):
-						# Wenn eine Verbindung existiert und das Signal vorhanden ist
-						if (plant, neighborPlant) in self.grid_lines:
-							# Zugriff auf die Linie aus grid_lines
-							line = self.grid_lines[(plant, neighborPlant)]
-							# Ändere die Farbe der Linie, zum Beispiel auf grün
-							self.gridCanvas.itemconfig(line, fill='dimgray')
+					if signal.spreadType == 'symbiotic':
+						if (plant, neighborPlant) in self.plant_connections and plant.isSignalPresent(signal):
+							# Wenn eine Verbindung existiert und das Signal vorhanden ist
+							if (plant, neighborPlant) in self.grid_lines:
+								# Zugriff auf die Linie aus grid_lines
+								line = self.grid_lines[(plant, neighborPlant)]
+								# Ändere die Farbe der Linie, zum Beispiel auf grün
+								self.gridCanvas.itemconfig(line, fill='dimgray')
+
+	
+	def sendSignal_air(self):
+		for plant in self.grid.plants:
+			for signal in self.grid.signals:
+				if signal.spreadType == 'air' and plant.isSignalPresent(signal):
+					for (cPlant, signal), fields in self.grid.radiusFields.items():
+												
+						# Wenn die Pflanze lebendig ist, setze den Radius
+						for field in fields:
+							squares_ids = self.squares.get(field)
+							if squares_ids:
+								outer_id = squares_ids['outer']
+								inner_id = squares_ids['inner']
+										
+								# Überprüfe, ob eine andere Pflanze auf diesem Gridfeld steht
+								other_plants_on_field = [p for p in self.grid.plants if p.position == field]
+										
+								# Wenn keine andere Pflanze auf dem Feld steht, ändere die Farbe
+								if not other_plants_on_field:
+									# Überprüfe die aktuelle Füllfarbe des inneren Rechtecks
+									current_fill = self.gridCanvas.itemcget(inner_id, 'fill')
+											
+									# Wenn die Farbe des inneren Rechtecks 'white' ist, ändere sie
+									if current_fill == 'white':
+										self.gridCanvas.itemconfig(outer_id, fill='bisque')
+										self.gridCanvas.itemconfig(inner_id, fill='bisque')
