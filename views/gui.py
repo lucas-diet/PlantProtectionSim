@@ -2103,6 +2103,7 @@ class Gui():
 					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
 					self.last_plant_colors[plant.position] = new_fill_color  # Zustand aktualisieren
 	
+
 	def sendSignal_symbiotic(self):
 		for plant in self.grid.plants:
 			neighbors = self.get_neighbors(plant.position)
@@ -2116,4 +2117,4 @@ class Gui():
 							# Zugriff auf die Linie aus grid_lines
 							line = self.grid_lines[(plant, neighborPlant)]
 							# Ändere die Farbe der Linie, zum Beispiel auf grün
-							self.gridCanvas.itemconfig(line, fill='snow')
+							self.gridCanvas.itemconfig(line, fill='dimgray')
