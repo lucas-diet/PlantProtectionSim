@@ -1965,19 +1965,20 @@ class Gui():
 		"""
 		with self.lock:
 			# Durchlaufe alle Positionen und Pflanzen
-			for gridID, plant in list(self.plant_at_position.items()):
+			for inner_id, plant in list(self.plant_at_position.items()):
 				# Überprüfe, ob die Pflanze null oder tot ist
 				if not plant:
 					continue
 				self.gridCanvas.after(10)
 				# Hole die aktuelle Farbe des Feldes
-				current_color = self.gridCanvas.itemcget(gridID, 'fill')
+				current_color = self.gridCanvas.itemcget(inner_id, 'fill')
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy and current_color != 'white':
-					self.set_white(gridID, plant)
+					self.set_white(inner_id, plant)
+					self.remove_radiusColor()
 					
 
-	def set_white(self, canvas_id, plant):
+	def set_white(self, inner_id, plant):
 		"""
 		Setzt die Farbe des Feldes auf Weiß und entfernt alle Verbindungen, wenn die Pflanze tot ist.
 		"""
@@ -1990,14 +1991,15 @@ class Gui():
 				self.gridCanvas.itemconfig(inner_square_id, fill='white')
 			
 			# Setze die Farbe auf Weiß für das innere Rechteck
-			self.gridCanvas.itemconfig(canvas_id, fill='white')
+			self.gridCanvas.itemconfig(inner_id, fill='white')
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
-			self.remove_tooltip(canvas_id)
+			self.remove_tooltip(inner_id)
+			del self.plant_at_position[inner_id]
 			self.grid.removePlant(plant)
 
 		except Exception as e:
-			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {canvas_id}: {e}')
+			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
 
 
 	def remove_plant_connections(self, plant):
@@ -2147,3 +2149,27 @@ class Gui():
 									if current_fill == 'white':
 										self.gridCanvas.itemconfig(outer_id, fill='bisque')
 										self.gridCanvas.itemconfig(inner_id, fill='bisque')
+
+	
+	def remove_radiusColor(self):
+		"""
+		Setzt die Farben der Felder im Signalradius auf Weiß, wenn keine Signale aktiv sind.
+		"""
+		# Überprüfe die Felder im Signalradius nur, wenn es keine Felder in radiusFields gibt	
+		if not self.grid.radiusFields:
+			for field, squares_ids in self.squares.items():
+				outer_id = squares_ids['outer']
+				inner_id = squares_ids['inner']
+
+                # Überprüfe, ob auf diesem Feld eine Pflanze steht
+				plants_on_field = [p for p in self.grid.plants if p.position == field]
+
+                # Wenn keine Pflanze auf dem Feld ist, setze die Farbe auf Weiß
+				if not plants_on_field:
+					current_fill = self.gridCanvas.itemcget(outer_id, 'fill')
+
+                    # Setze auf 'white', wenn die Farbe nicht bereits weiß ist
+					if current_fill != 'white':
+						self.gridCanvas.itemconfig(outer_id, fill='white')
+						self.gridCanvas.itemconfig(inner_id, fill='white')
+
