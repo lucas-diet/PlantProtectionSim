@@ -443,6 +443,10 @@ class Grid():
             
             # Aktualisiere die Position des Feindes
             ec.position = newPos
+
+            # Überprüfe, ob eine nähere Pflanze existiert
+            ec.checkAndUpdatePath(newPos)
+
             return newPos
         else:
             return oldPos

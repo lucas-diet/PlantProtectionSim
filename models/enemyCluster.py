@@ -1,6 +1,7 @@
 
 from collections import deque
 import random
+import numpy as np
 
 from models.plant import Plant
 
@@ -191,6 +192,35 @@ class EnemyCluster():
         else:
             return None
     
+
+    def checkAndUpdatePath(self, currentPos):
+        """
+        Überprüft, ob eine nähere Pflanze vorhanden ist, und aktualisiert den Pfad des Feindes.
+        """
+        # Überprüfe alle Pflanzen im Grid
+        helperGrid = self.grid.helperGrid()
+        plantPositions = self.detectPlant(helperGrid)
+
+        if not plantPositions:
+            return  # Keine Pflanzen vorhanden
+
+        # Finde die nächstgelegene Pflanze
+        nearestPlant = None
+        shortestDistance = float('inf')
+
+        for plantPos in plantPositions:
+            distance = np.abs(plantPos[0] - currentPos[0]) + np.abs(plantPos[1] - currentPos[1])  # Manhatten-Distanz
+            if distance < shortestDistance:
+                shortestDistance = distance
+                nearestPlant = plantPos
+
+        # Falls eine nähere Pflanze gefunden wurde, aktualisiere den Pfad
+        if nearestPlant and nearestPlant != self.targetPlant:
+            newPath = self.findShortestPath(currentPos, nearestPlant)
+            if newPath:
+                self.path = newPath
+                self.targetPlant = nearestPlant  # Aktualisiere das Ziel
+
     
     def getPath(self, start):
         return self.chooseRandomPlant(start)
