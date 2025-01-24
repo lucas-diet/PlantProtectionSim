@@ -1559,7 +1559,7 @@ class Gui():
 		# Ziehe eine Linie zwischen den Mittelpunkten der beiden Zellen
 		line = self.gridCanvas.create_line(
 			plant_center[0], plant_center[1], neighbor_center[0], neighbor_center[1],
-			fill='purple', width=2  # Optional: Anpassung der Farbe und Breite der Linie
+			fill='black', width=2  # Optional: Anpassung der Farbe und Breite der Linie
 		)
 		# Speichere die Linie, um sie später zu bearbeiten oder zu löschen
 		self.grid_lines[(plant, neighbor)] = line
@@ -1824,6 +1824,7 @@ class Gui():
 			self.update_enemyMarkers()
 			self.grid.removeDeadCluster()
 			self.show_substance()
+			self.sendSignal_symbiotic()
 			time.sleep(0.001)
 			self.remove_fieldColor()
 				
@@ -1832,7 +1833,7 @@ class Gui():
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
 			# Warte, bevor der nächste Schritt ausgeführt wird
-			self.gridCanvas.after(200)
+			self.gridCanvas.after(150)
 			
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
@@ -2067,7 +2068,6 @@ class Gui():
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
 
 
-
 	def show_substance(self):
 		"""
 		Aktualisiert die Farben der äußeren Rechtecke basierend auf dem Status von Signalen und Toxinen.
@@ -2102,3 +2102,18 @@ class Gui():
 				if last_color != new_fill_color:
 					self.gridCanvas.itemconfig(square_id, fill=new_fill_color)
 					self.last_plant_colors[plant.position] = new_fill_color  # Zustand aktualisieren
+	
+	def sendSignal_symbiotic(self):
+		for plant in self.grid.plants:
+			neighbors = self.get_neighbors(plant.position)
+
+			for neighbor in neighbors:
+				neighborPlant = self.grid.getPlantAt(neighbor)
+				for signal in self.grid.signals:
+					if (plant, neighborPlant) in self.plant_connections and plant.isSignalPresent(signal):
+						# Wenn eine Verbindung existiert und das Signal vorhanden ist
+						if (plant, neighborPlant) in self.grid_lines:
+							# Zugriff auf die Linie aus grid_lines
+							line = self.grid_lines[(plant, neighborPlant)]
+							# Ändere die Farbe der Linie, zum Beispiel auf grün
+							self.gridCanvas.itemconfig(line, fill='snow')
