@@ -1716,7 +1716,7 @@ class Gui():
 		
 		for substance_value in self.valid_substances_set:
 			substance_type, input_name, input_producer, input_trigger, input_prodTime = substance_value[1], substance_value[4], substance_value[5], substance_value[7], substance_value[8]
-			sub = Substance(name=input_name, type=substance_type.lower())
+			sub = Substance(name=input_name, type='signal')
 
 			if  substance_type == 'Signal':
 				input_spreadType, input_receiver, input_sendSpeed, input_energyCost, input_afterEffectTime = substance_value[3], substance_value[6], substance_value[9], substance_value[10], substance_value[11]
@@ -1969,13 +1969,11 @@ class Gui():
 				# Überprüfe, ob die Pflanze null oder tot ist
 				if not plant:
 					continue
-				self.gridCanvas.after(10)
-				# Hole die aktuelle Farbe des Feldes
-				current_color = self.gridCanvas.itemcget(inner_id, 'fill')
+				
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
-				if plant.currEnergy < plant.minEnergy and current_color != 'white':
+				if plant.currEnergy < plant.minEnergy:
 					self.set_white(inner_id, plant)
-					self.gridCanvas.after(10)
+					self.remove_radiusColor()
 				
 
 	def set_white(self, inner_id, plant):
@@ -1995,7 +1993,8 @@ class Gui():
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
 			self.remove_tooltip(inner_id)
-			del self.plant_at_position[inner_id]
+			if plant in self.plant_at_position[inner_id]:
+				del self.plant_at_position[inner_id]
 			self.grid.removePlant(plant)
 
 		except Exception as e:
@@ -2114,7 +2113,7 @@ class Gui():
 			for neighbor in neighbors:
 				neighborPlant = self.grid.getPlantAt(neighbor)
 				for signal in self.grid.signals:
-					if signal.spreadType == 'symbiotic':
+					if plant.name in signal.emit and signal.spreadType == 'symbiotic':
 						if (plant, neighborPlant) in self.plant_connections and plant.isSignalPresent(signal):
 							# Wenn eine Verbindung existiert und das Signal vorhanden ist
 							if (plant, neighborPlant) in self.grid_lines:
@@ -2122,14 +2121,14 @@ class Gui():
 								line = self.grid_lines[(plant, neighborPlant)]
 								# Ändere die Farbe der Linie, zum Beispiel auf grün
 								self.gridCanvas.itemconfig(line, fill='dimgray')
-
 	
+
 	def sendSignal_air(self):
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
-				if signal.spreadType == 'air' and plant.isSignalPresent(signal):
+				if plant.name in signal.emit and signal.spreadType == 'air' and plant.isSignalPresent(signal):
 					for (cPlant, signal), fields in self.grid.radiusFields.items():
-												
+						print(cPlant.currEnergy, signal.name)						
 						# Wenn die Pflanze lebendig ist, setze den Radius
 						for field in fields:
 							squares_ids = self.squares.get(field)
@@ -2168,5 +2167,4 @@ class Gui():
 				if not plants_on_field:
 					self.gridCanvas.itemconfig(outer_id, fill='white')
 					self.gridCanvas.itemconfig(inner_id, fill='white')
-					
-
+		
