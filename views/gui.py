@@ -1972,7 +1972,11 @@ class Gui():
 				
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy:
-					self.set_white(inner_id, plant)
+					if inner_id in self.plant_at_position and self.plant_at_position[inner_id] == plant:
+						self.remove_tooltip(inner_id)
+						del self.plant_at_position[inner_id]
+						self.set_white(inner_id, plant)
+
 					self.remove_radiusColor()
 				
 
@@ -1992,9 +1996,7 @@ class Gui():
 			self.gridCanvas.itemconfig(inner_id, fill='white')
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
-			self.remove_tooltip(inner_id)
 			if not self.plant_at_position[inner_id] == plant:
-				del self.plant_at_position[inner_id]
 				self.grid.removePlant(plant)
 
 		except Exception as e:
