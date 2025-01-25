@@ -1993,9 +1993,9 @@ class Gui():
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
 			self.remove_tooltip(inner_id)
-			if plant in self.plant_at_position[inner_id]:
+			if not self.plant_at_position[inner_id] == plant:
 				del self.plant_at_position[inner_id]
-			self.grid.removePlant(plant)
+				self.grid.removePlant(plant)
 
 		except Exception as e:
 			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
@@ -2093,7 +2093,7 @@ class Gui():
 				elif any(plant.signalAlarms.values()):  # Signal alarmiert
 					new_fill_color = 'yellow'
 				elif any(plant.isSignalSignaling.values()):  # Signal präsent, keine Alarmierung
-					new_fill_color = 'orange'
+					new_fill_color = 'darkorange'
 				else:
 					new_fill_color = 'white'  # Standardfarbe, wenn keine Aktivität vorliegt
 
@@ -2127,8 +2127,7 @@ class Gui():
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				if plant.name in signal.emit and signal.spreadType == 'air' and plant.isSignalPresent(signal):
-					for (cPlant, signal), fields in self.grid.radiusFields.items():
-						print(cPlant.currEnergy, signal.name)						
+					for (cPlant, signal), fields in self.grid.radiusFields.items():					
 						# Wenn die Pflanze lebendig ist, setze den Radius
 						for field in fields:
 							squares_ids = self.squares.get(field)
@@ -2146,8 +2145,8 @@ class Gui():
 											
 									# Wenn die Farbe des inneren Rechtecks 'white' ist, ändere sie
 									if current_fill == 'white':
-										self.gridCanvas.itemconfig(outer_id, fill='bisque')
-										self.gridCanvas.itemconfig(inner_id, fill='bisque')
+										self.gridCanvas.itemconfig(outer_id, fill='orange')
+										#self.gridCanvas.itemconfig(inner_id, fill='bisque')
 
 	
 	def remove_radiusColor(self):
