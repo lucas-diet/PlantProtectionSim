@@ -2149,6 +2149,24 @@ class Gui():
 									if current_fill == 'white':
 										self.gridCanvas.itemconfig(outer_id, fill='orange')
 										#self.gridCanvas.itemconfig(inner_id, fill='bisque')
+								
+								self.reacteToSignalRadius(other_plants_on_field, signal)
+								
+
+	def reacteToSignalRadius(self, other_plants_on_field, signal):
+		# Wenn eine Pflanze auf dem Feld steht, reagiere darauf
+		for other_plant in other_plants_on_field:
+        	# Wenn die andere Pflanze noch lebt und das Signal noch nicht hat
+			if other_plant.name in signal.receive and other_plant.currEnergy > other_plant.minEnergy and not other_plant.isSignalPresent(signal):
+				other_plant.setSignalPresence(signal, True)  # Die Pflanze empfängt das Signal
+
+                # Weiteres Verhalten: Signalfarbe für die andere Pflanze ändern
+				other_plant_field = self.squares.get(other_plant.position)
+				if other_plant_field:
+					other_outer_id = other_plant_field['outer']
+					self.gridCanvas.itemconfig(other_outer_id, fill='orange')
+
+				self.sendSignal_air() 
 
 	
 	def remove_radiusColor(self):
