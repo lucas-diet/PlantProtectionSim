@@ -638,7 +638,7 @@ class Grid():
             if ec.enemy.name == triggerEnemy and ec.position == plant.position:
                 # Überprüfen, ob der Feind das Reduzieren der Nachwirkzeit unterbricht
                 if currAfterEffectTime > 0:
-                    print(f"[DEBUG]: Nachwirkzeit wird unterbrochen für {plant.name}({signal.name}) durch Feind {ec.enemy.name}")
+                    print(f'[DEBUG]: Nachwirkzeit wird unterbrochen für {plant.name}({signal.name}) durch Feind {ec.enemy.name}')
                     return  # Unterbricht das Reduzieren der Nachwirkzeit, wenn der Feind ankommt
 
             # Reduziere die Nachwirkzeit nur, wenn der Feind nicht mehr aktiv ist
@@ -650,6 +650,8 @@ class Grid():
             # Wenn die Nachwirkzeit abgelaufen ist
             if currAfterEffectTime < 1 and ec.enemy.name == triggerEnemy:
                 ec.deleteLastVisits(plant, signal)
+                self.removeSignalReceiverPlant(plant, signal)
+
                 plant.setSignalPresence(signal, False)
                 plant.signalProdCounters[(ec, signal)] = 0
                 self.log.append(f'Nachwirkzeit abgelaufen: {signal.name} entfernen für {plant.name}')
@@ -717,7 +719,7 @@ class Grid():
                 if triggerEnemy == ec.enemy.name:
                     self.symCommunication(ec, plant, signal)
                     self.airCommunication(ec, plant, signal)
-                if plant.currEnergy <= plant.minEnergy:
+                if plant.currEnergy < plant.minEnergy:
                     self.removeSignalRadius(plant, signal)
 
 
@@ -811,7 +813,7 @@ class Grid():
             else:
                 sPlant.sendSignal(rPlant, signal)
                 # Um Rückkopplungen zu vermeiden wird der Counter erst zurückgesetzt wenn die empfangende Pflanze stirbt oder der Sender kein Signalstoff mehr hat.
-                if rPlant.currEnergy <= rPlant.minEnergy or not sPlant.isSignalPresent(signal):
+                if rPlant.currEnergy < rPlant.minEnergy or not sPlant.isSignalPresent(signal):
                     sPlant.resetSignalSendCounter(ec, signal, rPlant)
                 if not rPlant.isSignalPresent(signal):
                     self.log.append(f'Signal gesendet via Symbiose von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')
@@ -819,8 +821,8 @@ class Grid():
         else:
             self.log.append(f'{sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
             print(f'[DEBUG]: {sPlant.name} und {rPlant.name} sind verbunden. {rPlant.name} kann {signal.name} nicht empfangen.')
-            pass 
-
+            pass
+            
 
     def airCommunication(self, ec, plant, signal):
         if plant.name in signal.emit and signal.spreadType == 'air':
@@ -885,6 +887,20 @@ class Grid():
                     print(f'[DEBUG]: Signal gesendet via Luft von {sPlant.name}{sPlant.position} zu {rPlant.name}{rPlant.position}')  
 
 
+    def removeSignalReceiverPlant(self, plant, signal):
+        # Überprüfen, ob es überhaupt Verbindungen für die Pflanze gibt
+
+        if signal.spreadType == 'symbiotic':
+            for plants, plantsPos in plant.gridConnections.items():
+                sPlant, rPlant = plants
+                sPos, rPos = plantsPos
+                
+                rPlant.setSignalPresence(signal, False)
+
+        else:
+            for otherPlant in self.plants:
+                if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant.name in signal.receive:
+                    otherPlant.setSignalPresence(signal, False)
 
 
 
