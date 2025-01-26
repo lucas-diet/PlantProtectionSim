@@ -43,24 +43,8 @@ class Grid():
     
     def removePlant(self, plant):
         """Entfernt eine Pflanze aus dem Grid und aktualisiert die Verbindungen."""
-        # Entferne alle Verbindungen, die von oder zu dieser Pflanze führen
-        connections_to_remove = []
-        for plants, plantsPos in plant.gridConnections.items():
-            sPlant, rPlant = plants
-            if sPlant == plant or rPlant == plant:
-                connections_to_remove.append((sPlant, rPlant))
-
-        # Entferne Verbindungen und setze Signalstoffe zurück
-        for sPlant, rPlant in connections_to_remove:
-            if (sPlant, rPlant) in plant.gridConnections:
-                del plant.gridConnections[(sPlant, rPlant)]
-
-            for signal in self.signals:
-                # Signalstoff bei der empfangenden Pflanze deaktivieren
-                if rPlant.isSignalPresent(signal):
-                    rPlant.setSignalPresence(signal, False)
-                    print(f"[DEBUG]: Signal {signal.name} bei {rPlant.name} entfernt, da {sPlant.name} gestorben ist.")
-
+        
+        self.removeSignalAfterSenderDeath(plant)
         # Entferne die Pflanze aus dem Grid
         self.plants.remove(plant)
         grid_x, grid_y = plant.position
@@ -915,6 +899,56 @@ class Grid():
             for otherPlant in self.plants:
                 if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant.name in signal.receive:
                     otherPlant.setSignalPresence(signal, False)
+    
+
+    def removeSignalAfterSenderDeath(self, plant):
+       self.removeSignalSenderDeath_symbiotic(plant)
+       self.removeSignalSenderDeath_air(plant)
+        
+
+    def removeSignalSenderDeath_symbiotic(self, plant):
+        # Entferne alle Verbindungen, die von oder zu dieser Pflanze führen
+        connections_to_remove = []
+        for plants, plantsPos in plant.gridConnections.items():
+            sPlant, rPlant = plants
+            if sPlant == plant or rPlant == plant:
+                connections_to_remove.append((sPlant, rPlant))
+
+        # Entferne Verbindungen und setze Signalstoffe zurück
+        for sPlant, rPlant in connections_to_remove:
+            if (sPlant, rPlant) in plant.gridConnections:
+                del plant.gridConnections[(sPlant, rPlant)]
+
+            for signal in self.signals:
+                # Signalstoff bei der empfangenden Pflanze deaktivieren
+                if rPlant.isSignalPresent(signal):
+                    rPlant.setSignalPresence(signal, False)
+                    print(f'[DEBUG]: Signal {signal.name} bei {rPlant.name} entfernt, da {sPlant.name} gestorben ist.')
+
+    
+    def removeSignalSenderDeath_air(self, plant):
+        # Pflanzen im Radius verarbeiten
+        for signal in self.signals:
+            # Prüfe, ob ein Eintrag in radiusFields für diese Pflanze und dieses Signal existiert
+            if (plant, signal) in self.radiusFields:
+                affected_fields = self.radiusFields[(plant, signal)]
+            else:
+                continue  # Kein Eintrag vorhanden, überspringen
+
+            # Iteriere über alle betroffenen Felder und entferne Signalstoffe
+            for x, y in affected_fields:
+                _, ecs = self.grid[x][y]  # Hole Pflanzen und Feinde an der Position
+                plant_at_position = next((p for p in self.plants if p.position == (x, y)), None)
+
+                if plant_at_position:
+                    # Entferne Signalstoffe bei Pflanzen in den betroffenen Feldern
+                    if plant_at_position.isSignalPresent(signal):
+                        plant_at_position.setSignalPresence(signal, False)
+                        print(f'[DEBUG]: Signal {signal.name} bei {plant_at_position.name} entfernt, da {plant.name} gestorben ist.')
+
+            # Entferne den Eintrag aus radiusFields, da die Pflanze gestorben ist
+            del self.radiusFields[(plant, signal)]
+
 
 
 
