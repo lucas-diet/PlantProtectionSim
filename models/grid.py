@@ -42,15 +42,30 @@ class Grid():
 
     
     def removePlant(self, plant):
-        x,y = plant.position
-        if plant in self.plants:
-            self.plants.remove(plant)
+        """Entfernt eine Pflanze aus dem Grid und aktualisiert die Verbindungen."""
+        # Entferne alle Verbindungen, die von oder zu dieser Pflanze führen
+        connections_to_remove = []
+        for plants, plantsPos in plant.gridConnections.items():
+            sPlant, rPlant = plants
+            if sPlant == plant or rPlant == plant:
+                connections_to_remove.append((sPlant, rPlant))
 
-        if plant.position in self.plants:
-            del self.plantAtPos[plant.position]
+        # Entferne Verbindungen und setze Signalstoffe zurück
+        for sPlant, rPlant in connections_to_remove:
+            if (sPlant, rPlant) in plant.gridConnections:
+                del plant.gridConnections[(sPlant, rPlant)]
 
-        _, ecs = self.grid[x][y]
-        self.grid[x][y] = (None, ecs)
+            for signal in self.signals:
+                # Signalstoff bei der empfangenden Pflanze deaktivieren
+                if rPlant.isSignalPresent(signal):
+                    rPlant.setSignalPresence(signal, False)
+                    print(f"[DEBUG]: Signal {signal.name} bei {rPlant.name} entfernt, da {sPlant.name} gestorben ist.")
+
+        # Entferne die Pflanze aus dem Grid
+        self.plants.remove(plant)
+        grid_x, grid_y = plant.position
+        self.grid[grid_x][grid_y] = (None, self.grid[grid_x][grid_y][1])  # Pflanze aus der Zelle entfernen
+
 
     
     def isOccupied(self, position):
@@ -894,7 +909,6 @@ class Grid():
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
                 sPos, rPos = plantsPos
-                
                 rPlant.setSignalPresence(signal, False)
 
         else:
