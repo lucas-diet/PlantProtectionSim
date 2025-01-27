@@ -2276,15 +2276,19 @@ class Gui():
 				importer = Importer(filepath)
 				grid = importer.load()
 				self.grid = grid
-				plantsNum = self.getPlantsNum(grid)
-				enemyNum = self.getEnemyNum(grid)
-				substanceNum = self.getSubstanceNum(grid)
+				plantsNum = int(self.getPlantsNum(grid))
+				enemyNum = int(self.getEnemyNum(grid))
+				substanceNum = int(self.getSubstanceNum(grid))
 
 				self.grid_size_entry.delete(0, tk.END)
-				self.grid_size_entry.insert(0, int(grid.height))
-				self.plants_entry.insert(0, int(plantsNum))
-				self.enemies_entry.insert(0, int(enemyNum))
-				self.substances_entry.insert(0, int(substanceNum))
+				self.grid_size_entry.insert(0, grid.height)
+				self.plants_entry.insert(0, plantsNum)
+				self.enemies_entry.insert(0, enemyNum)
+				self.substances_entry.insert(0, substanceNum)
+
+				self.createSituation()
+				self.fillUpPlantInputs(grid)
+				self.fillUpEnemyInputs(grid)
 				
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
@@ -2328,5 +2332,60 @@ class Gui():
 					seen_substance.add(sig.enemy.name)
 
 		return count
-								
-							
+	
+
+	def fillUpPlantInputs(self, grid):
+		seen_plants = set()
+
+		for plant in grid.plants:
+			if plant.name not in seen_plants:  # Prüfen, ob die Pflanze schon verarbeitet wurde
+				seen_plants.add(plant.name)
+
+				# Suche nach einem freien Eintrag für die Pflanze
+				for i in self.plant_entries.keys():
+					if 'initEnergy' in self.plant_entries[i]:
+						self.plant_entries[i]['initEnergy'].delete(0, tk.END)
+						self.plant_entries[i]['initEnergy'].insert(0, plant.initEnergy)
+					if 'growthRate' in self.plant_entries[i]:
+						self.plant_entries[i]['growthRate'].delete(0, tk.END)
+						self.plant_entries[i]['growthRate'].insert(0, plant.growthRateEnergy)
+					if 'minEnergy' in self.plant_entries[i]:
+						self.plant_entries[i]['minEnergy'].delete(0, tk.END)
+						self.plant_entries[i]['minEnergy'].insert(0, plant.minEnergy)
+					if 'reproInterval' in self.plant_entries[i]:
+						self.plant_entries[i]['reproInterval'].delete(0, tk.END)
+						self.plant_entries[i]['reproInterval'].insert(0, plant.reproductionInterval)
+					if 'offspring' in self.plant_entries[i]:
+						self.plant_entries[i]['offspring'].delete(0, tk.END)
+						self.plant_entries[i]['offspring'].insert(0, plant.offspringEnergy)
+					if 'minDist' in self.plant_entries[i]:
+						self.plant_entries[i]['minDist'].delete(0, tk.END)
+						self.plant_entries[i]['minDist'].insert(0, plant.minDist)
+					if 'maxDist' in self.plant_entries[i]:
+						self.plant_entries[i]['maxDist'].delete(0, tk.END)
+						self.plant_entries[i]['maxDist'].insert(0, plant.maxDist)
+					break  # Weiter zur nächsten Pflanze
+
+	
+	def fillUpEnemyInputs(self, grid):
+		seen_enemies = set()
+
+		for ec in grid.enemies:
+			if ec.enemy.name not in seen_enemies:
+				seen_enemies.add(ec.enemy.name)
+
+				for i in self.enemy_entries.keys():
+
+					if 'clusterSize' in self.enemy_entries[i]:
+						self.enemy_entries[i]['clusterSize'].delete(0, tk.END)
+						self.enemy_entries[i]['clusterSize'].insert(0, ec.num)
+					if 'speed' in self.enemy_entries[i]:
+						self.enemy_entries[i]['speed'].delete(0, tk.END)
+						self.enemy_entries[i]['speed'].insert(0, ec.speed)
+					if 'eatSpeed' in self.enemy_entries[i]:
+						self.enemy_entries[i]['eatSpeed'].delete(0, tk.END)
+						self.enemy_entries[i]['eatSpeed'].insert(0, ec.eatingSpeed)
+					if 'eatVictory' in self.enemy_entries[i]:
+						self.enemy_entries[i]['eatVictory'].delete(0, tk.END)
+						self.enemy_entries[i]['eatVictory'].insert(0, ec.eatVictory)
+					break
