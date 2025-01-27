@@ -565,7 +565,7 @@ class Gui():
 			self.substance_entries[i]['subName'] = tk.Entry(self.substances_setting_frame)
 			self.substance_entries[i]['subName'].grid(row=row+3, column=1, columnspan=4, padx=2, pady=2, sticky='ew')
 
-			self.create_tooltip_inputs(self.substance_entries[i]['subName'], 'Name of the substance e.g. methyl jasmonate')
+			self.create_tooltip_inputs(self.substance_entries[i]['subName'], 'Name of the substance e.g. s1')
 
 			# Producer Eingabefeld
 			emit_label = tk.Label(self.substances_setting_frame, text='Producer:')
@@ -1976,8 +1976,9 @@ class Gui():
 						self.remove_tooltip(inner_id)
 						del self.plant_at_position[inner_id]
 						self.set_white(inner_id, plant)
-
-					self.remove_radiusColor()
+						self.remove_radiusColor_plantDead()
+				
+				self.remove_radiusColor_plantAlive(plant)
 				
 
 	def set_white(self, inner_id, plant):
@@ -2169,21 +2170,52 @@ class Gui():
 				self.sendSignal_air() 
 
 	
-	def remove_radiusColor(self):
+	def remove_radiusColor_plantDead(self):
 		"""
 		Setzt die Farben der Felder im Signalradius auf Weiß, wenn keine Signale aktiv sind.
 		"""
-		# Überprüfe die Felder im Signalradius nur, wenn es keine Felder in radiusFields gibt	
-		if not self.grid.radiusFields:
-			for field, squares_ids in self.squares.items():
-				outer_id = squares_ids['outer']
-				inner_id = squares_ids['inner']
+		# Überprüfe die Felder im Signalradius nur, wenn es keine Felder in radiusFields gibt
+		for pos, squares_ids in self.squares.items():
+			outer_id = squares_ids['outer']
+			inner_id = squares_ids['inner']
 
-				# Überprüfe, ob auf diesem Feld eine Pflanze steht
-				plants_on_field = [p for p in self.grid.plants if p.position == field]
+			# Überprüfe, ob auf diesem Feld eine Pflanze steht
+			plants_on_field = [p for p in self.grid.plants if p.position == pos]
 
-				# Wenn keine Pflanze auf dem Feld ist, setze die Farbe auf Weiß
-				if not plants_on_field:
-					self.gridCanvas.itemconfig(outer_id, fill='white')
-					self.gridCanvas.itemconfig(inner_id, fill='white')
-		
+			# Wenn keine Pflanze auf dem Feld ist, setze die Farbe auf Weiß
+			if not plants_on_field:
+				self.gridCanvas.itemconfig(outer_id, fill='white')
+				self.gridCanvas.itemconfig(inner_id, fill='white')
+	
+
+	def remove_radiusColor_plantAlive(self, plant):
+		for ec in self.grid.enemies:
+			for signal in self.grid.signals:
+				for (cPlant, signal), fields in list(self.grid.radiusFields.items()):
+					if plant == cPlant and ec.getAfterEffectTime(cPlant, signal) < 1:
+						# Lösche die Farben in den Feldern vor dem Entfernen
+						for field in fields:
+							squares_ids = self.squares.get(field)
+							if squares_ids:
+								outer_id = squares_ids['outer']
+								inner_id = squares_ids['inner']
+									
+								# Überprüfe, ob eine andere Pflanze auf diesem Feld steht
+								plants_on_field = [p for p in self.grid.plants if p.position == field]
+									
+								# Wenn keine andere Pflanze auf dem Feld ist, setze die Farbe auf Weiß
+								if not plants_on_field:
+									self.gridCanvas.itemconfig(outer_id, fill='white')
+									self.gridCanvas.itemconfig(inner_id, fill='white')
+								
+								if plants_on_field:
+									self.gridCanvas.itemconfig(outer_id, fill='white')
+							
+						# Entferne den Schlüssel aus dem Dictionary
+						del self.grid.radiusFields[(cPlant, signal)]
+						signal.radius[(plant, signal)] = 0
+
+							
+
+								
+							
