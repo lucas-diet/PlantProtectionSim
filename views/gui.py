@@ -2127,33 +2127,61 @@ class Gui():
 	
 
 	def sendSignal_air(self):
+		"""
+		Sendet Signale vom Typ 'air' und zeigt Signalradien an.
+		Nicht überlappende Felder eines Radius bleiben orange, überlappende Bereiche werden mit zunehmender Überlagerung dunkler.
+		"""
+		# Dictionary zur Verfolgung der Überlappungsanzahl pro Feld
+		field_overlap_count = {}
+
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				if plant.name in signal.emit and signal.spreadType == 'air' and plant.isSignalPresent(signal):
-					for (cPlant, signal), fields in self.grid.radiusFields.items():					
-						# Wenn die Pflanze lebendig ist, setze den Radius
+					for (cPlant, signal), fields in self.grid.radiusFields.items():
 						for field in fields:
-							squares_ids = self.squares.get(field)
-							if squares_ids:
-								outer_id = squares_ids['outer']
-								inner_id = squares_ids['inner']
-										
-								# Überprüfe, ob eine andere Pflanze auf diesem Gridfeld steht
-								other_plants_on_field = [p for p in self.grid.plants if p.position == field]
-										
-								# Wenn keine andere Pflanze auf dem Feld steht, ändere die Farbe
-								if not other_plants_on_field:
-									# Überprüfe die aktuelle Füllfarbe des inneren Rechtecks
-									current_fill = self.gridCanvas.itemcget(inner_id, 'fill')
-											
-									# Wenn die Farbe des inneren Rechtecks 'white' ist, ändere sie
-									if current_fill == 'white':
-										self.gridCanvas.itemconfig(outer_id, fill='orange')
-										#self.gridCanvas.itemconfig(inner_id, fill='bisque')
-								
-								self.reacteToSignalRadius(other_plants_on_field, signal)
-								
+							# Erhöhe die Überlappungsanzahl für dieses Feld
+							if field not in field_overlap_count:
+								field_overlap_count[field] = 1
+							else:
+								field_overlap_count[field] += 1
 
+		for field, overlap_count in field_overlap_count.items():
+			squares_ids = self.squares.get(field)
+			if squares_ids:
+				outer_id = squares_ids['outer']
+				inner_id = squares_ids['inner']
+
+				# Bestimme die Farbe basierend auf der Anzahl der Überlagerungen
+				if overlap_count == 1:
+					# Kein Überlappen – bleibt orange
+					new_color = '#ffa500'
+				else:
+					# Überlappen – berechne dunklere Farbe basierend auf der Anzahl der Überlagerungen
+					new_color = self.get_overlap_color(overlap_count)
+
+				# Setze die berechnete Farbe
+				self.gridCanvas.itemconfig(outer_id, fill=new_color)
+
+
+	def get_overlap_color(self, overlap_count):
+		"""
+		Gibt eine Farbe basierend auf der Anzahl der Überlagerungen zurück.
+		Nicht überlappende Felder bleiben orange (#ffa500).
+		Überlappende Felder werden mit zunehmender Überlagerung dunkler.
+		"""
+		base_color = (255, 165, 0)  # Basisfarbe Orange (RGB)
+		darkening_factor = 0.1  # Wie stark die Farbe pro Überlagerung dunkler wird (0 bis 1)
+
+		# Berechne die Abschwächung basierend auf der Überlappungsanzahl
+		factor = min((overlap_count - 1) * darkening_factor, 1)
+		r = int(base_color[0] * (1 - factor))
+		g = int(base_color[1] * (1 - factor))
+		b = int(base_color[2] * (1 - factor))
+
+		# Konvertiere die Farbe in Hex für tkinter
+		return f'#{r:02x}{g:02x}{b:02x}'
+
+								
 	def reacteToSignalRadius(self, other_plants_on_field, signal):
 		# Wenn eine Pflanze auf dem Feld steht, reagiere darauf
 		for other_plant in other_plants_on_field:
