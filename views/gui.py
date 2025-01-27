@@ -7,6 +7,8 @@ import threading
 from concurrent.futures import ThreadPoolExecutor
 import random
 import time
+from tkinter import filedialog
+import pickle as pkl
 
 from models.grid import Grid
 from models.plant import Plant
@@ -17,6 +19,7 @@ from models.connection import SymbioticConnection
 from models.substance import Substance
 from models.signal import Signal
 from models.toxin import Toxin
+from controllers.fileManager import Exporter, Importer
 
 
 class Gui():
@@ -119,8 +122,8 @@ class Gui():
 
 		tk.Button(self.top_frame, text='Plot', command=self.open_plotWindow).grid(row=0, column=13, columnspan=1, pady=1, sticky='ew')
 
-		tk.Button(self.top_frame, text='Import').grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Export').grid(row=0, column=15, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Import', command=self.importSystem).grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Export', command=self.exportSystem).grid(row=0, column=15, columnspan=1, pady=1, sticky='ew')
 
 
 	def createSituation(self):
@@ -793,11 +796,11 @@ class Gui():
 	def create_plotTabs(self):
 		# Notebook (Tabs) erstellen
 		self.plot_tabs = ttk.Notebook(self.plotWindow)
-		diagram = Diagrams(self.grid)
+		self.diagram = Diagrams(self.grid)
 		# Tab 1: Pflanzen - Energy
 		self.plants_energy_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.plants_energy_plot_tab, text='Plants-Energy')
-		diagram.dataPlotter(
+		self.diagram.dataPlotter(
 			root=self.plants_energy_plot_tab,
 			data_dict=self.grid.plantData,
 			simLength=self.sim.simLength,
@@ -809,7 +812,7 @@ class Gui():
 		# Tab 2: Pflanzen - Count
 		self.plants_count_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.plants_count_plot_tab, text='Plants-Count')
-		diagram.dataPlotter(
+		self.diagram.dataPlotter(
 			root=self.plants_count_plot_tab,
 			data_dict=self.grid.plantData,
 			simLength=self.sim.simLength,
@@ -821,7 +824,7 @@ class Gui():
 		# Tab 3: Feinde - Size
 		self.enemies_size_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.enemies_size_plot_tab, text='Enemies-Size')
-		diagram.dataPlotter(
+		self.diagram.dataPlotter(
 			root=self.enemies_size_plot_tab,
 			data_dict=self.grid.EnemyData,
 			simLength=self.sim.simLength,
@@ -833,7 +836,7 @@ class Gui():
 		# Tab 4: Feinde - Count
 		self.enemies_count_plot_tab = tk.Frame(self.plot_tabs)
 		self.plot_tabs.add(self.enemies_count_plot_tab, text='Enemies-Count')
-		diagram.dataPlotter(
+		self.diagram.dataPlotter(
 			root=self.enemies_count_plot_tab,
 			data_dict=self.grid.EnemyData,
 			simLength=self.sim.simLength,
@@ -2243,7 +2246,87 @@ class Gui():
 						del self.grid.radiusFields[(cPlant, signal)]
 						signal.radius[(plant, signal)] = 0
 
-							
 
+	def exportSystem(self):
+		# Prüfen, ob self.grid existiert und nicht None ist
+		if not hasattr(self, 'grid') or self.grid is None:
+			messagebox.showerror('Fehler', 'System not exists')
+			return
+		# Öffne das File-Explorer Fenster, um einen Speicherort auszuwählen
+		filepath = filedialog.asksaveasfilename(defaultextension='.pkl', 
+												filetypes=[('Pickle-Dateien', '*.pkl'), 
+														('Alle Dateien', '*.*')])
+		if filepath:
+			# Erstelle eine Instanz der Exporter-Klasse und speichere die Datei
+			exporter = Exporter(filepath, self.grid)
+			exporter.save()
+			print(f'Datei gespeichert unter: {filepath}')
+		else:
+			print('Speichern abgebrochen.')
+	
+
+	def importSystem(self):
+        # Öffne das File-Explorer Fenster, um eine Pickle-Datei auszuwählen
+		filepath = filedialog.askopenfilename(defaultextension='.pkl',
+                                              filetypes=[('Pickle-Dateien', '*.pkl'), 
+                                                         ('Alle Dateien', '*.*')])
+		if filepath:
+			try:
+                # Erstelle eine Instanz der Importer-Klasse und lade die Daten
+				importer = Importer(filepath)
+				grid = importer.load()
+				self.grid = grid
+				plantsNum = self.getPlantsNum(grid)
+				enemyNum = self.getEnemyNum(grid)
+				substanceNum = self.getSubstanceNum(grid)
+
+				self.grid_size_entry.delete(0, tk.END)
+				self.grid_size_entry.insert(0, int(grid.height))
+				self.plants_entry.insert(0, int(plantsNum))
+				self.enemies_entry.insert(0, int(enemyNum))
+				self.substances_entry.insert(0, int(substanceNum))
+				
+				print(f'Daten erfolgreich importiert aus: {filepath}')
+			except Exception as e:
+				print(f'Fehler beim Importieren der Daten: {e}')
+		else:
+			print('Import abgebrochen.')
+
+	
+	def getPlantsNum(self, grid):
+		count = 0
+		seen_plants = set()
+		self.plants_entry.delete(0, tk.END)
+		for plant in grid.plants:
+			if plant.name not in seen_plants:
+				count += 1
+				seen_plants.add(plant.name)
+
+		return count
+	
+
+	def getEnemyNum(self, grid):
+		count = 0
+		seen_enemies = set()
+		self.enemies_entry.delete(0, tk.END)
+		for ec in grid.enemies:
+			if ec.enemy.name not in seen_enemies:
+				count += 1
+				seen_enemies.add(ec.enemy.name)
+
+		return count
+	
+
+	def getSubstanceNum(self, grid):
+		count = 0
+		seen_substance = set()
+		self.substances_entry.delete(0, tk.END)
+		for sig in grid.signals:
+			for tox in grid.toxins:
+				if sig.name not in seen_substance or tox.name not in seen_substance:
+					count += 1
+					seen_substance.add(sig.enemy.name)
+
+		return count
 								
 							

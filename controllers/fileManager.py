@@ -5,10 +5,9 @@ import pickle as pkl
 
 class Exporter():
 
-    def __init__(self, path, grid, dia):
+    def __init__(self, path, grid):
         self.path =  path
         self.grid = grid
-        self.dia = dia
 
     
     def getDate(self):
@@ -17,12 +16,11 @@ class Exporter():
         cluster = self.grid.enemies
         signals = self.grid.signals
         toxins = self.grid.toxins
-        diagrams = self.dia
 
         # Verbindungen aus Pflanzen extrahieren
         plant_connections = {plant.name: plant.gridConnections for plant in plants}
 
-        return {'grid': grid, 'plants': plants, 'cluster': cluster, 'signals': signals, 'toxins': toxins, 'connections': plant_connections, 'diagrams': diagrams}
+        return {'grid': grid, 'plants': plants, 'cluster': cluster, 'signals': signals, 'toxins': toxins, 'connections': plant_connections}
     
 
     def save(self):
@@ -51,7 +49,6 @@ class Importer():
     
     def reconstructData(self, data):
         grid = data['grid']
-        dia = data['diagrams']
         
         self.reconstructPlants(data, grid)
         self.reconstructEnemies(data, grid)
@@ -59,7 +56,7 @@ class Importer():
         self.reconstructToxins(data, grid)
         self.reconstructConnections(data, grid)
         
-        return grid, dia
+        return grid
     
 
     def reconstructPlants(self, data, grid):
