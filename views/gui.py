@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 import random
 import time
 from tkinter import filedialog
-import pickle as pkl
+import copy
 
 from models.grid import Grid
 from models.plant import Plant
@@ -1133,7 +1133,7 @@ class Gui():
 			position=position,
 			grid=self.grid,
 			color=plant_color)
-
+		
 		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
 
 		# Pflanze zur Grid hinzufügen
@@ -1981,7 +1981,6 @@ class Gui():
 					if inner_id in self.plant_at_position and self.plant_at_position[inner_id] == plant:
 						self.remove_tooltip(inner_id)
 						del self.plant_at_position[inner_id]
-						self.grid.removePlant(plant)
 						self.set_white(inner_id, plant)
 						self.remove_radiusColor_plantDead()
 				
@@ -1999,6 +1998,7 @@ class Gui():
 				inner_square_id = square_ids['inner']
 				self.gridCanvas.itemconfig(outer_square_id, fill='white')
 				self.gridCanvas.itemconfig(inner_square_id, fill='white')
+				self.grid.removePlant(plant)
 			
 			# Setze die Farbe auf Weiß für das innere Rechteck
 			self.gridCanvas.itemconfig(inner_id, fill='white')
@@ -2270,7 +2270,7 @@ class Gui():
 		if filepath:
 			try:
 				# Export durchführen
-				exporter = Exporter(filepath, self.grid)
+				exporter = Exporter(filepath, self.backupGrid)
 				exporter.save()
 				messagebox.showinfo('Success', 'File was saved successfully')
 			except Exception as e:
