@@ -1999,7 +1999,7 @@ class Gui():
 				if plant in self.grid.plants:
 					self.grid.removePlant(plant)
 				else:
-					print(f'Pflanze {plant} war bereits entfernt oder existiert nicht in der Liste.')
+					print(f'Pflanze {plant.name}{plant.position} war bereits entfernt oder existiert nicht in der Liste.')
 
 				# Setze die Farbe auf Weiß für das innere Rechteck
 				self.gridCanvas.itemconfig(inner_id, fill='white')
