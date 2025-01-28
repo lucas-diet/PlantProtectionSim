@@ -2305,6 +2305,9 @@ class Gui():
 				self.fillUpPlantInputs(grid)
 				self.fillUpEnemyInputs(grid)
 				self.fillUpSubstanceInputs(grid)
+
+				self.placePlantsFromFile(grid)
+				self.placeEnemisFromFile(grid)
 				
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
@@ -2538,3 +2541,22 @@ class Gui():
 						self.substance_entries[i]['spreadType_var'].set('Symbiotic')
 					else:
 						self.substance_entries[i]['spreadType_var'].set('Air')
+		
+	
+	def placePlantsFromFile(self, grid):
+		for plant in grid.plants:
+			squares_ids = self.squares.get(plant.position)
+			if squares_ids:
+				inner_id = squares_ids['inner']
+
+				self.gridCanvas.itemconfig(inner_id, fill=plant.color)
+				self.plantDetails(plant, inner_id)
+
+	
+	def placeEnemisFromFile(self, grid):
+		for ec in grid.enemies:
+			squares_ids = self.squares.get(ec.position)
+			if squares_ids:
+				inner_id = squares_ids['inner']
+				x, y = ec.position
+				self.clusterMarker(ec.position, inner_id, ec)
