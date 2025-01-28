@@ -1994,12 +1994,20 @@ class Gui():
 				inner_square_id = square_ids['inner']
 				self.gridCanvas.itemconfig(outer_square_id, fill='white')
 				self.gridCanvas.itemconfig(inner_square_id, fill='white')
-				self.grid.removePlant(plant)
-			
+
+				# Überprüfen, ob die Pflanze noch in der Liste ist, bevor sie entfernt wird
+				if plant in self.grid.plants:
+					self.grid.removePlant(plant)
+				else:
+					print(f'Pflanze {plant} war bereits entfernt oder existiert nicht in der Liste.')
+
 				# Setze die Farbe auf Weiß für das innere Rechteck
 				self.gridCanvas.itemconfig(inner_id, fill='white')
+
 				# Entferne alle Verbindungen zu dieser Pflanze
 				self.remove_plant_connections(plant)
+			else:
+				print(f'Fehler: Keine square_ids für Position {plant.position} gefunden.')
 
 		except Exception as e:
 			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
@@ -2305,11 +2313,6 @@ class Gui():
 				self.placeEnemisFromFile(grid)
 
 				self.grid = grid
-
-				print(self.grid.enemies)
-				print(self.grid.plants)
-				print(self.grid.signals)
-				print(self.grid.toxins)
 				
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
