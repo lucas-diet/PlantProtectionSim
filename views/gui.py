@@ -1715,7 +1715,9 @@ class Gui():
 	
 	
 	def create_add_substance(self):
-		self.validate_substanceInputs(self.substance_entries)
+		# Validierung der Substanzen
+		if not self.validate_substanceInputs(self.substance_entries):  # Eingaben prüfen
+			return False  # Abbrechen, wenn Eingaben ungültig sind
 		
 		for substance_value in self.valid_substances_set:
 			substance_type, input_name, input_producer, input_trigger, input_prodTime = substance_value[1], substance_value[4], substance_value[5], substance_value[7], substance_value[8]
@@ -1737,6 +1739,7 @@ class Gui():
 				
 				if not any(t.substance.name == tox.substance.name for t in self.grid.toxins):
 					self.grid.addSubstance(tox)
+		return True
 
 	
 	def create_signal(self, sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime):
@@ -2248,22 +2251,34 @@ class Gui():
 
 
 	def exportSystem(self):
-		# Prüfen, ob self.grid existiert und nicht None ist
+		# Prüfen, ob das Grid existiert
 		if not hasattr(self, 'grid') or self.grid is None:
 			messagebox.showerror('Fehler', 'System not exists')
 			return
+
+		# Prüfen, ob Substanzen korrekt erstellt werden können
+		if not self.create_add_substance():  # Falls Fehler auftreten, wird abgebrochen
+			messagebox.showerror('Fehler', 'Invalid substance inputs! Please fix all errors before exporting.')
+			return
+
 		# Öffne das File-Explorer Fenster, um einen Speicherort auszuwählen
-		filepath = filedialog.asksaveasfilename(defaultextension='.pkl', 
-												filetypes=[('Pickle-Dateien', '*.pkl'), 
-														('Alle Dateien', '*.*')])
+		filepath = filedialog.asksaveasfilename(
+			defaultextension='.pkl',
+			filetypes=[('Pickle-Dateien', '*.pkl'), ('Alle Dateien', '*.*')]
+		)
+
+		# Export nur, wenn ein gültiger Pfad gewählt wurde
 		if filepath:
-			# Erstelle eine Instanz der Exporter-Klasse und speichere die Datei
-			exporter = Exporter(filepath, self.grid)
-			exporter.save()
-			print(f'Datei gespeichert unter: {filepath}')
+			try:
+				# Export durchführen
+				exporter = Exporter(filepath, self.grid)
+				exporter.save()
+				messagebox.showinfo('Success', 'File was saved successfully')
+			except Exception as e:
+				messagebox.showerror('Error', f'Error saving file: {str(e)}')
 		else:
-			print('Speichern abgebrochen.')
-	
+			pass
+
 
 	def importSystem(self):
         # Öffne das File-Explorer Fenster, um eine Pickle-Datei auszuwählen
@@ -2289,6 +2304,7 @@ class Gui():
 				self.createSituation()
 				self.fillUpPlantInputs(grid)
 				self.fillUpEnemyInputs(grid)
+				self.fillUpSubstanceInputs(grid)
 				
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
@@ -2325,7 +2341,6 @@ class Gui():
 		count = 0
 		seen_substance = set()
 		self.substances_entry.delete(0, tk.END)  # Lösche das Eingabefeld
-		#print(grid.signals)
 		# Zähle Signale
 		for sig in grid.signals:
 			if sig.name and sig.name not in seen_substance:  # Prüfe, ob das Signal einen Namen hat und nicht schon gezählt wurde
@@ -2339,7 +2354,6 @@ class Gui():
 				count += 1
 				seen_substance.add(tox.name)
 
-		print(seen_substance)
 		return count
 
 	
@@ -2398,3 +2412,101 @@ class Gui():
 						self.enemy_entries[i]['eatVictory'].delete(0, tk.END)
 						self.enemy_entries[i]['eatVictory'].insert(0, ec.eatVictory)
 					break
+
+
+	def fillUpSubstanceInputs(self, grid):
+		"""
+		Füllt die Substanzen-Eingabefelder basierend auf den Daten aus `grid`.
+		"""
+		seen_substances = set()  # Um Duplikate zu vermeiden
+
+		for substance in grid.signals + grid.toxins:  # Alle Substanzen durchlaufen
+			if substance.substance.name not in seen_substances:
+				seen_substances.add(substance.substance.name)
+
+				# Fülle die Felder entsprechend der Substanz-Daten
+				for i in self.substance_entries.keys():
+					# Name der Substanz
+					if 'subName' in self.substance_entries[i]:
+						self.substance_entries[i]['subName'].delete(0, tk.END)
+						self.substance_entries[i]['subName'].insert(0, substance.name)
+
+					# Typ (Signal oder Toxin)
+					if 'type_var' in self.substance_entries[i]:
+						self.substance_entries[i]['type_var'].set(substance.type)
+
+					# Producer
+					if 'producer' in self.substance_entries[i]:
+						self.substance_entries[i]['producer'].delete(0, tk.END)
+						self.substance_entries[i]['producer'].insert(0, substance.emit)
+
+					# Receiver
+					if 'receiver' in self.substance_entries[i]:
+						self.substance_entries[i]['receiver'].delete(0, tk.END)
+						self.substance_entries[i]['receiver'].insert(0, substance.receive)
+
+					# Trigger
+					if 'trigger' in self.substance_entries[i]:
+						self.substance_entries[i]['trigger'].delete(0, tk.END)
+						self.substance_entries[i]['trigger'].insert(0, substance.triggerCombination)
+
+					# Produktionszeit
+					if 'prodTime' in self.substance_entries[i]:
+						self.substance_entries[i]['prodTime'].delete(0, tk.END)
+						self.substance_entries[i]['prodTime'].insert(0, substance.prodTime)
+
+					# Send-Geschwindigkeit
+					if 'sendSpeed' in self.substance_entries[i]:
+						if hasattr(substance, 'sendSpeed'):
+							self.substance_entries[i]['sendSpeed'].config(state='normal')
+							self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
+							self.substance_entries[i]['sendSpeed'].insert(0, substance.sendSpeed)
+						else:
+							self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
+							self.substance_entries[i]['sendSpeed'].config(state='disabled')
+
+					# Energie-Kosten
+					if 'energyCosts' in self.substance_entries[i]:
+						if hasattr(substance, 'energyCost'):
+							self.substance_entries[i]['energyCosts'].config(state='normal')
+							self.substance_entries[i]['energyCosts'].delete(0, tk.END)
+							self.substance_entries[i]['energyCosts'].insert(0, substance.energyCosts)
+						else:
+							self.substance_entries[i]['energyCosts'].delete(0, tk.END)
+							self.substance_entries[i]['energyCosts'].config(state='disabled')
+
+					# AfterEffectTime
+					if 'aft' in self.substance_entries[i]:
+						if hasattr(substance, 'afterEffectTime'):
+							self.substance_entries[i]['aft'].config(state='normal')
+							self.substance_entries[i]['aft'].delete(0, tk.END)
+							self.substance_entries[i]['aft'].insert(0, substance.afterEffectTime)
+						else:
+							self.substance_entries[i]['aft'].delete(0, tk.END)
+							self.substance_entries[i]['aft'].config(state='disabled')
+
+					# Lethalität (Eli-Strength)
+					if 'eliStrength' in self.substance_entries[i]:
+						if hasattr(substance, 'eliStrength'):
+							self.substance_entries[i]['eliStrength'].config(state='normal')
+							self.substance_entries[i]['eliStrength'].delete(0, tk.END)
+							self.substance_entries[i]['eliStrength'].insert(0, substance.eliminationStrength)
+						else:
+							self.substance_entries[i]['eliStrength'].delete(0, tk.END)
+							self.substance_entries[i]['eliStrength'].config(state='disabled')
+
+					# Deadly-Toxin Checkbox
+					if 'toxinEffect_var' in self.substance_entries[i]:
+						if hasattr(substance, 'deadly') and substance.deadly:
+							self.substance_entries[i]['toxinEffect_var'].set(1)
+						else:
+							self.substance_entries[i]['toxinEffect_var'].set(0)
+
+					# Spread-Type Dropdown
+					if 'spreadType_var' in self.substance_entries[i]:
+						if hasattr(substance, 'spreadType'):
+							self.substance_entries[i]['spreadType_var'].set(substance.spreadType)
+						else:
+							self.substance_entries[i]['spreadType_var'].set("N/A")
+
+					break  # Verhindert mehrfache Zuordnung für dieselbe Substanz
