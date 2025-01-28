@@ -1981,6 +1981,7 @@ class Gui():
 					if inner_id in self.plant_at_position and self.plant_at_position[inner_id] == plant:
 						self.remove_tooltip(inner_id)
 						del self.plant_at_position[inner_id]
+						self.grid.removePlant(plant)
 						self.set_white(inner_id, plant)
 						self.remove_radiusColor_plantDead()
 				
@@ -2003,8 +2004,6 @@ class Gui():
 			self.gridCanvas.itemconfig(inner_id, fill='white')
 			# Entferne alle Verbindungen zu dieser Pflanze
 			self.remove_plant_connections(plant)
-			if not self.plant_at_position[inner_id] == plant:
-				self.grid.removePlant(plant)
 
 		except Exception as e:
 			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
@@ -2291,6 +2290,7 @@ class Gui():
 				importer = Importer(filepath)
 				grid = importer.load()
 				self.grid = grid
+				
 				plantsNum = int(self.getPlantsNum(grid))
 				enemyNum = int(self.getEnemyNum(grid))
 				substanceNum = int(self.getSubstanceNum(grid))
@@ -2308,6 +2308,11 @@ class Gui():
 
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
+
+				print(self.grid.enemies)
+				print(self.grid.plants)
+				print(self.grid.signals)
+				print(self.grid.toxins)
 				
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
@@ -2364,6 +2369,7 @@ class Gui():
 		seen_plants = set()
 
 		for plant in grid.plants:
+			self.grid.addPlant(plant)
 			if plant.name not in seen_plants:  # Prüfen, ob die Pflanze schon verarbeitet wurde
 				seen_plants.add(plant.name)
 
@@ -2397,6 +2403,7 @@ class Gui():
 		seen_enemies = set()
 
 		for ec in grid.enemies:
+			self.grid.addEnemies(ec)
 			if ec.enemy.name not in seen_enemies:
 				seen_enemies.add(ec.enemy.name)
 
@@ -2419,9 +2426,8 @@ class Gui():
 
 	def fillUpSubstanceInputs(self, grid):
 		"""
-		Füllt die Substanzen-Eingabefelder basierend auf den Daten aus `grid`.
+		Füllt die Substanzen-Eingabefelder basierend auf den Daten aus 'grid'.
 		"""
-		seen_substances = set()  # Um Duplikate zu vermeiden
 		entry_keys = list(self.substance_entries.keys())  # Liste der Eingabebereiche
 		entry_count = len(entry_keys)  # Anzahl der verfügbaren Bereiche
 
@@ -2433,6 +2439,7 @@ class Gui():
 			print('Warnung: Nicht genügend Eingabefelder für alle Substanzen vorhanden.')
 
 		for idx, substance in enumerate(substance_list):
+			self.grid.addSubstance(substance)
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
 				break
 
@@ -2546,17 +2553,18 @@ class Gui():
 	def placePlantsFromFile(self, grid):
 		for plant in grid.plants:
 			squares_ids = self.squares.get(plant.position)
+
 			if squares_ids:
 				inner_id = squares_ids['inner']
-
 				self.gridCanvas.itemconfig(inner_id, fill=plant.color)
 				self.plantDetails(plant, inner_id)
+				self.plant_at_position[inner_id] = plant
 
 	
 	def placeEnemisFromFile(self, grid):
 		for ec in grid.enemies:
 			squares_ids = self.squares.get(ec.position)
+			
 			if squares_ids:
 				inner_id = squares_ids['inner']
-				x, y = ec.position
 				self.clusterMarker(ec.position, inner_id, ec)
