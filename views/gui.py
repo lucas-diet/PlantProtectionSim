@@ -2477,7 +2477,6 @@ class Gui():
 					self.substance_entries[i]['trigger'].insert(0, trigger_value)
 				else:
 					trigger_value = '; '.join([f'{e[0]},{e[1]},{e[2]}' for e in substance.triggerCombination])
-					print(trigger_value)
 					self.substance_entries[i]['trigger'].delete(0, tk.END)
 					self.substance_entries[i]['trigger'].insert(0, trigger_value)
 
