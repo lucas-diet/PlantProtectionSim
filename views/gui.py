@@ -1721,7 +1721,7 @@ class Gui():
 			substance_type, input_name, input_producer, input_trigger, input_prodTime = substance_value[1], substance_value[4], substance_value[5], substance_value[7], substance_value[8]
 			sub = Substance(name=input_name, type='signal')
 
-			if  substance_type == 'Signal':
+			if substance_type == 'Signal':
 				input_spreadType, input_receiver, input_sendSpeed, input_energyCost, input_afterEffectTime = substance_value[3], substance_value[6], substance_value[9], substance_value[10], substance_value[11]
 				sig = self.create_signal(sub, input_producer, input_receiver, input_trigger, input_prodTime, input_spreadType, input_sendSpeed, input_energyCost, input_afterEffectTime)
 
@@ -2324,16 +2324,25 @@ class Gui():
 	def getSubstanceNum(self, grid):
 		count = 0
 		seen_substance = set()
-		self.substances_entry.delete(0, tk.END)
+		self.substances_entry.delete(0, tk.END)  # Lösche das Eingabefeld
+		#print(grid.signals)
+		# Zähle Signale
 		for sig in grid.signals:
-			for tox in grid.toxins:
-				if sig.name not in seen_substance or tox.name not in seen_substance:
-					count += 1
-					seen_substance.add(sig.enemy.name)
+			if sig.name and sig.name not in seen_substance:  # Prüfe, ob das Signal einen Namen hat und nicht schon gezählt wurde
+				count += 1
+				seen_substance.add(sig.name)
 
+
+		# Zähle Toxine
+		for tox in grid.toxins:
+			if tox.name and tox.name not in seen_substance:  # Prüfe, ob das Toxin einen Namen hat und nicht schon gezählt wurde
+				count += 1
+				seen_substance.add(tox.name)
+
+		print(seen_substance)
 		return count
-	
 
+	
 	def fillUpPlantInputs(self, grid):
 		seen_plants = set()
 

@@ -133,7 +133,7 @@ sc1.createConnection()
 
 # Simulation
 sim = Simulation(grid)
-sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+#sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 # Diagramme ohne GUI
 dia = Diagrams(grid)
@@ -143,8 +143,8 @@ dia = Diagrams(grid)
 #dia.dataPlotter(grid.EnemyData, sim.simLength, measure='count', title='Number by Enemy Types Over Time')
 
 # Export und Import
-#Exporter('test.pkl', grid, dia).save()
-#rGrid, rDia = Importer('test.pkl').load()
+#Exporter('test.pkl', grid).save()
+#rGrid = Importer('test.pkl').load()
 #rSim = Simulation(rGrid)
 #rSim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
@@ -158,4 +158,4 @@ dia = Diagrams(grid)
 #sim.logLoader('log.pkl')
 
 gui = Gui()
-gui.mainloop()
+#gui.mainloop()
