@@ -1996,10 +1996,10 @@ class Gui():
 				self.gridCanvas.itemconfig(inner_square_id, fill='white')
 				self.grid.removePlant(plant)
 			
-			# Setze die Farbe auf Weiß für das innere Rechteck
-			self.gridCanvas.itemconfig(inner_id, fill='white')
-			# Entferne alle Verbindungen zu dieser Pflanze
-			self.remove_plant_connections(plant)
+				# Setze die Farbe auf Weiß für das innere Rechteck
+				self.gridCanvas.itemconfig(inner_id, fill='white')
+				# Entferne alle Verbindungen zu dieser Pflanze
+				self.remove_plant_connections(plant)
 
 		except Exception as e:
 			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
@@ -2285,7 +2285,6 @@ class Gui():
                 # Erstelle eine Instanz der Importer-Klasse und lade die Daten
 				importer = Importer(filepath)
 				grid = importer.load()
-				self.grid = grid
 				
 				plantsNum = int(self.getPlantsNum(grid))
 				enemyNum = int(self.getEnemyNum(grid))
@@ -2304,6 +2303,8 @@ class Gui():
 
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
+
+				self.grid = grid
 
 				print(self.grid.enemies)
 				print(self.grid.plants)
@@ -2421,7 +2422,6 @@ class Gui():
 				self.plant_entries[i]['maxDist'].insert(0, plant.maxDist)
 
 
-	
 	def fillUpEnemyInputs(self, grid):
 		"""
 		Füllt die Feind-Eingabefelder basierend auf den Daten aus 'grid'.
