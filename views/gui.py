@@ -8,7 +8,6 @@ from concurrent.futures import ThreadPoolExecutor
 import random
 import time
 from tkinter import filedialog
-import copy
 
 from models.grid import Grid
 from models.plant import Plant
@@ -543,7 +542,7 @@ class Gui():
 				command=lambda i=i: self.update_eli_entry_state(i))
 			
 			self.substance_entries[i]['toxinEffect'].grid(row=row+1, column=2, padx=2, pady=2, sticky='w')
-			self.substance_entries[i]['toxinEffect'].config(state='disable')
+			self.substance_entries[i]['toxinEffect'].config(state=tk.DISABLED)
 			
 			# Spread-Type Dropdown
 			spreadType_label = tk.Label(self.substances_setting_frame, text='Spread:')
@@ -631,7 +630,7 @@ class Gui():
 			self.substance_entries[i]['eliStrength'] = tk.Entry(self.substances_setting_frame, width=4)
 			self.substance_entries[i]['eliStrength'].grid(row=row+9, column=1, columnspan=1, padx=2, pady=2, sticky='w')
 			self.substance_entries[i]['eliStrength'].insert(0,int(0))
-			self.substance_entries[i]['eliStrength'].config(state='disable')
+			self.substance_entries[i]['eliStrength'].config(state=tk.DISABLED)
 
 			self.create_tooltip_inputs(self.substance_entries[i]['eliStrength'], 'Number of individuals that die per time step if the poison is lethal e.g. 3')
 
@@ -662,9 +661,9 @@ class Gui():
 		eli_stren_entry = getattr(self, f'eli_entry_{index}')
 		if toxin_effect_var.get() == 1:  # Checkbox ist aktiviert
 			eli_stren_entry .delete(0, tk.END)
-			eli_stren_entry.config(state='normal')
+			eli_stren_entry.config(state=tk.NORMAL)
 		else:  # Checkbox ist deaktiviert
-			eli_stren_entry.config(state='disable')
+			eli_stren_entry.config(state=tk.DISABLED)
 
 
 	def change_SubstanceType(self, index):
@@ -679,23 +678,23 @@ class Gui():
 
 		# Disable or enable fields based on the substance type
 		if substance_var.get() == 'Toxin':
-			substance_spreadtype_menu.config(state='disable')
+			substance_spreadtype_menu.config(state=tk.DISABLED)
 			sendSpeed_entry.delete(0, tk.END)
-			sendSpeed_entry.config(state='disable')
-			toxin_effect_checkbox.config(state='normal')
+			sendSpeed_entry.config(state=tk.DISABLED)
+			toxin_effect_checkbox.config(state=tk.NORMAL)
 			receive_entry.delete(0, tk.END)
-			receive_entry.config(state='disable')
+			receive_entry.config(state=tk.DISABLED)
 			aft_entry.delete(0, tk.END)
-			aft_entry.config(state='disable')
+			aft_entry.config(state=tk.DISABLED)
 			
 		else:
-			substance_spreadtype_menu.config(state='normal')
-			sendSpeed_entry.config(state='normal')
-			toxin_effect_checkbox.config(state='disable')
-			receive_entry.config(state='normal')
-			aft_entry.config(state='normal')
+			substance_spreadtype_menu.config(state=tk.NORMAL)
+			sendSpeed_entry.config(state=tk.NORMAL)
+			toxin_effect_checkbox.config(state=tk.DISABLED)
+			receive_entry.config(state=tk.NORMAL)
+			aft_entry.config(state=tk.NORMAL)
 			eli_stren_entry.delete(0, tk.END)
-			eli_stren_entry.config(state='disable')
+			eli_stren_entry.config(state=tk.DISABLED)
 
 	
 	def create_tooltip_inputs(self, widget, text):
@@ -1641,7 +1640,7 @@ class Gui():
 
 				# Überprüfe Receiver
 				receiver_pattern = r'^(p[1-9]|p1[0-6])(\s*,\s*(p[1-9]|p1[0-6]))*$'
-				if self.substance_entries[i]['receiver'].cget('state') == 'normal':
+				if self.substance_entries[i]['receiver'].cget('state') == tk.NORMAL:
 					if not receiver or not re.fullmatch(receiver_pattern, receiver):
 						errors.append('Receiver must be in the format "p1, p2, ..., p16"!')			
 
@@ -1680,21 +1679,21 @@ class Gui():
 					errors.append('prod time must be a valid number!')
 
 				# Überprüfe send_speed
-				if self.substance_entries[i]['sendSpeed'].cget('state') == 'normal':
+				if self.substance_entries[i]['sendSpeed'].cget('state') == tk.NORMAL:
 					if not send_speed or not send_speed.isdigit():
 						errors.append('send speed must be a valid number!')
 
 				# Überprüfe energy_costs
-				if self.substance_entries[i]['energyCosts'].cget('state') == 'normal':
+				if self.substance_entries[i]['energyCosts'].cget('state') == tk.NORMAL:
 					if not energy_costs or not energy_costs.isdigit():
 						errors.append('energy costs must be a valid number!')
 
 				# Überprüfe after_effect_time
-				if self.substance_entries[i]['aft'].cget('state') == 'normal':
+				if self.substance_entries[i]['aft'].cget('state') == tk.NORMAL:
 					if not after_effect_time or not after_effect_time.isdigit():
 						errors.append('after effect time must be a valid number!')
 				
-				if self.substance_entries[i]['eliStrength'].cget('state') == 'normal':
+				if self.substance_entries[i]['eliStrength'].cget('state') == tk.NORMAL:
 					if not eli_stren or not eli_stren.isdigit():
 						errors.append('elimination strength must be a valid number!')
 
@@ -1972,9 +1971,6 @@ class Gui():
 		with self.lock:
 			# Durchlaufe alle Positionen und Pflanzen
 			for inner_id, plant in list(self.plant_at_position.items()):
-				# Überprüfe, ob die Pflanze null oder tot ist
-				if not plant:
-					continue
 				
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy:
@@ -2270,7 +2266,7 @@ class Gui():
 		if filepath:
 			try:
 				# Export durchführen
-				exporter = Exporter(filepath, self.backupGrid)
+				exporter = Exporter(filepath, self.grid)
 				exporter.save()
 				messagebox.showinfo('Success', 'File was saved successfully')
 			except Exception as e:
@@ -2364,64 +2360,114 @@ class Gui():
 
 		return count
 
-	
+
 	def fillUpPlantInputs(self, grid):
-		seen_plants = set()
+		"""
+		Füllt die Pflanzen-Eingabefelder basierend auf den Daten aus 'grid'.
+		"""
+		entry_keys = list(self.plant_entries.keys())
+		entry_count = len(entry_keys)
 
-		for plant in grid.plants:
-			self.grid.addPlant(plant)
-			if plant.name not in seen_plants:  # Prüfen, ob die Pflanze schon verarbeitet wurde
-				seen_plants.add(plant.name)
+		unique_plant_types = set(plant.name for plant in grid.plants)
 
-				# Suche nach einem freien Eintrag für die Pflanze
-				for i in self.plant_entries.keys():
-					if 'initEnergy' in self.plant_entries[i]:
-						self.plant_entries[i]['initEnergy'].delete(0, tk.END)
-						self.plant_entries[i]['initEnergy'].insert(0, plant.initEnergy)
-					if 'growthRate' in self.plant_entries[i]:
-						self.plant_entries[i]['growthRate'].delete(0, tk.END)
-						self.plant_entries[i]['growthRate'].insert(0, plant.growthRateEnergy)
-					if 'minEnergy' in self.plant_entries[i]:
-						self.plant_entries[i]['minEnergy'].delete(0, tk.END)
-						self.plant_entries[i]['minEnergy'].insert(0, plant.minEnergy)
-					if 'reproInterval' in self.plant_entries[i]:
-						self.plant_entries[i]['reproInterval'].delete(0, tk.END)
-						self.plant_entries[i]['reproInterval'].insert(0, plant.reproductionInterval)
-					if 'offspring' in self.plant_entries[i]:
-						self.plant_entries[i]['offspring'].delete(0, tk.END)
-						self.plant_entries[i]['offspring'].insert(0, plant.offspringEnergy)
-					if 'minDist' in self.plant_entries[i]:
-						self.plant_entries[i]['minDist'].delete(0, tk.END)
-						self.plant_entries[i]['minDist'].insert(0, plant.minDist)
-					if 'maxDist' in self.plant_entries[i]:
-						self.plant_entries[i]['maxDist'].delete(0, tk.END)
-						self.plant_entries[i]['maxDist'].insert(0, plant.maxDist)
-					break  # Weiter zur nächsten Pflanze
+		# Anzahl der verschiedenen Pflanzenarten
+		unique_plant_count = len(unique_plant_types)
+
+		# Sicherheitsüberprüfung: Falls es mehr Pflanzenarten gibt als Felder
+		if unique_plant_count > entry_count:
+			print('Warnung: Nicht genügend Eingabefelder für alle Pflanzenarten vorhanden.')
+
+		for idx, plant in enumerate(grid.plants):
+			self.grid.addPlant(plant)  # Stelle sicher, dass die Pflanze im Grid hinzugefügt wird
+			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
+				break
+
+			# Fülle die Felder für die aktuelle Pflanze
+			i = entry_keys[idx]  # Aktueller Eingabebereich für die Pflanze
+
+			# Initialenergie
+			if 'initEnergy' in self.plant_entries[i]:
+				self.plant_entries[i]['initEnergy'].delete(0, tk.END)
+				self.plant_entries[i]['initEnergy'].insert(0, plant.initEnergy)
+
+			# Wachstumsrate
+			if 'growthRate' in self.plant_entries[i]:
+				self.plant_entries[i]['growthRate'].delete(0, tk.END)
+				self.plant_entries[i]['growthRate'].insert(0, plant.growthRateEnergy)
+
+			# Mindestenergie
+			if 'minEnergy' in self.plant_entries[i]:
+				self.plant_entries[i]['minEnergy'].delete(0, tk.END)
+				self.plant_entries[i]['minEnergy'].insert(0, plant.minEnergy)
+
+			# Reproduktionsintervall
+			if 'reproInterval' in self.plant_entries[i]:
+				self.plant_entries[i]['reproInterval'].delete(0, tk.END)
+				self.plant_entries[i]['reproInterval'].insert(0, plant.reproductionInterval)
+
+			# Energie der Nachkommen
+			if 'offspring' in self.plant_entries[i]:
+				self.plant_entries[i]['offspring'].delete(0, tk.END)
+				self.plant_entries[i]['offspring'].insert(0, plant.offspringEnergy)
+
+			# Mindestabstand
+			if 'minDist' in self.plant_entries[i]:
+				self.plant_entries[i]['minDist'].delete(0, tk.END)
+				self.plant_entries[i]['minDist'].insert(0, plant.minDist)
+
+			# Maximalabstand
+			if 'maxDist' in self.plant_entries[i]:
+				self.plant_entries[i]['maxDist'].delete(0, tk.END)
+				self.plant_entries[i]['maxDist'].insert(0, plant.maxDist)
+
 
 	
 	def fillUpEnemyInputs(self, grid):
-		seen_enemies = set()
+		"""
+		Füllt die Feind-Eingabefelder basierend auf den Daten aus 'grid'.
+		"""
+		# Alle möglichen Feind-Eingabefelder (z. B. Textfelder für verschiedene Feindtypen)
+		entry_keys = list(self.enemy_entries.keys())
+		entry_count = len(entry_keys)
 
-		for ec in grid.enemies:
-			self.grid.addEnemies(ec)
-			if ec.enemy.name not in seen_enemies:
-				seen_enemies.add(ec.enemy.name)
+		# Erstelle ein Set, um nur einzigartige Feindarten zu speichern
+		unique_enemy_types = set(ec.enemy.name for ec in grid.enemies)
 
-				for i in self.enemy_entries.keys():
+		# Anzahl der verschiedenen Feindarten
+		unique_enemy_count = len(unique_enemy_types)
 
-					if 'clusterSize' in self.enemy_entries[i]:
-						self.enemy_entries[i]['clusterSize'].delete(0, tk.END)
-						self.enemy_entries[i]['clusterSize'].insert(0, ec.num)
-					if 'speed' in self.enemy_entries[i]:
-						self.enemy_entries[i]['speed'].delete(0, tk.END)
-						self.enemy_entries[i]['speed'].insert(0, ec.speed)
-					if 'eatSpeed' in self.enemy_entries[i]:
-						self.enemy_entries[i]['eatSpeed'].delete(0, tk.END)
-						self.enemy_entries[i]['eatSpeed'].insert(0, ec.eatingSpeed)
-					if 'eatVictory' in self.enemy_entries[i]:
-						self.enemy_entries[i]['eatVictory'].delete(0, tk.END)
-						self.enemy_entries[i]['eatVictory'].insert(0, ec.eatVictory)
-					break
+		# Sicherheitsüberprüfung: Falls es mehr Feindarten gibt als Felder
+		if unique_enemy_count > entry_count:
+			print('Warnung: Nicht genügend Eingabefelder für alle Feindarten vorhanden.')
+
+
+		for idx, ec in enumerate(grid.enemies):
+			self.grid.addEnemies(ec)  # Stelle sicher, dass der Feind im Grid hinzugefügt wird
+			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
+				break
+
+			# Fülle die Felder für den aktuellen Feind
+			i = entry_keys[idx]  # Aktueller Eingabebereich für den Feind
+
+			# Clustergröße
+			if 'clusterSize' in self.enemy_entries[i]:
+				self.enemy_entries[i]['clusterSize'].delete(0, tk.END)
+				self.enemy_entries[i]['clusterSize'].insert(0, ec.num)
+
+			# Geschwindigkeit
+			if 'speed' in self.enemy_entries[i]:
+				self.enemy_entries[i]['speed'].delete(0, tk.END)
+				self.enemy_entries[i]['speed'].insert(0, ec.speed)
+
+			# Essgeschwindigkeit
+			if 'eatSpeed' in self.enemy_entries[i]:
+				self.enemy_entries[i]['eatSpeed'].delete(0, tk.END)
+				self.enemy_entries[i]['eatSpeed'].insert(0, ec.eatingSpeed)
+
+			# Esspunkte (Sieg-Bedingung)
+			if 'eatVictory' in self.enemy_entries[i]:
+				self.enemy_entries[i]['eatVictory'].delete(0, tk.END)
+				self.enemy_entries[i]['eatVictory'].insert(0, ec.eatVictory)
 
 
 	def fillUpSubstanceInputs(self, grid):
@@ -2464,20 +2510,33 @@ class Gui():
 			# Producer
 			if 'producer' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
+					if isinstance(substance.emit, list):  # Falls es sich um eine Liste handelt
+						emit_value = ', '.join(map(str, substance.emit))
+					else:  # Falls nur ein einzelner Wert existiert
+						emit_value = str(substance.emit)
+
 					self.substance_entries[i]['producer'].delete(0, tk.END)
-					self.substance_entries[i]['producer'].insert(0, substance.emit)
+					self.substance_entries[i]['producer'].insert(0, emit_value)
 				else:
+					if isinstance(substance.plantTransmitter, list):  # Falls es sich um eine Liste handelt
+						plantTransmitter_value = ', '.join(map(str, substance.plantTransmitter))
+					else:  # Falls nur ein einzelner Wert existiert
+						plantTransmitter_value = str(substance.plantTransmitter)
 					self.substance_entries[i]['producer'].delete(0, tk.END)
-					self.substance_entries[i]['producer'].insert(0, substance.plantTransmitter)
+					self.substance_entries[i]['producer'].insert(0, plantTransmitter_value)
 
 			# Receiver
 			if 'receiver' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
+					if isinstance(substance.receive, list):  # Falls es sich um eine Liste handelt
+						receiver_value = ', '.join(map(str, substance.receive))
+					else:  # Falls nur ein einzelner Wert existiert
+						receiver_value = str(substance.receive)
 					self.substance_entries[i]['receiver'].delete(0, tk.END)
-					self.substance_entries[i]['receiver'].insert(0, substance.receive)
+					self.substance_entries[i]['receiver'].insert(0, receiver_value)
 				else:
 					self.substance_entries[i]['receiver'].delete(0, tk.END)
-					self.substance_entries[i]['receiver'].config(state='disable')
+					self.substance_entries[i]['receiver'].config(state=tk.DISABLED)
 
 			# Trigger
 			if 'trigger' in self.substance_entries[i]:
@@ -2498,12 +2557,12 @@ class Gui():
 			# Send-Geschwindigkeit
 			if 'sendSpeed' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
-					self.substance_entries[i]['sendSpeed'].config(state='normal')
+					self.substance_entries[i]['sendSpeed'].config(state=tk.NORMAL)
 					self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
 					self.substance_entries[i]['sendSpeed'].insert(0, substance.sendingSpeed)
 				else:
 					self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
-					self.substance_entries[i]['sendSpeed'].config(state='disable')
+					self.substance_entries[i]['sendSpeed'].config(state=tk.DISABLED)
 
 			# Energie-Kosten
 			if 'energyCosts' in self.substance_entries[i]:
@@ -2513,23 +2572,23 @@ class Gui():
 			# AfterEffectTime
 			if 'aft' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
-					self.substance_entries[i]['aft'].config(state='normal')
+					self.substance_entries[i]['aft'].config(state=tk.NORMAL)
 					self.substance_entries[i]['aft'].delete(0, tk.END)
 					self.substance_entries[i]['aft'].insert(0, substance.afterEffectTime)
 				else:
 					self.substance_entries[i]['aft'].delete(0, tk.END)
-					self.substance_entries[i]['aft'].config(state='disable')
+					self.substance_entries[i]['aft'].config(state=tk.DISABLED)
 
 			# Elinimatiosnrate
 			if 'eliStrength' in self.substance_entries[i]:
 				if substance.substance.type == 'toxin':
 					if substance.deadly:
-						self.substance_entries[i]['eliStrength'].config(state='normal')
+						self.substance_entries[i]['eliStrength'].config(state=tk.NORMAL)
 						self.substance_entries[i]['eliStrength'].delete(0, tk.END)
 						self.substance_entries[i]['eliStrength'].insert(0, substance.eliminationStrength)
 					else:
 						self.substance_entries[i]['eliStrength'].delete(0, tk.END)
-						self.substance_entries[i]['eliStrength'].config(state='disable')
+						self.substance_entries[i]['eliStrength'].config(state=tk.DISABLED)
 
 			# Deadly-Toxin Checkbox
 			if 'toxinEffect_var' in self.substance_entries[i]:
@@ -2539,7 +2598,7 @@ class Gui():
 					else:
 						self.substance_entries[i]['toxinEffect_var'].set(0)
 				else:
-					self.substance_entries[i]['toxinEffect'].config(state='disable')
+					self.substance_entries[i]['toxinEffect'].config(state=tk.DISABLED)
 
 			# Spread-Type Dropdown
 			if 'spreadType_var' in self.substance_entries[i]:
