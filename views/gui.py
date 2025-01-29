@@ -994,7 +994,7 @@ class Gui():
 				outer_y2 = outer_y1 + square_height
 
 				# Zeichne das äußere Rechteck
-				outer_square_id = self.gridCanvas.create_rectangle(
+				outer_id = self.gridCanvas.create_rectangle(
 					outer_x1, outer_y1, outer_x2, outer_y2,
 					outline='black', fill='white', width=1
 				)
@@ -1008,15 +1008,15 @@ class Gui():
 				inner_y2 = outer_y2 - margin
 
 				# Zeichne das innere Rechteck
-				inner_square_id = self.gridCanvas.create_rectangle(
+				inner_id = self.gridCanvas.create_rectangle(
 					inner_x1, inner_y1, inner_x2, inner_y2,
 					outline='', fill='white', width=1
 				)
 
 				# Speichere die IDs des inneren und äußeren Rechtecks
 				self.squares[(i, j)] = {
-					'outer': outer_square_id,
-					'inner': inner_square_id
+					'outer': outer_id,
+					'inner': inner_id
 				}
 
 
@@ -1902,25 +1902,25 @@ class Gui():
 		squares_ids = self.squares.get(offspring_position)
 
 		if squares_ids:
-			inner_square_id = squares_ids['inner']  # ID für den inneren Bereich
-			outer_square_id = squares_ids['outer']  # ID für den äußeren Bereich
+			inner_id = squares_ids['inner']  # ID für den inneren Bereich
+			outer_id = squares_ids['outer']  # ID für den äußeren Bereich
 
 			# Falls es eine Pflanze auf dieser Position gibt, entfernen wir diese, falls sie tot ist
 			existing_plant = self.plant_at_position.get(offspring_position)
 			if existing_plant and existing_plant.currEnergy < existing_plant.minEnergy:
 				# Setze die Farbe des äußeren Bereichs zurück auf Weiß
-				self.gridCanvas.itemconfig(outer_square_id, fill='white')
-				self.gridCanvas.itemconfig(inner_square_id, fill='white')  # Setze auch den inneren Bereich auf Weiß
-				del self.plant_at_position[inner_square_id]  # Entferne die Pflanze aus der Position
+				self.gridCanvas.itemconfig(outer_id, fill='white')
+				self.gridCanvas.itemconfig(inner_id, fill='white')  # Setze auch den inneren Bereich auf Weiß
+				del self.plant_at_position[inner_id]  # Entferne die Pflanze aus der Position
 
 			# Füge das Nachkommen zum Grid hinzu
 			if offspring not in self.grid.plants:
 				self.grid.addPlant(offspring)
 
 			# Aktualisiere die Canvas-Farbe des inneren Rechtecks und das Mapping
-			self.gridCanvas.itemconfig(inner_square_id, fill=offspring.color)  # Ändere die Farbe des inneren Quadrats
-			self.plant_at_position[inner_square_id] = offspring  # Aktualisiere die Pflanze an der Position
-			self.plantDetails(offspring, inner_square_id)  # Zeige Pflanzendetails an
+			self.gridCanvas.itemconfig(inner_id, fill=offspring.color)  # Ändere die Farbe des inneren Quadrats
+			self.plant_at_position[inner_id] = offspring  # Aktualisiere die Pflanze an der Position
+			self.plantDetails(offspring, inner_id)  # Zeige Pflanzendetails an
 
 		else:
 			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
@@ -1990,10 +1990,10 @@ class Gui():
 		try:
 			square_ids = self.squares.get(plant.position)
 			if square_ids:
-				outer_square_id = square_ids['outer']
-				inner_square_id = square_ids['inner']
-				self.gridCanvas.itemconfig(outer_square_id, fill='white')
-				self.gridCanvas.itemconfig(inner_square_id, fill='white')
+				outer_id = square_ids['outer']
+				inner_id = square_ids['inner']
+				self.gridCanvas.itemconfig(outer_id, fill='white')
+				self.gridCanvas.itemconfig(inner_id, fill='white')
 
 				# Überprüfen, ob die Pflanze noch in der Liste ist, bevor sie entfernt wird
 				if plant in self.grid.plants:
@@ -2311,6 +2311,7 @@ class Gui():
 
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
+				self.placeConnectionsFromFile(grid)
 
 				self.grid = grid
 				
@@ -2618,9 +2619,10 @@ class Gui():
 
 			if squares_ids:
 				inner_id = squares_ids['inner']
-				self.gridCanvas.itemconfig(inner_id, fill=plant.color)
-				self.plantDetails(plant, inner_id)
 				self.plant_at_position[inner_id] = plant
+				self.plantDetails(plant, inner_id)
+				self.gridCanvas.itemconfig(inner_id, fill=plant.color)
+				print(f'Position: {plant.position}, Gefundene IDs: {squares_ids}')
 
 	
 	def placeEnemisFromFile(self, grid):
@@ -2630,3 +2632,10 @@ class Gui():
 			if squares_ids:
 				inner_id = squares_ids['inner']
 				self.clusterMarker(ec.position, inner_id, ec)
+
+
+	def placeConnectionsFromFile(self, grid):
+		for plant in grid.plants:
+			for plants, plantsPos in plant.gridConnections.items():
+				plant1, plant2 = plants
+				self.connect_plants(plant1, plant2)
