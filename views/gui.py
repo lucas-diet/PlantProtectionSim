@@ -939,7 +939,7 @@ class Gui():
 		
 		# Fenster verstecken
 		self.breakupWindow.withdraw()
-		print(self.maxSteps, self.plant_death, self.enemy_death, self.max_plant_energy, self.max_enemies_num)
+		#print(self.maxSteps, self.plant_death, self.enemy_death, self.max_plant_energy, self.max_enemies_num)
 
 
 	def create_gridFrame(self, width, height):
@@ -1036,7 +1036,7 @@ class Gui():
 					break
 
 			if clicked_position is None:
-				print(f'Zelle mit innerer ID {item_id} nicht gefunden.')
+				#print(f'Zelle mit innerer ID {item_id} nicht gefunden.')
 				return
 
 			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
@@ -1148,7 +1148,8 @@ class Gui():
 				inner_id = square_ids['inner']  # ID für den inneren Bereich
 				self.plant_at_position[inner_id] = plant
 			else:
-				print(f'Fehler: Keine gültigen Square-IDs für Position {plant.position}')
+				#print(f'Fehler: Keine gültigen Square-IDs für Position {plant.position}')
+				pass
 
 		else:
 			pass
@@ -1298,17 +1299,17 @@ class Gui():
 	def get_cellPosition(self, position):
 		square_ids = self.squares.get(position)
 		if square_ids is None:
-			print(f'Fehler: Keine Zelle mit den Koordinaten {position} gefunden.')
+			#print(f'Fehler: Keine Zelle mit den Koordinaten {position} gefunden.')
 			return None  # Zelle nicht gefunden
 
 		inner_id = square_ids.get('inner')
 		if inner_id is None:
-			print(f'Fehler: Keine innere Zelle für die Koordinaten {position} gefunden.')
+			#print(f'Fehler: Keine innere Zelle für die Koordinaten {position} gefunden.')
 			return None  # Innerer Bereich nicht gefunden
 
 		bbox = self.gridCanvas.bbox(inner_id)
 		if bbox is None:
-			print(f'Fehler: Keine Bounding Box für die Zelle mit item_id {inner_id} gefunden.')
+			#print(f'Fehler: Keine Bounding Box für die Zelle mit item_id {inner_id} gefunden.')
 			return None  # Bounding Box nicht gefunden
 
 		cell_width = bbox[2] - bbox[0]
@@ -1413,7 +1414,7 @@ class Gui():
 					break
 
 			if clicked_position is None:
-				print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
+				#print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
 				return
 
 			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
@@ -1428,7 +1429,8 @@ class Gui():
 				# Zeige das Popup nur, wenn eine Pflanze existiert
 				self.show_popup(clicked_position, event)
 			else:
-				print(f'Keine Pflanze an Position {clicked_position}.')
+				#print(f'Keine Pflanze an Position {clicked_position}.')
+				pass
 
 
 	def show_popup(self, position, event):
@@ -1466,11 +1468,11 @@ class Gui():
 					def toggle_connection(n_plant, n_var):
 						if n_var.get():
 							# Verbindung herstellen
-							print(f'Verbindung hergestellt: {plant.name} <-> {n_plant.name}')
+							#print(f'Verbindung hergestellt: {plant.name} <-> {n_plant.name}')
 							self.connect_plants(plant, n_plant)
 						else:
 							# Verbindung entfernen
-							print(f'Verbindung entfernt: {plant.name} <-> {n_plant.name}')
+							#print(f'Verbindung entfernt: {plant.name} <-> {n_plant.name}')
 							self.disconnect_plants(plant, n_plant)
 
 					# Erstelle einen Checkbutton und binde die spezifische Nachbarpflanze
@@ -1525,7 +1527,7 @@ class Gui():
 		self.plant_connections[(plant, neighbor)] = True
 		self.plant_connections[(neighbor, plant)] = True
 
-		print(f'Verbindung gespeichert: {plant.name} <-> {neighbor.name}')
+		#print(f'Verbindung gespeichert: {plant.name} <-> {neighbor.name}')
 		self.create_connectionLine(plant, neighbor)
 
 
@@ -1539,7 +1541,7 @@ class Gui():
 		if (neighbor, plant) in self.plant_connections:
 			del self.plant_connections[(neighbor, plant)]
 
-		print(f'Verbindung entfernt: {plant.name} <-> {neighbor.name}')
+		#print(f'Verbindung entfernt: {plant.name} <-> {neighbor.name}')
 		self.remove_connectionLine(plant, neighbor)
 
 
@@ -1548,7 +1550,7 @@ class Gui():
 		neighbor_center = self.get_cellPosition(neighbor.position)
 
 		if plant_center is None or neighbor_center is None:
-			print(f'Fehler: Ungültige Positionen für Pflanzen {plant.name} und {neighbor.name}')
+			#print(f'Fehler: Ungültige Positionen für Pflanzen {plant.name} und {neighbor.name}')
 			return
 
 		# Ziehe eine Linie zwischen den Mittelpunkten der beiden Zellen
@@ -1803,7 +1805,7 @@ class Gui():
 		# Backup-Datei erstellen und den Zustand des gesamten Grids speichern
 		with open('grid_backup.pkl', 'wb') as f:
 			pickle.dump(self.grid, f)  # Speichert das Grid-Objekt
-			print("Initialer Zustand gespeichert.")
+			print('Initialer Zustand gespeichert.')
 
 		while True:
 			# Abbruchbedingungen
@@ -1925,7 +1927,8 @@ class Gui():
 
 		else:
 			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
-			print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
+			#print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
+			pass
 
 
 	def on_GridRightClick(self, event):
@@ -1946,7 +1949,7 @@ class Gui():
 					break
 
 			if clicked_position is None:
-				print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
+				#print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
 				return
 
 			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
@@ -1961,7 +1964,8 @@ class Gui():
 				# Zeige das Popup nur, wenn eine Pflanze existiert
 				self.show_popup(clicked_position, event)
 			else:
-				print(f'Keine Pflanze an Position {clicked_position}.')
+				#print(f'Keine Pflanze an Position {clicked_position}.')
+				pass
 
 
 	def remove_fieldColor(self):
@@ -2000,7 +2004,8 @@ class Gui():
 				if plant in self.grid.plants:
 					self.grid.removePlant(plant)
 				else:
-					print(f'Pflanze {plant.name}{plant.position} war bereits entfernt oder existiert nicht in der Liste.')
+					#print(f'Pflanze {plant.name}{plant.position} war bereits entfernt oder existiert nicht in der Liste.')
+					pass
 
 				# Setze die Farbe auf Weiß für das innere Rechteck
 				self.gridCanvas.itemconfig(inner_id, fill='white')
@@ -2008,10 +2013,12 @@ class Gui():
 				# Entferne alle Verbindungen zu dieser Pflanze
 				self.remove_plant_connections(plant)
 			else:
-				print(f'Fehler: Keine square_ids für Position {plant.position} gefunden.')
+				#print(f'Fehler: Keine square_ids für Position {plant.position} gefunden.')
+				pass
 
 		except Exception as e:
-			print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
+			#print(f'Fehler beim Setzen der Farbe oder Entfernen der Verbindungen für {inner_id}: {e}')
+			pass
 
 
 	def remove_plant_connections(self, plant):
@@ -2071,7 +2078,7 @@ class Gui():
 			new_position = cluster.position
 			position_data = self.get_cellPosition(new_position)
 			if not position_data:
-				print(f'Fehler: Ungültige Position {new_position} für Cluster {cluster}.')
+				#print(f'Fehler: Ungültige Position {new_position} für Cluster {cluster}.')
 				continue
 
 			# 3. Zeichne den Marker auf der Canvas
@@ -2261,12 +2268,12 @@ class Gui():
 			with open('grid_backup.pkl', 'rb') as f:
 				# Lade den Grid-Zustand aus der Backup-Datei
 				self.grid = pickle.load(f)
-				print("Grid geladen aus Backup.")
+				print('Grid geladen aus Backup.')
 		except FileNotFoundError:
-			messagebox.showerror('Fehler', 'Backup-Datei nicht gefunden.')
+			messagebox.showerror('Error', 'Backup file not found.')
 			return
 		except Exception as e:
-			messagebox.showerror('Fehler', f'Fehler beim Laden des Grids: {str(e)}')
+			messagebox.showerror('Error', f'Error loading grid: {str(e)}')
 			return
 
 		# Prüfen, ob das Grid existiert
