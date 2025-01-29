@@ -8,6 +8,8 @@ from concurrent.futures import ThreadPoolExecutor
 import random
 import time
 from tkinter import filedialog
+import pickle
+import os
 
 from models.grid import Grid
 from models.plant import Plant
@@ -1294,34 +1296,27 @@ class Gui():
 
 
 	def get_cellPosition(self, position):
-		"""
-		Berechnet die Position der inneren Zelle basierend auf den Koordinaten und berücksichtigt Scroll-Offsets.
-		"""
-		# Hole die Square-IDs für die gegebene Position
-		square_ids = self.squares.get(position)  # Erhalte die IDs (inner/outer) von den Koordinaten
+		square_ids = self.squares.get(position)
 		if square_ids is None:
 			print(f'Fehler: Keine Zelle mit den Koordinaten {position} gefunden.')
 			return None  # Zelle nicht gefunden
 
-		# Verwende die ID des inneren Bereichs ('inner')
 		inner_id = square_ids.get('inner')
 		if inner_id is None:
 			print(f'Fehler: Keine innere Zelle für die Koordinaten {position} gefunden.')
 			return None  # Innerer Bereich nicht gefunden
 
-		# Hole die Bounding Box der inneren Zelle
 		bbox = self.gridCanvas.bbox(inner_id)
 		if bbox is None:
 			print(f'Fehler: Keine Bounding Box für die Zelle mit item_id {inner_id} gefunden.')
 			return None  # Bounding Box nicht gefunden
 
-		# Berechne die zentrale Position der inneren Zelle
 		cell_width = bbox[2] - bbox[0]
 		cell_height = bbox[3] - bbox[1]
 		x_pos = bbox[0] + cell_width / 2
 		y_pos = bbox[1] + cell_height / 2
 
-		# Positionen für Feinde in der Zelle berücksichtigen
+		# Feinde-Positionen berücksichtigen
 		if not hasattr(self, 'enemy_positions'):
 			self.enemy_positions = {}
 
@@ -1333,7 +1328,7 @@ class Gui():
 
 		return x_pos, y_pos
 
-	
+
 	def create_clusterCircle(self, x_pos, y_pos, fill_color='navy'): 
 		""" Zeichnet einen kleinen Kreis, um den Feind auf dem Canvas darzustellen. """
 
@@ -1802,6 +1797,11 @@ class Gui():
 
 		self.create_add_substance()
 		self.error_substances.config(text='')
+		# Backup-Datei erstellen und den Zustand des gesamten Grids speichern
+		with open('grid_backup.pkl', 'wb') as f:
+			pickle.dump(self.grid, f)  # Speichert das Grid-Objekt
+			print("Initialer Zustand gespeichert.")
+
 		while True:
 			# Abbruchbedingungen
 			if count - 1 == self.maxSteps or \
@@ -2252,6 +2252,20 @@ class Gui():
 
 
 	def exportSystem(self):
+		"""Exportiert das Grid-System, wenn ein Backup existiert."""
+		# Prüfen, ob eine Backup-Datei existiert
+		try:
+			with open('grid_backup.pkl', 'rb') as f:
+				# Lade den Grid-Zustand aus der Backup-Datei
+				self.grid = pickle.load(f)
+				print("Grid geladen aus Backup.")
+		except FileNotFoundError:
+			messagebox.showerror('Fehler', 'Backup-Datei nicht gefunden.')
+			return
+		except Exception as e:
+			messagebox.showerror('Fehler', f'Fehler beim Laden des Grids: {str(e)}')
+			return
+
 		# Prüfen, ob das Grid existiert
 		if not hasattr(self, 'grid') or self.grid is None:
 			messagebox.showerror('Fehler', 'System not exists')
@@ -2271,10 +2285,15 @@ class Gui():
 		# Export nur, wenn ein gültiger Pfad gewählt wurde
 		if filepath:
 			try:
-				# Export durchführen
+				# Export durchführen (speichert das Grid in die angegebene Datei)
 				exporter = Exporter(filepath, self.grid)
-				exporter.save()
+				exporter.save()  # Angenommen, save() kümmert sich um das Speichern des Objekts
 				messagebox.showinfo('Success', 'File was saved successfully')
+
+				# Backup-Datei nach dem erfolgreichen Export löschen
+				if os.path.exists('grid_backup.pkl'):
+					os.remove('grid_backup.pkl')
+					print('Backup-Datei gelöscht.')
 			except Exception as e:
 				messagebox.showerror('Error', f'Error saving file: {str(e)}')
 		else:
