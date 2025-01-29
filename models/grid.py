@@ -534,6 +534,7 @@ class Grid():
                 while ec.currentPath:
                     step = ec.currentPath.pop(0)  # Hole den nächsten Schritt
                     newPos = self.processEnemyMovement(ec, ec.position, [step])
+                    ec.checkAndUpdatePath(newPos)
                     self.updateEnemyClusterPos(ec, ec.position, newPos)  # Aktualisiere Position im Grid
             else:
                 continue
