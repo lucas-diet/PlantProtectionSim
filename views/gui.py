@@ -1153,7 +1153,6 @@ class Gui():
 		return plant
 
 
-	
 	def plantDetails(self, plant, square_id):
 		"""
 		Zeigt die Energie der Pflanze als Tooltip an, wenn die Maus über die Zelle bewegt wird.
@@ -1235,7 +1234,6 @@ class Gui():
 			# Färbe die angeklickte Zelle
 			eCluster = self.create_add_cluster(selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory)
 			self.clusterMarker(clicked_position, selected_index, eCluster)
-
 
 
 	def get_enemyInputs(self, enemy_entries):
@@ -2356,7 +2354,6 @@ class Gui():
 				count += 1
 				seen_substance.add(sig.name)
 
-
 		# Zähle Toxine
 		for tox in grid.toxins:
 			if tox.name and tox.name not in seen_substance:  # Prüfe, ob das Toxin einen Namen hat und nicht schon gezählt wurde
@@ -2622,9 +2619,8 @@ class Gui():
 				self.plant_at_position[inner_id] = plant
 				self.plantDetails(plant, inner_id)
 				self.gridCanvas.itemconfig(inner_id, fill=plant.color)
-				print(f'Position: {plant.position}, Gefundene IDs: {squares_ids}')
-
 	
+
 	def placeEnemisFromFile(self, grid):
 		for ec in grid.enemies:
 			squares_ids = self.squares.get(ec.position)
