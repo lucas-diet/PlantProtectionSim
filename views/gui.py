@@ -1780,6 +1780,9 @@ class Gui():
 	
 
 	def start_simulation(self):
+		# Überprüfen, ob self.grid existiert
+		if not hasattr(self, 'grid') or self.grid is None:
+			return  # Falls kein Grid vorhanden ist, nichts tun
 		# Starte die Simulation in einem separaten Thread
 		sim_thread = threading.Thread(target=self.run_simulation)
 		sim_thread.daemon = True  # Beendet den Thread automatisch, wenn das Hauptprogramm endet
