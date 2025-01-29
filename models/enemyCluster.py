@@ -174,7 +174,7 @@ class EnemyCluster():
         
         if len(pPos) == 0:
             print('\nno plant. stop simulation')
-            return
+            return []
         
         for pos in pPos:
             path = self.findShortestPath(start, pos)
