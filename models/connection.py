@@ -26,9 +26,11 @@ class SymbioticConnection():
             self.plant2.gridConnections[key2] = (pos2, pos1)
         else:
             if dist > 1:
-                print(f'[INFO]: {self.plant1.name} und {self.plant2.name} sind nicht benachbart')
+                #print(f'[INFO]: {self.plant1.name} und {self.plant2.name} sind nicht benachbart')
+                pass
             if self.connect == False:
-                print(f'[INFO]: Keine Verbindung zwischen {self.plant1.name} und {self.plant2.name}')
+                #print(f'[INFO]: Keine Verbindung zwischen {self.plant1.name} und {self.plant2.name}')
+                pass
     
 
 
