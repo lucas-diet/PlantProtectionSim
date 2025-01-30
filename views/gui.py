@@ -2403,16 +2403,21 @@ class Gui():
 		entry_keys = list(self.plant_entries.keys())
 		entry_count = len(entry_keys)
 
-		unique_plant_types = set(plant.name for plant in grid.plants)
-		unique_plant_count = len(unique_plant_types) # Anzahl der verschiedenen Pflanzenarten
+		# Pflanzenarten eindeutig extrahieren und nach Name gruppieren
+		plant_dict = {}  # Dictionary zur Speicherung der ersten Instanz jeder Pflanzenart
+		for plant in grid.plants:
+			if plant.name not in plant_dict:
+				plant_dict[plant.name] = plant  # Speichere die erste Instanz dieser Art
+
+		unique_plants = list(plant_dict.values())  # Liste der einzigartigen Pflanzenobjekte
+		unique_plant_count = len(unique_plants)  # Anzahl der verschiedenen Pflanzenarten
 
 		# Sicherheitsüberprüfung: Falls es mehr Pflanzenarten gibt als Felder
 		if unique_plant_count > entry_count:
 			print('Warnung: Nicht genügend Eingabefelder für alle Pflanzenarten vorhanden.')
 
-		for idx, plant in enumerate(grid.plants):
-			self.grid.addPlant(plant)  # Stelle sicher, dass die Pflanze im Grid hinzugefügt wird
-
+		# Felder mit den richtigen Pflanzenarten füllen
+		for idx, plant in enumerate(unique_plants):
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
 				continue
 
@@ -2462,15 +2467,21 @@ class Gui():
 		entry_keys = list(self.enemy_entries.keys())
 		entry_count = len(entry_keys)
 
-		unique_enemy_types = set(ec.enemy.name for ec in grid.enemies) # Erstelle ein Set, um nur einzigartige Feindarten zu speichern
-		unique_enemy_count = len(unique_enemy_types) # Anzahl der verschiedenen Feindarten
+		# Feinde nach einzigartigem Namen gruppieren
+		enemy_dict = {}  # Speichert nur die erste Instanz jeder Feindart
+		for ec in grid.enemies:
+			if ec.enemy.name not in enemy_dict:
+				enemy_dict[ec.enemy.name] = ec  # Speichere die erste Instanz dieser Art
+
+		unique_enemies = list(enemy_dict.values())  # Liste der einzigartigen Feindobjekte
+		unique_enemy_count = len(unique_enemies)  # Anzahl der verschiedenen Feindarten
 
 		# Sicherheitsüberprüfung: Falls es mehr Feindarten gibt als Felder
 		if unique_enemy_count > entry_count:
 			print('Warnung: Nicht genügend Eingabefelder für alle Feindarten vorhanden.')
 
-		for idx, ec in enumerate(grid.enemies):
-			self.grid.addEnemies(ec)  # Stelle sicher, dass der Feind im Grid hinzugefügt wird
+		# Felder mit den richtigen Feindarten füllen
+		for idx, ec in enumerate(unique_enemies):
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
 				continue
 
@@ -2501,88 +2512,75 @@ class Gui():
 	def fillUpSubstanceInputs(self, grid):
 		"""
 		Füllt die Substanzen-Eingabefelder basierend auf den Daten aus 'grid'.
+		Die Reihenfolge bleibt exakt so, wie die Substanzen ursprünglich eingetragen wurden.
+		
+		:param grid: Enthält die Signal- und Toxin-Objekte.
 		"""
-		entry_keys = list(self.substance_entries.keys())  # Liste der Eingabebereiche
-		entry_count = len(entry_keys)  # Anzahl der verfügbaren Bereiche
+		entry_keys = list(self.substance_entries.keys())  # Liste der Eingabefelder
+		entry_count = len(entry_keys)  # Anzahl der verfügbaren Felder
 
-		substance_list = grid.signals + grid.toxins  # Kombiniere Signale und Toxine
-		substance_count = len(substance_list)  # Anzahl der Substanzen
+		# **Reihenfolge unverändert lassen**
+		substance_list = grid.signals + grid.toxins  
 
-		# Sicherheitsüberprüfung: Falls es mehr Substanzen gibt als Felder
-		if substance_count > entry_count:
-			print('Warnung: Nicht genügend Eingabefelder für alle Substanzen vorhanden.')
+		# Sicherheitsüberprüfung
+		if len(substance_list) > entry_count:
+			print('⚠️ Warnung: Nicht genügend Eingabefelder für alle Substanzen!')
 
 		for idx, substance in enumerate(substance_list):
 			self.grid.addSubstance(substance)
-			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
+			if idx >= entry_count:  # Falls keine Eingabefelder mehr verfügbar sind
 				break
 
-			# Fülle die Felder für die aktuelle Substanz
-			i = entry_keys[idx]  # Aktueller Eingabebereich
+			# **Das richtige Eingabefeld zuweisen**
+			i = entry_keys[idx]  
 
 			if 'checkbox_var' in self.substance_entries[i]:
 				self.substance_entries[i]['checkbox_var'].set(1)
 
-			# Name der Substanz
+			# **Name der Substanz**
 			if 'subName' in self.substance_entries[i]:
 				self.substance_entries[i]['subName'].delete(0, tk.END)
 				self.substance_entries[i]['subName'].insert(0, substance.substance.name)
 
-			# Typ (Signal oder Toxin)
+			# **Typ (Signal oder Toxin)**
 			if 'type_var' in self.substance_entries[i]:
-				if substance.substance.type == 'signal':
-					self.substance_entries[i]['type_var'].set('Signal')
-				else:
-					self.substance_entries[i]['type_var'].set('Toxin')
+				self.substance_entries[i]['type_var'].set('Signal' if substance.substance.type == 'signal' else 'Toxin')
 
-			# Producer
+			# **Producer**
 			if 'producer' in self.substance_entries[i]:
-				if substance.substance.type == 'signal':
-					if isinstance(substance.emit, list):  # Falls es sich um eine Liste handelt
-						emit_value = ', '.join(map(str, substance.emit))
-					else:  # Falls nur ein einzelner Wert existiert
-						emit_value = str(substance.emit)
-
-					self.substance_entries[i]['producer'].delete(0, tk.END)
-					self.substance_entries[i]['producer'].insert(0, emit_value)
+				if isinstance(substance, Signal):
+					producer_value = ', '.join(map(str, substance.emit)) if isinstance(substance.emit, list) else str(substance.emit)
 				else:
-					if isinstance(substance.plantTransmitter, list):  # Falls es sich um eine Liste handelt
-						plantTransmitter_value = ', '.join(map(str, substance.plantTransmitter))
-					else:  # Falls nur ein einzelner Wert existiert
-						plantTransmitter_value = str(substance.plantTransmitter)
-					self.substance_entries[i]['producer'].delete(0, tk.END)
-					self.substance_entries[i]['producer'].insert(0, plantTransmitter_value)
+					producer_value = ', '.join(map(str, substance.plantTransmitter)) if isinstance(substance.plantTransmitter, list) else str(substance.plantTransmitter)
+				self.substance_entries[i]['producer'].delete(0, tk.END)
+				self.substance_entries[i]['producer'].insert(0, producer_value)
 
-			# Receiver
+			# **Receiver**
 			if 'receiver' in self.substance_entries[i]:
-				if substance.substance.type == 'signal':
-					if isinstance(substance.receive, list):  # Falls es sich um eine Liste handelt
-						receiver_value = ', '.join(map(str, substance.receive))
-					else:  # Falls nur ein einzelner Wert existiert
-						receiver_value = str(substance.receive)
+				if isinstance(substance, Signal):
+					receiver_value = ', '.join(map(str, substance.receive)) if isinstance(substance.receive, list) else str(substance.receive)
 					self.substance_entries[i]['receiver'].delete(0, tk.END)
 					self.substance_entries[i]['receiver'].insert(0, receiver_value)
 				else:
 					self.substance_entries[i]['receiver'].delete(0, tk.END)
 					self.substance_entries[i]['receiver'].config(state=tk.DISABLED)
 
-			# Trigger
+			# **Trigger**
 			if 'trigger' in self.substance_entries[i]:
-				if substance.type == 'signal':
+				if isinstance(substance, Signal):
 					trigger_value = '; '.join([f'{e[0]},{e[1]}' for e in substance.triggerCombination])
-					self.substance_entries[i]['trigger'].delete(0, tk.END)
-					self.substance_entries[i]['trigger'].insert(0, trigger_value)
 				else:
 					trigger_value = '; '.join([f'{e[0]},{e[1]},{e[2]}' for e in substance.triggerCombination])
-					self.substance_entries[i]['trigger'].delete(0, tk.END)
-					self.substance_entries[i]['trigger'].insert(0, trigger_value)
 
-			# Produktionszeit
+				self.substance_entries[i]['trigger'].delete(0, tk.END)
+				self.substance_entries[i]['trigger'].insert(0, trigger_value)
+
+			# **Produktionszeit**
 			if 'prodTime' in self.substance_entries[i]:
 				self.substance_entries[i]['prodTime'].delete(0, tk.END)
 				self.substance_entries[i]['prodTime'].insert(0, substance.prodTime)
 
-			# Send-Geschwindigkeit
+			# **Send-Geschwindigkeit**
 			if 'sendSpeed' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
 					self.substance_entries[i]['sendSpeed'].config(state=tk.NORMAL)
@@ -2592,12 +2590,12 @@ class Gui():
 					self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
 					self.substance_entries[i]['sendSpeed'].config(state=tk.DISABLED)
 
-			# Energie-Kosten
+			# **Energie-Kosten**
 			if 'energyCosts' in self.substance_entries[i]:
 				self.substance_entries[i]['energyCosts'].delete(0, tk.END)
 				self.substance_entries[i]['energyCosts'].insert(0, substance.energyCosts)
 
-			# AfterEffectTime
+			# **AfterEffectTime**
 			if 'aft' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
 					self.substance_entries[i]['aft'].config(state=tk.NORMAL)
@@ -2607,7 +2605,7 @@ class Gui():
 					self.substance_entries[i]['aft'].delete(0, tk.END)
 					self.substance_entries[i]['aft'].config(state=tk.DISABLED)
 
-			# Elinimatiosnrate
+			# **Eliminationsrate (nur für Toxine)**
 			if 'eliStrength' in self.substance_entries[i]:
 				if substance.substance.type == 'toxin':
 					if substance.deadly:
@@ -2618,25 +2616,18 @@ class Gui():
 						self.substance_entries[i]['eliStrength'].delete(0, tk.END)
 						self.substance_entries[i]['eliStrength'].config(state=tk.DISABLED)
 
-			# Deadly-Toxin Checkbox
+			# **Deadly-Toxin Checkbox**
 			if 'toxinEffect_var' in self.substance_entries[i]:
-				if substance.type == 'toxin':
-					if substance.deadly:
-						self.substance_entries[i]['toxinEffect_var'].set(1)
-					else:
-						self.substance_entries[i]['toxinEffect_var'].set(0)
+				if substance.substance.type == 'toxin':
+					self.substance_entries[i]['toxinEffect_var'].set(1 if substance.deadly else 0)
 				else:
 					self.substance_entries[i]['toxinEffect'].config(state=tk.DISABLED)
 
-			# Spread-Type Dropdown
+			# **Spread-Type Dropdown**
 			if 'spreadType_var' in self.substance_entries[i]:
 				if substance.substance.type == 'signal':
-					if substance.spreadType == 'symbiotic':
-						self.substance_entries[i]['spreadType_var'].set('Symbiotic')
-					else:
-						self.substance_entries[i]['spreadType_var'].set('Air')
-		
-	
+					self.substance_entries[i]['spreadType_var'].set('Symbiotic' if substance.spreadType == 'symbiotic' else 'Air')
+
 	def placePlantsFromFile(self, grid):
 		for plant in grid.plants:
 			squares_ids = self.squares.get(plant.position)
