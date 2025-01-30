@@ -2414,10 +2414,6 @@ class Gui():
 
 		for idx, plant in enumerate(grid.plants):
 			self.grid.addPlant(plant)  # Stelle sicher, dass die Pflanze im Grid hinzugefügt wird
-			square_ids = self.squares.get(plant.position)
-			if square_ids:
-				inner_id = square_ids['inner']
-				self.plant_at_position[inner_id] = plant
 
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
 				continue
@@ -2475,15 +2471,8 @@ class Gui():
 		if unique_enemy_count > entry_count:
 			print('Warnung: Nicht genügend Eingabefelder für alle Feindarten vorhanden.')
 
-
 		for idx, ec in enumerate(grid.enemies):
 			self.grid.addEnemies(ec)  # Stelle sicher, dass der Feind im Grid hinzugefügt wird
-			# Feindinformationen für diese Position speichern  
-			if ec.position not in self.enemies_at_positions:
-				self.enemies_at_positions[ec.position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
-
-			# Füge die Feindinformationen zur Liste hinzu
-			self.enemies_at_positions[ec.position].append(ec)
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
 				continue
 
