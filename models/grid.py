@@ -873,7 +873,7 @@ class Grid():
     
     def airInteraction(self, plant, signal, ec):
         for otherPlant in self.plants:
-            if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant.name in signal.receive:
+            if otherPlant != plant and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant.name in signal.receive:
                 sPlant, rPlant = plant, otherPlant
                 sPos, rPos = plant.position, otherPlant.position
                 if sPlant.getSignalSendCounter(ec, signal, rPlant) < signal.sendingSpeed:
@@ -900,7 +900,6 @@ class Grid():
                 if otherPlant.name != plant.name and otherPlant.position in self.radiusFields.get((plant, signal), []):
                     otherPlant.setSignalPresence(signal, False)
 
-    
 
     def removeSignalAfterSenderDeath(self, plant):
        self.removeSignalSenderDeath_symbiotic(plant)
@@ -949,6 +948,7 @@ class Grid():
 
             # Entferne den Eintrag aus radiusFields, da die Pflanze gestorben ist
             del self.radiusFields[(plant, signal)]
+            signal.radius[(plant, signal)] = 0
 
 
 

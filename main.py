@@ -80,8 +80,8 @@ sig1 = Signal(substance=s1,
               triggerCombination=[['e1', 2]],
               prodTime=1,
               spreadType='air',
-              sendingSpeed=1,
-              energyCosts=4,
+              sendingSpeed=2,
+              energyCosts=1,
               afterEffectTime=1)
 
 sig2 = Signal(substance=s2,
@@ -133,7 +133,7 @@ sc1.createConnection()
 
 # Simulation
 sim = Simulation(grid)
-#sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 # Diagramme ohne GUI
 dia = Diagrams(grid)

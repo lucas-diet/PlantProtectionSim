@@ -2153,7 +2153,7 @@ class Gui():
 		"""
 		# Dictionary zur Verfolgung der Überlappungsanzahl pro Feld
 		field_overlap_count = {}
-
+		
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				if plant.name in signal.emit and signal.spreadType == 'air' and plant.isSignalPresent(signal):
