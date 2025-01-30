@@ -116,7 +116,7 @@ class Gui():
 		tk.Label(self.top_frame, text=' ', width=4).grid(row=0, column=9, padx=1, pady=1, sticky='ew')
 		
 		tk.Button(self.top_frame, text='Breakups', command=self.open_breakupWindow).grid(row=0, column=10, columnspan=1, pady=1, sticky='ew')
-		tk.Button(self.top_frame, text='Play', command=self.start_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew') ######################################
+		tk.Button(self.top_frame, text='Play', command=self.start_simulation).grid(row=0, column=11, columnspan=1, pady=1, sticky='ew')
 
 		self.roundCount = tk.Label(self.top_frame, text='0', width=4, bg='red')
 		self.roundCount.grid(row=0, column=12, padx=1, pady=1, sticky='ew')
@@ -2651,7 +2651,6 @@ class Gui():
 	def placeEnemisFromFile(self, grid):
 		for ec in grid.enemies:
 			squares_ids = self.squares.get(ec.position)
-			
 			if squares_ids:
 				inner_id = squares_ids['inner']
 				self.clusterMarker(ec.position, inner_id, ec)
