@@ -2519,7 +2519,7 @@ class Gui():
 		entry_keys = list(self.substance_entries.keys())  # Liste der Eingabefelder
 		entry_count = len(entry_keys)  # Anzahl der verfügbaren Felder
 
-		# **Reihenfolge unverändert lassen**
+		# Reihenfolge unverändert lassen
 		substance_list = grid.signals + grid.toxins  
 
 		# Sicherheitsüberprüfung
@@ -2531,22 +2531,22 @@ class Gui():
 			if idx >= entry_count:  # Falls keine Eingabefelder mehr verfügbar sind
 				break
 
-			# **Das richtige Eingabefeld zuweisen**
+			# Das richtige Eingabefeld zuweisen
 			i = entry_keys[idx]  
 
 			if 'checkbox_var' in self.substance_entries[i]:
 				self.substance_entries[i]['checkbox_var'].set(1)
 
-			# **Name der Substanz**
+			# Name der Substanz
 			if 'subName' in self.substance_entries[i]:
 				self.substance_entries[i]['subName'].delete(0, tk.END)
-				self.substance_entries[i]['subName'].insert(0, substance.substance.name)
+				self.substance_entries[i]['subName'].insert(0, substance.name)
 
-			# **Typ (Signal oder Toxin)**
+			# Typ (Signal oder Toxin)
 			if 'type_var' in self.substance_entries[i]:
-				self.substance_entries[i]['type_var'].set('Signal' if substance.substance.type == 'signal' else 'Toxin')
+				self.substance_entries[i]['type_var'].set('Signal' if substance.type == 'signal' else 'Toxin')
 
-			# **Producer**
+			# Producer
 			if 'producer' in self.substance_entries[i]:
 				if isinstance(substance, Signal):
 					producer_value = ', '.join(map(str, substance.emit)) if isinstance(substance.emit, list) else str(substance.emit)
@@ -2555,7 +2555,7 @@ class Gui():
 				self.substance_entries[i]['producer'].delete(0, tk.END)
 				self.substance_entries[i]['producer'].insert(0, producer_value)
 
-			# **Receiver**
+			# Receiver
 			if 'receiver' in self.substance_entries[i]:
 				if isinstance(substance, Signal):
 					receiver_value = ', '.join(map(str, substance.receive)) if isinstance(substance.receive, list) else str(substance.receive)
@@ -2565,7 +2565,7 @@ class Gui():
 					self.substance_entries[i]['receiver'].delete(0, tk.END)
 					self.substance_entries[i]['receiver'].config(state=tk.DISABLED)
 
-			# **Trigger**
+			# Trigger
 			if 'trigger' in self.substance_entries[i]:
 				if isinstance(substance, Signal):
 					trigger_value = '; '.join([f'{e[0]},{e[1]}' for e in substance.triggerCombination])
@@ -2575,14 +2575,14 @@ class Gui():
 				self.substance_entries[i]['trigger'].delete(0, tk.END)
 				self.substance_entries[i]['trigger'].insert(0, trigger_value)
 
-			# **Produktionszeit**
+			# Produktionszeit
 			if 'prodTime' in self.substance_entries[i]:
 				self.substance_entries[i]['prodTime'].delete(0, tk.END)
 				self.substance_entries[i]['prodTime'].insert(0, substance.prodTime)
 
-			# **Send-Geschwindigkeit**
+			# Send-Geschwindigkeit
 			if 'sendSpeed' in self.substance_entries[i]:
-				if substance.substance.type == 'signal':
+				if substance.type == 'signal':
 					self.substance_entries[i]['sendSpeed'].config(state=tk.NORMAL)
 					self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
 					self.substance_entries[i]['sendSpeed'].insert(0, substance.sendingSpeed)
@@ -2590,14 +2590,14 @@ class Gui():
 					self.substance_entries[i]['sendSpeed'].delete(0, tk.END)
 					self.substance_entries[i]['sendSpeed'].config(state=tk.DISABLED)
 
-			# **Energie-Kosten**
+			# Energie-Kosten
 			if 'energyCosts' in self.substance_entries[i]:
 				self.substance_entries[i]['energyCosts'].delete(0, tk.END)
 				self.substance_entries[i]['energyCosts'].insert(0, substance.energyCosts)
 
-			# **AfterEffectTime**
+			# AfterEffectTime
 			if 'aft' in self.substance_entries[i]:
-				if substance.substance.type == 'signal':
+				if substance.type == 'signal':
 					self.substance_entries[i]['aft'].config(state=tk.NORMAL)
 					self.substance_entries[i]['aft'].delete(0, tk.END)
 					self.substance_entries[i]['aft'].insert(0, substance.afterEffectTime)
@@ -2605,9 +2605,9 @@ class Gui():
 					self.substance_entries[i]['aft'].delete(0, tk.END)
 					self.substance_entries[i]['aft'].config(state=tk.DISABLED)
 
-			# **Eliminationsrate (nur für Toxine)**
+			# Eliminationsrate (nur für Toxine)
 			if 'eliStrength' in self.substance_entries[i]:
-				if substance.substance.type == 'toxin':
+				if substance.type == 'toxin':
 					if substance.deadly:
 						self.substance_entries[i]['eliStrength'].config(state=tk.NORMAL)
 						self.substance_entries[i]['eliStrength'].delete(0, tk.END)
@@ -2616,16 +2616,16 @@ class Gui():
 						self.substance_entries[i]['eliStrength'].delete(0, tk.END)
 						self.substance_entries[i]['eliStrength'].config(state=tk.DISABLED)
 
-			# **Deadly-Toxin Checkbox**
+			# Deadly-Toxin Checkbox
 			if 'toxinEffect_var' in self.substance_entries[i]:
-				if substance.substance.type == 'toxin':
+				if substance.type == 'toxin':
 					self.substance_entries[i]['toxinEffect_var'].set(1 if substance.deadly else 0)
 				else:
 					self.substance_entries[i]['toxinEffect'].config(state=tk.DISABLED)
 
-			# **Spread-Type Dropdown**
+			# Spread-Type Dropdown
 			if 'spreadType_var' in self.substance_entries[i]:
-				if substance.substance.type == 'signal':
+				if substance.type == 'signal':
 					self.substance_entries[i]['spreadType_var'].set('Symbiotic' if substance.spreadType == 'symbiotic' else 'Air')
 
 	def placePlantsFromFile(self, grid):
