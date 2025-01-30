@@ -207,6 +207,3 @@ class Diagrams:
 
         save_button = tk.Button(root, text='Save Plot', command=save_action)
         save_button.pack(side=tk.BOTTOM, pady=10)
-
-
-        

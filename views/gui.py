@@ -795,7 +795,6 @@ class Gui():
 
 		# Größe und Position des Fensters festlegen
 		self.plotWindow.geometry(f'{window_width}x{window_height}+{x}+{y}')
-
 		self.create_plotTabs()
 		
 
@@ -812,7 +811,6 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='energy',
 			title='Energy by Plant Type Over Time',
-			ylabel='Energy'
 		)
 
 		# Tab 2: Pflanzen - Count
@@ -824,7 +822,6 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='count',
 			title='Number by Plant Types Over Time',
-			ylabel='Count'
 		)
 
 		# Tab 3: Feinde - Size
@@ -836,7 +833,6 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='size',
 			title='Clustersize by Enemy Type Over Time',
-			ylabel='Size'
 		)
 
 		# Tab 4: Feinde - Count
@@ -848,7 +844,6 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='count',
 			title='Number by Enemy Types Over Time',
-			ylabel='Count'
 		)
 
 		# Tabs anzeigen
