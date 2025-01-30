@@ -893,12 +893,13 @@ class Grid():
             for plants, plantsPos in plant.gridConnections.items():
                 sPlant, rPlant = plants
                 sPos, rPos = plantsPos
-                rPlant.setSignalPresence(signal, False)
-
+                if rPlant in plant.gridConnections:  # Überprüfen, ob der Schlüssel existiert
+                    rPlant.setSignalPresence(signal, False)
         else:
             for otherPlant in self.plants:
-                if otherPlant.name != plant.name and otherPlant.position in self.radiusFields[(plant, signal)] and otherPlant.name in signal.receive:
+                if otherPlant.name != plant.name and otherPlant.position in self.radiusFields.get((plant, signal), []):
                     otherPlant.setSignalPresence(signal, False)
+
     
 
     def removeSignalAfterSenderDeath(self, plant):
