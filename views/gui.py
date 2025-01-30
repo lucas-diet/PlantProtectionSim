@@ -134,6 +134,11 @@ class Gui():
 		self.input_gridSize()
 
 		self.roundCount.config(text='0', bg='red')
+
+		# Backup-Datei nach dem erfolgreichen Export löschen
+		if os.path.exists('grid_backup.pkl'):
+			os.remove('grid_backup.pkl')
+			print('Backup-Datei gelöscht.')
 	
 
 	def sidebarTabs(self):
@@ -2262,52 +2267,53 @@ class Gui():
 
 
 	def exportSystem(self):
-		"""Exportiert das Grid-System, wenn ein Backup existiert."""
-		# Prüfen, ob eine Backup-Datei existiert
+		"""Exportiert das Grid-System, wenn ein Backup existiert oder erstellt ein neues Backup."""
+		backup_file = 'grid_backup.pkl'
+
+		# Falls die Backup-Datei nicht existiert, erstelle eine neue
+		if not os.path.exists(backup_file):
+			try:
+				with open(backup_file, 'wb') as f:
+					pickle.dump(self.grid, f)
+				print('Neue Backup-Datei wurde erstellt.')
+			except Exception as e:
+				messagebox.showerror('Error', f'Error creating backup: {str(e)}')
+				return
+
+		# Laden der Grid-Daten aus dem Backup
 		try:
-			with open('grid_backup.pkl', 'rb') as f:
-				# Lade den Grid-Zustand aus der Backup-Datei
+			with open(backup_file, 'rb') as f:
 				self.grid = pickle.load(f)
 				print('Grid geladen aus Backup.')
-		except FileNotFoundError:
-			messagebox.showerror('Error', 'Backup file not found.')
-			return
 		except Exception as e:
 			messagebox.showerror('Error', f'Error loading grid: {str(e)}')
 			return
 
-		# Prüfen, ob das Grid existiert
+		# Überprüfen, ob das Grid existiert
 		if not hasattr(self, 'grid') or self.grid is None:
-			messagebox.showerror('Fehler', 'System not exists')
+			messagebox.showerror('Error', 'System not exists')
 			return
 
 		# Prüfen, ob Substanzen korrekt erstellt werden können
-		if not self.create_add_substance():  # Falls Fehler auftreten, wird abgebrochen
-			messagebox.showerror('Fehler', 'Invalid substance inputs! Please fix all errors before exporting.')
+		if not self.create_add_substance():
+			messagebox.showerror('Error', 'Invalid substance inputs! Please fix all errors before exporting.')
 			return
 
-		# Öffne das File-Explorer Fenster, um einen Speicherort auszuwählen
+		# Dateiauswahl für den Export
 		filepath = filedialog.asksaveasfilename(
 			defaultextension='.pkl',
 			filetypes=[('Pickle-Dateien', '*.pkl'), ('Alle Dateien', '*.*')]
 		)
 
-		# Export nur, wenn ein gültiger Pfad gewählt wurde
 		if filepath:
 			try:
-				# Export durchführen (speichert das Grid in die angegebene Datei)
 				exporter = Exporter(filepath, self.grid)
-				exporter.save()  # Angenommen, save() kümmert sich um das Speichern des Objekts
+				exporter.save()  
 				messagebox.showinfo('Success', 'File was saved successfully')
 
-				# Backup-Datei nach dem erfolgreichen Export löschen
-				if os.path.exists('grid_backup.pkl'):
-					os.remove('grid_backup.pkl')
-					print('Backup-Datei gelöscht.')
 			except Exception as e:
 				messagebox.showerror('Error', f'Error saving file: {str(e)}')
-		else:
-			pass
+
 
 
 	def importSystem(self):
@@ -2400,9 +2406,7 @@ class Gui():
 		entry_count = len(entry_keys)
 
 		unique_plant_types = set(plant.name for plant in grid.plants)
-
-		# Anzahl der verschiedenen Pflanzenarten
-		unique_plant_count = len(unique_plant_types)
+		unique_plant_count = len(unique_plant_types) # Anzahl der verschiedenen Pflanzenarten
 
 		# Sicherheitsüberprüfung: Falls es mehr Pflanzenarten gibt als Felder
 		if unique_plant_count > entry_count:
@@ -2410,8 +2414,13 @@ class Gui():
 
 		for idx, plant in enumerate(grid.plants):
 			self.grid.addPlant(plant)  # Stelle sicher, dass die Pflanze im Grid hinzugefügt wird
+			square_ids = self.squares.get(plant.position)
+			if square_ids:
+				inner_id = square_ids['inner']
+				self.plant_at_position[inner_id] = plant
+
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
-				break
+				continue
 
 			# Fülle die Felder für die aktuelle Pflanze
 			i = entry_keys[idx]  # Aktueller Eingabebereich für die Pflanze
@@ -2456,15 +2465,11 @@ class Gui():
 		"""
 		Füllt die Feind-Eingabefelder basierend auf den Daten aus 'grid'.
 		"""
-		# Alle möglichen Feind-Eingabefelder (z. B. Textfelder für verschiedene Feindtypen)
 		entry_keys = list(self.enemy_entries.keys())
 		entry_count = len(entry_keys)
 
-		# Erstelle ein Set, um nur einzigartige Feindarten zu speichern
-		unique_enemy_types = set(ec.enemy.name for ec in grid.enemies)
-
-		# Anzahl der verschiedenen Feindarten
-		unique_enemy_count = len(unique_enemy_types)
+		unique_enemy_types = set(ec.enemy.name for ec in grid.enemies) # Erstelle ein Set, um nur einzigartige Feindarten zu speichern
+		unique_enemy_count = len(unique_enemy_types) # Anzahl der verschiedenen Feindarten
 
 		# Sicherheitsüberprüfung: Falls es mehr Feindarten gibt als Felder
 		if unique_enemy_count > entry_count:
@@ -2473,8 +2478,14 @@ class Gui():
 
 		for idx, ec in enumerate(grid.enemies):
 			self.grid.addEnemies(ec)  # Stelle sicher, dass der Feind im Grid hinzugefügt wird
+			# Feindinformationen für diese Position speichern  
+			if ec.position not in self.enemies_at_positions:
+				self.enemies_at_positions[ec.position] = []  # Initialisiere Liste für diese Position, falls sie noch nicht existiert
+
+			# Füge die Feindinformationen zur Liste hinzu
+			self.enemies_at_positions[ec.position].append(ec)
 			if idx >= entry_count:  # Falls es keine verfügbaren Eingabefelder mehr gibt
-				break
+				continue
 
 			# Fülle die Felder für den aktuellen Feind
 			i = entry_keys[idx]  # Aktueller Eingabebereich für den Feind
