@@ -120,13 +120,19 @@ class Simulation():
         Args:
             timeStep (int): Der aktuelle Zeitschritt der Simulation.
         """
-        for plant in self.grid.plants:
-            if (plant.name, timeStep) not in self.grid.plantData:
-                self.grid.plantData[(plant.name, timeStep)] = {'energy': 0, 'count': 0}
-            
-            self.grid.plantData[(plant.name, timeStep)]['energy'] += plant.currEnergy
-            self.grid.plantData[(plant.name, timeStep)]['count'] += 1
+        temp_counts = {}  # Zwischenspeicher für zählbare Pflanzen
+        temp_energy = {}  # Zwischenspeicher für Energie
 
+        for plant in self.grid.plants:
+            if (plant.name, timeStep) not in temp_counts:
+                temp_counts[(plant.name, timeStep)] = 0
+                temp_energy[(plant.name, timeStep)] = 0
+            temp_counts[(plant.name, timeStep)] += 1
+            temp_energy[(plant.name, timeStep)] += plant.currEnergy
+
+        # Übertrage die aggregierten Daten in 'plantData'
+        for key in temp_counts:
+            self.grid.plantData[key] = {'energy': temp_energy[key], 'count': temp_counts[key]}
 
     def getEnemyData(self, timeStep):
         """_summary_
@@ -134,12 +140,20 @@ class Simulation():
         Args:
             timeStep (int): Der aktuelle Zeitschritt der Simulation.
         """
+        temp_counts = {}  # Zwischenspeicher für die Anzahl der Gruppen
+        temp_sizes = {}   # Zwischenspeicher für die Gruppengröße
+
         for ec in self.grid.enemies:
-            if (ec.enemy.name, timeStep) not in self.grid.EnemyData:
-                self.grid.EnemyData[(ec.enemy.name, timeStep)] = {'size': 0, 'count': 0}
-            
-            self.grid.EnemyData[(ec.enemy.name, timeStep)]['size'] += ec.num
-            self.grid.EnemyData[(ec.enemy.name, timeStep)]['count'] += 1
+            key = (ec.enemy.name, timeStep)
+            if key not in temp_counts:
+                temp_counts[key] = 0
+                temp_sizes[key] = 0
+            temp_counts[key] += 1  # Jede 'ec' zählt als eine Gruppe
+            temp_sizes[key] += ec.num  # Summe aller Feindgrößen
+
+        # Übertrage die aggregierten Daten in 'EnemyData'
+        for key in temp_counts:
+            self.grid.EnemyData[key] = {'size': temp_sizes[key], 'count': temp_counts[key]}
 
     
     def logSafer(self, logArr):

@@ -144,11 +144,11 @@ dia = Diagrams(grid)
 
 # Export und Import
 #Exporter('test.pkl', grid).save()
-#rGrid = Importer('/Users/lucas/Desktop/test2.pkl').load()
+rGrid = Importer('/Users/lucas/Desktop/test.pkl').load()
 #rSim = Simulation(rGrid)
 #rSim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
-#rDia = Diagrams(rGrid)
+rDia = Diagrams(rGrid)
 #rDia.dataPlotter(rGrid.plantData, rSim.simLength, measure='energy', title='Energy by Plant Type Over Time')
 #rDia.dataPlotter(rGrid.plantData, rSim.simLength, measure='count', title='Number by Plant Types Over Time')
 #rDia.dataPlotter(rGrid.EnemyData, rSim.simLength, measure='size', title='Clustersize by Enemy Type Over Time')
