@@ -567,7 +567,6 @@ class Gui():
 			substance_spredType_om.grid(row=row+2, column=1, padx=2, pady=2, sticky='w')
 			substance_spredType_om.config(fg='black', width=5)
 
-		
 			# Name Eingabefeld
 			name_label = tk.Label(self.substances_setting_frame, text='Name:')
 			name_label.grid(row=row+3, column=0, columnspan=1, padx=2, pady=2, sticky='w')
@@ -811,6 +810,7 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='energy',
 			title='Energy by Plant Type Over Time',
+			ylabel='Energy'
 		)
 
 		# Tab 2: Pflanzen - Count
@@ -822,6 +822,7 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='count',
 			title='Number by Plant Types Over Time',
+			ylabel='Count'
 		)
 
 		# Tab 3: Feinde - Size
@@ -833,6 +834,7 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='size',
 			title='Clustersize by Enemy Type Over Time',
+			ylabel='Size'
 		)
 
 		# Tab 4: Feinde - Count
@@ -844,6 +846,7 @@ class Gui():
 			simLength=self.sim.simLength,
 			measure='count',
 			title='Number by Enemy Types Over Time',
+			ylabel='Count'
 		)
 
 		# Tabs anzeigen
