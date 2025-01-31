@@ -1257,7 +1257,7 @@ class Gui():
 
 
 	def create_add_cluster(self, selected_index, clicked_position, clusterSize, speed, eatSpeed, eatVictory):
-		enemy = Enemy(name=f'e{selected_index - 15}', symbol=f'E{selected_index - 15}')
+		enemy = Enemy(name=f'e{selected_index - 15}')
 
 		cluster = EnemyCluster(enemy=enemy,
 						 num=clusterSize,

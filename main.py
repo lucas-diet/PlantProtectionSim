@@ -61,9 +61,9 @@ p3 = Plant(name='p3',
            grid=grid,
            color=PLANT_COLORS)
 
-e1 = Enemy(name='e1', symbol='E1')
-e2 = Enemy(name='e2', symbol='E2')
-e3 = Enemy(name='e3', symbol='E3')
+e1 = Enemy(name='e1')
+e2 = Enemy(name='e2')
+e3 = Enemy(name='e3')
 
 ec1 = EnemyCluster(enemy=e1, num=2, speed=1, position=(0,0), grid=grid, eatingSpeed=1, eatVictory=1)
 ec2 = EnemyCluster(enemy=e2, num=2, speed=1, position=(0,2), grid=grid, eatingSpeed=1, eatVictory=1)

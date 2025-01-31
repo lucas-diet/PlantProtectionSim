@@ -7,17 +7,12 @@ from models.plant import Plant
 
 class Enemy():
 
-    def __init__(self, name, symbol):
+    def __init__(self, name):
         self.name = name
-        self.symbol = symbol
 
     
     def getName(self):
         return self.name
-    
-
-    def getSymbol(self):
-        return self.symbol
     
 
 
