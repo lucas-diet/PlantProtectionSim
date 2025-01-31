@@ -1055,7 +1055,6 @@ class Gui():
 				self.enemyClusterPlacer(clicked_position, selected_index)
 
 
-
 	def plantPlacer(self, position, selected_index):
 		"""
 		Platziert eine Pflanze auf dem Grid an den gegebenen Koordinaten (x, y).
@@ -1932,43 +1931,6 @@ class Gui():
 			# Falls es das Feld noch nicht gibt, was theoretisch nicht passieren sollte, wird es hier behandelt
 			#print(f'Fehler: Feld {offspring_position} existiert nicht im Grid.')
 			pass
-
-
-	def on_GridRightClick(self, event):
-		"""
-		Behandelt Rechtsklicks auf das Grid und zeigt ein Popup an, wenn der innere Bereich einer Zelle geklickt wird.
-		"""
-		# Ermittle das angeklickte Canvas-Element
-		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
-		if clicked_item:
-			item_id = clicked_item[0]
-
-			# Finde die (x, y)-Koordinaten der angeklickten Zelle basierend auf der inner-ID
-			clicked_position = None
-			for position, ids in self.squares.items():
-				inner_id = ids.get('inner')  # Hole die ID des inneren Bereichs
-				if inner_id == item_id:  # Überprüfe, ob die geklickte ID mit der inner-ID übereinstimmt
-					clicked_position = position
-					break
-
-			if clicked_position is None:
-				#print(f'Innerer Bereich der Zelle mit ID {item_id} nicht gefunden.')
-				return
-
-			# Prüfe, ob eine Pflanze oder ein Feind ausgewählt ist
-			selected_index = self.selectedItem.get()
-			if selected_index == -1:
-				# Keine Auswahl getroffen
-				return
-
-			# Überprüfe, ob an dieser Position eine Pflanze existiert
-			plant = self.grid.getPlantAt(clicked_position)
-			if plant:
-				# Zeige das Popup nur, wenn eine Pflanze existiert
-				self.show_popup(clicked_position, event)
-			else:
-				#print(f'Keine Pflanze an Position {clicked_position}.')
-				pass
 
 
 	def remove_fieldColor(self):
