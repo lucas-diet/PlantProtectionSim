@@ -274,7 +274,7 @@ class EnemyCluster():
                 plant.currEnergy -= self.eatingSpeed
                 self.eatedEnergy += self.eatingSpeed
 
-                if plant.currEnergy <= plant.minEnergy:
+                if plant.currEnergy < plant.minEnergy:
                     self.targetPlant = None
                     self.grid.removePlant(plant)
 
