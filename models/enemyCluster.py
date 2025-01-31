@@ -162,11 +162,17 @@ class EnemyCluster():
         Returns:
             list[tuple[int, int]] | None: Der kürzeste Pfad zu einer Pflanze als Liste von Koordinaten oder 'None'
         """
-        
-        # Wenn bereits eine Zielpflanze gesetzt ist, muss keine neue ausgewählt werden
         if self.targetPlant is not None:
-            return self.findShortestPath(start, self.targetPlant)
-        
+            # Alle aktuellen Pflanzenpositionen abrufen
+            current_plants = self.detectPlant(self.grid.helperGrid())
+            
+            # Überprüfen, ob die Zielpflanze noch existiert
+            if self.targetPlant not in current_plants:  
+                self.targetPlant = None  # Zielpflanze zurücksetzen
+            else:
+                return self.findShortestPath(start, self.targetPlant)
+
+
         helperGrid = self.grid.helperGrid()
         pPos = self.detectPlant(helperGrid)
         shortestPaths = [] # Liste mit allen kürzesten Pfaden mit der gleichen Länge
