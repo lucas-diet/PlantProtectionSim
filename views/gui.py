@@ -1968,6 +1968,9 @@ class Gui():
 				self.gridCanvas.itemconfig(outer_id, fill='white')
 				self.gridCanvas.itemconfig(inner_id, fill='white')
 
+				# Entferne alle Verbindungen zu dieser Pflanze
+				self.remove_plant_connections(plant)
+
 				# Überprüfen, ob die Pflanze noch in der Liste ist, bevor sie entfernt wird
 				if plant in self.grid.plants:
 					self.grid.removePlant(plant)
@@ -1978,8 +1981,6 @@ class Gui():
 				# Setze die Farbe auf Weiß für das innere Rechteck
 				self.gridCanvas.itemconfig(inner_id, fill='white')
 
-				# Entferne alle Verbindungen zu dieser Pflanze
-				self.remove_plant_connections(plant)
 			else:
 				#print(f'Fehler: Keine square_ids für Position {plant.position} gefunden.')
 				pass
