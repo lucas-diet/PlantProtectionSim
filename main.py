@@ -9,7 +9,9 @@ from models.grid import Grid
 
 from models.connection import SymbioticConnection, AirConnection
 
-from models.substance import Substance, Signal, Toxin
+from models.substance import Substance
+from models.signal import Signal
+from models.toxin import Toxin
 
 from controllers.simulation import Simulation
 from controllers.fileManager import Exporter, Importer
