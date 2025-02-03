@@ -2003,8 +2003,9 @@ class Gui():
 		# Lösche auch die Pflanzverbindungen
 		for (p1, p2) in list(self.plant_connections.items()):
 			if p1 == plant or p2 == plant:
-				del self.connect_plants[(p1, p2)]  # Löscht die Verbindung aus dem Dict
-				del self.connect_plants[(p2, p1)]  # Löscht auch die Gegenrichtung
+				del self.plant_connections[(p1, p2)]
+				if (p2, p1) in self.plant_connections:  # Doppelte Richtung sicherstellen
+					del self.plant_connections[(p2, p1)]
 
 
 	def remove_tooltip(self, square_id):
@@ -2118,11 +2119,14 @@ class Gui():
 		"""
 		# Dictionary zur Verfolgung der Überlappungsanzahl pro Feld
 		field_overlap_count = {}
+		senderPlant = None
 		
+		# Bestimmen der sendenden Pflanze (cPlant)
 		for plant in self.grid.plants:
 			for signal in self.grid.signals:
 				if plant.name in signal.emit and signal.spreadType == 'air' and plant.isSignalPresent(signal):
 					for (cPlant, signal), fields in self.grid.radiusFields.items():
+						senderPlant = cPlant
 						for field in fields:
 							# Erhöhe die Überlappungsanzahl für dieses Feld
 							if field not in field_overlap_count:
@@ -2130,11 +2134,21 @@ class Gui():
 							else:
 								field_overlap_count[field] += 1
 
+		# Jetzt über alle Felder mit ihren Überlappungen iterieren
 		for field, overlap_count in field_overlap_count.items():
 			squares_ids = self.squares.get(field)
 			if squares_ids:
 				outer_id = squares_ids['outer']
 				inner_id = squares_ids['inner']
+
+				# Überprüfen, ob eine Pflanze auf dem Feld steht
+				plants_on_field = [p for p in self.grid.plants if p.position == field]
+				if plants_on_field:
+					plant_on_field = plants_on_field[0]  # Nehme die erste Pflanze auf diesem Feld
+
+					# Wenn es die sendende Pflanze ist (cPlant), überspringe das Setzen der Farbe auf Orange
+					if plant_on_field == senderPlant:
+						continue  # Überspringe das Setzen der Farbe für die sendende Pflanze
 
 				# Bestimme die Farbe basierend auf der Anzahl der Überlagerungen
 				if overlap_count == 1:
@@ -2144,8 +2158,10 @@ class Gui():
 					# Überlappen – berechne dunklere Farbe basierend auf der Anzahl der Überlagerungen
 					new_color = self.get_overlap_color(overlap_count)
 
-				# Setze die berechnete Farbe
+				# Setze die berechnete Farbe für das Feld (außer für die sendende Pflanze)
 				self.gridCanvas.itemconfig(outer_id, fill=new_color)
+
+
 
 
 	def get_overlap_color(self, overlap_count):
