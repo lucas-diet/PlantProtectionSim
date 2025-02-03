@@ -250,7 +250,10 @@ class Gui():
 			messagebox.showwarning('Invalid number', 'The number of gridsize must be between 1 and 80!')
 			return
 		else:
-			self.grid = Grid(gridSize, gridSize)
+			if not hasattr(self, 'grid'):
+				self.grid = Grid(gridSize, gridSize)
+			else:
+				pass
 		
 		self.clear_gridFrame()
 		self.create_gridFrame(gridSize, gridSize)
@@ -2305,7 +2308,7 @@ class Gui():
 				self.placeEnemisFromFile(grid)
 				self.placeConnectionsFromFile(grid)
 
-				self.grid = grid
+				self.setGrid(grid)
 				
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
@@ -2613,3 +2616,7 @@ class Gui():
 			for plants, plantsPos in plant.gridConnections.items():
 				plant1, plant2 = plants
 				self.connect_plants(plant1, plant2)
+	
+
+	def setGrid(self, grid):
+		self.grid = grid
