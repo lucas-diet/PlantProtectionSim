@@ -17,9 +17,7 @@ from models.enemyCluster import Enemy, EnemyCluster
 from controllers.simulation import Simulation
 from views.diagrams import Diagrams
 from models.connection import SymbioticConnection
-from models.substance import Substance
-from models.signal import Signal
-from models.toxin import Toxin
+from models.substance import Substance, Signal, Toxin
 from controllers.fileManager import Exporter, Importer
 
 

@@ -9,9 +9,7 @@ from models.grid import Grid
 
 from models.connection import SymbioticConnection, AirConnection
 
-from models.substance import Substance
-from models.signal import Signal
-from models.toxin import Toxin
+from models.substance import Substance, Signal, Toxin
 
 from controllers.simulation import Simulation
 from controllers.fileManager import Exporter, Importer
@@ -133,7 +131,7 @@ sc1.createConnection()
 
 # Simulation
 sim = Simulation(grid)
-sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
+#sim.run(maxSteps=30, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
 # Diagramme ohne GUI
 dia = Diagrams(grid)
@@ -144,11 +142,11 @@ dia = Diagrams(grid)
 
 # Export und Import
 #Exporter('test.pkl', grid).save()
-rGrid = Importer('/Users/lucas/Desktop/test.pkl').load()
+#rGrid = Importer('/Users/lucas/Desktop/test.pkl').load()
 #rSim = Simulation(rGrid)
 #rSim.run(maxSteps=20, plant=None, ec=None, maxGridEnergy=None, maxEnemyNum=None)
 
-rDia = Diagrams(rGrid)
+#rDia = Diagrams(rGrid)
 #rDia.dataPlotter(rGrid.plantData, rSim.simLength, measure='energy', title='Energy by Plant Type Over Time')
 #rDia.dataPlotter(rGrid.plantData, rSim.simLength, measure='count', title='Number by Plant Types Over Time')
 #rDia.dataPlotter(rGrid.EnemyData, rSim.simLength, measure='size', title='Clustersize by Enemy Type Over Time')
