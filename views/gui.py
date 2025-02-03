@@ -2162,8 +2162,6 @@ class Gui():
 				self.gridCanvas.itemconfig(outer_id, fill=new_color)
 
 
-
-
 	def get_overlap_color(self, overlap_count):
 		"""
 		Gibt eine Farbe basierend auf der Anzahl der Überlagerungen zurück.
