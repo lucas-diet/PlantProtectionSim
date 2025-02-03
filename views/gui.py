@@ -1993,19 +1993,34 @@ class Gui():
 		"""
 		Entfernt alle Verbindungen (Linien) von und zu dieser Pflanze.
 		"""
-		# Entferne alle Verbindungen zu dieser Pflanze
+		# Zuerst die zu löschenden Verbindungen und Linien sammeln
+		to_remove_lines = []
+		to_remove_connections = []
+
+		# Durchlaufe alle Verbindungen in grid_lines und plant_connections
 		for (p1, p2), line_id in list(self.grid_lines.items()):
 			if p1 == plant or p2 == plant:
-				# Lösche die Linie, wenn einer der beiden Pflanzen betroffen ist
+				to_remove_lines.append((p1, p2, line_id))
+
+		# Alle Verbindungen in plant_connections, die die Pflanze betreffen
+		for (p1, p2) in list(self.plant_connections.keys()):
+			if p1 == plant or p2 == plant:
+				to_remove_connections.append((p1, p2))
+
+		# Entferne zuerst die Verbindungen von und zu dieser Pflanze aus grid_lines
+		for (p1, p2, line_id) in to_remove_lines:
+			if line_id:
+				# Lösche die Linie vom Canvas, wenn die ID vorhanden ist
 				self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
 				del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
 
-		# Lösche auch die Pflanzverbindungen
-		for (p1, p2) in list(self.plant_connections.items()):
-			if p1 == plant or p2 == plant:
-				del self.plant_connections[(p1, p2)]
-				if (p2, p1) in self.plant_connections:  # Doppelte Richtung sicherstellen
-					del self.plant_connections[(p2, p1)]
+		# Entferne dann die Verbindungen aus plant_connections
+		for (p1, p2) in to_remove_connections:
+			self.disconnect_plants(p1, p2)
+			del self.plant_connections[(p1, p2)]
+			if (p2, p1) in self.plant_connections:  # Doppelte Richtung sicherstellen
+				self.disconnect_plants(p2, p1)
+				del self.plant_connections[(p2, p1)]
 
 
 	def remove_tooltip(self, square_id):
