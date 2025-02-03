@@ -2275,7 +2275,6 @@ class Gui():
 				messagebox.showerror('Error', f'Error saving file: {str(e)}')
 
 
-
 	def importSystem(self):
         # Öffne das File-Explorer Fenster, um eine Pickle-Datei auszuwählen
 		filepath = filedialog.askopenfilename(defaultextension='.pkl',
@@ -2486,7 +2485,7 @@ class Gui():
 
 		# Sicherheitsüberprüfung
 		if len(substance_list) > entry_count:
-			print('⚠️ Warnung: Nicht genügend Eingabefelder für alle Substanzen!')
+			print('Warnung: Nicht genügend Eingabefelder für alle Substanzen!')
 
 		for idx, substance in enumerate(substance_list):
 			self.grid.addSubstance(substance)
