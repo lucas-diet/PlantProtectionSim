@@ -485,7 +485,7 @@ class Grid():
                                         
                     self.plantAlarmAndSignalProd(ec, dist, plant)  # Alarm und Signalproduktion prüfen
                     self.plantAlarmAndPoisonProd(ec, dist, plant)  # Alarm und Giftproduktion prüfen
-
+                    
                     if (i, j) == ec.position:  # Wenn der Feind auf der Pflanze steht
                         ec.lastPlant = plant
                         ec.currentPath = []  # Setze den aktuellen Pfad zurück
@@ -493,6 +493,9 @@ class Grid():
                         
                         self.processSignalEffects(ec, plant)  # Signalwirkungen
                         self.processToxinEffects(ec, plant)  # Giftwirkungen
+
+                        if plant.currEnergy < plant.minEnergy: #################################### Wenn Pflanze stirbt und Feind vergiftet wurde ist Gift nicht mehr präsent => feind nciht mehr vergiftet.
+                            ec.intoxicated = False
 
 
     def reduceClusterSize(self, ec):
