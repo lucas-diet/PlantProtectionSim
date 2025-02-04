@@ -1808,10 +1808,9 @@ class Gui():
 
 		self.create_add_substance()
 		self.error_substances.config(text='')
-		# Backup-Datei erstellen und den Zustand des gesamten Grids speichern
-		with open('grid_backup.pkl', 'wb') as f:
-			pickle.dump(self.grid, f)  # Speichert das Grid-Objekt
-			print('Initialer Zustand gespeichert.')
+		# Initiales Backup erstellen
+		self.saveBackup()  # Zu Beginn speichern
+		print('Initialer Zustand gespeichert.')
 
 		while True:
 			# Abbruchbedingungen
@@ -2261,36 +2260,26 @@ class Gui():
 
 
 	def exportSystem(self):
-		"""Exportiert das Grid-System, wenn ein Backup existiert oder erstellt ein neues Backup."""
+		"""Exportiert das Grid-System und aktualisiert das Backup."""
 		backup_file = 'grid_backup.pkl'
-
-		# Falls die Backup-Datei nicht existiert, erstelle eine neue
-		if not os.path.exists(backup_file):
-			try:
-				with open(backup_file, 'wb') as f:
-					pickle.dump(self.grid, f)
-				print('Neue Backup-Datei wurde erstellt.')
-			except Exception as e:
-				messagebox.showerror('Error', f'Error creating backup: {str(e)}')
-				return
-
-		# Laden der Grid-Daten aus dem Backup
-		try:
-			with open(backup_file, 'rb') as f:
-				self.grid = pickle.load(f)
-				print('Grid geladen aus Backup.')
-		except Exception as e:
-			messagebox.showerror('Error', f'Error loading grid: {str(e)}')
-			return
 
 		# Überprüfen, ob das Grid existiert
 		if not hasattr(self, 'grid') or self.grid is None:
-			messagebox.showerror('Error', 'System not exists')
+			messagebox.showerror('Error', 'System does not exist')
 			return
 
 		# Prüfen, ob Substanzen korrekt erstellt werden können
 		if not self.create_add_substance():
 			messagebox.showerror('Error', 'Invalid substance inputs! Please fix all errors before exporting.')
+			return
+
+		# Backup aktualisieren (altes Backup überschreiben)
+		try:
+			with open(backup_file, 'wb') as f:
+				pickle.dump(self.grid, f)
+			print('Backup-Datei wurde aktualisiert.')
+		except Exception as e:
+			messagebox.showerror('Error', f'Error updating backup: {str(e)}')
 			return
 
 		# Dateiauswahl für den Export
@@ -2302,9 +2291,8 @@ class Gui():
 		if filepath:
 			try:
 				exporter = Exporter(filepath, self.grid)
-				exporter.save()  
+				exporter.save()
 				messagebox.showinfo('Success', 'File was saved successfully')
-
 			except Exception as e:
 				messagebox.showerror('Error', f'Error saving file: {str(e)}')
 
@@ -2675,7 +2663,7 @@ class Gui():
 			messagebox.showerror('Error', 'Grid data is missing!')
 			return
 
-		# Aktualisiere GUI-Felder basierend auf dem geladenen Grid
+		# Parameter in der GUI aktualisieren
 		self.grid_size_entry.delete(0, tk.END)
 		self.grid_size_entry.insert(0, self.grid.height)
 
@@ -2703,3 +2691,16 @@ class Gui():
 		self.placeConnectionsFromFile(self.grid)
 
 		self.setGrid(self.grid)
+
+		# Backup nach dem Reset speichern
+		self.saveBackup()  # Backup nach dem Reset aktualisieren
+
+
+	def saveBackup(self):
+		backup_file = 'grid_backup.pkl'
+		try:
+			with open(backup_file, 'wb') as f:
+				pickle.dump(self.grid, f)
+			print('Backup erfolgreich gespeichert.')
+		except Exception as e:
+			print(f'Fehler beim Speichern des Backups: {str(e)}')
