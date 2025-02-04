@@ -494,7 +494,7 @@ class Grid():
                         self.processSignalEffects(ec, plant)  # Signalwirkungen
                         self.processToxinEffects(ec, plant)  # Giftwirkungen
 
-                        if plant.currEnergy < plant.minEnergy: #################################### Wenn Pflanze stirbt und Feind vergiftet wurde ist Gift nicht mehr präsent => feind nciht mehr vergiftet.
+                        if plant.currEnergy < plant.minEnergy and ec.intoxicated: #################################### Wenn Pflanze stirbt und Feind vergiftet wurde ist Gift nicht mehr präsent => feind nciht mehr vergiftet.
                             ec.intoxicated = False
 
 
