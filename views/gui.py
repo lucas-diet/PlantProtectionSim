@@ -2332,7 +2332,7 @@ class Gui():
 				self.placeEnemisFromFile(grid)
 				self.placeConnectionsFromFile(grid)  # Sollte jetzt korrekt funktionieren
 
-				self.update_idletasks()  # Stellt sicher, dass Änderungen gerendert werden
+				self.gridCanvas.update_idletasks()  # Stellt sicher, dass Änderungen gerendert werden
 
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
