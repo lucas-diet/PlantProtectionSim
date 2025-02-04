@@ -46,7 +46,7 @@ class Gui():
 		self.root = tk.Tk()
 		self.root.title('Simulator')
 		# Berechnen der Fenstergröße
-		window_width = self.root.winfo_screenwidth() - 200
+		window_width = self.root.winfo_screenwidth() - 130
 		window_height = self.root.winfo_screenheight() - 200
 		
 		# Berechnung der Position, um das Fenster zu zentrieren
@@ -125,6 +125,7 @@ class Gui():
 
 		tk.Button(self.top_frame, text='Import', command=self.importSystem).grid(row=0, column=14, columnspan=1, pady=1, sticky='ew')
 		tk.Button(self.top_frame, text='Export', command=self.exportSystem).grid(row=0, column=15, columnspan=1, pady=1, sticky='ew')
+		tk.Button(self.top_frame, text='Reset', command=self.resetSystem).grid(row=0, column=16, columnspan=1, pady=1, sticky='ew')
 
 
 	def createSituation(self):
@@ -2650,3 +2651,55 @@ class Gui():
 
 	def setGrid(self, grid):
 		self.grid = grid
+	
+
+	def resetSystem(self):
+		backup_file = 'grid_backup.pkl'
+
+		# Prüfen, ob die Backup-Datei existiert
+		if not os.path.exists(backup_file):
+			messagebox.showerror('Error', 'No backup file found!')
+			return
+
+		# Laden des Grid-Backups
+		try:
+			with open(backup_file, 'rb') as f:
+				self.grid = pickle.load(f)
+			print('Grid geladen aus Backup.')
+		except Exception as e:
+			messagebox.showerror('Error', f'Error loading grid: {str(e)}')
+			return
+
+		# Überprüfen, ob das Grid existiert
+		if not hasattr(self, 'grid') or self.grid is None:
+			messagebox.showerror('Error', 'Grid data is missing!')
+			return
+
+		# Aktualisiere GUI-Felder basierend auf dem geladenen Grid
+		self.grid_size_entry.delete(0, tk.END)
+		self.grid_size_entry.insert(0, self.grid.height)
+
+		plantsNum = int(self.getPlantsNum(self.grid))
+		enemyNum = int(self.getEnemyNum(self.grid))
+		substanceNum = int(self.getSubstanceNum(self.grid))
+
+		self.plants_entry.delete(0, tk.END)
+		self.plants_entry.insert(0, plantsNum)
+
+		self.enemies_entry.delete(0, tk.END)
+		self.enemies_entry.insert(0, enemyNum)
+
+		self.substances_entry.delete(0, tk.END)
+		self.substances_entry.insert(0, substanceNum)
+
+		# Erstelle die Situation erneut
+		self.createSituation()
+		self.fillUpPlantInputs(self.grid)
+		self.fillUpEnemyInputs(self.grid)
+		self.fillUpSubstanceInputs(self.grid)
+
+		self.placePlantsFromFile(self.grid)
+		self.placeEnemisFromFile(self.grid)
+		self.placeConnectionsFromFile(self.grid)
+
+		self.setGrid(self.grid)
