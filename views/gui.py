@@ -2298,24 +2298,29 @@ class Gui():
 
 
 	def importSystem(self):
-        # Öffne das File-Explorer Fenster, um eine Pickle-Datei auszuwählen
+		# Öffne das File-Explorer Fenster, um eine Pickle-Datei auszuwählen
 		filepath = filedialog.askopenfilename(defaultextension='.pkl',
-                                              filetypes=[('Pickle-Dateien', '*.pkl'), 
-                                                         ('Alle Dateien', '*.*')])
+											filetypes=[('Pickle-Dateien', '*.pkl'), 
+														('Alle Dateien', '*.*')])
 		if filepath:
 			try:
-                # Erstelle eine Instanz der Importer-Klasse und lade die Daten
+				# Erstelle eine Instanz der Importer-Klasse und lade die Daten
 				importer = Importer(filepath)
 				grid = importer.load()
 				
+				self.setGrid(grid)  
+
 				plantsNum = int(self.getPlantsNum(grid))
 				enemyNum = int(self.getEnemyNum(grid))
 				substanceNum = int(self.getSubstanceNum(grid))
 
 				self.grid_size_entry.delete(0, tk.END)
 				self.grid_size_entry.insert(0, grid.height)
+				self.plants_entry.delete(0, tk.END)
 				self.plants_entry.insert(0, plantsNum)
+				self.enemies_entry.delete(0, tk.END)
 				self.enemies_entry.insert(0, enemyNum)
+				self.substances_entry.delete(0, tk.END)
 				self.substances_entry.insert(0, substanceNum)
 
 				self.createSituation()
@@ -2325,15 +2330,16 @@ class Gui():
 
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
-				self.placeConnectionsFromFile(grid)
+				self.placeConnectionsFromFile(grid)  # Sollte jetzt korrekt funktionieren
 
-				self.setGrid(grid)
-				
+				self.update_idletasks()  # Stellt sicher, dass Änderungen gerendert werden
+
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
 				print(f'Fehler beim Importieren der Daten: {e}')
 		else:
 			print('Import abgebrochen.')
+
 
 	
 	def getPlantsNum(self, grid):
