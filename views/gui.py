@@ -2334,6 +2334,8 @@ class Gui():
 
 				self.createSituation()
 				self.clearEnemies_toolstips()
+				self.clearPlants_tooltips()
+
 				self.fillUpPlantInputs(grid)
 				self.fillUpEnemyInputs(grid)
 				self.fillUpSubstanceInputs(grid)
@@ -2357,11 +2359,20 @@ class Gui():
 			self.enemies_at_positions.clear()  # Löscht alle gespeicherten Feinde-Positionen
 		
 		# Entferne Tooltips von alten Feinden
-		for item in self.gridCanvas.find_withtag("enemy"):
+		for item in self.gridCanvas.find_withtag('enemy'):
 			self.gridCanvas.delete(item)  # Löscht das Feind-Objekt aus dem Canvas
 
-
 	
+	def clearPlants_tooltips(self):
+		""" Entfernt alle gespeicherten Pflanzen und löscht ihre Tooltips. """
+		if hasattr(self, 'plants_at_positions'):
+			self.plants_at_positions.clear()  # Löscht alle gespeicherten Pflanzen-Positionen
+		
+		# Entferne Tooltips von alten Pflanzen
+		for item in self.gridCanvas.find_withtag('plant'):
+			self.gridCanvas.delete(item)  # Löscht das Pflanzen-Objekt aus dem Canvas
+
+
 	def getPlantsNum(self, grid):
 		count = 0
 		seen_plants = set()
