@@ -1791,6 +1791,10 @@ class Gui():
 		# Überprüfen, ob self.grid existiert
 		if not hasattr(self, 'grid') or self.grid is None:
 			return  # Falls kein Grid vorhanden ist, nichts tun
+		
+		if not hasattr(self.grid, 'plants') or not self.grid.plants:
+			messagebox.showerror('Error', 'There are no plants on the grid')
+			return
 		# Starte die Simulation in einem separaten Thread
 		sim_thread = threading.Thread(target=self.run_simulation)
 		sim_thread.daemon = True  # Beendet den Thread automatisch, wenn das Hauptprogramm endet
