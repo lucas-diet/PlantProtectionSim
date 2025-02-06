@@ -1800,6 +1800,8 @@ class Gui():
 		if not hasattr(self.grid, 'plants') or not self.grid.plants:
 			messagebox.showerror('Error', 'There are no plants on the grid')
 			return
+		
+		self.saveBackup()
 		# Starte die Simulation in einem separaten Thread
 		sim_thread = threading.Thread(target=self.run_simulation)
 		sim_thread.daemon = True  # Beendet den Thread automatisch, wenn das Hauptprogramm endet
