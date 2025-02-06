@@ -2319,7 +2319,7 @@ class Gui():
 				importer = Importer(filepath)
 				grid = importer.load()
 				
-				self.setGrid(grid)  
+				self.setGrid(grid) 
 
 				plantsNum = int(self.getPlantsNum(grid))
 				enemyNum = int(self.getEnemyNum(grid))
@@ -2549,7 +2549,6 @@ class Gui():
 			print('Warnung: Nicht genügend Eingabefelder für alle Substanzen!')
 
 		for idx, substance in enumerate(substance_list):
-			self.grid.addSubstance(substance)
 			if idx >= entry_count:  # Falls keine Eingabefelder mehr verfügbar sind
 				break
 
@@ -2650,10 +2649,14 @@ class Gui():
 				if substance.type == 'signal':
 					self.substance_entries[i]['spreadType_var'].set('Symbiotic' if substance.spreadType == 'symbiotic' else 'Air')
 
+
+	def setGrid(self, grid):
+		self.grid = grid
+
+
 	def placePlantsFromFile(self, grid):
 		for plant in grid.plants:
 			squares_ids = self.squares.get(plant.position)
-
 			if squares_ids:
 				inner_id = squares_ids['inner']
 				self.plant_at_position[inner_id] = plant
@@ -2674,10 +2677,6 @@ class Gui():
 			for plants, plantsPos in plant.gridConnections.items():
 				plant1, plant2 = plants
 				self.connect_plants(plant1, plant2)
-	
-
-	def setGrid(self, grid):
-		self.grid = grid
 	
 
 	def resetSystem(self):
