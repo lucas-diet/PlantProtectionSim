@@ -41,6 +41,11 @@ class Gui():
 		self.valid_substances_set = set()
 		self.last_plant_colors = {}
 
+		# Backup-Datei nach dem erfolgreichen Export löschen
+		if os.path.exists('grid_backup.pkl'):
+			os.remove('grid_backup.pkl')
+			print('Backup-Datei gelöscht.')
+
 
 	def initSimulationWindow(self):
 		self.root = tk.Tk()
@@ -2328,6 +2333,7 @@ class Gui():
 				self.substances_entry.insert(0, substanceNum)
 
 				self.createSituation()
+				self.clearEnemies_toolstips()
 				self.fillUpPlantInputs(grid)
 				self.fillUpEnemyInputs(grid)
 				self.fillUpSubstanceInputs(grid)
@@ -2343,6 +2349,16 @@ class Gui():
 				print(f'Fehler beim Importieren der Daten: {e}')
 		else:
 			print('Import abgebrochen.')
+
+
+	def clearEnemies_toolstips(self):
+		""" Entfernt alle gespeicherten Feinde und löscht ihre Tooltips. """
+		if hasattr(self, 'enemies_at_positions'):
+			self.enemies_at_positions.clear()  # Löscht alle gespeicherten Feinde-Positionen
+		
+		# Entferne Tooltips von alten Feinden
+		for item in self.gridCanvas.find_withtag("enemy"):
+			self.gridCanvas.delete(item)  # Löscht das Feind-Objekt aus dem Canvas
 
 
 	
