@@ -1128,6 +1128,9 @@ class Gui():
 		existing_plant = self.grid.getPlantAt(position)
 		
 		if existing_plant:
+			# Wenn eine Pflanze vorhanden ist, entferne den Tooltip, falls vorhanden
+			self.remove_tooltip_plant(existing_plant)
+			
 			# Wenn eine Pflanze vorhanden ist, entfernen sie
 			self.grid.removePlant(existing_plant)  # Entferne die alte Pflanze
 			print(f'Pflanze auf {position} entfernt und durch neue ersetzt.')
@@ -1165,6 +1168,17 @@ class Gui():
 		else:
 			pass
 		return plant
+	
+
+	def remove_tooltip_plant(self, plant):
+		"""
+		Entfernt das Tooltip-Fenster für die angegebene Pflanze.
+		"""
+		# Überprüfe, ob ein Tooltip-Fenster existiert und schließe es
+		if hasattr(plant, 'tooltip_window') and plant.tooltip_window is not None:
+			plant.tooltip_window.destroy()
+			plant.tooltip_window = None
+			print(f'Tooltip für Pflanze {plant.name} entfernt.')
 
 
 	def plantDetails(self, plant, square_id):
@@ -1955,7 +1969,7 @@ class Gui():
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy:
 					if inner_id in self.plant_at_position and self.plant_at_position[inner_id] == plant:
-						self.remove_tooltip(inner_id)
+						self.remove_tooltip_id(inner_id)
 						del self.plant_at_position[inner_id]
 						self.set_white(inner_id, plant)
 						self.remove_radiusColor_plantDead()
@@ -2031,7 +2045,7 @@ class Gui():
 				del self.plant_connections[(p2, p1)]
 
 
-	def remove_tooltip(self, square_id):
+	def remove_tooltip_id(self, square_id):
 		"""
 		Entfernt den Tooltip für ein bestimmtes Feld.
 		"""
