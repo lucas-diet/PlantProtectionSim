@@ -1415,7 +1415,6 @@ class Gui():
 		clicked_item = self.gridCanvas.find_closest(event.x, event.y)
 		if clicked_item:
 			item_id = clicked_item[0]
-
 			# Finde die (x, y)-Koordinaten der angeklickten Zelle basierend auf der inner-ID
 			clicked_position = None
 			for position, ids in self.squares.items():
@@ -2341,9 +2340,10 @@ class Gui():
 
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
-				self.placeConnectionsFromFile(grid)  # Sollte jetzt korrekt funktionieren
+				self.placeConnectionsFromFile(grid)
 
-				self.gridCanvas.update_idletasks()  # Stellt sicher, dass Änderungen gerendert werden
+				self.gridCanvas.update_idletasks()
+				self.gridCanvas.update()
 
 				print(f'Daten erfolgreich importiert aus: {filepath}')
 			except Exception as e:
@@ -2659,8 +2659,11 @@ class Gui():
 				self.plant_at_position[inner_id] = plant
 				self.plantDetails(plant, inner_id)
 				self.gridCanvas.itemconfig(inner_id, fill=plant.color)
-	
 
+				self.gridCanvas.addtag_withtag('plant', inner_id)
+				self.gridCanvas.tag_bind(inner_id, '<Button-3>', self.on_GridRightClick)
+
+	
 	def placeEnemisFromFile(self, grid):
 		for ec in grid.enemies:
 			squares_ids = self.squares.get(ec.position)
