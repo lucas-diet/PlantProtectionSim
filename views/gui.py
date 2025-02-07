@@ -1819,9 +1819,6 @@ class Gui():
 
 		self.create_add_substance()
 		self.error_substances.config(text='')
-		# Initiales Backup erstellen
-		self.saveBackup()  # Zu Beginn speichern
-		print('Initialer Zustand gespeichert.')
 
 		while True:
 			# Abbruchbedingungen
