@@ -1128,9 +1128,10 @@ class Gui():
 		existing_plant = self.grid.getPlantAt(position)
 		
 		if existing_plant:
+			# Wenn eine Pflanze vorhanden ist, entferne die Verbindungen zu ihren Nachbarn
+			self.remove_plant_connections(existing_plant)
 			# Wenn eine Pflanze vorhanden ist, entferne den Tooltip, falls vorhanden
 			self.remove_tooltip_plant(existing_plant)
-			
 			# Wenn eine Pflanze vorhanden ist, entfernen sie
 			self.grid.removePlant(existing_plant)  # Entferne die alte Pflanze
 			print(f'Pflanze auf {position} entfernt und durch neue ersetzt.')
@@ -1148,7 +1149,7 @@ class Gui():
 			position=position,
 			grid=self.grid,
 			color=plant_color)
-		
+
 		self.error_plants.config(text='')  # Fehlerbehandlung zurücksetzen
 
 		# Pflanze zur Grid hinzufügen
@@ -1164,7 +1165,6 @@ class Gui():
 			else:
 				#print(f'Fehler: Keine gültigen Square-IDs für Position {plant.position}')
 				pass
-
 		else:
 			pass
 		return plant
@@ -2015,7 +2015,6 @@ class Gui():
 		"""
 		Entfernt alle Verbindungen (Linien) von und zu dieser Pflanze.
 		"""
-		# Zuerst die zu löschenden Verbindungen und Linien sammeln
 		to_remove_lines = []
 		to_remove_connections = []
 
@@ -2032,17 +2031,18 @@ class Gui():
 		# Entferne zuerst die Verbindungen von und zu dieser Pflanze aus grid_lines
 		for (p1, p2, line_id) in to_remove_lines:
 			if line_id:
-				# Lösche die Linie vom Canvas, wenn die ID vorhanden ist
 				self.gridCanvas.delete(line_id)  # Entferne die Linie vom Canvas
 				del self.grid_lines[(p1, p2)]  # Lösche die Verbindung aus dem Dict
 
-		# Entferne dann die Verbindungen aus plant_connections
+		# Entferne dann die Verbindungen aus plant_connections, aber nur, wenn der Schlüssel existiert
 		for (p1, p2) in to_remove_connections:
-			self.disconnect_plants(p1, p2)
-			del self.plant_connections[(p1, p2)]
+			if (p1, p2) in self.plant_connections:
+				del self.plant_connections[(p1, p2)]
+				self.disconnect_plants(p1, p2)
+
 			if (p2, p1) in self.plant_connections:  # Doppelte Richtung sicherstellen
-				self.disconnect_plants(p2, p1)
 				del self.plant_connections[(p2, p1)]
+				self.disconnect_plants(p2, p1)
 
 
 	def remove_tooltip_id(self, square_id):
