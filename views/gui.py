@@ -1238,7 +1238,6 @@ class Gui():
 		Platziert einen Feind-Cluster auf dem Grid an den gegebenen Koordinaten (x, y).
 		"""
 		square_ids = self.squares.get(clicked_position)
-
 		if square_ids:
 			# Hole die ID des äußeren Bereichs (outer) - für Feind-Visualisierung
 			inner_id = square_ids['inner']
@@ -1460,6 +1459,7 @@ class Gui():
 	def show_popup(self, position, event):
 		# Öffnet ein Popup-Fenster, das die benachbarten Felder anzeigt
 		popup = tk.Toplevel(self.grid_frame)
+		popup.title('')
 
 		# Berechne die Position des Popups basierend auf den Mauskoordinaten
 		x = event.x_root
@@ -2677,7 +2677,7 @@ class Gui():
 				self.gridCanvas.addtag_withtag('plant', inner_id)
 				self.gridCanvas.tag_bind(inner_id, '<Button-3>', self.on_GridRightClick)
 
-	
+
 	def placeEnemisFromFile(self, grid):
 		for ec in grid.enemies:
 			squares_ids = self.squares.get(ec.position)
