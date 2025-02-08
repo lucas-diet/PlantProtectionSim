@@ -2715,10 +2715,6 @@ class Gui():
 			messagebox.showerror('Error', 'Grid data is missing!')
 			return
 
-		# Parameter in der GUI aktualisieren
-		self.grid_size_entry.delete(0, tk.END)
-		self.grid_size_entry.insert(0, self.grid.height)
-
 		plantsNum = int(self.getPlantsNum(self.grid))
 		enemyNum = int(self.getEnemyNum(self.grid))
 		substanceNum = int(self.getSubstanceNum(self.grid))
@@ -2743,8 +2739,6 @@ class Gui():
 		self.placeConnectionsFromFile(self.grid)
 
 		self.setGrid(self.grid)
-
-		# Backup nach dem Reset speichern
 		self.saveBackup()  # Backup nach dem Reset aktualisieren
 
 
