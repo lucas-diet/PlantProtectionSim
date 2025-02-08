@@ -387,7 +387,11 @@ class Gui():
 				text=f'Plant {i+1}:'
 			)
 			plant_checkbox.grid(row=row+1, column=0, sticky='w', padx=2, pady=2)
-			
+
+			# Wenn Pflanzen bereits aus einer Datei geladen wurden, setze den ersten Checkbutton auf aktiv
+			if number_of_plants > 0:
+				self.selectedItem.set(0)  # Setze den ersten Checkbutton auf aktiv (0 bedeutet die erste Pflanze)
+
 			# Farbe der Pflanze
 			plant_color_label = tk.Label(self.plants_setting_frame, width=2, bg=self.PLANT_COLORS[i])
 			plant_color_label.grid(row=row+1, column=1, sticky='ew', padx=2, pady=2)
@@ -2352,11 +2356,12 @@ class Gui():
 				self.fillUpEnemyInputs(grid)
 				self.fillUpSubstanceInputs(grid)
 
+				self.gridCanvas.update_idletasks()
+
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
 				self.placeConnectionsFromFile(grid)
-
-				self.gridCanvas.update_idletasks()
+				
 				self.gridCanvas.update()
 
 				print(f'Daten erfolgreich importiert aus: {filepath}')
