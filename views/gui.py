@@ -2332,8 +2332,8 @@ class Gui():
 				# Erstelle eine Instanz der Importer-Klasse und lade die Daten
 				importer = Importer(filepath)
 				grid = importer.load()
-				
-				self.setGrid(grid) 
+
+				self.setGrid(grid)
 
 				plantsNum = int(self.getPlantsNum(grid))
 				enemyNum = int(self.getEnemyNum(grid))
@@ -2361,6 +2361,8 @@ class Gui():
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
 				self.placeConnectionsFromFile(grid)
+
+				self.saveBackup()
 
 				self.grid.signals = []
 				self.grid.toxins = []
