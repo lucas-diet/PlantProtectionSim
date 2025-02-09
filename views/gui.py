@@ -2698,7 +2698,10 @@ class Gui():
 		for plant in grid.plants:
 			for plants, plantsPos in plant.gridConnections.items():
 				plant1, plant2 = plants
-				self.connect_plants(plant1, plant2)
+				
+				# Überprüfen, ob die Verbindung bereits existiert
+				if (plant1, plant2) not in self.plant_connections and (plant2, plant1) not in self.plant_connections:
+					self.connect_plants(plant1, plant2)
 	
 
 	def resetSystem(self):
