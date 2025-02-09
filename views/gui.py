@@ -1818,7 +1818,6 @@ class Gui():
 			messagebox.showerror('Error', 'There are no plants on the grid')
 			return
 		
-		self.saveBackup()
 		# Starte die Simulation in einem separaten Thread
 		sim_thread = threading.Thread(target=self.run_simulation)
 		sim_thread.daemon = True  # Beendet den Thread automatisch, wenn das Hauptprogramm endet
@@ -1835,6 +1834,7 @@ class Gui():
 			return  # Beende die Funktion, falls die Validierung fehlschlägt
 
 		self.create_add_substance()
+		self.saveBackup()
 		self.error_substances.config(text='')
 
 		while True:
