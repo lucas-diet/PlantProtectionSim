@@ -1871,6 +1871,8 @@ class Gui():
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
+			self.gridCanvas.update_idletasks()
+			self.gridCanvas.update()
 			# Warte, bevor der nächste Schritt ausgeführt wird
 			self.gridCanvas.after(150)
 			
