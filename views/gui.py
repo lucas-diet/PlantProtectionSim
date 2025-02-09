@@ -2361,6 +2361,9 @@ class Gui():
 				self.placePlantsFromFile(grid)
 				self.placeEnemisFromFile(grid)
 				self.placeConnectionsFromFile(grid)
+
+				self.grid.signals = []
+				self.grid.toxins = []
 				
 				self.gridCanvas.update()
 
