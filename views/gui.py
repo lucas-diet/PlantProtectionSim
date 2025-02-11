@@ -1861,7 +1861,7 @@ class Gui():
 
 			self.grid.collectAndManageEnemies()
 			self.update_enemyMarkers()
-			self.check_and_split_clusters()
+			self.check_and_split_clusters(count)
 			self.grid.removeDeadCluster()
 			self.show_substance()
 			self.sendSignal_symbiotic()
@@ -2104,7 +2104,7 @@ class Gui():
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
 	
 
-	def check_and_split_clusters(self):
+	def check_and_split_clusters(self, count):
 		for cluster in self.grid.enemies:
 			# Überprüfe, ob der Cluster schon in self.cluster_sizes gespeichert ist
 			# Wenn nicht, setze die Clustergröße auf die aktuelle Größe
@@ -2136,6 +2136,10 @@ class Gui():
 
 				# Füge das neue Cluster dem Grid hinzu
 				self.grid.addEnemies(new_cluster)
+
+				if new_cluster:
+					if (new_cluster.enemy.name, count) in self.grid.EnemyData:
+						self.grid.EnemyData[(new_cluster.enemy.name, count)] += 1
 
 				# Setze den Marker für das neue Cluster
 				self.clusterMarker(cluster.position, None, new_cluster)  # Hier rufst du clusterMarker für das neue Cluster auf
