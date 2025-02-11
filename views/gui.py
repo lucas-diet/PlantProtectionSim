@@ -40,6 +40,7 @@ class Gui():
 		self.grid_lines = {}
 		self.valid_substances_set = set()
 		self.last_plant_colors = {}
+		self.cluster_sizes = {}
 
 		# Backup-Datei nach dem erfolgreichen Export löschen
 		if os.path.exists('grid_backup.pkl'):
@@ -1860,6 +1861,7 @@ class Gui():
 
 			self.grid.collectAndManageEnemies()
 			self.update_enemyMarkers()
+			self.check_and_split_clusters()
 			self.grid.removeDeadCluster()
 			self.show_substance()
 			self.sendSignal_symbiotic()
@@ -2100,6 +2102,58 @@ class Gui():
 
 			# 4. Aktualisiere die zentrale Datenstruktur
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
+	
+
+	def check_and_split_clusters(self):
+		for cluster in self.grid.enemies:
+			# Überprüfe, ob der Cluster schon in self.cluster_sizes gespeichert ist
+			# Wenn nicht, setze die Clustergröße auf die aktuelle Größe
+			last_size = self.cluster_sizes.get(cluster.position, None)
+
+			# Falls der Wert nicht existiert (Ersterlauf oder Position neu), initialisiere die Größe
+			if last_size is None:
+				self.cluster_sizes[cluster.position] = cluster.num
+				last_size = cluster.num  # Setze den last_size auf die aktuelle Clustergröße
+				#print(f"Initialisiere Cluster bei {cluster.position} mit Größe: {last_size}")
+
+			# Überprüfe, ob sich die Clustergröße verdoppelt hat
+			if cluster.num >= 2 * last_size:  # Wenn die aktuelle Größe mindestens doppelt so groß ist wie die vorherige
+				#print(f"Cluster bei {cluster.position} hat sich verdoppelt!")
+
+				# Berechne die neue Größe des Clusters, das aufgeteilt wird
+				new_cluster_size = cluster.num // 2
+
+				# Erstelle ein neues Cluster mit der halben Anzahl Feinde
+				new_cluster = EnemyCluster(
+					enemy=cluster.enemy,
+					num=new_cluster_size,  # Die Hälfte der Feinde des Clusters
+					position=cluster.position,
+					grid=self.grid,
+					speed=cluster.speed,
+					eatingSpeed=cluster.eatingSpeed,
+					eatVictory=cluster.eatVictory
+				)
+
+				# Füge das neue Cluster dem Grid hinzu
+				self.grid.addEnemies(new_cluster)
+
+				# Setze den Marker für das neue Cluster
+				self.clusterMarker(cluster.position, None, new_cluster)  # Hier rufst du clusterMarker für das neue Cluster auf
+
+				# Reduziere die Anzahl der Feinde im aktuellen Cluster
+				cluster.num //= 2
+
+				# Aktualisiere die Clustergröße in der gespeicherten Liste
+				self.cluster_sizes[cluster.position] = cluster.num
+				#print(f"Neues Cluster mit {new_cluster_size} Feinden erstellt und Marker gesetzt.")
+				#print(f"Cluster bei {cluster.position} hat jetzt {cluster.num} Feinde.")
+			else:
+				#print(f"Cluster bei {cluster.position} hat sich nicht verdoppelt. Keine Aktion notwendig.")
+				pass
+		return
+
+
+
 
 
 	def show_substance(self):
