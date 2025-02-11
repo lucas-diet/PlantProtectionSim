@@ -1861,7 +1861,6 @@ class Gui():
 
 			self.grid.collectAndManageEnemies()
 			self.update_enemyMarkers()
-			self.check_and_split_clusters(count)
 			self.grid.removeDeadCluster()
 			self.show_substance()
 			self.sendSignal_symbiotic()
@@ -1873,6 +1872,7 @@ class Gui():
 			self.sim.getEnemyData(count)
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
+			self.check_and_split_clusters(count)
 			self.gridCanvas.update_idletasks()
 			self.gridCanvas.update()
 			# Warte, bevor der nächste Schritt ausgeführt wird
@@ -2105,28 +2105,27 @@ class Gui():
 	
 
 	def check_and_split_clusters(self, count):
-		for cluster in self.grid.enemies:
-			# Überprüfe, ob der Cluster schon in self.cluster_sizes gespeichert ist
-			# Wenn nicht, setze die Clustergröße auf die aktuelle Größe
-			last_size = self.cluster_sizes.get(cluster.position, None)
+		splitted_clusters = {}  # Dictionary, um den letzten Split-Zeitschritt zu speichern
 
-			# Falls der Wert nicht existiert (Ersterlauf oder Position neu), initialisiere die Größe
+		for cluster in list(self.grid.enemies):  # Kopie der Liste, um Änderungen während der Iteration zu vermeiden
+			# Verhindere mehrfaches Splitten im selben Schritt und frisch erstellte Cluster
+			last_split_step = splitted_clusters.get(cluster, None)
+			if last_split_step is not None and last_split_step == count:
+				continue  # Überspringen, wenn dieses Cluster bereits in diesem Schritt gesplittet wurde
+
+			last_size = self.cluster_sizes.get(cluster, None)
 			if last_size is None:
-				self.cluster_sizes[cluster.position] = cluster.num
-				last_size = cluster.num  # Setze den last_size auf die aktuelle Clustergröße
-				#print(f"Initialisiere Cluster bei {cluster.position} mit Größe: {last_size}")
+				self.cluster_sizes[cluster] = cluster.num
+				last_size = cluster.num  
 
-			# Überprüfe, ob sich die Clustergröße verdoppelt hat
-			if cluster.num >= 2 * last_size:  # Wenn die aktuelle Größe mindestens doppelt so groß ist wie die vorherige
-				#print(f"Cluster bei {cluster.position} hat sich verdoppelt!")
+			# Falls das Cluster verdoppelt wurde und noch nicht frisch erstellt wurde
+			if cluster.num >= 2 * last_size:
+				new_cluster_size = cluster.num // 2  # Die Hälfte der Feinde bleibt im aktuellen Cluster
 
-				# Berechne die neue Größe des Clusters, das aufgeteilt wird
-				new_cluster_size = cluster.num // 2
-
-				# Erstelle ein neues Cluster mit der halben Anzahl Feinde
+				# Neues Cluster erstellen
 				new_cluster = EnemyCluster(
 					enemy=cluster.enemy,
-					num=new_cluster_size,  # Die Hälfte der Feinde des Clusters
+					num=new_cluster_size,
 					position=cluster.position,
 					grid=self.grid,
 					speed=cluster.speed,
@@ -2134,29 +2133,30 @@ class Gui():
 					eatVictory=cluster.eatVictory
 				)
 
-				# Füge das neue Cluster dem Grid hinzu
+				# Neues Cluster ins Grid einfügen
 				self.grid.addEnemies(new_cluster)
+				#print(f'Nach Split: {len(self.grid.enemies)} Cluster vorhanden')
 
-				if new_cluster:
-					if (new_cluster.enemy.name, count) in self.grid.EnemyData:
-						self.grid.EnemyData[(new_cluster.enemy.name, count)] += 1
+
+				# EnemyData aktualisieren
+				key = (new_cluster.enemy.name, count)
+				if key in self.grid.EnemyData:
+					self.grid.EnemyData[key]['count'] += 1  
+				else:
+					self.grid.EnemyData[key] = {'count': 1, 'size': new_cluster_size}
 
 				# Setze den Marker für das neue Cluster
-				self.clusterMarker(cluster.position, None, new_cluster)  # Hier rufst du clusterMarker für das neue Cluster auf
+				self.clusterMarker(cluster.position, None, new_cluster)
 
-				# Reduziere die Anzahl der Feinde im aktuellen Cluster
+				# Reduziere die Feinde im aktuellen Cluster
 				cluster.num //= 2
 
-				# Aktualisiere die Clustergröße in der gespeicherten Liste
-				self.cluster_sizes[cluster.position] = cluster.num
-				#print(f"Neues Cluster mit {new_cluster_size} Feinden erstellt und Marker gesetzt.")
-				#print(f"Cluster bei {cluster.position} hat jetzt {cluster.num} Feinde.")
-			else:
-				#print(f"Cluster bei {cluster.position} hat sich nicht verdoppelt. Keine Aktion notwendig.")
-				pass
-		return
+				# Speichere, dass dieses Cluster gesplittet wurde
+				splitted_clusters[cluster] = count  # Speichert den aktuellen Zeitschritt
+				splitted_clusters[new_cluster] = count  # Neu erstellte Cluster dürfen nicht sofort wieder gesplittet werden
 
-
+				# Aktualisiere die Clustergröße erst am Ende des Durchgangs
+				self.cluster_sizes[cluster] = cluster.num
 
 
 
