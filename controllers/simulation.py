@@ -123,6 +123,10 @@ class Simulation():
         temp_counts = {}  # Zwischenspeicher für zählbare Pflanzen
         temp_energy = {}  # Zwischenspeicher für Energie
 
+        # Bestimme die maximale Anzahl von Pflanzen, die in das Grid passen
+        max_plants = self.grid.width * self.grid.height  # Beispiel: Anzahl der Gridfelder
+
+        # Zählen der Pflanzen pro Typ
         for plant in self.grid.plants:
             if (plant.name, timeStep) not in temp_counts:
                 temp_counts[(plant.name, timeStep)] = 0
@@ -130,9 +134,24 @@ class Simulation():
             temp_counts[(plant.name, timeStep)] += 1
             temp_energy[(plant.name, timeStep)] += plant.currEnergy
 
+        # Überprüfen, ob die Anzahl der Pflanzen den maximalen Wert überschreitet
+        total_plant_count = sum(temp_counts.values())
+        if total_plant_count > max_plants:
+            excess_plants = total_plant_count - max_plants
+            # Reduziere die Anzahl der Pflanzen (z.B. entferne überschüssige Pflanzen)
+            for key in temp_counts:
+                # Berechne die überschüssigen Pflanzen und reduziere den Zähler
+                temp_counts[key] = max(0, temp_counts[key] - excess_plants)
+                excess_plants -= max(0, temp_counts[key])
+
+                # Breche ab, wenn keine überschüssigen Pflanzen mehr zu entfernen sind
+                if excess_plants <= 0:
+                    break
+
         # Übertrage die aggregierten Daten in 'plantData'
         for key in temp_counts:
             self.grid.plantData[key] = {'energy': temp_energy[key], 'count': temp_counts[key]}
+
 
     def getEnemyData(self, timeStep):
         """_summary_

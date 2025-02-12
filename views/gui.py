@@ -1855,7 +1855,6 @@ class Gui():
 				executor.map(self.grow_plant_para, self.grid.plants)
 
 			# Nachkommen verteilen (scatterSeed) parallelisieren
-			# Hier wird der 'count' als Argument mitgegeben
 			plants_with_index = [(i, plant) for i, plant in enumerate(self.grid.plants)]
 			with ThreadPoolExecutor() as executor:
 				executor.map(lambda plant_with_index: self.scatter_seed_para(plant_with_index, count), plants_with_index)
@@ -1866,18 +1865,21 @@ class Gui():
 			self.show_substance()
 			self.sendSignal_symbiotic()
 			self.sendSignal_air()
-			#time.sleep(0.001)
 			self.remove_fieldColor()
-				
+
 			self.sim.getPlantData(count)
 			self.sim.getEnemyData(count)
-			self.roundCount.config(text=f'{count}', bg='orange')
-			count += 1
+
+			# Um das UI zu aktualisieren
+			self.gridCanvas.after(0, lambda: self.roundCount.config(text=f'{count}', bg='orange'))
+
 			self.check_and_split_clusters(count)
 			self.gridCanvas.after(0, self.gridCanvas.update)
+			count += 1
+
 			# Warte, bevor der nächste Schritt ausgeführt wird
 			self.gridCanvas.after(150)
-			
+		
 		self.sim.simLength = count - 1
 		self.roundCount.config(bg='green')
 
@@ -1901,35 +1903,30 @@ class Gui():
 		# Anzahl der Nachkommen ermitteln (z. B. 1 bis 4, abhängig von der scatterSeed-Logik)
 		num_offspring = random.randint(1, 4)
 
-		# Positionen für die Nachkommen ermitteln
-		offspring_positions = [plant.setOffspringPos() for _ in range(num_offspring)]
-		offspring_positions = [pos for pos in offspring_positions if pos]  # Filtere ungültige Positionen
+		# Nachkommen erzeugen
+		for _ in range(num_offspring):
+			# Hier wird die Position durch die setOffspringPos-Methode gewählt,
+			# die nun sicherstellt, dass der Nachkomme innerhalb des gültigen Streu-Radius liegt.
+			offspring_position = plant.setOffspringPos()
 
-		# Zufällige Auswahl der Positionen für die Nachkommen
-		random.shuffle(offspring_positions)  # Zufällige Reihenfolge der Positionen
-		
-		# Platzieren der Nachkommen auf den zufälligen Positionen
-		for i in range(min(num_offspring, len(offspring_positions))):  # Falls es weniger Positionen gibt als Nachkommen
-			offspring_position = offspring_positions[i]
+			if offspring_position:  # Wenn eine gültige Position gefunden wird
+				offspring = Plant(
+					name=plant.name,
+					initEnergy=offspring_energy,  # Die Energie des Nachkommens
+					growthRateEnergy=plant.growthRateEnergy,  # Die Wachstumsrate der Mutterpflanze
+					minEnergy=plant.minEnergy,  # Mindestenergie der Mutterpflanze
+					reproductionInterval=plant.reproductionInterval,  # Reproduktionsintervall der Mutterpflanze
+					offspringEnergy=plant.offspringEnergy,  # Energie für Nachkommen
+					minDist=plant.minDist,  # Mindestdistanz der Mutterpflanze
+					maxDist=plant.maxDist,  # Maximale Distanz der Mutterpflanze
+					position=offspring_position,  # Position des Nachkommens
+					grid=plant.grid,  # Grid der Mutterpflanze
+					color=plant.color,  # Farbe der Mutterpflanze
+				)
 
-			# Hier wird ein Nachkomme erzeugt
-			offspring = Plant(
-				name=plant.name,
-				initEnergy=offspring_energy,  # Die Energie des Nachkommens
-				growthRateEnergy=plant.growthRateEnergy,  # Die Wachstumsrate der Mutterpflanze
-				minEnergy=plant.minEnergy,  # Mindestenergie der Mutterpflanze
-				reproductionInterval=plant.reproductionInterval,  # Reproduktionsintervall der Mutterpflanze
-				offspringEnergy=plant.offspringEnergy,  # Energie für Nachkommen
-				minDist=plant.minDist,  # Mindestdistanz der Mutterpflanze
-				maxDist=plant.maxDist,  # Maximale Distanz der Mutterpflanze
-				position=offspring_position,  # Position des Nachkommens
-				grid=plant.grid,  # Grid der Mutterpflanze
-				color=plant.color,  # Farbe der Mutterpflanze
-			)
+				# Füge das Nachkommen zum Grid hinzu
+				self.add_offspring_to_grid(offspring, offspring_position)
 
-			# Füge das Nachkommen zum Grid hinzu
-			self.add_offspring_to_grid(offspring, offspring_position)
-	
 
 	def add_offspring_to_grid(self, offspring, offspring_position):
 		"""
