@@ -10,6 +10,7 @@ import time
 from tkinter import filedialog
 import pickle
 import os
+import numpy as np
 
 from models.grid import Grid
 from models.plant import Plant
@@ -1865,7 +1866,7 @@ class Gui():
 			self.show_substance()
 			self.sendSignal_symbiotic()
 			self.sendSignal_air()
-			time.sleep(0.001)
+			#time.sleep(0.001)
 			self.remove_fieldColor()
 				
 			self.sim.getPlantData(count)
@@ -2106,8 +2107,8 @@ class Gui():
 
 	def check_and_split_clusters(self, count):
 		splitted_clusters = {}  # Dictionary, um den letzten Split-Zeitschritt zu speichern
-
-		for cluster in list(self.grid.enemies):  # Kopie der Liste, um Änderungen während der Iteration zu vermeiden
+		tmp_list = np.copy(self.grid.enemies)
+		for cluster in tmp_list:  # Kopie der Liste, um Änderungen während der Iteration zu vermeiden
 			# Verhindere mehrfaches Splitten im selben Schritt und frisch erstellte Cluster
 			last_split_step = splitted_clusters.get(cluster, None)
 			if last_split_step is not None and last_split_step == count:
@@ -2120,7 +2121,7 @@ class Gui():
 
 			# Falls das Cluster verdoppelt wurde und noch nicht frisch erstellt wurde
 			if cluster.num >= 2 * last_size:
-				new_cluster_size = cluster.num // 2  # Die Hälfte der Feinde bleibt im aktuellen Cluster
+				new_cluster_size = 10 #np.floor_divide(cluster.num, 2)  # Die Hälfte der Feinde bleibt im aktuellen Cluster
 
 				# Neues Cluster erstellen
 				new_cluster = EnemyCluster(
@@ -2149,7 +2150,7 @@ class Gui():
 				self.clusterMarker(cluster.position, None, new_cluster)
 
 				# Reduziere die Feinde im aktuellen Cluster
-				cluster.num //= 2
+				cluster.num = cluster.num - 10
 
 				# Speichere, dass dieses Cluster gesplittet wurde
 				splitted_clusters[cluster] = count  # Speichert den aktuellen Zeitschritt
