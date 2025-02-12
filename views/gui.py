@@ -1874,8 +1874,7 @@ class Gui():
 			self.roundCount.config(text=f'{count}', bg='orange')
 			count += 1
 			self.check_and_split_clusters(count)
-			self.gridCanvas.update_idletasks()
-			self.gridCanvas.update()
+			self.gridCanvas.after(0, self.gridCanvas.update)
 			# Warte, bevor der nächste Schritt ausgeführt wird
 			self.gridCanvas.after(150)
 			
