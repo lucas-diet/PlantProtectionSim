@@ -2121,7 +2121,7 @@ class Gui():
 
 			# Falls das Cluster verdoppelt wurde und noch nicht frisch erstellt wurde
 			if cluster.num >= 2 * last_size:
-				new_cluster_size = 10 #np.floor_divide(cluster.num, 2)  # Die Hälfte der Feinde bleibt im aktuellen Cluster
+				new_cluster_size = np.floor_divide(cluster.num, 2)  # Die Hälfte der Feinde bleibt im aktuellen Cluster
 
 				# Neues Cluster erstellen
 				new_cluster = EnemyCluster(
@@ -2150,7 +2150,7 @@ class Gui():
 				self.clusterMarker(cluster.position, None, new_cluster)
 
 				# Reduziere die Feinde im aktuellen Cluster
-				cluster.num = cluster.num - 10
+				cluster.num = np.floor_divide(cluster.num, 2)
 
 				# Speichere, dass dieses Cluster gesplittet wurde
 				splitted_clusters[cluster] = count  # Speichert den aktuellen Zeitschritt
