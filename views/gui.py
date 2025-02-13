@@ -2353,13 +2353,15 @@ class Gui():
 			messagebox.showerror('Error', 'Invalid substance inputs! Please fix all errors before exporting.')
 			return
 		
-		try:
-			with open(backup_file, 'rb') as f:
-				self.grid = pkl.load(f)
-			print('Backup-Datei wurde aktualisiert.')
-		except Exception as e:
-			messagebox.showerror('Error', f'Error updating backup: {str(e)}')
-			return
+		if os.path.exists(backup_file):
+			try:
+				with open(backup_file, 'rb') as f:
+					self.grid = pkl.load(f)
+			except Exception as e:
+				messagebox.showerror('Error', f'Error updating backup: {str(e)}')
+				return
+		else:
+			self.saveBackup()
 
 		# Dateiauswahl für den Export
 		filepath = filedialog.asksaveasfilename(
