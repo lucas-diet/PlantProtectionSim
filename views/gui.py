@@ -8,7 +8,7 @@ from concurrent.futures import ThreadPoolExecutor
 import random
 import time
 from tkinter import filedialog
-import pickle
+import pickle as pkl
 import os
 import numpy as np
 
@@ -143,7 +143,6 @@ class Gui():
 
 		self.roundCount.config(text='0', bg='red')
 
-		# Backup-Datei nach dem erfolgreichen Export löschen
 		if os.path.exists('grid_backup.pkl'):
 			os.remove('grid_backup.pkl')
 			print('Backup-Datei gelöscht.')
@@ -2096,9 +2095,10 @@ class Gui():
 			x_pos, y_pos = position_data
 			fill_color = 'red' if cluster.intoxicated else 'navy'
 			cluster.circle_id = self.create_clusterCircle(x_pos, y_pos, fill_color)
-
+			
 			# 4. Aktualisiere die zentrale Datenstruktur
 			self.enemies_at_positions.setdefault(new_position, []).append(cluster)
+			self.enemyDetails(cluster.circle_id, cluster.position)
 	
 
 	def check_and_split_clusters(self, count):
@@ -2133,7 +2133,6 @@ class Gui():
 				# Neues Cluster ins Grid einfügen
 				self.grid.addEnemies(new_cluster)
 				#print(f'Nach Split: {len(self.grid.enemies)} Cluster vorhanden')
-
 
 				# EnemyData aktualisieren
 				key = (new_cluster.enemy.name, count)
@@ -2342,7 +2341,6 @@ class Gui():
 
 	def exportSystem(self):
 		"""Exportiert das Grid-System und aktualisiert das Backup."""
-		self.saveBackup()
 		backup_file = 'grid_backup.pkl'
 
 		# Überprüfen, ob das Grid existiert
@@ -2354,11 +2352,10 @@ class Gui():
 		if not self.create_add_substance():
 			messagebox.showerror('Error', 'Invalid substance inputs! Please fix all errors before exporting.')
 			return
-
-		# Backup aktualisieren (altes Backup überschreiben)
+		
 		try:
-			with open(backup_file, 'wb') as f:
-				pickle.dump(self.grid, f)
+			with open(backup_file, 'rb') as f:
+				self.grid = pkl.load(f)
 			print('Backup-Datei wurde aktualisiert.')
 		except Exception as e:
 			messagebox.showerror('Error', f'Error updating backup: {str(e)}')
@@ -2774,7 +2771,7 @@ class Gui():
 		# Laden des Grid-Backups
 		try:
 			with open(backup_file, 'rb') as f:
-				self.grid = pickle.load(f)
+				self.grid = pkl.load(f)
 			print('Grid geladen aus Backup.')
 		except Exception as e:
 			messagebox.showerror('Error', f'Error loading grid: {str(e)}')
@@ -2809,14 +2806,13 @@ class Gui():
 		self.placeConnectionsFromFile(self.grid)
 
 		self.setGrid(self.grid)
-		self.saveBackup()  # Backup nach dem Reset aktualisieren
 
 
 	def saveBackup(self):
 		backup_file = 'grid_backup.pkl'
 		try:
 			with open(backup_file, 'wb') as f:
-				pickle.dump(self.grid, f)
+				pkl.dump(self.grid, f)
 			print('Backup erfolgreich gespeichert.')
 		except Exception as e:
 			print(f'Fehler beim Speichern des Backups: {str(e)}')
