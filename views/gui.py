@@ -2156,7 +2156,6 @@ class Gui():
 				self.cluster_sizes[cluster] = cluster.num
 
 
-
 	def show_substance(self):
 		"""
 		Aktualisiert die Farben der äußeren Rechtecke basierend auf dem Status von Signalen und Toxinen.
@@ -2343,6 +2342,7 @@ class Gui():
 
 	def exportSystem(self):
 		"""Exportiert das Grid-System und aktualisiert das Backup."""
+		self.saveBackup()
 		backup_file = 'grid_backup.pkl'
 
 		# Überprüfen, ob das Grid existiert
