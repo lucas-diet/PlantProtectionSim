@@ -2102,24 +2102,28 @@ class Gui():
 	
 
 	def check_and_split_clusters(self, count):
-		splitted_clusters = {}  # Dictionary, um den letzten Split-Zeitschritt zu speichern
+		splitted_clusters = {}  # Letzte Split-Zeitschritte speichern
 		tmp_list = np.copy(self.grid.enemies)
-		for cluster in tmp_list:  # Kopie der Liste, um Änderungen während der Iteration zu vermeiden
-			# Verhindere mehrfaches Splitten im selben Schritt und frisch erstellte Cluster
+
+		for cluster in tmp_list:  
 			last_split_step = splitted_clusters.get(cluster, None)
 			if last_split_step is not None and last_split_step == count:
-				continue  # Überspringen, wenn dieses Cluster bereits in diesem Schritt gesplittet wurde
+				continue  
 
 			last_size = self.cluster_sizes.get(cluster, None)
 			if last_size is None:
 				self.cluster_sizes[cluster] = cluster.num
 				last_size = cluster.num  
 
-			# Falls das Cluster verdoppelt wurde und noch nicht frisch erstellt wurde
+			maxCluster = (self.grid.height * self.grid.width) / 2
+			# Falls das Cluster verdoppelt wurde
 			if cluster.num >= 2 * last_size:
-				new_cluster_size = np.floor_divide(cluster.num, 2)  # Die Hälfte der Feinde bleibt im aktuellen Cluster
+				# Prüfen, ob bereits die maximale Anzahl an Clustern erreicht ist
+				if len(self.grid.enemies) >= np.floor(maxCluster):
+					continue  # Kein neues Cluster erstellen, falls das Limit erreicht ist
+					
+				new_cluster_size = np.floor_divide(cluster.num, 2)  
 
-				# Neues Cluster erstellen
 				new_cluster = EnemyCluster(
 					enemy=cluster.enemy,
 					num=new_cluster_size,
@@ -2130,28 +2134,21 @@ class Gui():
 					eatVictory=cluster.eatVictory
 				)
 
-				# Neues Cluster ins Grid einfügen
 				self.grid.addEnemies(new_cluster)
-				#print(f'Nach Split: {len(self.grid.enemies)} Cluster vorhanden')
 
-				# EnemyData aktualisieren
 				key = (new_cluster.enemy.name, count)
 				if key in self.grid.EnemyData:
 					self.grid.EnemyData[key]['count'] += 1  
 				else:
 					self.grid.EnemyData[key] = {'count': 1, 'size': new_cluster_size}
 
-				# Setze den Marker für das neue Cluster
 				self.clusterMarker(cluster.position, None, new_cluster)
 
-				# Reduziere die Feinde im aktuellen Cluster
 				cluster.num = np.floor_divide(cluster.num, 2)
 
-				# Speichere, dass dieses Cluster gesplittet wurde
-				splitted_clusters[cluster] = count  # Speichert den aktuellen Zeitschritt
-				splitted_clusters[new_cluster] = count  # Neu erstellte Cluster dürfen nicht sofort wieder gesplittet werden
+				splitted_clusters[cluster] = count  
+				splitted_clusters[new_cluster] = count  
 
-				# Aktualisiere die Clustergröße erst am Ende des Durchgangs
 				self.cluster_sizes[cluster] = cluster.num
 
 
