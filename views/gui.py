@@ -2143,12 +2143,9 @@ class Gui():
 					self.grid.EnemyData[key] = {'count': 1, 'size': new_cluster_size}
 
 				self.clusterMarker(cluster.position, None, new_cluster)
-
-				cluster.num = np.floor_divide(cluster.num, 2)
-
+				cluster.num = cluster.num - new_cluster_size
 				splitted_clusters[cluster] = count  
 				splitted_clusters[new_cluster] = count  
-
 				self.cluster_sizes[cluster] = cluster.num
 
 

@@ -1002,16 +1002,9 @@ class Grid():
 
                 x, y = cluster.position  # Die Position des alten Clusters verwenden
                 self.grid[x][y][1].append(new_cluster)  # Neues Cluster der entsprechenden Grid-Zelle hinzufügen
-
-
-                print(f"Cluster gesplittet: {cluster.enemy.name} an Position {cluster.position}")
-                print(f"Neues Cluster mit {new_cluster_size} Feinden erstellt.")
-
-                cluster.num = cluster.num // 2
-
+                cluster.num = cluster.num = cluster.num - new_cluster_size
                 splitted_clusters[cluster] = count  
-                splitted_clusters[new_cluster] = count  
-
+                splitted_clusters[new_cluster] = count
                 self.cluster_sizes[cluster] = cluster.num
 
 
