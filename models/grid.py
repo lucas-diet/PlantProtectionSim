@@ -25,6 +25,7 @@ class Grid():
         self.EnemyData = {}
 
         self.plantAtPos = {}
+        self.cluster_sizes = {}
 
         self.log = []
 
@@ -954,6 +955,64 @@ class Grid():
             signal.radius[(plant, signal)] = 0
 
 
+    def checkAndSplit(self, count):
+        """
+            Soll die Cluster in der Konsolenversion vermehrenm, wenn sich die Individuen verdopptl haben. Neue clsuer werden aber nicht 
+            in der Konsolenversion des Grids angezeigt. Sind dennoch regestriert und werden in den Plots (die wichtig sind) angezeigt. 
+        """
+        splitted_clusters = {}  # Letzte Split-Zeitschritte speichern
+        tmp_list = self.enemies[:]
+
+        for cluster in tmp_list:
+            last_split_step = splitted_clusters.get(cluster, None)
+            if last_split_step is not None and last_split_step == count:
+                continue  
+
+            last_size = self.cluster_sizes.get(cluster, None)
+            if last_size is None:
+                self.cluster_sizes[cluster] = cluster.num
+                last_size = cluster.num  
+
+            maxCluster = (self.height * self.width) / 2
+
+            if cluster.num >= 2 * last_size:
+                if len(self.enemies) >= int(maxCluster):
+                    continue  # Kein neues Cluster erstellen, wenn Limit erreicht
+
+                new_cluster_size = cluster.num // 2  
+
+                new_cluster = EnemyCluster(
+                    enemy=cluster.enemy,
+                    num=new_cluster_size,
+                    position=cluster.position,
+                    grid=self,
+                    speed=cluster.speed,
+                    eatingSpeed=cluster.eatingSpeed,
+                    eatVictory=cluster.eatVictory
+                )
+
+                # Neues Cluster zur Liste hinzufügen
+                self.enemies.append(new_cluster)
+
+                key = (new_cluster.enemy.name, count)
+                if key in self.EnemyData:
+                    self.EnemyData[key]['count'] += 1  
+                else:
+                    self.EnemyData[key] = {'count': 1, 'size': new_cluster_size}
+
+                x, y = cluster.position  # Die Position des alten Clusters verwenden
+                self.grid[x][y][1].append(new_cluster)  # Neues Cluster der entsprechenden Grid-Zelle hinzufügen
+
+
+                print(f"Cluster gesplittet: {cluster.enemy.name} an Position {cluster.position}")
+                print(f"Neues Cluster mit {new_cluster_size} Feinden erstellt.")
+
+                cluster.num = cluster.num // 2
+
+                splitted_clusters[cluster] = count  
+                splitted_clusters[new_cluster] = count  
+
+                self.cluster_sizes[cluster] = cluster.num
 
 
     def getAllGridConnections(self, plant, *scs):

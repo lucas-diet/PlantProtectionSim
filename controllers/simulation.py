@@ -179,6 +179,7 @@ class Simulation():
         with open('log.pkl', 'wb') as file:
             pkl.dump(logArr, file)
 
+    
     def logLoader(self, filename):
         with open(filename, 'rb') as file:
             log = pkl.load(file)
@@ -230,11 +231,13 @@ class Simulation():
             self.runStep()
             self.grid.collectAndManageEnemies()
             self.grid.removeDeadCluster()
+            self.grid.checkAndSplit(count)
             self.grid.displayGridEnergy()
             self.grid.displayEnemyNum()
             self.grid.displayGrid()  
             self.getPlantData(count)
             self.getEnemyData(count)
+            
             count += 1
             #time.sleep(1)
         self.simLength = count - 1
