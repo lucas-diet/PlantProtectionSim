@@ -30,7 +30,7 @@ Dieses Simulationssystem modelliert die Wechselwirkungen zwischen Pflanzen und F
    ```
 4. Anwendung starten:
    ```bash
-   poetry run python main.py
+   python main.py
    ```
 
 ## Nutzung
