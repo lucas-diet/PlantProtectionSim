@@ -17,9 +17,14 @@ Dieses Simulationssystem modelliert die Wechselwirkungen zwischen Pflanzen und F
 
 ### Installationsschritte
 1. Repository klonen oder ZIP-Datei herunterladen:
-   ```bash
-   git clone https://github.com/lucas-diet/PlantProtectionSim.git
-   ```
+   - GitHub:
+      ```bash
+      git clone https://github.com/lucas-diet/PlantProtectionSim.git
+      ```
+   - GitLab der Friedrich-Schiller-Universität Jena:
+      ```bash
+      git clone https://git.uni-jena.de/xe43nok/PlantProtectionSim
+      ```
 2. In das Projektverzeichnis wechseln:
    ```bash
    cd PlantProtectionSim
@@ -58,7 +63,5 @@ Es gibt Beispiele im Ordner _files, die importiert werden können.
   - `toxin.py`: Modellklasse für Giftstoffe
   - `grid.py`: Modellklasse für das Grid als Biotop
 
-
 ---
 Vielen Dank für die Nutzung dieses Simulationssystems!
-
