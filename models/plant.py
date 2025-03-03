@@ -35,6 +35,7 @@ class Plant():
         self.toxinProdCounters = {} #dict, wo produktionsCounter für jedes [ec, toxin] gespeichert wird.
         self.airSpreadCounters = {}
         self.offspringEnergies = []
+        self.tooltip_window = None
 
     def grow(self):
         """_summary_

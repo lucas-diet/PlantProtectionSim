@@ -1196,8 +1196,10 @@ class Gui():
 		def show_tooltip(event):
 			nonlocal tooltip_window
 
-			if tooltip_window is not None:
-				return  # Verhindert mehrfaches Erstellen von Tooltips
+			# Falls die Pflanze bereits ein Tooltip hat, zerstöre es zuerst
+			if hasattr(plant, 'tooltip_window') and plant.tooltip_window:
+				plant.tooltip_window.destroy()
+				plant.tooltip_window = None
 
 			# Berechne die Energie der Pflanze dynamisch
 			energy_percentage = int((plant.currEnergy / plant.initEnergy) * 100)
@@ -1207,6 +1209,7 @@ class Gui():
 			tooltip_window = tk.Toplevel(self.gridCanvas)
 			tooltip_window.wm_overrideredirect(True)  # Entferne Fensterrahmen
 			tooltip_window.attributes('-topmost', True)  # Halte den Tooltip im Vordergrund
+			plant.tooltip_window = tooltip_window  # Speichere das Tooltip im Pflanzendatenobjekt
 
 			# Setze die Tooltip-Position
 			x, y = self.gridCanvas.winfo_pointerxy()  # Mausposition relativ zum Bildschirm
@@ -1225,6 +1228,7 @@ class Gui():
 				pady=3,
 			)
 			label.pack()
+
 
 		# Funktion zum Verstecken des Tooltips
 		def hide_tooltip(event):
