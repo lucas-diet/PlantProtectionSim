@@ -1183,7 +1183,6 @@ class Gui():
 		if hasattr(plant, 'tooltip_window') and plant.tooltip_window is not None:
 			plant.tooltip_window.destroy()
 			plant.tooltip_window = None
-			print(f'Tooltip für Pflanze {plant.name} entfernt.')
 
 
 	def plantDetails(self, plant, square_id):
@@ -1228,7 +1227,6 @@ class Gui():
 				pady=3,
 			)
 			label.pack()
-
 
 		# Funktion zum Verstecken des Tooltips
 		def hide_tooltip(event):
@@ -1387,17 +1385,24 @@ class Gui():
 		def show_tooltip(event):
 			nonlocal tooltip_window
 
-			if tooltip_window is not None:
-				return  # Verhindert mehrfaches Erstellen des Tooltips
+			# Falls bereits ein Tooltip existiert, zerstöre ihn zuerst
+			if hasattr(self, 'enemy_tooltip_window') and self.enemy_tooltip_window:
+				self.enemy_tooltip_window.destroy()
+				self.enemy_tooltip_window = None
 
 			# Sammle Informationen zu allen Feinden an dieser Position
 			enemies_at_pos = self.enemies_at_positions.get(position, [])
-			tooltip_text = '\n'.join(f'{ec.enemy.name}: Size {int(ec.num)}, Intox-State {ec.intoxicated}' for ec in enemies_at_pos)
+			if not enemies_at_pos:
+				return  # Kein Tooltip anzeigen, wenn es keine Feinde gibt
+
+			tooltip_text = '\n'.join(f'{ec.enemy.name}: Size {int(ec.num)}, Intox-State {ec.intoxicated}' 
+									for ec in enemies_at_pos)
 
 			# Erstelle ein neues Fenster für den Tooltip
 			tooltip_window = tk.Toplevel(self.gridCanvas)
 			tooltip_window.wm_overrideredirect(True)  # Entferne Fensterrahmen
 			tooltip_window.attributes('-topmost', True)  # Halte den Tooltip im Vordergrund
+			self.enemy_tooltip_window = tooltip_window  # Speichere das Tooltip global für spätere Löschung
 
 			# Positioniere das Tooltip-Fenster
 			x, y = self.gridCanvas.winfo_pointerxy()  # Mausposition relativ zum Bildschirm
@@ -1977,6 +1982,7 @@ class Gui():
 				# Wenn die Pflanze tot ist (currEnergy < minEnergy)
 				if plant.currEnergy < plant.minEnergy:
 					if inner_id in self.plant_at_position and self.plant_at_position[inner_id] == plant:
+						self.remove_tooltip_plant(plant)
 						self.remove_tooltip_id(inner_id)
 						del self.plant_at_position[inner_id]
 						self.set_white(inner_id, plant)
