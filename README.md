@@ -21,7 +21,7 @@ Dieses Simulationssystem modelliert die Wechselwirkungen zwischen Pflanzen und F
       ```bash
       git clone https://github.com/lucas-diet/PlantProtectionSim.git
       ```
-   - GitLab der Friedrich-Schiller-Universität Jena:
+   - GitLab der Friedrich-Schiller-Universität Jena (Ist-Zustand bei Abgabe am 10. März 2025):
       ```bash
       git clone https://git.uni-jena.de/xe43nok/PlantProtectionSim
       ```
